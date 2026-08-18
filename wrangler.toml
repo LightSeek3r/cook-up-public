@@ -4,14 +4,14 @@ compatibility_flags = ["nodejs_compat"]
 pages_build_output_dir = ".svelte-kit/cloudflare"
 
 [[d1_databases]]
-binding = "DB"
+binding = "cook_up_db"
 database_name = "cook-up-db"
-database_id = "PASTE_ID_HERE"
+database_id = "d280f0fa-a98a-42aa-9477-c1294322b207"
 migrations_dir = "migrations"
 
 [[kv_namespaces]]
 binding = "TRANSLATIONS"
-id = "PASTE_KV_ID_HERE"
+id = "4273e964f2cf4404938badb8c1b03248"
 
 # Workers AI has no local emulation, so this binding is always proxied to the
 # remote account. `vite dev` therefore requires `npx wrangler login`; D1 and KV
