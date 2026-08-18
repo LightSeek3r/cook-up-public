@@ -1,0 +1,31 @@
+{
+  "name": "cook-up",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite dev",
+    "build": "vite build",
+    "preview": "wrangler pages dev",
+    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "db:migrate": "wrangler d1 migrations apply cook-up-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply cook-up-db --remote",
+    "db:smoke": "wrangler d1 execute cook-up-db --local --file=pipeline/fixtures/smoke.sql",
+    "db:seed:prototype": "node pipeline/prototype/seed_themealdb.mjs && wrangler d1 execute cook-up-db --local --file=pipeline/out/seed_themealdb.sql"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260817.1",
+    "@sveltejs/adapter-cloudflare": "^7.2.9",
+    "@sveltejs/kit": "^2.70.2",
+    "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "svelte": "^5.56.9",
+    "svelte-check": "^4.7.6",
+    "typescript": "^6.0.3",
+    "vite": "^8.2.1",
+    "wrangler": "^4.123.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "workerd@1.20260811.1": true
+  }
+}

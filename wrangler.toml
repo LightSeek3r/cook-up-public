@@ -1,0 +1,22 @@
+name = "cook-up"
+compatibility_date = "2026-08-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "cook-up-db"
+database_id = "PASTE_ID_HERE"
+migrations_dir = "migrations"
+
+[[kv_namespaces]]
+binding = "TRANSLATIONS"
+id = "PASTE_KV_ID_HERE"
+
+# Workers AI has no local emulation, so this binding is always proxied to the
+# remote account. `vite dev` therefore requires `npx wrangler login`; D1 and KV
+# stay local. Comment this block out to work fully offline — /api/translate then
+# returns a clear 500 ("Workers AI binding is not configured").
+[ai]
+binding = "AI"
+remote = true
