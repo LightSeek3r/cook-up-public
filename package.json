@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "preview": "wrangler pages dev",
+    "preview": "wrangler dev",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "db:migrate": "wrangler d1 migrations apply cook-up-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply cook-up-db --remote",

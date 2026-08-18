@@ -1,10 +1,14 @@
 name = "cook-up"
+main = ".svelte-kit/cloudflare/_worker.js"
 compatibility_date = "2026-08-01"
-compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".svelte-kit/cloudflare"
+compatibility_flags = ["nodejs_compat", "nodejs_als"]
+
+[assets]
+binding = "ASSETS"
+directory = ".svelte-kit/cloudflare"
 
 [[d1_databases]]
-binding = "cook_up_db"
+binding = "DB"
 database_name = "cook-up-db"
 database_id = "d280f0fa-a98a-42aa-9477-c1294322b207"
 migrations_dir = "migrations"
