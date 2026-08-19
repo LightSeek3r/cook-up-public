@@ -26,6 +26,8 @@ export interface MatchResult {
 	/** Non-staple ingredients the recipe needs that were not selected. */
 	missing: number;
 	required_non_staple: number;
+	/** Comma-separated names of the `missing` ingredients, NULL when `missing` is 0. */
+	missing_names: string | null;
 }
 
 export interface MicroNutrient {

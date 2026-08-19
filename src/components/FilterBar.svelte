@@ -5,18 +5,19 @@
 		cuisine: string;
 		meal: string;
 		diet: string;
+		sort: string;
 		query: string;
 		t: (key: string) => string;
-		onFilter: (key: 'cuisine' | 'meal' | 'diet', value: string) => void;
+		onFilter: (key: 'cuisine' | 'meal' | 'diet' | 'sort', value: string) => void;
 		onQuery: (value: string) => void;
 	}
 
-	let { cuisine, meal, diet, query, t, onFilter, onQuery }: Props = $props();
+	let { cuisine, meal, diet, sort, query, t, onFilter, onQuery }: Props = $props();
 
-	const pick = (key: 'cuisine' | 'meal' | 'diet') => (event: Event) =>
+	const pick = (key: 'cuisine' | 'meal' | 'diet' | 'sort') => (event: Event) =>
 		onFilter(key, (event.currentTarget as HTMLSelectElement).value);
 
-	const activeCount = $derived([cuisine, meal, diet].filter(Boolean).length);
+	const activeCount = $derived([cuisine, meal, diet, sort].filter(Boolean).length);
 </script>
 
 <div class="filters" class:filtered={activeCount > 0}>
@@ -58,6 +59,12 @@
 		{#each DIETS as value (value)}
 			<option {value}>{t(`diet.${value}`)}</option>
 		{/each}
+	</select>
+
+	<select class:on={sort} aria-label={t('filter.sort')} value={sort} onchange={pick('sort')}>
+		<option value="">{t('sort.match')}</option>
+		<option value="kcal">{t('sort.kcal')}</option>
+		<option value="grade">{t('sort.grade')}</option>
 	</select>
 </div>
 
@@ -119,7 +126,7 @@
 
 	@media (min-width: 48rem) {
 		.filters {
-			grid-template-columns: 2fr 1fr 1fr 1fr;
+			grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
 		}
 		.search {
 			grid-column: auto;

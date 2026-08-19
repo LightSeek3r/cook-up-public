@@ -15,6 +15,7 @@
 	const showNutrition = $derived(nutritionVisible(recipe.nutrition_coverage));
 	const minutes = $derived(recipe.total_minutes ?? recipe.prep_minutes);
 	const ready = $derived(recipe.missing === 0);
+	const missingNames = $derived(recipe.missing_names?.split(', ') ?? []);
 </script>
 
 <a class="card result" class:ready href="/recipe/{recipe.id}?lang={lang}">
@@ -26,7 +27,7 @@
 	</div>
 
 	<div class="meta">
-		<MissingChips missing={recipe.missing} {t} />
+		<MissingChips missing={recipe.missing} names={missingNames} {t} />
 		{#if minutes}
 			<span class="muted">{minutes} {t('card.minutes')}</span>
 		{/if}

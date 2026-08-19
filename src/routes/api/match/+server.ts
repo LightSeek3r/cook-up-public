@@ -24,6 +24,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		mealType: oneOf(MEAL_TYPES, url.searchParams.get('meal')),
 		diet: oneOf(DIETS, url.searchParams.get('diet')),
 		excludeAllergens: parseIds(url.searchParams.get('noAllergen')),
+		sort: oneOf(['kcal', 'grade'] as const, url.searchParams.get('sort')),
 		offset
 	});
 

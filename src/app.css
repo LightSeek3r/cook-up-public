@@ -96,12 +96,15 @@
 	--line: #d8c9a8;
 	--line-strong: #c2ae85;
 
-	/* Balance Grade */
-	--grade-a: #3f7d33;
-	--grade-b: #7a9a2e;
-	--grade-c: #b8860f;
-	--grade-d: #c4601f;
-	--grade-e: #b3311a;
+	/* Balance Grade — darkened from the first pass so the badge's hardcoded
+	   white text (BalanceGrade.svelte) clears 4.5:1 against every one; the
+	   original set never got visually checked because nutrition_coverage was
+	   always 0 until real nutrition data existed. */
+	--grade-a: #328532;
+	--grade-b: #647e30;
+	--grade-c: #966e08;
+	--grade-d: #b35e19;
+	--grade-e: #da3c2b;
 
 	/* Spacing — density 6/10 (standard) */
 	--space-1: 0.25rem;
@@ -203,11 +206,11 @@
 		--line: #362f22;
 		--line-strong: #4a4030;
 
-		--grade-a: #7fb85f;
-		--grade-b: #a3b34a;
-		--grade-c: #d1a53d;
-		--grade-d: #e0824a;
-		--grade-e: #d2624a;
+		--grade-a: #398439;
+		--grade-b: #6b7d36;
+		--grade-c: #936e10;
+		--grade-d: #b85e14;
+		--grade-e: #d34131;
 
 		--shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
 		--shadow-2: 0 8px 20px -8px rgb(0 0 0 / 60%);

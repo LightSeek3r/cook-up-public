@@ -28,6 +28,7 @@
 	const cuisine = $derived(params.get('cuisine') ?? '');
 	const meal = $derived(params.get('meal') ?? '');
 	const diet = $derived(params.get('diet') ?? '');
+	const sort = $derived(params.get('sort') ?? '');
 
 	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.id)));
 
@@ -47,7 +48,7 @@
 		});
 	}
 
-	function setFilter(key: 'cuisine' | 'meal' | 'diet', value: string) {
+	function setFilter(key: 'cuisine' | 'meal' | 'diet' | 'sort', value: string) {
 		updateUrl((url) => {
 			if (value) url.searchParams.set(key, value);
 			else url.searchParams.delete(key);
@@ -84,6 +85,7 @@
 		if (cuisine) search.set('cuisine', cuisine);
 		if (meal) search.set('meal', meal);
 		if (diet) search.set('diet', diet);
+		if (sort) search.set('sort', sort);
 
 		loading = true;
 		fetch(`/api/match?${search}`)
@@ -98,6 +100,7 @@
 	{cuisine}
 	{meal}
 	{diet}
+	{sort}
 	{query}
 	{t}
 	onFilter={setFilter}

@@ -1,7 +1,6 @@
 <script lang="ts">
 	interface Props {
 		missing: number;
-		/** Populated once /api/match resolves missing ingredient names (phase 6). */
 		names?: string[];
 		t: (key: string) => string;
 	}

@@ -51,6 +51,11 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	const id = Number(url.searchParams.get('id'));
 	if (!Number.isInteger(id) || id <= 0) throw error(400, 'valid "id" required');
 	const lang = resolveLang(url.searchParams.get('lang'));
+	// The batch pre-fill (pipeline/07_translate.mjs) writes straight to
+	// recipe_i18n and has no use for the KV cache — letting it opt out keeps
+	// thousands of one-off pre-fill calls from burning through KV's free-tier
+	// daily put quota, which is shared with every real lazy-fallback request.
+	const skipCache = url.searchParams.get('cache') === '0';
 
 	const cacheKey = `recipe:${id}:${lang}`;
 	const cached = await kv.get<Translated>(cacheKey, 'json');
@@ -94,7 +99,16 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	};
 
 	// Never cache a failed translation — a permanent KV entry would freeze the
-	// untranslated fallback in place forever.
-	if (text) await kv.put(cacheKey, JSON.stringify(out));
+	// untranslated fallback in place forever. And never let a cache *write*
+	// failure (e.g. the daily put-quota exhausted) fail a request that
+	// otherwise succeeded — the translation is still good, it just won't be
+	// cached this time.
+	if (text && !skipCache) {
+		try {
+			await kv.put(cacheKey, JSON.stringify(out));
+		} catch (err) {
+			console.error('KV put failed, serving uncached:', err);
+		}
+	}
 	return json({ ...out, cached: false });
 };

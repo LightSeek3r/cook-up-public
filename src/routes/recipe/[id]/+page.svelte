@@ -177,7 +177,11 @@
 								category={ingredient.category}
 							/>
 						</span>
-						<span>{ingredient.raw_text ?? ingredient.name}</span>
+						<span>
+							{data.lang === data.recipe.source_lang && ingredient.raw_text
+								? ingredient.raw_text
+								: ingredient.name}
+						</span>
 					</li>
 				{/each}
 			</ul>

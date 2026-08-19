@@ -10,15 +10,22 @@ export interface MatchParams {
 	mealType?: string;
 	diet?: string;
 	excludeAllergens?: number[];
+	/** Default: fewest missing first. `kcal`/`grade` push recipes with no
+	 *  nutrition data to the end rather than mixing them in arbitrarily. */
+	sort?: 'kcal' | 'grade';
 	limit?: number;
 	offset?: number;
 }
 
 /**
- * Ranks recipes by how few non-staple ingredients the user is missing.
+ * Returns only recipes that use every selected ingredient — a recipe may need
+ * more than `have`, never fewer — ranked by how few *other* non-staple
+ * ingredients it still needs.
  *
- * Ordering is the product rule: `missing = 0` first ("you can make this now"),
- * then 1, 2, … Ties break on the smaller shopping list, then the faster recipe.
+ * Default ordering is the product rule: `missing = 0` first ("you can make
+ * this now"), then 1, 2, … Ties break on the smaller shopping list, then the
+ * faster recipe. `sort: 'kcal' | 'grade'` overrides this to rank by nutrition
+ * instead, still pushing recipes with no nutrition data to the end.
  *
  * Staples (salt, water, oil…) are flagged in `ingredients.is_staple` and are
  * never counted as missing.
@@ -35,12 +42,14 @@ export async function matchRecipes(
 	const binds: (string | number)[] = [];
 	const list = (values: number[]) => values.map(() => '?').join(',');
 
-	// 1. SELECT clause: the selected-ingredient set appears twice.
+	// 1. SELECT clause: the selected-ingredient set appears three times
+	// (matched, missing count, missing-names list).
 	const haveList = list(p.have);
-	binds.push(...p.have, ...p.have);
+	binds.push(...p.have, ...p.have, ...p.have);
 
-	// 2. Title join: requested language, falling back to the source language.
-	binds.push(p.lang);
+	// 2. Title + missing-ingredient-name joins: requested language, falling
+	// back to the source language / English respectively.
+	binds.push(p.lang, p.lang);
 
 	// 3. Filters — only bound when supplied, so no dead `? IS NULL` predicates.
 	const where: string[] = [];
@@ -65,7 +74,23 @@ export async function matchRecipes(
 	}
 	const whereSql = where.length ? `WHERE ${where.join('\n      AND ')}` : '';
 
-	// 4. Paging.
+	// 4. Every selected ingredient must be used — a recipe may use more than
+	// `have`, never fewer. `matched` already counts distinct selected
+	// ingredients found (one row per ingredient per recipe, by primary key),
+	// so requiring the full house is just `matched = have.length`.
+	binds.push(p.have.length);
+
+	// 5. Sort — a column/expression choice, not a value, so it's built as SQL
+	// text rather than bound; `p.sort` only ever reaches here already
+	// whitelisted by the API route, same trust boundary as `p.cuisine` etc.
+	let orderBy = 'missing ASC, required_non_staple ASC, r.total_minutes ASC, r.id ASC';
+	if (p.sort === 'kcal') {
+		orderBy = '(r.nutrition_coverage < 0.7 OR r.kcal IS NULL) ASC, r.kcal ASC, missing ASC, r.id ASC';
+	} else if (p.sort === 'grade') {
+		orderBy = '(r.balance_grade IS NULL) ASC, r.balance_grade ASC, missing ASC, r.id ASC';
+	}
+
+	// 6. Paging.
 	const limit = p.limit ?? MATCH_PAGE_SIZE;
 	binds.push(limit, p.offset ?? 0);
 
@@ -79,16 +104,20 @@ export async function matchRecipes(
       COUNT(*) FILTER (WHERE ri.ingredient_id IN (${haveList}))       AS matched,
       COUNT(*) FILTER (WHERE i.is_staple = 0
                          AND ri.ingredient_id NOT IN (${haveList}))   AS missing,
-      COUNT(*) FILTER (WHERE i.is_staple = 0)                         AS required_non_staple
+      COUNT(*) FILTER (WHERE i.is_staple = 0)                         AS required_non_staple,
+      GROUP_CONCAT(CASE WHEN i.is_staple = 0 AND ri.ingredient_id NOT IN (${haveList})
+                        THEN COALESCE(mt.name, men.name, i.canonical_key) END, ', ') AS missing_names
     FROM recipes r
     JOIN recipe_ingredients ri ON ri.recipe_id = r.id
     JOIN ingredients i         ON i.id = ri.ingredient_id
     LEFT JOIN recipe_i18n t    ON t.recipe_id = r.id AND t.lang = ?
     LEFT JOIN recipe_i18n src  ON src.recipe_id = r.id AND src.lang = r.source_lang
+    LEFT JOIN ingredient_i18n mt  ON mt.ingredient_id = ri.ingredient_id AND mt.lang = ?
+    LEFT JOIN ingredient_i18n men ON men.ingredient_id = ri.ingredient_id AND men.lang = 'en'
     ${whereSql}
     GROUP BY r.id
-    HAVING matched > 0
-    ORDER BY missing ASC, required_non_staple ASC, r.total_minutes ASC, r.id ASC
+    HAVING matched = ?
+    ORDER BY ${orderBy}
     LIMIT ? OFFSET ?`;
 
 	const { results } = await db
