@@ -2,43 +2,194 @@
  * Stage 07 — batch machine translation (ADR B′).
  *
  * Input:  recipes already seeded in D1 (stage 06)
- * Output: pipeline/out/translations.sql — `recipe_i18n` rows with is_machine = 1
+ * Output: `recipe_i18n` rows with is_machine = 1, applied directly to D1 as
+ *         each batch completes (not a single seed.sql — this stage makes
+ *         live, costed AI calls interleaved with reads, so work already done
+ *         must survive a crash or a rate limit partway through)
  *
- * Translations are a pure function of (recipe, language) and the corpus only
- * grows by a handful of recipes per rebuild, so they are computed here rather
- * than at request time. Writing them into `recipe_i18n` (instead of KV) is what
- * makes translated titles show up in the mosaic, the result list and the
- * `recipe_title_fts` index — KV is only ever read by the detail page.
+ * Deviation from the original plan, and why: the original design called for
+ * a direct call to the Workers AI REST API so it could log real neuron usage
+ * from the response. This machine has no portable `CLOUDFLARE_API_TOKEN` —
+ * only wrangler's own OAuth session, which isn't a bearer token that's safe
+ * or stable to extract from its local config. The already-deployed
+ * `/api/translate` endpoint does the *exact same* translation (same model,
+ * same system prompt, same rules) and is reachable over plain HTTPS, so this
+ * stage calls that instead of the raw REST API. Trade-off: no per-call
+ * neuron count in the response, so cost is tracked by counting actual
+ * characters translated instead (see the summary line at the end).
  *
- * `/api/translate` + KV stays in place as the runtime fallback for recipes added
- * since the last run of this stage.
- *
- * Selection query — only the gaps, so re-runs are cheap:
- *   SELECT r.id, r.source_lang, s.title, s.instructions
- *     FROM recipes r
- *     JOIN recipe_i18n s ON s.recipe_id = r.id AND s.lang = r.source_lang
- *    WHERE NOT EXISTS (SELECT 1 FROM recipe_i18n t
- *                       WHERE t.recipe_id = r.id AND t.lang = ?)
- *
- * Rules (must match src/routes/api/translate/+server.ts, which is the fallback
- * for the same job — divergence between the two would be a silent quality bug):
- *   - model must be NON-REASONING; `gemma-4-*-it` returns empty `content`
- *     because it spends the whole budget on `reasoning_content`
- *   - accept either `response` or `choices[0].message.content`
- *   - temperature 0.2 — sampling variance drops or merges recipe steps
+ * Rules (kept in sync with src/routes/api/translate/+server.ts — divergence
+ * between the two would be a silent quality bug):
  *   - titles are NOT translated; a dish name is a proper noun
+ *   - model/prompt/temperature all live in that one endpoint now
  *
- * Quality gate the lazy endpoint cannot afford: assert the translation has the
- * same number of non-empty lines as the source, and re-queue mismatches instead
- * of writing them.
+ * Quality gate the lazy endpoint cannot afford: assert the translation has
+ * the same number of non-empty lines as the source; mismatches are logged
+ * and skipped (left as a gap — the next run's selection query picks them up
+ * again automatically), never written.
  *
- * Must finish with:
- *   INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');
- *
- * FIRST TASK, before any full run: `--limit 50 --dry-run`, logging the neurons
- * reported by the Workers AI REST API, so the cost of the initial fill is a
- * measurement and not an estimate.
+ * Usage:
+ *   node pipeline/07_translate.mjs --dry-run --limit=50   # cost measurement
+ *   node pipeline/07_translate.mjs --limit=500            # real, incremental fill
+ *   node pipeline/07_translate.mjs                        # fill every remaining gap
  */
 
-// TODO(phase 5): dry run first (50 recipes, log neuron usage), then full fill.
-console.log('07_translate: not implemented');
+import { execFileSync } from 'node:child_process';
+import { writeFile } from 'node:fs/promises';
+import path from 'node:path';
+
+const BASE_URL = 'https://cook-up.asakura-account.workers.dev';
+const OUT_DIR = path.resolve('pipeline/out');
+
+// Must track src/lib/config.ts's SUPPORTED_LANGS minus the source language —
+// every phase-2/3 recipe is source_lang='en'. pipeline/ is plain Node ESM and
+// can't import the SvelteKit TS module directly.
+const TARGET_LANGS = ['es', 'fr', 'de', 'ar', 'hi', 'zh', 'ja', 'ko', 'vi'];
+
+function parseArgs() {
+	const args = process.argv.slice(2);
+	const num = (flag, fallback) => {
+		const hit = args.find((a) => a.startsWith(`--${flag}=`));
+		return hit ? Number(hit.split('=')[1]) : fallback;
+	};
+	return {
+		limit: num('limit', Infinity),
+		dryRun: args.includes('--dry-run'),
+		local: args.includes('--local')
+	};
+}
+
+function esc(v) {
+	if (v === null || v === undefined) return 'NULL';
+	if (typeof v === 'number') return String(v);
+	return `'${String(v).replace(/'/g, "''")}'`;
+}
+
+const WRANGLER_BIN = path.resolve('node_modules/wrangler/bin/wrangler.js');
+
+/** Shells out to wrangler for both reads and writes — this stage needs live
+ *  D1 state interleaved with network calls, unlike the file-based jsonl
+ *  stages before it. Invokes wrangler's own JS entry point directly via
+ *  `node`, with the SQL as one argv element — no shell involved at all, so
+ *  none of its quoting rules apply. (Two dead ends first: `execSync` with a
+ *  command *string* went through cmd.exe, which mangled the embedded single
+ *  quotes and newlines; `execFileSync('npx.cmd', ...)` can't spawn without a
+ *  shell either, since `.cmd` files aren't directly executable. `--file=`
+ *  avoids both but only returns execution stats, not row data, so it's
+ *  useless for the SELECTs this stage needs.) */
+function d1(sql, { local, json = true }) {
+	const args = [WRANGLER_BIN, 'd1', 'execute', 'cook-up-db', local ? '--local' : '--remote'];
+	if (json) args.push('--json');
+	args.push('--command', sql);
+	const out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 100 });
+	return json ? JSON.parse(out)[0]?.results ?? [] : out;
+}
+
+const nonEmptyLineCount = (text) => text.split('\n').map((l) => l.trim()).filter(Boolean).length;
+
+async function translate(id, lang) {
+	// cache=0: this stage writes straight to recipe_i18n and never re-requests
+	// the same (id, lang) pair, so the KV cache buys it nothing — and 20k+
+	// pre-fill calls would blow through KV's free-tier daily put quota, which
+	// is shared with every real lazy-fallback request. (Found the hard way:
+	// the first full run did exactly that, 500ing every call after ~1000 puts.)
+	const res = await fetch(`${BASE_URL}/api/translate?id=${id}&lang=${lang}&cache=0`);
+	if (!res.ok) throw new Error(`translate ${id}/${lang}: HTTP ${res.status}`);
+	return res.json();
+}
+
+async function main() {
+	const { limit, dryRun, local } = parseArgs();
+
+	let remaining = limit;
+	let translatedCount = 0;
+	let skippedMismatch = 0;
+	let charsTranslated = 0;
+	const mismatches = [];
+	const inserts = []; // batched, applied every FLUSH_EVERY rows so a crash mid-run loses little
+
+	const FLUSH_EVERY = 15;
+	const flush = () => {
+		if (!inserts.length) return;
+		const values = inserts.splice(0, inserts.length).join(',\n');
+		if (!dryRun) {
+			d1(
+				`INSERT INTO recipe_i18n (recipe_id, lang, title, instructions, is_machine) VALUES\n${values};`,
+				{ local, json: false }
+			);
+		}
+	};
+
+	// The endpoint is network/inference-bound, not CPU-bound — sequential calls
+	// measured ~4s each, which is ~24h wall-clock for the full 21k-pair fill.
+	// Workers AI handles concurrent requests fine; this is the difference
+	// between hours and minutes; kept modest to stay a good citizen of the
+	// shared deployment rather than hammering it.
+	const CONCURRENCY = 12;
+
+	async function processGap(gap, lang) {
+		let result;
+		try {
+			result = await translate(gap.id, lang);
+		} catch (err) {
+			console.error(`translate ${gap.id}/${lang} failed:`, err.message);
+			return;
+		}
+
+		const sourceLines = nonEmptyLineCount(gap.instructions);
+		const translatedLines = nonEmptyLineCount(result.instructions);
+		if (sourceLines !== translatedLines) {
+			skippedMismatch++;
+			mismatches.push(`${gap.id}\t${lang}\t${sourceLines} vs ${translatedLines} lines`);
+			return;
+		}
+
+		charsTranslated += result.instructions.length;
+		translatedCount++;
+		inserts.push(`(${gap.id},${esc(lang)},${esc(gap.title)},${esc(result.instructions)},1)`);
+		if (inserts.length >= FLUSH_EVERY) flush();
+	}
+
+	for (const lang of TARGET_LANGS) {
+		if (remaining <= 0) break;
+		const gaps = d1(
+			`SELECT r.id, r.source_lang, s.title, s.instructions
+			 FROM recipes r
+			 JOIN recipe_i18n s ON s.recipe_id = r.id AND s.lang = r.source_lang
+			 WHERE NOT EXISTS (SELECT 1 FROM recipe_i18n t WHERE t.recipe_id = r.id AND t.lang = '${lang}')
+			 LIMIT ${Math.min(remaining, 2000)}`,
+			{ local }
+		);
+
+		for (let i = 0; i < gaps.length && remaining > 0; i += CONCURRENCY) {
+			const batch = gaps.slice(i, i + Math.min(CONCURRENCY, remaining));
+			remaining -= batch.length;
+			await Promise.all(batch.map((gap) => processGap(gap, lang)));
+			if ((i / CONCURRENCY) % 20 === 0) {
+				console.log(`07_translate: ${lang} — ${Math.min(i + CONCURRENCY, gaps.length)}/${gaps.length}`);
+			}
+		}
+	}
+	flush();
+
+	if (!dryRun && translatedCount > 0) {
+		d1("INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');", { local, json: false });
+	}
+
+	if (mismatches.length) {
+		await writeFile(path.join(OUT_DIR, 'translate_mismatches.txt'), mismatches.join('\n') + '\n');
+	}
+
+	// $0.555/M output tokens, ~4 chars/token — the same estimation method used
+	// for the earlier cost projection, now against what was actually sent.
+	const estimatedCost = (charsTranslated / 4 / 1_000_000) * 0.555;
+	console.log(
+		`07_translate: ${translatedCount} translated, ${skippedMismatch} skipped (line-count mismatch, see translate_mismatches.txt)` +
+			(dryRun ? ' [DRY RUN — nothing written]' : '')
+	);
+	console.log(
+		`07_translate: ${charsTranslated} chars translated, ~$${estimatedCost.toFixed(4)} estimated output-token cost this run`
+	);
+}
+
+await main();
