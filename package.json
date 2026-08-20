@@ -20,6 +20,7 @@
     "pipeline:parse": "node pipeline/02_parse.mjs",
     "pipeline:normalize": "node pipeline/03_normalize_ingredients.mjs",
     "pipeline:seed": "node pipeline/06_seed_d1.mjs",
+    "pipeline:gen-remote-seed": "node pipeline/gen_remote_seed.mjs",
     "db:seed:real": "npm run pipeline:fetch && npm run pipeline:parse && npm run pipeline:normalize && npm run pipeline:seed && wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql"
   },
   "devDependencies": {
