@@ -31,7 +31,26 @@ export type Lang = (typeof SUPPORTED_LANGS)[number];
 export const DEFAULT_LANG: Lang = 'en';
 export const RTL_LANGS = new Set<Lang>(['ar']);
 
-/** English endonyms, used to address the translation model in its own prompt. */
+/**
+ * Each language's name **in that language** — for the UI language switcher.
+ * Distinct from LANG_NAMES below, which is deliberately English and exists only
+ * to address the translation model in its own prompt. Showing "HI" or
+ * "Simplified Chinese" in the picker is useless to the person looking for it.
+ */
+export const LANG_ENDONYMS: Record<Lang, string> = {
+	en: 'English',
+	es: 'Español',
+	fr: 'Français',
+	de: 'Deutsch',
+	ar: 'العربية',
+	hi: 'हिन्दी',
+	zh: '简体中文',
+	ja: '日本語',
+	ko: '한국어',
+	vi: 'Tiếng Việt'
+};
+
+/** English exonyms, used to address the translation model in its own prompt. */
 export const LANG_NAMES: Record<Lang, string> = {
 	en: 'English',
 	es: 'Spanish',
@@ -68,3 +87,18 @@ export type IngredientCategory = (typeof INGREDIENT_CATEGORIES)[number];
 
 /** Result page size for /api/match. */
 export const MATCH_PAGE_SIZE = 50;
+
+/**
+ * Separator for match.ts's `missing_names` GROUP_CONCAT. The ASCII Unit
+ * Separator control character (0x1F), not `", "`: ingredient names are
+ * translated content across ten languages, and any name containing a
+ * comma-space would otherwise be split into two phantom "missing" ingredients
+ * on the client. Built via fromCharCode rather than a literal control
+ * character in the source — a literal is invisible and silently unreliable to
+ * round-trip through editors/tools (confirmed the hard way: an edit here once
+ * quietly became an *empty* string, which would have collapsed the separator
+ * between every concatenated name to nothing). Lives here rather than in
+ * match.ts so client components (ResultCard) don't need to import a module
+ * that pulls in @cloudflare/workers-types.
+ */
+export const MISSING_NAMES_SEP = String.fromCharCode(31);

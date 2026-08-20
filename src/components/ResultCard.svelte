@@ -2,6 +2,7 @@
 	import BalanceGrade from './BalanceGrade.svelte';
 	import MissingChips from './MissingChips.svelte';
 	import { nutritionVisible } from '$lib/nutrition';
+	import { MISSING_NAMES_SEP } from '$lib/config';
 	import type { MatchResult } from '$lib/types';
 
 	interface Props {
@@ -15,14 +16,14 @@
 	const showNutrition = $derived(nutritionVisible(recipe.nutrition_coverage));
 	const minutes = $derived(recipe.total_minutes ?? recipe.prep_minutes);
 	const ready = $derived(recipe.missing === 0);
-	const missingNames = $derived(recipe.missing_names?.split(', ') ?? []);
+	const missingNames = $derived(recipe.missing_names?.split(MISSING_NAMES_SEP) ?? []);
 </script>
 
 <a class="card result" class:ready href="/recipe/{recipe.id}?lang={lang}">
 	<div class="head">
 		<h3 class="title">{recipe.title}</h3>
 		{#if showNutrition}
-			<BalanceGrade grade={recipe.balance_grade} />
+			<BalanceGrade grade={recipe.balance_grade} gradeLabel={t('grade.label')} />
 		{/if}
 	</div>
 
@@ -32,7 +33,7 @@
 			<span class="muted">{minutes} {t('card.minutes')}</span>
 		{/if}
 		{#if showNutrition && recipe.kcal}
-			<span class="muted">{Math.round(recipe.kcal)} kcal</span>
+			<span class="muted">{Math.round(recipe.kcal)} {t('nutrition.kcal')}</span>
 		{/if}
 	</div>
 </a>

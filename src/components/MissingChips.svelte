@@ -49,14 +49,17 @@
 		height: 0.95em;
 		flex: none;
 	}
+	/* Text colour is a dedicated on-tint token, not the fill colour: reusing the
+	   fill measured 3.61:1 (light) / 3.12:1 (dark) on its own 14% tint, and at
+	   12.5px bold this is not WCAG "large text", so 4.5:1 applies. */
 	.ok {
 		background: color-mix(in srgb, var(--accent) 14%, var(--surface));
 		border-color: color-mix(in srgb, var(--accent) 35%, transparent);
-		color: var(--accent);
+		color: var(--on-ok-tint);
 	}
 	.warn {
 		background: color-mix(in srgb, var(--grade-d) 14%, var(--surface));
 		border-color: color-mix(in srgb, var(--grade-d) 35%, transparent);
-		color: var(--grade-d);
+		color: var(--on-warn-tint);
 	}
 </style>

@@ -43,7 +43,9 @@
 	>
 		<option value="">{t('filter.cuisine')} — {t('filter.all')}</option>
 		{#each CUISINES as value (value)}
-			<option {value}>{value.replace(/_/g, ' ')}</option>
+			<!-- Was `value.replace(/_/g, ' ')`, which rendered raw lowercase English
+			     slugs in all 10 locales while the sibling selects used t(). -->
+			<option {value}>{t(`cuisine.${value}`)}</option>
 		{/each}
 	</select>
 

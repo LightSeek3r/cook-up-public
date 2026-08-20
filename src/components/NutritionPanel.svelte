@@ -1,30 +1,42 @@
 <script lang="ts">
 	import BalanceGrade from './BalanceGrade.svelte';
 	import { splitHighlights, nutritionVisible } from '$lib/nutrition';
-	import { GRADE } from '$lib/config';
 	import type { RecipeDetail } from '$lib/types';
 
 	interface Props {
 		recipe: RecipeDetail;
 		t: (key: string) => string;
+		/** Needed for Intl list/number formatting, not just for t(). */
+		lang: string;
 	}
 
-	let { recipe, t }: Props = $props();
+	let { recipe, t, lang }: Props = $props();
 
 	const visible = $derived(nutritionVisible(recipe.nutrition_coverage));
 	const highlights = $derived(splitHighlights(recipe.micronutrients));
 
+	// `key` is stable and drives both the i18n lookup and the {#each} key; `label`
+	// used to be a hardcoded English string doing double duty as the each-key,
+	// which would have made list identity locale-dependent once translated.
 	const macros = $derived(
 		[
-			{ label: 'kcal', value: recipe.kcal, unit: '' },
-			{ label: 'Protein', value: recipe.protein_g, unit: 'g' },
-			{ label: 'Fat', value: recipe.fat_g, unit: 'g' },
-			{ label: 'Saturates', value: recipe.sat_fat_g, unit: 'g' },
-			{ label: 'Carbs', value: recipe.carb_g, unit: 'g' },
-			{ label: 'Sugars', value: recipe.sugar_g, unit: 'g' },
-			{ label: 'Fibre', value: recipe.fiber_g, unit: 'g' },
-			{ label: 'Sodium', value: recipe.sodium_mg, unit: 'mg' }
+			{ key: 'kcal', value: recipe.kcal, unit: '' },
+			{ key: 'protein', value: recipe.protein_g, unit: 'g' },
+			{ key: 'fat', value: recipe.fat_g, unit: 'g' },
+			{ key: 'satFat', value: recipe.sat_fat_g, unit: 'g' },
+			{ key: 'carbs', value: recipe.carb_g, unit: 'g' },
+			{ key: 'sugars', value: recipe.sugar_g, unit: 'g' },
+			{ key: 'fibre', value: recipe.fiber_g, unit: 'g' },
+			{ key: 'sodium', value: recipe.sodium_mg, unit: 'mg' }
 		].filter((macro) => macro.value != null)
+	);
+
+	/** Micronutrient keys come from the DB as slugs (`vitamin_c`); never show those raw. */
+	const microLabel = (key: string) => t(`nutrient.${key}`);
+
+	/** Locale-aware list joining, rather than a hardcoded Latin ", ". */
+	const listFormat = $derived(
+		new Intl.ListFormat(lang, { style: 'short', type: 'conjunction' })
 	);
 </script>
 
@@ -32,7 +44,12 @@
 	<div class="head">
 		<h2>{t('nutrition.heading')}</h2>
 		{#if visible}
-			<BalanceGrade grade={recipe.balance_grade} score={recipe.balance_score} showScore />
+			<BalanceGrade
+				grade={recipe.balance_grade}
+				score={recipe.balance_score}
+				showScore
+				gradeLabel={t('grade.label')}
+			/>
 		{/if}
 	</div>
 
@@ -42,35 +59,51 @@
 		<p class="muted">{t('nutrition.perServing')} · {t('nutrition.estimated')}</p>
 
 		<dl>
-			{#each macros as macro (macro.label)}
+			{#each macros as macro (macro.key)}
 				<div>
-					<dt>{macro.label}</dt>
+					<dt>{t(`nutrition.${macro.key}`)}</dt>
 					<dd>{Math.round(macro.value ?? 0)}{macro.unit}</dd>
 				</div>
 			{/each}
 		</dl>
 
 		{#if highlights.high.length}
-			<p><strong>{t('nutrition.highIn')}:</strong> {highlights.high.map((m) => m.nutrient_key).join(', ')}</p>
+			<p>
+				<strong>{t('nutrition.highIn')}:</strong>
+				{listFormat.format(highlights.high.map((m) => microLabel(m.nutrient_key)))}
+			</p>
 		{/if}
 		{#if highlights.source.length}
-			<p><strong>{t('nutrition.sourceOf')}:</strong> {highlights.source.map((m) => m.nutrient_key).join(', ')}</p>
+			<p>
+				<strong>{t('nutrition.sourceOf')}:</strong>
+				{listFormat.format(highlights.source.map((m) => microLabel(m.nutrient_key)))}
+			</p>
 		{/if}
 
 		<details>
-			<summary>{GRADE.label}</summary>
+			<summary>{t('grade.label')}</summary>
 			<p class="muted">{t('grade.explain')}</p>
-			<table>
-				<tbody>
-					{#each recipe.micronutrients as micro (micro.nutrient_key)}
+			{#if recipe.micronutrients.length}
+				<table>
+					<caption class="sr-only">{t('nutrition.micronutrients')}</caption>
+					<thead>
 						<tr>
-							<td>{micro.nutrient_key}</td>
-							<td>{micro.amount}{micro.unit}</td>
-							<td>{micro.pct_nrv != null ? `${Math.round(micro.pct_nrv)}% NRV` : ''}</td>
+							<th scope="col">{t('nutrition.nutrient')}</th>
+							<th scope="col">{t('nutrition.amount')}</th>
+							<th scope="col">{t('nutrition.pctNrv')}</th>
 						</tr>
-					{/each}
-				</tbody>
-			</table>
+					</thead>
+					<tbody>
+						{#each recipe.micronutrients as micro (micro.nutrient_key)}
+							<tr>
+								<th scope="row">{microLabel(micro.nutrient_key)}</th>
+								<td>{micro.amount}{micro.unit}</td>
+								<td>{micro.pct_nrv != null ? `${Math.round(micro.pct_nrv)}%` : ''}</td>
+							</tr>
+						{/each}
+					</tbody>
+				</table>
+			{/if}
 		</details>
 	{/if}
 </section>

@@ -32,16 +32,40 @@
 
 	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.id)));
 
+	// Text for the always-mounted live region; empty before the user picks anything
+	// so it never announces on first load.
+	const liveStatus = $derived(
+		selected.length === 0
+			? ''
+			: loading
+				? t('results.loading')
+				: results.length === 0
+					? t('results.empty')
+					: `${results.length} ${t('results.found')}`
+	);
+
 	function updateUrl(mutate: (url: URL) => void) {
 		const url = new URL($page.url);
 		mutate(url);
 		goto(url, { keepFocus: true, noScroll: true, replaceState: true });
 	}
 
+	/**
+	 * The tray is gated on `selected.length`, so emptying it deletes the element
+	 * the user was focused on and drops focus to <body> — losing both keyboard
+	 * position and context. `keepFocus` can't help: it preserves focus across the
+	 * navigation, not across a reactive unmount. Hand focus to the results region.
+	 */
+	function handOffFocusIfTrayCloses(nextLength: number) {
+		if (nextLength > 0) return;
+		requestAnimationFrame(() => document.getElementById('results')?.focus());
+	}
+
 	function toggle(id: number) {
 		const next = selected.includes(id)
 			? selected.filter((value) => value !== id)
 			: [...selected, id];
+		handOffFocusIfTrayCloses(next.length);
 		updateUrl((url) => {
 			if (next.length) url.searchParams.set('have', next.join(','));
 			else url.searchParams.delete('have');
@@ -56,6 +80,7 @@
 	}
 
 	function clearAll() {
+		handOffFocusIfTrayCloses(0);
 		updateUrl((url) => url.searchParams.delete('have'));
 	}
 
@@ -112,22 +137,27 @@
 		<Mosaic {tiles} {selected} {t} onToggle={toggle} />
 	</div>
 
-	<aside class="results" id="results">
+	<section class="results" id="results" tabindex="-1" aria-labelledby="results-heading">
 		<div class="results-inner">
 			<div class="results-head">
-				<h2>{t('results.heading')}</h2>
+				<h2 id="results-heading">{t('results.heading')}</h2>
 				{#if selected.length > 0 && !loading}
 					<span class="pill">{results.length} {t('results.found')}</span>
 				{/if}
 			</div>
 
+			<!-- One always-mounted live region. A role="status" that is created at the
+			     same moment its text appears is skipped by most screen readers, so the
+			     previous version announced neither loading nor completion. -->
+			<div class="sr-only" role="status" aria-live="polite">{liveStatus}</div>
+
 			{#if selected.length === 0}
 				<p class="muted state">{t('results.start')}</p>
 			{:else if loading}
-				<p class="muted state" role="status">{t('results.loading')}</p>
+				<p class="muted state">{t('results.loading')}</p>
 				<!-- Skeletons reserve the space the cards will occupy (no layout shift). -->
 				{#each [0, 1, 2] as row (row)}
-					<div class="skeleton card"></div>
+					<div class="skeleton card" aria-hidden="true"></div>
 				{/each}
 			{:else if results.length === 0}
 				<p class="state"><strong>{t('results.empty')}</strong></p>
@@ -140,7 +170,7 @@
 				</div>
 			{/if}
 		</div>
-	</aside>
+	</section>
 </div>
 
 {#if selected.length}
@@ -161,7 +191,10 @@
 								stroke-linecap="round"
 							/>
 						</svg>
-						<span class="sr-only">{t('mosaic.clear')}</span>
+						<!-- `mosaic.remove`, not `mosaic.clear`: this button removes ONE
+						     ingredient, but "Clear all" made it announce as "Tomato Clear
+						     all" — and made every chip claim to wipe the selection. -->
+						<span class="sr-only">{t('mosaic.remove')}</span>
 					</button>
 				{/each}
 			</div>
@@ -265,8 +298,13 @@
 		scrollbar-width: thin;
 		padding-block: 2px;
 		/* Fade the trailing edge so a clipped chip reads as "scroll for more"
-		   rather than as a broken layout. */
-		mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+		   rather than as a broken layout. `to right` is physical, so it must be
+		   mirrored for RTL — otherwise it dims the *leading* edge in Arabic and
+		   inverts the affordance. (Same approach as .back svg on the recipe page.) */
+		mask-image: linear-gradient(to right, black calc(100% - 1.5rem), transparent);
+	}
+	:global([dir='rtl']) .chips {
+		mask-image: linear-gradient(to left, black calc(100% - 1.5rem), transparent);
 	}
 	.chip {
 		display: inline-flex;
@@ -280,7 +318,9 @@
 		padding: 0.35rem 0.7rem;
 		font-size: 0.8rem;
 		font-weight: 600;
-		min-height: 2.25rem;
+		/* 44px: these are the only way to undo a selection on mobile, and they
+		   live in a horizontal scroll container — the worst place to be undersized. */
+		min-height: 2.75rem;
 		transition: transform var(--dur) var(--ease-spring);
 	}
 	.chip:active {

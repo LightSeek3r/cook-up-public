@@ -52,7 +52,7 @@
 			<span class="count">{group.all.length}</span>
 		</div>
 
-		<div class="mosaic">
+		<div class="mosaic" id="mosaic-{group.category}">
 			{#each group.visible as tile, index (tile.id)}
 				<IngredientTile
 					{tile}
@@ -69,6 +69,7 @@
 				type="button"
 				class="more"
 				aria-expanded={group.isOpen}
+				aria-controls="mosaic-{group.category}"
 				onclick={() => (expanded = { ...expanded, [group.category]: !group.isOpen })}
 			>
 				{group.isOpen ? t('mosaic.showLess') : `${t('mosaic.showAll')} (${group.all.length})`}

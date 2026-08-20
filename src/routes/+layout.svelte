@@ -2,7 +2,7 @@
 	import '../app.css';
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
-	import { SUPPORTED_LANGS } from '$lib/config';
+	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
 	import { goto } from '$app/navigation';
 
 	let { children } = $props();
@@ -24,6 +24,8 @@
 	}
 </script>
 
+<a class="skip" href="#main">{t('app.skipToContent')}</a>
+
 <div class="page">
 	<header>
 		<div class="bar">
@@ -42,23 +44,29 @@
 						stroke-linecap="round"
 					/>
 				</svg>
-				<h1>{t('app.title')}</h1>
+				<!-- Not an <h1>: every page supplies its own, and the recipe page's
+				     title is the real document heading. -->
+				<span class="title">{t('app.title')}</span>
 			</a>
-			<select aria-label="Language" value={lang} onchange={switchLang}>
+			<select aria-label={t('app.language')} value={lang} onchange={switchLang}>
 				{#each SUPPORTED_LANGS as code (code)}
-					<option value={code}>{code.toUpperCase()}</option>
+					<!-- Endonyms, not ISO codes: a Hindi speaker scans for "हिन्दी", not "HI". -->
+					<option value={code}>{LANG_ENDONYMS[code]}</option>
 				{/each}
 			</select>
 		</div>
 		<p class="tagline">{t('app.tagline')}</p>
 	</header>
 
-	{@render children?.()}
+	<main id="main">
+		{@render children?.()}
+	</main>
 
 	<footer class="muted">
-		<!-- CC BY-SA 3.0 requires visible attribution once real recipe data lands. -->
-		<p>Recipe data: Wikibooks Cookbook (CC BY-SA 3.0) and public-domain sources.</p>
-		<p>Nutrition reference: USDA FoodData Central (public domain).</p>
+		<!-- CC BY-SA 3.0 requires visible attribution. Work titles, licence ids and
+		     database names stay untranslated; only the framing is localised. -->
+		<p>{t('footer.recipeData')}: Wikibooks Cookbook (CC BY-SA 3.0) — {t('footer.andPublicDomain')}</p>
+		<p>{t('footer.nutritionRef')}: USDA FoodData Central ({t('footer.publicDomain')})</p>
 	</footer>
 </div>
 
@@ -81,8 +89,38 @@
 		height: 1.9rem;
 		flex: none;
 	}
-	.brand h1 {
+	/* Visually the wordmark, but not a heading — see the markup comment. */
+	.brand .title {
 		color: var(--ink);
+		font-family: var(--font-display);
+		font-weight: 700;
+		letter-spacing: -0.01em;
+		line-height: 1.2;
+		font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+	}
+
+	/* Off-screen until focused, then pinned over the header. */
+	.skip {
+		position: fixed;
+		inset-block-start: var(--space-2);
+		inset-inline-start: var(--space-2);
+		z-index: 20;
+		padding: 0.6rem 0.9rem;
+		min-height: 2.75rem;
+		display: inline-flex;
+		align-items: center;
+		background: var(--surface);
+		color: var(--primary);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius);
+		box-shadow: var(--shadow-2);
+		font-weight: 600;
+		text-decoration: none;
+		transform: translateY(-150%);
+		transition: transform var(--dur) var(--ease-spring);
+	}
+	.skip:focus-visible {
+		transform: translateY(0);
 	}
 	.bar select {
 		min-height: 2.75rem;

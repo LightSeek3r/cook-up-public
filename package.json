@@ -8,10 +8,14 @@
     "build": "vite build",
     "preview": "wrangler dev",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "db:migrate": "wrangler d1 migrations apply cook-up-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply cook-up-db --remote",
     "db:smoke": "wrangler d1 execute cook-up-db --local --file=pipeline/fixtures/smoke.sql",
     "db:seed:prototype": "node pipeline/prototype/seed_themealdb.mjs && wrangler d1 execute cook-up-db --local --file=pipeline/out/seed_themealdb.sql",
+    "db:translate:daily": "node pipeline/07_translate.mjs --limit=500",
+    "db:translate:all": "node pipeline/07_translate.mjs",
     "pipeline:fetch": "node pipeline/01_fetch.mjs",
     "pipeline:parse": "node pipeline/02_parse.mjs",
     "pipeline:normalize": "node pipeline/03_normalize_ingredients.mjs",
@@ -27,6 +31,7 @@
     "svelte-check": "^4.7.6",
     "typescript": "^6.0.3",
     "vite": "^8.2.1",
+    "vitest": "^4.1.11",
     "wrangler": "^4.123.0"
   },
   "allowScripts": {

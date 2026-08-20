@@ -80,10 +80,8 @@
 
 	/* Brand */
 	--primary: #b23018;
-	--primary-soft: #de5a3a;
 	--on-primary: #fbf3e4;
 	--accent: #3f6b3a;
-	--accent-soft: #578c4e;
 	--on-accent: #f7f3e4;
 
 	/* Surfaces */
@@ -96,15 +94,23 @@
 	--line: #d8c9a8;
 	--line-strong: #c2ae85;
 
-	/* Balance Grade — darkened from the first pass so the badge's hardcoded
-	   white text (BalanceGrade.svelte) clears 4.5:1 against every one; the
-	   original set never got visually checked because nutrition_coverage was
-	   always 0 until real nutrition data existed. */
+	/* Balance Grade — darkened so the badge's --on-grade text clears 4.5:1
+	   against every one. Measured at full precision, not rounded: --grade-e was
+	   #da3c2b = 4.5042:1, which "passes" by 0.09% — a rounded 4.50 in an earlier
+	   check hid how tight that was. Widened to 4.80:1. */
 	--grade-a: #328532;
 	--grade-b: #647e30;
 	--grade-c: #966e08;
 	--grade-d: #b35e19;
-	--grade-e: #da3c2b;
+	--grade-e: #d43727;
+	/* Text on any --grade-* fill. A token, so the badge stops hardcoding #fff. */
+	--on-grade: #ffffff;
+
+	/* Text on the MissingChips tints. The fill colour is too light to double as
+	   the text colour on its own 14% tint (--grade-d on its tint measured
+	   3.61:1 light / 3.12:1 dark at 12.5px bold, well under 4.5:1). */
+	--on-warn-tint: #8f4a12;
+	--on-ok-tint: #3f6b3a;
 
 	/* Spacing — density 6/10 (standard) */
 	--space-1: 0.25rem;
@@ -191,10 +197,8 @@
 		color-scheme: dark;
 
 		--primary: #ef6a44;
-		--primary-soft: #f38a63;
 		--on-primary: #241005;
 		--accent: #8bb36f;
-		--accent-soft: #a8cb8d;
 		--on-accent: #16220f;
 
 		--bg: #17140f;
@@ -211,6 +215,11 @@
 		--grade-c: #936e10;
 		--grade-d: #b85e14;
 		--grade-e: #d34131;
+		--on-grade: #ffffff;
+
+		/* Light text on the dark tints — see the light-mode note. */
+		--on-warn-tint: #f0a86a;
+		--on-ok-tint: #8bb36f;
 
 		--shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
 		--shadow-2: 0 8px 20px -8px rgb(0 0 0 / 60%);
@@ -394,6 +403,12 @@ button {
 	*::after {
 		animation-duration: 0.01ms !important;
 		animation-iteration-count: 1 !important;
+		/* Must also zero the *delay*. IngredientTile staggers up to 24 x 14ms with
+		   `animation-fill-mode: backwards`, which holds the `from { opacity: 0 }`
+		   state throughout the delay — so zeroing only the duration left reduced-
+		   motion users with up to 336ms of invisible tiles popping in one by one,
+		   exactly the effect this block exists to remove. */
+		animation-delay: 0s !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}

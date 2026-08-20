@@ -37,6 +37,17 @@ export interface MicroNutrient {
 	pct_nrv: number | null;
 }
 
+export interface SubstitutionTip {
+	/** canonical_key of the recipe ingredient this tip applies to. */
+	from: string;
+	/** canonical_key of the suggested substitute. */
+	to: string;
+	fromName: string;
+	toName: string;
+	/** Suffix of the `sub.<benefit>` i18n key. */
+	benefit: string;
+}
+
 export interface RecipeDetail {
 	id: number;
 	title: string;

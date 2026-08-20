@@ -1,7 +1,9 @@
 <script lang="ts">
 	import NutritionPanel from '$components/NutritionPanel.svelte';
+	import SubstitutionTips from '$components/SubstitutionTips.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
 	import { t as translator } from '$lib/i18n';
+	import { splitSteps } from '$lib/steps';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -21,31 +23,6 @@
 	const title = $derived(translated?.title ?? data.recipe.title);
 	const instructions = $derived(translated?.instructions ?? data.recipe.instructions);
 	const machine = $derived(translated ? translated.machine : Boolean(data.recipe.is_machine));
-
-	/**
-	 * Sources hand us one blob of prose whose steps are numbered inline, and they
-	 * do not agree on where to start — TheMealDB rows begin at "0.". Splitting on
-	 * the source's own markers and renumbering from 1 turns that into a method
-	 * list you can hold your place in while cooking.
-	 */
-	function splitSteps(text: string): string[] {
-		const normalised = text.replace(/\r\n?/g, '\n').trim();
-		if (!normalised) return [];
-
-		const marker = /(?:^|\n|(?<=[.!?])[ \t]+)(?:step[ \t]*)?\d{1,2}[ \t]*[.):][ \t]+/gi;
-		const numbered = normalised
-			.split(marker)
-			.map((step) => step.trim())
-			.filter(Boolean);
-		// Two segments usually means a stray "2. " inside a sentence, not a list.
-		if (numbered.length >= 3) return numbered;
-
-		const lines = normalised
-			.split('\n')
-			.map((line) => line.trim())
-			.filter(Boolean);
-		return lines.length > 1 ? lines : [normalised];
-	}
 
 	const steps = $derived(splitSteps(instructions));
 
@@ -128,7 +105,9 @@
 					</svg>
 					<span><strong>{data.recipe.servings}</strong> {t('recipe.servings')}</span>
 					{#if data.recipe.servings_assumed}
-						<abbr title={t('recipe.assumed')}>?</abbr>
+						<!-- Was <abbr title>, which abbreviates nothing and is mouse-hover-only:
+						     the caveat was invisible to keyboard and touch users. Now visible text. -->
+						<em class="assumed">({t('recipe.assumed')})</em>
 					{/if}
 				</li>
 			{/if}
@@ -144,7 +123,7 @@
 							stroke-linejoin="round"
 						/>
 					</svg>
-					<span><strong>{Math.round(data.recipe.kcal)}</strong> kcal</span>
+					<span><strong>{Math.round(data.recipe.kcal)}</strong> {t('nutrition.kcal')}</span>
 				</li>
 			{/if}
 			{#if machine}
@@ -200,7 +179,9 @@
 		</section>
 	</div>
 
-	<NutritionPanel recipe={data.recipe} {t} />
+	<NutritionPanel recipe={data.recipe} {t} lang={data.lang} />
+
+	<SubstitutionTips tips={data.tips} {t} />
 
 	<p class="muted source">
 		{t('recipe.source')}:
@@ -220,7 +201,8 @@
 		font-weight: 600;
 		text-decoration: none;
 		color: var(--muted);
-		min-height: 2.5rem;
+		/* 44px — the only back affordance on the page. */
+		min-height: 2.75rem;
 	}
 	.back:hover {
 		color: var(--primary);
@@ -298,18 +280,10 @@
 	.stats .mt svg {
 		color: var(--muted);
 	}
-	.stats abbr {
-		font-size: 0.7rem;
-		font-weight: 700;
-		width: 1.1rem;
-		height: 1.1rem;
-		display: grid;
-		place-items: center;
-		border-radius: var(--radius-pill);
-		background: var(--surface-sunken);
-		border: 1px solid var(--line-strong);
-		cursor: help;
-		text-decoration: none;
+	.assumed {
+		font-size: 0.8rem;
+		font-style: italic;
+		color: var(--muted);
 	}
 
 	.cols {

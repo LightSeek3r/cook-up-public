@@ -1,7 +1,8 @@
 import { error } from '@sveltejs/kit';
 import { requireDb } from '$lib/db';
 import { resolveLang } from '$lib/i18n';
-import type { MicroNutrient, RecipeDetail } from '$lib/types';
+import { substitutionsFor } from '$lib/substitutions';
+import type { MicroNutrient, RecipeDetail, SubstitutionTip } from '$lib/types';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url, platform }) => {
@@ -51,13 +52,41 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
 
 	// Prose in the requested language is filled lazily by /api/translate.
 	const needsTranslation = lang !== recipe.source_lang;
+	const recipeIngredients = ingredients.results ?? [];
+
+	const matches = substitutionsFor(recipeIngredients.map((i) => i.canonical_key));
+	let tips: SubstitutionTip[] = [];
+	if (matches.length) {
+		const nameByKey = new Map(recipeIngredients.map((i) => [i.canonical_key, i.name]));
+		const toKeys = [...new Set(matches.map((m) => m.to))];
+		const placeholders = toKeys.map(() => '?').join(',');
+		const subNames = await db
+			.prepare(
+				`SELECT i.canonical_key, COALESCE(t.name, en.name, i.canonical_key) AS name
+         FROM ingredients i
+         LEFT JOIN ingredient_i18n t  ON t.ingredient_id = i.id AND t.lang = ?
+         LEFT JOIN ingredient_i18n en ON en.ingredient_id = i.id AND en.lang = 'en'
+         WHERE i.canonical_key IN (${placeholders})`
+			)
+			.bind(lang, ...toKeys)
+			.all<{ canonical_key: string; name: string }>();
+		const toNameByKey = new Map((subNames.results ?? []).map((r) => [r.canonical_key, r.name]));
+		tips = matches.map((m) => ({
+			from: m.from,
+			to: m.to,
+			fromName: nameByKey.get(m.from) ?? m.from,
+			toName: toNameByKey.get(m.to) ?? m.to,
+			benefit: m.benefit
+		}));
+	}
 
 	return {
 		lang,
 		needsTranslation,
+		tips,
 		recipe: {
 			...recipe,
-			ingredients: ingredients.results ?? [],
+			ingredients: recipeIngredients,
 			micronutrients: micronutrients.results ?? []
 		} satisfies RecipeDetail
 	};

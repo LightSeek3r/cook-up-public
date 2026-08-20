@@ -21,6 +21,6 @@ id = "4273e964f2cf4404938badb8c1b03248"
 # remote account. `vite dev` therefore requires `npx wrangler login`; D1 and KV
 # stay local. Comment this block out to work fully offline — /api/translate then
 # returns a clear 500 ("Workers AI binding is not configured").
-[ai]
-binding = "AI"
-remote = true
+#[ai]
+#binding = "AI"
+#remote = true

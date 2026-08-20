@@ -1,5 +1,5 @@
 import type { D1Database } from '@cloudflare/workers-types';
-import { MATCH_PAGE_SIZE, type Lang } from '$lib/config';
+import { MATCH_PAGE_SIZE, MISSING_NAMES_SEP, type Lang } from '$lib/config';
 import type { MatchResult } from '$lib/types';
 
 export interface MatchParams {
@@ -37,15 +37,22 @@ export async function matchRecipes(
 	db: D1Database,
 	p: MatchParams
 ): Promise<{ results: MatchResult[] }> {
-	if (p.have.length === 0) return { results: [] };
+	// Dedupe here, not just in the caller: `HAVING matched = ?` is bound to the
+	// selected-ingredient count below, and that is only a correct test for "uses
+	// every selected ingredient" if the set has no duplicates — `matched` counts
+	// distinct rows, so `have: [1, 1]` would demand matched = 2 from a single row
+	// and silently return nothing. `parseIds` dedupes for the HTTP route, but this
+	// function is exported and takes `have` directly.
+	const have = [...new Set(p.have)];
+	if (have.length === 0) return { results: [] };
 
 	const binds: (string | number)[] = [];
 	const list = (values: number[]) => values.map(() => '?').join(',');
 
 	// 1. SELECT clause: the selected-ingredient set appears three times
 	// (matched, missing count, missing-names list).
-	const haveList = list(p.have);
-	binds.push(...p.have, ...p.have, ...p.have);
+	const haveList = list(have);
+	binds.push(...have, ...have, ...have);
 
 	// 2. Title + missing-ingredient-name joins: requested language, falling
 	// back to the source language / English respectively.
@@ -78,7 +85,7 @@ export async function matchRecipes(
 	// `have`, never fewer. `matched` already counts distinct selected
 	// ingredients found (one row per ingredient per recipe, by primary key),
 	// so requiring the full house is just `matched = have.length`.
-	binds.push(p.have.length);
+	binds.push(have.length);
 
 	// 5. Sort — a column/expression choice, not a value, so it's built as SQL
 	// text rather than bound; `p.sort` only ever reaches here already
@@ -106,7 +113,8 @@ export async function matchRecipes(
                          AND ri.ingredient_id NOT IN (${haveList}))   AS missing,
       COUNT(*) FILTER (WHERE i.is_staple = 0)                         AS required_non_staple,
       GROUP_CONCAT(CASE WHEN i.is_staple = 0 AND ri.ingredient_id NOT IN (${haveList})
-                        THEN COALESCE(mt.name, men.name, i.canonical_key) END, ', ') AS missing_names
+                        THEN COALESCE(mt.name, men.name, i.canonical_key) END,
+                   '${MISSING_NAMES_SEP}') AS missing_names
     FROM recipes r
     JOIN recipe_ingredients ri ON ri.recipe_id = r.id
     JOIN ingredients i         ON i.id = ri.ingredient_id

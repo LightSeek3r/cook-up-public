@@ -1,21 +1,24 @@
 <script lang="ts">
 	import type { BalanceGrade } from '$lib/config';
-	import { GRADE } from '$lib/config';
 
 	interface Props {
 		grade: BalanceGrade | null;
 		score?: number | null;
 		showScore?: boolean;
+		/** Localised name of the grade, for the accessible label. */
+		gradeLabel: string;
 	}
 
-	let { grade, score = null, showScore = false }: Props = $props();
+	let { grade, score = null, showScore = false, gradeLabel }: Props = $props();
 </script>
 
 {#if grade}
-	<span class="grade" data-grade={grade} title={GRADE.label}>
-		<abbr title={GRADE.label}>{grade}</abbr>
+	<!-- aria-label, not <abbr title>: `title` is mouse-hover-only, so on a
+	     keyboard or touch device the bare letter A–E had no explanation at all. -->
+	<span class="grade" data-grade={grade} aria-label="{gradeLabel}: {grade}">
+		<span aria-hidden="true">{grade}</span>
 		{#if showScore && score !== null}
-			<small>{score}/100</small>
+			<small aria-hidden="true">{score}/100</small>
 		{/if}
 	</span>
 {/if}
@@ -26,13 +29,10 @@
 		align-items: center;
 		gap: 0.3rem;
 		font-weight: 700;
-		color: #fff;
-		border-radius: 6px;
+		color: var(--on-grade);
+		border-radius: var(--radius-sm);
 		padding: 0.1rem 0.45rem;
 		background: var(--grade-c);
-	}
-	.grade abbr {
-		text-decoration: none;
 	}
 	.grade[data-grade='A'] {
 		background: var(--grade-a);
