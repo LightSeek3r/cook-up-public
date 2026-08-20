@@ -18,9 +18,12 @@ binding = "TRANSLATIONS"
 id = "4273e964f2cf4404938badb8c1b03248"
 
 # Workers AI has no local emulation, so this binding is always proxied to the
-# remote account. `vite dev` therefore requires `npx wrangler login`; D1 and KV
-# stay local. Comment this block out to work fully offline — /api/translate then
-# returns a clear 500 ("Workers AI binding is not configured").
-#[ai]
-#binding = "AI"
-#remote = true
+# remote account when present — that's required for the deployed Worker
+# (/api/translate needs it in production) but means `vite dev` needs
+# `npx wrangler login` too. Comment the block out only for local-only work to
+# skip that login; /api/translate then returns a clear 500 ("Workers AI
+# binding is not configured") instead of hanging. Must be uncommented before
+# any deploy.
+[ai]
+binding = "AI"
+remote = true
