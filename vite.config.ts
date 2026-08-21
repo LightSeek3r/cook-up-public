@@ -10,7 +10,12 @@ export default defineConfig({
 		// `$lib` / `$components` are declared in svelte.config.js and the generated
 		// .svelte-kit tsconfig, not in Vite — they only resolve because the
 		// sveltekit() plugin above is loaded, so tests must share this config.
-		include: ['src/**/*.test.ts', 'pipeline/**/*.test.mjs'],
+		// src/**/*.test.mjs is for the rare src-side test that needs real node APIs:
+		// theme-css.test.mjs reads app.css as text, and Vite's SSR pipeline returns an
+		// empty string for any CSS import (?raw and ?inline included). The generated
+		// tsconfig typechecks src/**/*.{js,ts,svelte} but not .mjs, so that extension
+		// buys node:fs without pulling in @types/node for one file.
+		include: ['src/**/*.test.ts', 'src/**/*.test.mjs', 'pipeline/**/*.test.mjs'],
 		environment: 'node'
 	}
 });

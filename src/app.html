@@ -4,6 +4,39 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="color-scheme" content="light dark" />
+
+		<!-- Media-scoped so they are correct for the default ('auto') and with no
+		     JavaScript at all. ThemeToggle repoints both at one palette when the
+		     user forces a theme, using the data-* colours below to restore them. -->
+		<meta
+			name="theme-color"
+			content="#f0deac"
+			media="(prefers-color-scheme: light)"
+			data-light="#f0deac"
+			data-dark="#1d1216"
+		/>
+		<meta
+			name="theme-color"
+			content="#1d1216"
+			media="(prefers-color-scheme: dark)"
+			data-light="#f0deac"
+			data-dark="#1d1216"
+		/>
+
+		<!-- Applies a stored theme override before first paint, so a user who chose
+		     the palette opposite their OS never sees a flash of the other one. This
+		     cannot import from $lib (it runs before any module), so the two valid
+		     values and the storage key are repeated here as literals — theme-css.test.ts
+		     asserts they still match THEMES and THEME_KEY. -->
+		<script>
+			try {
+				var t = localStorage.getItem('cookup-theme');
+				if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
+			} catch (e) {
+				/* storage unavailable (private mode, blocked cookies) — fall back to the OS */
+			}
+		</script>
+
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">

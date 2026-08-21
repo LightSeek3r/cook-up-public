@@ -181,6 +181,25 @@
 		transform: scale(1);
 	}
 
+	/* Forced colours replace --accent with the system background, so the selected
+	   fill vanishes and a selected tile would differ from an unselected one only by
+	   its checkmark. That checkmark does survive (it is currentColor, and opacity is
+	   not overridden), but leaning on a 17px glyph alone is thin — Highlight and
+	   HighlightText are the system's own selected pair, so state the fill in terms
+	   the OS honours. forced-color-adjust is required for it to stick. */
+	@media (forced-colors: active) {
+		.tile.selected {
+			background: Highlight;
+			color: HighlightText;
+			border-color: Highlight;
+			forced-color-adjust: none;
+		}
+		.tile.selected .art,
+		.tile.selected .check {
+			color: HighlightText;
+		}
+	}
+
 	@keyframes rise {
 		from {
 			opacity: 0;

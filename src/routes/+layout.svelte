@@ -4,6 +4,7 @@
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
 	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
 	import { goto } from '$app/navigation';
+	import ThemeToggle from '$components/ThemeToggle.svelte';
 
 	let { children } = $props();
 
@@ -48,12 +49,24 @@
 				     title is the real document heading. -->
 				<span class="title">{t('app.title')}</span>
 			</a>
-			<select aria-label={t('app.language')} value={lang} onchange={switchLang}>
-				{#each SUPPORTED_LANGS as code (code)}
-					<!-- Endonyms, not ISO codes: a Hindi speaker scans for "हिन्दी", not "HI". -->
-					<option value={code}>{LANG_ENDONYMS[code]}</option>
-				{/each}
-			</select>
+			<!-- Wrapper, not two more flex children: .bar is space-between with the
+			     brand at one end, so a third direct child would spread them apart. -->
+			<div class="controls">
+				<ThemeToggle
+					label={t('app.theme')}
+					optionLabels={{
+						light: t('app.themeLight'),
+						dark: t('app.themeDark'),
+						auto: t('app.themeAuto')
+					}}
+				/>
+				<select aria-label={t('app.language')} value={lang} onchange={switchLang}>
+					{#each SUPPORTED_LANGS as code (code)}
+						<!-- Endonyms, not ISO codes: a Hindi speaker scans for "हिन्दी", not "HI". -->
+						<option value={code}>{LANG_ENDONYMS[code]}</option>
+					{/each}
+				</select>
+			</div>
 		</div>
 		<p class="tagline">{t('app.tagline')}</p>
 	</header>
@@ -76,6 +89,15 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2);
+	}
+	.controls {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+		/* Two controls in a narrow header: let them wrap rather than squeeze the
+		   brand on small screens. */
+		flex-wrap: wrap;
+		justify-content: flex-end;
 	}
 	.brand {
 		display: inline-flex;

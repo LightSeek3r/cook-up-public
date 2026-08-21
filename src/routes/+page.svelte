@@ -227,6 +227,12 @@
 			max-height: calc(100vh - 7rem);
 			overflow-y: auto;
 			padding-inline-end: var(--space-1);
+			/* 5px = the global 3px ring + its 2px offset. Without it a card scrolled
+			   to either edge of this scrollport has its focus ring shaved off by the
+			   overflow clip; scroll-padding keeps focus-driven scrolling clear of the
+			   same edge rather than parking the card flush against it. */
+			padding-block: 5px;
+			scroll-padding-block: 5px;
 		}
 	}
 
@@ -283,6 +289,15 @@
 		box-shadow: var(--shadow-2);
 		padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
 	}
+	/* The blur is what makes a 92%-opaque tray legible over the mosaic scrolling
+	   under it. Without transparency there is nothing to blur, so go fully opaque
+	   rather than leaving text over unblurred tiles. */
+	@media (prefers-reduced-transparency: reduce) {
+		.tray {
+			background: var(--surface);
+			backdrop-filter: none;
+		}
+	}
 	.tray-inner {
 		max-width: 78rem;
 		margin: 0 auto;
@@ -305,6 +320,15 @@
 	}
 	:global([dir='rtl']) .chips {
 		mask-image: linear-gradient(to left, black calc(100% - 1.5rem), transparent);
+	}
+	/* A mask applies to descendant rendering, focus ring included — so a chip
+	   scrolled near the trailing edge got a half-faded ring, on the one control
+	   that is the only way to undo a selection on mobile. Drop the fade entirely
+	   while focus is inside: the affordance is for pointer users scanning the row,
+	   and a keyboard user is already being moved through it one chip at a time. */
+	.chips:focus-within,
+	:global([dir='rtl']) .chips:focus-within {
+		mask-image: none;
 	}
 	.chip {
 		display: inline-flex;

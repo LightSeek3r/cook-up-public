@@ -83,6 +83,14 @@
 		background: linear-gradient(var(--bg) 82%, transparent);
 		backdrop-filter: blur(6px);
 	}
+	/* Same reasoning as the tray on the home page: the fade-to-transparent tail
+	   only works because what shows through is blurred. Solid --bg instead. */
+	@media (prefers-reduced-transparency: reduce) {
+		.filters {
+			background: var(--bg);
+			backdrop-filter: none;
+		}
+	}
 	.search {
 		grid-column: 1 / -1;
 		position: relative;

@@ -68,13 +68,54 @@ describe('matchRecipes', () => {
 	it('dedupes `have` before binding, so [1, 1] does not silently demand matched = 2', async () => {
 		const { db, calls } = spyDb();
 		await matchRecipes(db, { ...base, have: [1, 1, 2] });
-		// The have-set is bound 3 times (matched/missing/missing_names) plus
-		// once more as HAVING matched = ? — every occurrence must reflect the
-		// deduped set, or a duplicated id would make "uses every selected
-		// ingredient" mean matched = 3 from what is really only 2 ingredients.
+		// The have-set is bound many times now (once per selected id in the
+		// matched EXISTS-sum, twice more for missing/missing_names) plus once
+		// more as HAVING matched = ? — every occurrence must reflect the deduped
+		// set, or a duplicated id would make "uses every selected ingredient"
+		// mean matched = 3 from what is really only 2 ingredients.
 		const havingBind = calls[0].binds.at(-3); // limit, offset are last two
 		expect(havingBind).toBe(2);
 	});
+
+	it('the matched expression binds the have-set once as JSON, unpacked via json_each — not once per id', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, have: [5, 7, 9] });
+		// `json_each(?)` replaces one `?` per selected id: D1 caps bound
+		// parameters at 100, and a placeholder-per-id design hit that ceiling
+		// at just 16 selected ingredients (95 -> 101 binds). Binding `have`
+		// once as JSON keeps the total bind count constant regardless of
+		// selection size — see the matchedExpr comment in match.ts.
+		const haveJson = JSON.stringify([5, 7, 9]);
+		expect(calls[0].binds.slice(0, 2)).toEqual([haveJson, haveJson]);
+		expect(calls[0].sql).toContain('json_each');
+		expect(calls[0].sql).toContain('ingredient_generic_of');
+	});
+
+	it('total bind count stays constant regardless of how many ingredients are selected', async () => {
+		// Regression test for a real production bug: a placeholder-per-id
+		// design bound ~6 params per selected id, hitting D1's 100-bind
+		// ceiling (and 500ing /api/match) at 16 selected ingredients.
+		const { db: dbFew, calls: fewCalls } = spyDb();
+		await matchRecipes(dbFew, { ...base, have: [1, 2, 3] });
+
+		const { db: dbMany, calls: manyCalls } = spyDb();
+		const manyIds = Array.from({ length: 40 }, (_, i) => i + 1);
+		await matchRecipes(dbMany, { ...base, have: manyIds });
+
+		expect(manyCalls[0].binds.length).toBe(fewCalls[0].binds.length);
+		expect(manyCalls[0].binds.length).toBeLessThan(20);
+	});
+
+	it.each([base, { ...base, have: [1, 2, 3, 4, 5] }, { ...base, cuisine: 'italian', excludeAllergens: [1, 2] }])(
+		'generated SQL has balanced parentheses (mock verification can\'t catch a mismatched paren the way a real DB would)',
+		async (params) => {
+			const { db, calls } = spyDb();
+			await matchRecipes(db, params);
+			const opens = (calls[0].sql.match(/\(/g) ?? []).length;
+			const closes = (calls[0].sql.match(/\)/g) ?? []).length;
+			expect(opens).toBe(closes);
+		}
+	);
 
 	it('has no dangling WHERE when no filters are supplied', async () => {
 		const { db, calls } = spyDb();

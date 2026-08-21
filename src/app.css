@@ -1,8 +1,11 @@
 /*
  * Design system: "Market Stall" — a deli-counter, butcher-paper-and-ink-stamp
  * identity, deliberately away from the soft cream/terracotta "cozy AI cookbook"
- * look. Kraft-paper ground, espresso ink, one loud chili-red stamp colour, a
- * grounded olive for "you can make this". Tokens only; components never use raw hex.
+ * look. Kraft-paper ground, espresso ink, one loud chili-red stamp colour, and a
+ * deep petrol teal for "you can make this" — the chili-red's complement, so the
+ * two brand hues sit opposite each other rather than both crowding the warm end
+ * (this replaced an earlier grounded olive, which also had the least contrast
+ * headroom of any light-mode token). Tokens only; components never use raw hex.
  */
 
 /*
@@ -78,10 +81,17 @@
 :root {
 	color-scheme: light;
 
-	/* Brand */
+	/* Brand. --accent is the complement of --primary (chili-red sits at ~9°,
+	   this teal at ~192°) rather than the olive green it replaced: same
+	   "you can make this" meaning, but opposite the primary on the wheel
+	   instead of adjacent to the warm ground. Contrast measured at full
+	   precision for every pair this token feeds, not rounded — cream on the
+	   fill 6.96:1, accent-as-text on its own 14% tint 5.80:1, accent-as-text
+	   on the kraft --bg 5.80:1 (the olive's equivalents were 5.60 / 4.77 /
+	   4.67, the tightest margins anywhere in this theme). */
 	--primary: #b23018;
 	--on-primary: #fbf3e4;
-	--accent: #3f6b3a;
+	--accent: #2b5964;
 	--on-accent: #f7f3e4;
 
 	/* Surfaces */
@@ -90,9 +100,25 @@
 	--surface: #faf6ec;
 	--surface-sunken: #f5e9c4;
 	--ink: #241d16;
-	--muted: #6b5f4e;
+	/* Darkened from #6b5f4e. That value measured 4.6705:1 on --bg as a token
+	   pair, but --muted's most prominent use (.tagline) sits in the header —
+	   inside the reach of the --bg-tint radial wash, which peaks at 16.67%
+	   --bg-tint at the very top edge (the ellipse is centred 20rem above the
+	   page, 40rem vertical radius, transparent at 60%, so it dies out by
+	   y=4rem). Against that composited ground the old value was 4.1137:1 —
+	   a real WCAG failure, not a theoretical one. Now 4.8078:1 composited /
+	   5.4586:1 on raw --bg. Contrast gates here must run on the composited
+	   ground, not the token pair; see tasks/lessons.md. */
+	--muted: #605546;
 	--line: #d8c9a8;
 	--line-strong: #c2ae85;
+
+	/* Focus ring. Its own token rather than reusing --primary directly: the ring
+	   is only legible today because outline-offset lands it on the page ground
+	   instead of on the element's own fill (ring-on---primary is 1.00:1). Keeping
+	   it decoupled means a future primary- or accent-filled focusable surface can
+	   retune the ring in one place instead of discovering it has vanished. */
+	--focus: #b23018;
 
 	/* Balance Grade — darkened so the badge's --on-grade text clears 4.5:1
 	   against every one. Measured at full precision, not rounded: --grade-e was
@@ -110,7 +136,7 @@
 	   the text colour on its own 14% tint (--grade-d on its tint measured
 	   3.61:1 light / 3.12:1 dark at 12.5px bold, well under 4.5:1). */
 	--on-warn-tint: #8f4a12;
-	--on-ok-tint: #3f6b3a;
+	--on-ok-tint: #2b5964;
 
 	/* Spacing — density 6/10 (standard) */
 	--space-1: 0.25rem;
@@ -192,23 +218,75 @@
 	--cat-line: #c9bda2;
 }
 
+/*
+ * ── Dark palette ───────────────────────────────────────────────────────────
+ * There are exactly two palettes, light and dark. Light is the base (the :root
+ * and [data-cat] blocks above), so it never needs restating — dark is the only
+ * one that gets applied conditionally, and it has to be reachable two ways:
+ *
+ *   1. the OS asks for dark and the user hasn't overridden it
+ *      -> @media (prefers-color-scheme: dark) :root:not([data-theme='light'])
+ *   2. the user explicitly chose dark, whatever the OS says
+ *      -> :root[data-theme='dark']
+ *
+ * A media query is a conditional group rule, so it cannot be OR'd with an
+ * attribute selector in a single rule — case 2 has to be a mirrored copy of the
+ * declarations, immediately after the media query. That duplication is a real
+ * drift hazard (the dark doodle stroke already drifted away from dark --ink
+ * once), so it is enforced mechanically by src/lib/theme-css.test.ts, which
+ * fails if the two copies disagree on any token. Edit both, or neither.
+ *
+ * `color-scheme` is set per branch on purpose: it is what makes native controls
+ * (the language <select>) follow a *forced* theme rather than the OS one.
+ */
 @media (prefers-color-scheme: dark) {
-	:root {
+	:root:not([data-theme='light']) {
 		color-scheme: dark;
 
-		--primary: #ef6a44;
-		--on-primary: #241005;
-		--accent: #8bb36f;
-		--on-accent: #16220f;
+		/* Reworked from an earlier, near-neutral-charcoal dark mode that read
+		   as a tech-dashboard/trading-terminal dark theme rather than a
+		   kitchen at night — the giveaway combination was a near-desaturated
+		   almost-black background (#17140f) paired with a very saturated,
+		   fully-brightened "neon ember" primary (#ef6a44). Dark mode should
+		   use desaturated/lighter tonal variants, not just a brightened,
+		   still-fully-saturated hue glowing against near-black. A first pass
+		   landed on a "roasted coffee" brown ground, but brown itself was the
+		   wrong call (user preference, not a contrast issue) — replaced with
+		   "Wine Cellar": a dark aubergine/wine-maroon ground, picked from four
+		   contrast-verified candidates (cast iron / deep olive / wine cellar /
+		   dusk), screenshotted and compared before choosing. Primary/accent
+		   unchanged from the brown-ground pass (a desaturated terracotta
+		   ember + muted sage), since those read as brand hues rather than
+		   "brown" on their own. Contrast re-verified at full precision for
+		   this exact palette, not rounded — tightest pair (the --ok-tint
+		   color-mix, which depends on --surface) is 5.50:1, well clear of
+		   4.5:1.
 
-		--bg: #17140f;
-		--bg-tint: #1e1a13;
-		--surface: #241f17;
-		--surface-sunken: #1c1811;
-		--ink: #ece2cd;
-		--muted: #a89a80;
-		--line: #362f22;
-		--line-strong: #4a4030;
+		   Accent reworked again, separately: sage green out, a complementary
+		   hue in. Dark --primary sits at ~18° (terracotta), so the complement
+		   is ~198°; landed on a blue-teal (~183°) rather than the exact
+		   steel-blue for a bit more pop against the maroon. Light mode moved
+		   to a complementary teal too (see the light --accent note) — both
+		   themes now use one hue family for "you have this ingredient", but
+		   at opposite tonal directions: light fills dark-on-pale, dark fills
+		   pale-on-dark, which is the normal dark-mode inversion rather than a
+		   mismatch. Contrast re-verified at full precision for this exact
+		   pairing: tightest is 5.69:1 (the accent used as its own text color
+		   on the --ok-tint color-mix). */
+		--primary: #d97a52;
+		--on-primary: #2a1208;
+		--accent: #62b7bc;
+		--on-accent: #0f2729;
+
+		--bg: #1d1216;
+		--bg-tint: #271821;
+		--surface: #28191f;
+		--surface-sunken: #201217;
+		--ink: #f0e2e2;
+		--muted: #af9298;
+		--line: #432a32;
+		--line-strong: #583842;
+		--focus: #d97a52;
 
 		--grade-a: #398439;
 		--grade-b: #6b7d36;
@@ -219,58 +297,139 @@
 
 		/* Light text on the dark tints — see the light-mode note. */
 		--on-warn-tint: #f0a86a;
-		--on-ok-tint: #8bb36f;
+		--on-ok-tint: #62b7bc;
 
 		--shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
 		--shadow-2: 0 8px 20px -8px rgb(0 0 0 / 60%);
 		--shadow-press: inset 0 2px 4px rgb(0 0 0 / 45%);
 	}
 
-	[data-cat='vegetable'] {
+	:root:not([data-theme='light']) [data-cat='vegetable'] {
 		--cat-ink: #b9c584;
 		--cat-tint: #22240f;
 		--cat-line: #3b3d1e;
 	}
-	[data-cat='fruit'] {
+	:root:not([data-theme='light']) [data-cat='fruit'] {
 		--cat-ink: #dd93ab;
 		--cat-tint: #271319;
 		--cat-line: #40222c;
 	}
-	[data-cat='protein'] {
+	:root:not([data-theme='light']) [data-cat='protein'] {
 		--cat-ink: #dd9376;
 		--cat-tint: #261510;
 		--cat-line: #40261c;
 	}
-	[data-cat='dairy'] {
+	:root:not([data-theme='light']) [data-cat='dairy'] {
 		--cat-ink: #8db9c4;
 		--cat-tint: #131e21;
 		--cat-line: #223339;
 	}
-	[data-cat='grain'] {
+	:root:not([data-theme='light']) [data-cat='grain'] {
 		--cat-ink: #d8b671;
 		--cat-tint: #241c10;
 		--cat-line: #3c301c;
 	}
-	[data-cat='legume'] {
+	:root:not([data-theme='light']) [data-cat='legume'] {
 		--cat-ink: #8fbfa6;
 		--cat-tint: #131f1a;
 		--cat-line: #22352c;
 	}
-	[data-cat='nut'] {
+	:root:not([data-theme='light']) [data-cat='nut'] {
 		--cat-ink: #c9a071;
 		--cat-tint: #221a11;
 		--cat-line: #3a2c1c;
 	}
-	[data-cat='spice'] {
+	:root:not([data-theme='light']) [data-cat='spice'] {
 		--cat-ink: #dd9163;
 		--cat-tint: #261809;
 		--cat-line: #402813;
 	}
-	[data-cat='other'] {
+	:root:not([data-theme='light']) [data-cat='other'] {
 		--cat-ink: #c2b79f;
 		--cat-tint: #1f1c15;
 		--cat-line: #362f24;
 	}
+}
+
+/* Case 2: the user explicitly chose dark. Mirror of the block above — same
+   tokens, same values, no media query. Kept in lockstep by theme-css.test.ts. */
+:root[data-theme='dark'] {
+	color-scheme: dark;
+
+	--primary: #d97a52;
+	--on-primary: #2a1208;
+	--accent: #62b7bc;
+	--on-accent: #0f2729;
+
+	--bg: #1d1216;
+	--bg-tint: #271821;
+	--surface: #28191f;
+	--surface-sunken: #201217;
+	--ink: #f0e2e2;
+	--muted: #af9298;
+	--line: #432a32;
+	--line-strong: #583842;
+	--focus: #d97a52;
+
+	--grade-a: #398439;
+	--grade-b: #6b7d36;
+	--grade-c: #936e10;
+	--grade-d: #b85e14;
+	--grade-e: #d34131;
+	--on-grade: #ffffff;
+
+	--on-warn-tint: #f0a86a;
+	--on-ok-tint: #62b7bc;
+
+	--shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
+	--shadow-2: 0 8px 20px -8px rgb(0 0 0 / 60%);
+	--shadow-press: inset 0 2px 4px rgb(0 0 0 / 45%);
+}
+
+:root[data-theme='dark'] [data-cat='vegetable'] {
+	--cat-ink: #b9c584;
+	--cat-tint: #22240f;
+	--cat-line: #3b3d1e;
+}
+:root[data-theme='dark'] [data-cat='fruit'] {
+	--cat-ink: #dd93ab;
+	--cat-tint: #271319;
+	--cat-line: #40222c;
+}
+:root[data-theme='dark'] [data-cat='protein'] {
+	--cat-ink: #dd9376;
+	--cat-tint: #261510;
+	--cat-line: #40261c;
+}
+:root[data-theme='dark'] [data-cat='dairy'] {
+	--cat-ink: #8db9c4;
+	--cat-tint: #131e21;
+	--cat-line: #223339;
+}
+:root[data-theme='dark'] [data-cat='grain'] {
+	--cat-ink: #d8b671;
+	--cat-tint: #241c10;
+	--cat-line: #3c301c;
+}
+:root[data-theme='dark'] [data-cat='legume'] {
+	--cat-ink: #8fbfa6;
+	--cat-tint: #131f1a;
+	--cat-line: #22352c;
+}
+:root[data-theme='dark'] [data-cat='nut'] {
+	--cat-ink: #c9a071;
+	--cat-tint: #221a11;
+	--cat-line: #3a2c1c;
+}
+:root[data-theme='dark'] [data-cat='spice'] {
+	--cat-ink: #dd9163;
+	--cat-tint: #261809;
+	--cat-line: #402813;
+}
+:root[data-theme='dark'] [data-cat='other'] {
+	--cat-ink: #c2b79f;
+	--cat-tint: #1f1c15;
+	--cat-line: #362f24;
 }
 
 * {
@@ -297,15 +456,30 @@ body {
 	-webkit-text-size-adjust: 100%;
 }
 
+/* The dark ground, both ways. The doodle stroke colour is baked into the data
+   URI (a data URI cannot read a custom property), which is why this block has
+   to be restated per theme at all — and why the stroke hex drifted away from
+   dark --ink once already. It is now %23f0e2e2 == dark --ink #f0e2e2, matching
+   the light block's %23241d16 == light --ink, and theme-css.test.ts asserts that
+   pairing in both themes so it cannot drift again. */
 @media (prefers-color-scheme: dark) {
-	html,
-	body {
+	:root:not([data-theme='light']),
+	:root:not([data-theme='light']) body {
 		background:
 			radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23ece2cd' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
 			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
 			var(--bg);
 	}
+}
+
+:root[data-theme='dark'],
+:root[data-theme='dark'] body {
+	background:
+		radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+		var(--bg);
 }
 
 .page {
@@ -367,7 +541,7 @@ button {
 }
 
 :where(a, button, input, select, summary, [tabindex]):focus-visible {
-	outline: 3px solid var(--primary);
+	outline: 3px solid var(--focus);
 	outline-offset: 2px;
 	border-radius: var(--radius-sm);
 }
@@ -411,5 +585,35 @@ button {
 		animation-delay: 0s !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
+	}
+}
+
+/*
+ * Windows High Contrast and friends. The OS replaces colours wholesale here, so
+ * the nine-hue category system, the color-mix chip tints and all three shadow
+ * tokens stop carrying information. Most of the UI survives that without help,
+ * because colour was never the only channel — categories also have icon
+ * archetypes and grouped headings, MissingChips pairs its tint with an icon and
+ * a start-border, and every card and tile has a real border rather than relying
+ * on its shadow. Only the cases below actually need an override; the selected
+ * ingredient tile is handled in IngredientTile.svelte, where its state lives.
+ *
+ * !important throughout, matching the reduced-motion block above: these have to
+ * beat the theme rules, which carry higher specificity than a bare element
+ * selector (:root[data-theme='dark'] is 0,2,0 against html's 0,0,1).
+ */
+@media (forced-colors: active) {
+	/* Name the system focus colour rather than leaving --focus to be substituted
+	   by whatever the OS picks for text. */
+	:where(a, button, input, select, summary, [tabindex]):focus-visible {
+		outline-color: Highlight !important;
+	}
+
+	/* The doodle and paper-grain layers are tuned to sit at 5-9% over a known
+	   ground. Over an OS-substituted one they stop reading as texture and start
+	   competing with the text on top of them. */
+	html,
+	body {
+		background-image: none !important;
 	}
 }

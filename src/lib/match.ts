@@ -22,6 +22,13 @@ export interface MatchParams {
  * more than `have`, never fewer — ranked by how few *other* non-staple
  * ingredients it still needs.
  *
+ * A selected generic ingredient also satisfies a recipe's need for one of its
+ * curated specific forms (`ingredient_generic_of`, e.g. selecting "egg"
+ * satisfies a recipe that needs "egg_yolk") — but never the other direction,
+ * and only for the curated pairs in that table, not the taxonomy's full DAG
+ * (see `pipeline/lib/generic_ingredients.mjs` for why: e.g. "spice" or
+ * "cheese" are whole categories, not one food with named variants).
+ *
  * Default ordering is the product rule: `missing = 0` first ("you can make
  * this now"), then 1, 2, … Ties break on the smaller shopping list, then the
  * faster recipe. `sort: 'kcal' | 'grade'` overrides this to rank by nutrition
@@ -49,16 +56,54 @@ export async function matchRecipes(
 	const binds: (string | number)[] = [];
 	const list = (values: number[]) => values.map(() => '?').join(',');
 
-	// 1. SELECT clause: the selected-ingredient set appears three times
-	// (matched, missing count, missing-names list).
-	const haveList = list(have);
-	binds.push(...have, ...have, ...have);
+	// `have` is passed as one bound JSON string and unpacked in SQL via
+	// `json_each`, not as `have.length` positional placeholders — D1 caps
+	// bound parameters at 100 (undocumented in the schema, found by bisection:
+	// 15 selected ingredients = 95 binds, works; 16 = 101 binds, `D1_ERROR: too
+	// many SQL variables`). Any placeholder-per-id design just moves that
+	// ceiling; `json_each(?)` makes bind count constant (6, below) regardless
+	// of how many ingredients are selected.
+	const haveJson = JSON.stringify(have);
+	const haveIds = `SELECT value FROM json_each(?)`;
 
-	// 2. Title + missing-ingredient-name joins: requested language, falling
+	// 1. `matched` — NOT a simple row count against `have`: a recipe using
+	// both egg_yolk and egg_white for a selected "egg" must still only count
+	// once, or `matched` could exceed `have.length` and a real match would be
+	// excluded by the `HAVING` below. Computed as a UNION (not a per-row CASE
+	// picking one generic parent) so an ingredient with *two* curated generic
+	// parents — e.g. `cassava_flour` under both `cassava` and `flour`
+	// (`pipeline/lib/generic_ingredients.mjs`) — still credits both if the
+	// user selected both, same as the old per-id-EXISTS design did; a CASE
+	// with a single fallback lookup would silently drop one.
+	const matchedExpr = `(
+    SELECT COUNT(DISTINCT s.have_id) FROM (
+      SELECT ri2.ingredient_id AS have_id
+        FROM recipe_ingredients ri2
+       WHERE ri2.recipe_id = r.id AND ri2.ingredient_id IN (${haveIds})
+      UNION
+      SELECT igo.generic_id AS have_id
+        FROM recipe_ingredients ri2
+        JOIN ingredient_generic_of igo ON igo.specific_id = ri2.ingredient_id
+       WHERE ri2.recipe_id = r.id AND igo.generic_id IN (${haveIds})
+    ) s
+  )`;
+	binds.push(haveJson, haveJson);
+
+	// 2. `missing` / `missing_names` — a per-row check, safe to expand as a
+	// plain OR: a row is satisfied if its own id is selected, or its curated
+	// generic parent is selected. Used twice (count + names), each occurrence
+	// needs `haveJson` bound twice (the direct check, then the generic-parent
+	// check).
+	const notSatisfied = `ri.ingredient_id NOT IN (${haveIds})
+       AND ri.ingredient_id NOT IN (SELECT specific_id FROM ingredient_generic_of WHERE generic_id IN (${haveIds}))`;
+	binds.push(haveJson, haveJson); // missing count
+	binds.push(haveJson, haveJson); // missing_names
+
+	// 3. Title + missing-ingredient-name joins: requested language, falling
 	// back to the source language / English respectively.
 	binds.push(p.lang, p.lang);
 
-	// 3. Filters — only bound when supplied, so no dead `? IS NULL` predicates.
+	// 4. Filters — only bound when supplied, so no dead `? IS NULL` predicates.
 	const where: string[] = [];
 	if (p.cuisine) {
 		where.push('r.cuisine = ?');
@@ -81,13 +126,14 @@ export async function matchRecipes(
 	}
 	const whereSql = where.length ? `WHERE ${where.join('\n      AND ')}` : '';
 
-	// 4. Every selected ingredient must be used — a recipe may use more than
-	// `have`, never fewer. `matched` already counts distinct selected
-	// ingredients found (one row per ingredient per recipe, by primary key),
-	// so requiring the full house is just `matched = have.length`.
+	// 5. Every selected ingredient must be used (directly or via a curated
+	// generic->specific pair) — a recipe may use more than `have`, never
+	// fewer. `matched` is a count of distinct satisfied `have` ids (see
+	// above), so it's capped at `have.length` by construction — requiring the
+	// full house is just this equality.
 	binds.push(have.length);
 
-	// 5. Sort — a column/expression choice, not a value, so it's built as SQL
+	// 6. Sort — a column/expression choice, not a value, so it's built as SQL
 	// text rather than bound; `p.sort` only ever reaches here already
 	// whitelisted by the API route, same trust boundary as `p.cuisine` etc.
 	let orderBy = 'missing ASC, required_non_staple ASC, r.total_minutes ASC, r.id ASC';
@@ -97,7 +143,7 @@ export async function matchRecipes(
 		orderBy = '(r.balance_grade IS NULL) ASC, r.balance_grade ASC, missing ASC, r.id ASC';
 	}
 
-	// 6. Paging.
+	// 7. Paging.
 	const limit = p.limit ?? MATCH_PAGE_SIZE;
 	binds.push(limit, p.offset ?? 0);
 
@@ -108,11 +154,11 @@ export async function matchRecipes(
       r.cuisine, r.meal_type, r.prep_minutes, r.total_minutes,
       r.kcal, r.balance_grade, r.balance_score,
       r.nutrition_coverage, r.servings_assumed,
-      COUNT(*) FILTER (WHERE ri.ingredient_id IN (${haveList}))       AS matched,
+      (${matchedExpr})                                                AS matched,
       COUNT(*) FILTER (WHERE i.is_staple = 0
-                         AND ri.ingredient_id NOT IN (${haveList}))   AS missing,
+                         AND ${notSatisfied})                          AS missing,
       COUNT(*) FILTER (WHERE i.is_staple = 0)                         AS required_non_staple,
-      GROUP_CONCAT(CASE WHEN i.is_staple = 0 AND ri.ingredient_id NOT IN (${haveList})
+      GROUP_CONCAT(CASE WHEN i.is_staple = 0 AND ${notSatisfied}
                         THEN COALESCE(mt.name, men.name, i.canonical_key) END,
                    '${MISSING_NAMES_SEP}') AS missing_names
     FROM recipes r
