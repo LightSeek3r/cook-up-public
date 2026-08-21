@@ -20,14 +20,16 @@
 
 	// This layout mounts once per browser session and survives client-side
 	// navigation, so `onMount` — unlike `$effect` — fires exactly once no
-	// matter how much clicking-around happens. sessionStorage (not
-	// localStorage) is what makes this "once per visit": it clears when the
-	// tab/browser closes, so a later visit still counts as a new one.
+	// matter how much clicking-around happens. sessionStorage (not a cookie)
+	// is what makes this "once per visit": it clears when the tab/browser
+	// closes, so a later visit still counts as a new one. The actual call to
+	// unit42.fr happens server-side via /api/track — the browser never talks
+	// to that domain directly.
 	const VISIT_KEY = 'cookup_visited';
 	onMount(() => {
 		if (sessionStorage.getItem(VISIT_KEY)) return;
 		sessionStorage.setItem(VISIT_KEY, '1');
-		fetch(`/api/visit?path=${encodeURIComponent(location.pathname)}`, { method: 'POST' }).catch(
+		fetch(`/api/track?path=${encodeURIComponent(location.pathname)}`, { method: 'POST' }).catch(
 			() => {}
 		);
 	});
