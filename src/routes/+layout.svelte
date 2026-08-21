@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '../app.css';
+	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
 	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
@@ -15,6 +16,20 @@
 	$effect(() => {
 		document.documentElement.lang = lang;
 		document.documentElement.dir = dirFor(lang);
+	});
+
+	// This layout mounts once per browser session and survives client-side
+	// navigation, so `onMount` — unlike `$effect` — fires exactly once no
+	// matter how much clicking-around happens. sessionStorage (not
+	// localStorage) is what makes this "once per visit": it clears when the
+	// tab/browser closes, so a later visit still counts as a new one.
+	const VISIT_KEY = 'cookup_visited';
+	onMount(() => {
+		if (sessionStorage.getItem(VISIT_KEY)) return;
+		sessionStorage.setItem(VISIT_KEY, '1');
+		fetch(`/api/visit?path=${encodeURIComponent(location.pathname)}`, { method: 'POST' }).catch(
+			() => {}
+		);
 	});
 
 	function switchLang(event: Event) {
@@ -80,6 +95,7 @@
 		     database names stay untranslated; only the framing is localised. -->
 		<p>{t('footer.recipeData')}: Wikibooks Cookbook (CC BY-SA 3.0) — {t('footer.andPublicDomain')}</p>
 		<p>{t('footer.nutritionRef')}: USDA FoodData Central ({t('footer.publicDomain')})</p>
+		<p>{t('footer.app')}: <a href="https://unit42.fr" target="_blank" rel="noopener noreferrer">unit42.fr</a></p>
 	</footer>
 </div>
 

@@ -1,3 +1,4 @@
+/// <reference types="@sveltejs/adapter-cloudflare" />
 import type { D1Database, KVNamespace, Ai } from '@cloudflare/workers-types';
 
 declare global {
