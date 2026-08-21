@@ -124,5 +124,11 @@
   "nutrient.calcium": "カルシウム",
   "nutrient.potassium": "カリウム",
   "nutrient.magnesium": "マグネシウム",
-  "nutrient.zinc": "亜鉛"
+  "nutrient.zinc": "亜鉛",
+  "error.title": "エラー",
+  "error.notFoundHeading": "ページが見つかりません",
+  "error.notFoundBody": "お探しのページは存在しないか、移動しました。",
+  "error.genericHeading": "問題が発生しました",
+  "error.genericBody": "予期しないエラーが発生しました。もう一度お試しください。",
+  "error.backHome": "Cook Upに戻る"
 }

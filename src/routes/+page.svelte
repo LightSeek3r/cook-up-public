@@ -5,6 +5,7 @@
 	import Mosaic from '$components/Mosaic.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
 	import ResultCard from '$components/ResultCard.svelte';
+	import SeoHead from '$components/SeoHead.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import type { IngredientTile, MatchResult } from '$lib/types';
 
@@ -120,6 +121,13 @@
 			.finally(() => (loading = false));
 	});
 </script>
+
+<SeoHead
+	title="{t('app.title')} — {t('app.tagline')}"
+	description={t('app.tagline')}
+	url={$page.url}
+	{lang}
+/>
 
 <FilterBar
 	{cuisine}

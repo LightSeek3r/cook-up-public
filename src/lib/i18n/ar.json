@@ -124,5 +124,11 @@
   "nutrient.calcium": "الكالسيوم",
   "nutrient.potassium": "البوتاسيوم",
   "nutrient.magnesium": "المغنيسيوم",
-  "nutrient.zinc": "الزنك"
+  "nutrient.zinc": "الزنك",
+  "error.title": "خطأ",
+  "error.notFoundHeading": "الصفحة غير موجودة",
+  "error.notFoundBody": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+  "error.genericHeading": "حدث خطأ ما",
+  "error.genericBody": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+  "error.backHome": "العودة إلى Cook Up"
 }

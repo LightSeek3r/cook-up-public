@@ -111,9 +111,15 @@ export const ICONS = {
 	},
 
 	// — protein ————————————————————————————————————————————————
+	// Was a drumstick drawn as a round lobe on a straight diagonal shaft — per
+	// user feedback that silhouette (round head + thin handle) reads as
+	// anatomy before it reads as food, and no amount of resizing the lobes
+	// fixed that; it's the same shape family as a magnifying glass or lollipop.
+	// A bird head in profile (comb, beak, wattle) is a different silhouette
+	// family entirely, and doubles as the icon for turkey/duck/poultry too.
 	chicken: {
-		fill: 'M20.4 3.6a5.2 5.2 0 0 0-8.2 5.2l-4.4 4.4a3.1 3.1 0 1 0-2.2 5.2 3.1 3.1 0 1 0 5.2-2.2l4.4-4.4a5.2 5.2 0 0 0 5.2-8.2Z',
-		line: 'M12.2 8.8 15.2 11.8'
+		fill: 'M12 5.4a6.2 5.6 0 1 1 0 11.2 6.2 5.6 0 1 1 0-11.2ZM16.8 9.6 20.6 10.8 16.8 12.4ZM15.4 13.8c.9.2 1.6 1 1.6 2 0 1.2-.9 2.2-2 2.2-.6 0-1.1-.2-1.5-.6Z',
+		line: 'M9 4.4a1.3 1.3 0 1 1 2.6 0M11.6 3.6a1.3 1.3 0 1 1 2.6 0M14.2 4.4a1.3 1.3 0 1 1 2.6 0M9.6 10.4h.01'
 	},
 	beef: {
 		fill: 'M4.6 11.6C4.6 7.4 8.6 4.6 13.2 4.6c4.4 0 7.6 2.6 7.6 6.2 0 4.6-3.6 8.6-8.6 8.6-4.6 0-7.6-3-7.6-7.8Z',

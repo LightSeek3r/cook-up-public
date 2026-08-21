@@ -124,5 +124,11 @@
   "nutrient.calcium": "칼슘",
   "nutrient.potassium": "칼륨",
   "nutrient.magnesium": "마그네슘",
-  "nutrient.zinc": "아연"
+  "nutrient.zinc": "아연",
+  "error.title": "오류",
+  "error.notFoundHeading": "페이지를 찾을 수 없습니다",
+  "error.notFoundBody": "찾으시는 페이지가 존재하지 않거나 이동되었습니다.",
+  "error.genericHeading": "문제가 발생했습니다",
+  "error.genericBody": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
+  "error.backHome": "Cook Up으로 돌아가기"
 }

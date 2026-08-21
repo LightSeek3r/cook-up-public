@@ -124,5 +124,11 @@
   "nutrient.calcium": "Calcium",
   "nutrient.potassium": "Potassium",
   "nutrient.magnesium": "Magnesium",
-  "nutrient.zinc": "Zinc"
+  "nutrient.zinc": "Zinc",
+  "error.title": "Error",
+  "error.notFoundHeading": "Page not found",
+  "error.notFoundBody": "The page you're looking for doesn't exist or has moved.",
+  "error.genericHeading": "Something went wrong",
+  "error.genericBody": "An unexpected error occurred. Please try again.",
+  "error.backHome": "Back to Cook Up"
 }

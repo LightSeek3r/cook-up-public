@@ -124,5 +124,11 @@
   "nutrient.calcium": "कैल्शियम",
   "nutrient.potassium": "पोटैशियम",
   "nutrient.magnesium": "मैग्नीशियम",
-  "nutrient.zinc": "जिंक"
+  "nutrient.zinc": "जिंक",
+  "error.title": "त्रुटि",
+  "error.notFoundHeading": "पेज नहीं मिला",
+  "error.notFoundBody": "आप जो पेज खोज रहे हैं वह मौजूद नहीं है या स्थानांतरित कर दिया गया है।",
+  "error.genericHeading": "कुछ गलत हो गया",
+  "error.genericBody": "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।",
+  "error.backHome": "Cook Up पर वापस जाएं"
 }

@@ -124,5 +124,11 @@
   "nutrient.calcium": "Canxi",
   "nutrient.potassium": "Kali",
   "nutrient.magnesium": "Magiê",
-  "nutrient.zinc": "Kẽm"
+  "nutrient.zinc": "Kẽm",
+  "error.title": "Lỗi",
+  "error.notFoundHeading": "Không tìm thấy trang",
+  "error.notFoundBody": "Trang bạn tìm không tồn tại hoặc đã được di chuyển.",
+  "error.genericHeading": "Đã xảy ra lỗi",
+  "error.genericBody": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.",
+  "error.backHome": "Về lại Cook Up"
 }

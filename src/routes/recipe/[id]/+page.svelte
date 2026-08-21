@@ -1,7 +1,9 @@
 <script lang="ts">
+	import { page } from '$app/stores';
 	import NutritionPanel from '$components/NutritionPanel.svelte';
 	import SubstitutionTips from '$components/SubstitutionTips.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
+	import SeoHead from '$components/SeoHead.svelte';
 	import { t as translator } from '$lib/i18n';
 	import { splitSteps } from '$lib/steps';
 	import type { PageData } from './$types';
@@ -9,6 +11,20 @@
 	let { data }: { data: PageData } = $props();
 
 	const t = $derived(translator(data.lang));
+
+	// A compact fact string ("20 min · 4 servings · 320 kcal") rather than a
+	// truncated slice of the instructions: it's meaningful in every one of the
+	// 10 languages without risking a mid-word cut, and stays true regardless
+	// of which fields the source recipe happened to state.
+	const seoDescription = $derived(
+		[
+			data.recipe.total_minutes ? `${data.recipe.total_minutes} ${t('card.minutes')}` : null,
+			data.recipe.servings ? `${data.recipe.servings} ${t('recipe.servings')}` : null,
+			data.recipe.kcal ? `${Math.round(data.recipe.kcal)} ${t('nutrition.kcal')}` : null
+		]
+			.filter((part): part is string => Boolean(part))
+			.join(' · ') || t('app.tagline')
+	);
 
 	interface Translated {
 		title: string;
@@ -53,6 +69,14 @@
 			});
 	});
 </script>
+
+<SeoHead
+	title="{title} — {t('app.title')}"
+	description={seoDescription}
+	url={$page.url}
+	lang={data.lang}
+	type="article"
+/>
 
 <article>
 	<a class="back" href="/?lang={data.lang}">

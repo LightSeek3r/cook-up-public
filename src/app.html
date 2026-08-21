@@ -5,6 +5,10 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="color-scheme" content="light dark" />
 
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
+
 		<!-- Media-scoped so they are correct for the default ('auto') and with no
 		     JavaScript at all. ThemeToggle repoints both at one palette when the
 		     user forces a theme, using the data-* colours below to restore them. -->
@@ -24,18 +28,16 @@
 		/>
 
 		<!-- Applies a stored theme override before first paint, so a user who chose
-		     the palette opposite their OS never sees a flash of the other one. This
-		     cannot import from $lib (it runs before any module), so the two valid
-		     values and the storage key are repeated here as literals — theme-css.test.ts
-		     asserts they still match THEMES and THEME_KEY. -->
-		<script>
-			try {
-				var t = localStorage.getItem('cookup-theme');
-				if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t;
-			} catch (e) {
-				/* storage unavailable (private mode, blocked cookies) — fall back to the OS */
-			}
-		</script>
+		     the palette opposite their OS never sees a flash of the other one. Lives
+		     in a same-origin file rather than inline: a strict script-src CSP has no
+		     way to allow-list an inline script that's already static HTML text (the
+		     hash SvelteKit computes under kit.csp only covers scripts it generates
+		     itself, not this template's own markup) — 'self' covers an external file
+		     with no hash to keep in sync. It cannot import from $lib (it runs before
+		     any module), so the two valid values and the storage key are repeated as
+		     literals in static/theme-init.js — theme-css.test.mjs asserts they still
+		     match THEMES and THEME_KEY. -->
+		<script src="/theme-init.js"></script>
 
 		%sveltekit.head%
 	</head>

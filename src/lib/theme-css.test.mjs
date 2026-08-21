@@ -26,6 +26,7 @@ import { INGREDIENT_CATEGORIES } from '$lib/config';
 
 const css = readFileSync(new URL('../app.css', import.meta.url), 'utf8');
 const html = readFileSync(new URL('../app.html', import.meta.url), 'utf8');
+const themeInit = readFileSync(new URL('../../static/theme-init.js', import.meta.url), 'utf8');
 
 /** Strip comments first — they contain selector-shaped prose. */
 const stripped = css.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -181,12 +182,18 @@ describe('background doodle stroke follows --ink', () => {
 	});
 });
 
-describe('app.html bootstrap script', () => {
+describe('app.html links the external bootstrap script', () => {
+	it('references /theme-init.js', () => {
+		expect(html).toContain('<script src="/theme-init.js">');
+	});
+});
+
+describe('theme-init.js bootstrap script', () => {
 	// It runs before any module loads, so it cannot import THEMES or THEME_KEY and
 	// repeats them as literals. If those ever diverge, a stored theme silently stops
 	// being applied before first paint and the bug reappears as a flash of the wrong
 	// palette — the exact thing the script exists to prevent.
-	const script = /<script>([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
+	const script = themeInit;
 
 	it('exists', () => {
 		expect(script.length).toBeGreaterThan(0);
