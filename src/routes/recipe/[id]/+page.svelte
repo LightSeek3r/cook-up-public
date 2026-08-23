@@ -4,8 +4,11 @@
 	import SubstitutionTips from '$components/SubstitutionTips.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
+	import { DIFFICULTY_MAX } from '$lib/config';
 	import { t as translator } from '$lib/i18n';
 	import { splitSteps } from '$lib/steps';
+	import { equivalentOf } from '$lib/measure';
+	import type { RecipeDetail } from '$lib/types';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -41,11 +44,21 @@
 	const machine = $derived(translated ? translated.machine : Boolean(data.recipe.is_machine));
 
 	const steps = $derived(splitSteps(instructions));
+	const notes = $derived(data.recipe.notes?.split('\n').filter(Boolean) ?? []);
 
+	/** The parenthesised metric/imperial equivalent for one ingredient line, or ''
+	 *  when there is nothing honest to add. */
+	const equivalent = (ing: RecipeDetail['ingredients'][number]) =>
+		equivalentOf(ing.quantity, ing.unit, ing.grams) ?? '';
+
+	// Both go through t(): cuisine was previously rendered raw, so this page showed
+	// "middle_eastern" where the filter bar and the search results showed
+	// "Middle Eastern" — the keys already existed in all ten locales.
 	const tags = $derived(
-		[data.recipe.cuisine, data.recipe.meal_type ? t(`meal.${data.recipe.meal_type}`) : null].filter(
-			(tag): tag is string => Boolean(tag)
-		)
+		[
+			data.recipe.cuisine ? t(`cuisine.${data.recipe.cuisine}`) : null,
+			data.recipe.meal_type ? t(`meal.${data.recipe.meal_type}`) : null
+		].filter((tag): tag is string => Boolean(tag))
 	);
 
 	// Layer-2 i18n: fetch the machine translation only when the page is actually
@@ -94,6 +107,23 @@
 	</a>
 
 	<header class="hero">
+		{#if data.recipe.image_url}
+			<!-- width/height come from the API so the box is reserved before the image
+			     arrives (no layout shift). `loading="eager"` because this is the page's
+			     lead image and above the fold — lazy-loading it would only delay it.
+			     `no-referrer` keeps the visitor's page out of Wikimedia's logs, which
+			     is the privacy cost of hotlinking rather than mirroring. -->
+			<img
+				class="photo"
+				src={data.recipe.image_url}
+				width={data.recipe.image_width}
+				height={data.recipe.image_height}
+				alt={title}
+				loading="eager"
+				decoding="async"
+				referrerpolicy="no-referrer"
+			/>
+		{/if}
 		{#if tags.length}
 			<p class="eyebrow">{tags.join(' · ')}</p>
 		{/if}
@@ -113,6 +143,24 @@
 						/>
 					</svg>
 					<span><strong>{data.recipe.total_minutes}</strong> {t('card.minutes')}</span>
+				</li>
+			{/if}
+			{#if data.recipe.difficulty}
+				<li>
+					<!-- A filled/empty pip meter rather than a bare number: "3" means
+					     nothing without its scale, and the scale is only 1-4. The
+					     accessible name carries the same information as text, since the
+					     pips are decorative shapes. -->
+					<span
+						class="pips"
+						role="img"
+						aria-label="{t('recipe.difficulty')}: {data.recipe.difficulty}/{DIFFICULTY_MAX}"
+					>
+						{#each Array(DIFFICULTY_MAX) as _, i (i)}
+							<span class="pip" class:on={i < data.recipe.difficulty}></span>
+						{/each}
+					</span>
+					<span>{t('recipe.difficulty')}</span>
 				</li>
 			{/if}
 			{#if data.recipe.servings}
@@ -184,6 +232,13 @@
 							{data.lang === data.recipe.source_lang && ingredient.raw_text
 								? ingredient.raw_text
 								: ingredient.name}
+							<!-- The other measuring system, and a real weight where the pipeline
+							     resolved one. Rendered as a quiet suffix rather than replacing the
+							     source's own wording, which stays authoritative. Silent when there
+							     is nothing honest to add — see `equivalentOf`. -->
+							{#if equivalent(ingredient)}
+								<span class="equiv">({equivalent(ingredient)})</span>
+							{/if}
 						</span>
 					</li>
 				{/each}
@@ -203,9 +258,45 @@
 		</section>
 	</div>
 
+	<!-- Source-language only, and deliberately so. These bullets are untranslated
+	     free text; showing English tips inside an Arabic page would be worse than
+	     omitting them, and translating them would add ~24% to a machine-translation
+	     backlog that still has seven languages at zero. Same rule already applied
+	     to ingredient `raw_text` above. -->
+	{#if notes.length && data.lang === data.recipe.source_lang}
+		<section class="card notes">
+			<h2>{t('recipe.notes')}</h2>
+			<ul>
+				{#each notes as note, index (index)}
+					<li>{note}</li>
+				{/each}
+			</ul>
+		</section>
+	{/if}
+
 	<NutritionPanel recipe={data.recipe} {t} lang={data.lang} />
 
 	<SubstitutionTips tips={data.tips} {t} />
+
+	<!-- Per-image credit, separate from the recipe-text credit below. Not optional:
+	     most of these files are share-alike (CC BY-SA / CC BY), which requires
+	     naming the author and the licence and linking the file page. The footer's
+	     CC-BY-SA-3.0 line covers the Wikibooks *prose* only — a photo has its own
+	     author and frequently a different licence. Author is omitted when the file
+	     states none (CC0 / public domain, which require no attribution). -->
+	{#if data.recipe.image_url && data.recipe.image_licence}
+		<p class="muted source">
+			{t('recipe.photo')}:
+			{#if data.recipe.image_page}
+				<a href={data.recipe.image_page} rel="noopener noreferrer nofollow" target="_blank">
+					{data.recipe.image_author ?? t('recipe.photoUnknownAuthor')}
+				</a>
+			{:else}
+				{data.recipe.image_author ?? t('recipe.photoUnknownAuthor')}
+			{/if}
+			— {data.recipe.image_licence}, {t('recipe.viaCommons')}
+		</p>
+	{/if}
 
 	<p class="muted source">
 		{t('recipe.source')}:
@@ -303,6 +394,75 @@
 	}
 	.stats .mt svg {
 		color: var(--muted);
+	}
+
+	/* Difficulty pips. Sized and spaced to read as a meter at a glance, and
+	   deliberately not colour-only: filled vs empty differs in fill AND in border
+	   weight, so the level survives greyscale and forced-colors. */
+	.pips {
+		display: inline-flex;
+		gap: 0.2rem;
+		align-items: center;
+	}
+	.pip {
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 50%;
+		border: 1.5px solid var(--line-strong);
+	}
+	.pip.on {
+		background: var(--primary);
+		border-color: var(--primary);
+	}
+	@media (forced-colors: active) {
+		.pip {
+			border-color: CanvasText;
+		}
+		.pip.on {
+			background: CanvasText;
+			border-color: CanvasText;
+		}
+	}
+
+	/* Quieter than the ingredient name it follows: this is a convenience, and it
+	   must not compete with the source's own wording. */
+	/* Full-bleed inside the hero card, above the eyebrow. aspect-ratio comes from
+	   the stored dimensions via the width/height attributes, so the box is reserved
+	   and nothing shifts when the image lands. */
+	.photo {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-height: 22rem;
+		object-fit: cover;
+		border-radius: var(--radius) var(--radius) 0 0;
+		margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-4);
+		width: calc(100% + 2 * var(--space-5));
+		background: var(--surface-sunken);
+	}
+
+	.equiv {
+		color: var(--muted);
+		font-size: 0.85em;
+		white-space: nowrap;
+	}
+
+	.notes {
+		margin-top: var(--space-5);
+	}
+	.notes h2 {
+		margin: 0 0 var(--space-3);
+		font-size: 1.05rem;
+	}
+	.notes ul {
+		margin: 0;
+		padding-left: 1.1rem;
+		display: grid;
+		gap: var(--space-2);
+	}
+	.notes li {
+		font-size: 0.92rem;
+		line-height: 1.55;
 	}
 	.assumed {
 		font-size: 0.8rem;

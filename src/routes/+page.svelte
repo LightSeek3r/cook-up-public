@@ -5,44 +5,83 @@
 	import Mosaic from '$components/Mosaic.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
 	import ResultCard from '$components/ResultCard.svelte';
+	import RecipeHits from '$components/RecipeHits.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
-	import type { IngredientTile, MatchResult } from '$lib/types';
+	import { MIN_FTS_LENGTH } from '$lib/search';
+	import type { IngredientTile, MatchResult, RecipeHit } from '$lib/types';
 
 	let tiles = $state<IngredientTile[]>([]);
 	let results = $state<MatchResult[]>([]);
+	// Comes back with the results rather than being read off the URL: the server
+	// dedupes `have`, so its count is the authoritative denominator for
+	// "uses N of your M".
+	let haveCount = $state(0);
+	// Matches in total, ignoring paging — the number the UI reports. Previously it
+	// showed `results.length`, which capped at the page size and so claimed "50
+	// recipes" when 395 matched.
+	let total = $state(0);
 	let loading = $state(false);
-	let query = $state('');
-	let debouncedQuery = $state('');
+	let loadingMore = $state(false);
+	/** Identifies the selection a response belongs to; see `loadMore`. */
+	let requestToken = $state('');
+	let recipeHits = $state<RecipeHit[]>([]);
+	let debouncedQuery = $state($page.url.searchParams.get('q') ?? '');
 
 	// The URL is the single source of truth: selection is shareable and the app
 	// stays completely stateless server-side.
+	// Search text is URL state like every other control in the bar, so a search
+	// is shareable and survives a reload — it was previously the one exception.
+	// Held as local $state rather than derived from the URL so typing stays
+	// instant: the URL is written from the *debounced* value, one navigation per
+	// pause rather than one per keystroke.
+	let query = $state($page.url.searchParams.get('q') ?? '');
+
 	const params = $derived($page.url.searchParams);
 	const lang = $derived(resolveLang(params.get('lang')));
 	const t = $derived(translator(lang));
+	// Canonical keys, not ids: ids are positional in the seed and get renumbered
+	// by every corpus rebuild, which silently repointed shared links at different
+	// food. Mirrors `parseKeys` in $lib/db, which validates the same shape
+	// server-side. A stale numeric link now selects nothing, deliberately — see
+	// that function's comment.
 	const selected = $derived(
 		(params.get('have') ?? '')
 			.split(',')
-			.map(Number)
-			.filter((n) => Number.isInteger(n) && n > 0)
+			.map((key) => key.trim().toLowerCase())
+			.filter((key) => /^[a-z][a-z0-9_]*$/.test(key))
 	);
 	const cuisine = $derived(params.get('cuisine') ?? '');
 	const meal = $derived(params.get('meal') ?? '');
 	const diet = $derived(params.get('diet') ?? '');
 	const sort = $derived(params.get('sort') ?? '');
 
-	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.id)));
+	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.canonical_key)));
+
+	// The API returns both groups in one ranked list (full matches first, by
+	// construction — see `matchRecipes`), so splitting is a partition here rather
+	// than a second request. `haveCount || selected.length` covers the first
+	// render, before the response lands.
+	const exactCount = $derived(haveCount || selected.length);
+	const exact = $derived(results.filter((r) => r.matched >= exactCount));
+	const almost = $derived(results.filter((r) => r.matched < exactCount));
 
 	// Text for the always-mounted live region; empty before the user picks anything
 	// so it never announces on first load.
 	const liveStatus = $derived(
 		selected.length === 0
-			? ''
+			? // Nothing is selected, so this region is otherwise idle — use it to
+				// announce recipe-title hits, which nothing announced before. Only in
+				// this branch: with a selection live, the match results own the region
+				// and two sources would talk over each other.
+				recipeHits.length
+				? `${recipeHits.length} ${t('results.found')}`
+				: ''
 			: loading
 				? t('results.loading')
 				: results.length === 0
 					? t('results.empty')
-					: `${results.length} ${t('results.found')}`
+					: `${total} ${t('results.found')}`
 	);
 
 	function updateUrl(mutate: (url: URL) => void) {
@@ -62,10 +101,10 @@
 		requestAnimationFrame(() => document.getElementById('results')?.focus());
 	}
 
-	function toggle(id: number) {
-		const next = selected.includes(id)
-			? selected.filter((value) => value !== id)
-			: [...selected, id];
+	function toggle(canonicalKey: string) {
+		const next = selected.includes(canonicalKey)
+			? selected.filter((value) => value !== canonicalKey)
+			: [...selected, canonicalKey];
 		handOffFocusIfTrayCloses(next.length);
 		updateUrl((url) => {
 			if (next.length) url.searchParams.set('have', next.join(','));
@@ -92,6 +131,30 @@
 		return () => clearTimeout(timer);
 	});
 
+	// Mirror the settled query into the URL. Kept separate from the debounce
+	// above so the navigation is driven by the value that actually settled, and
+	// guarded on equality so writing the URL can't re-trigger this effect.
+	$effect(() => {
+		const value = debouncedQuery.trim();
+		if (value === (params.get('q') ?? '')) return;
+		updateUrl((url) => {
+			if (value) url.searchParams.set('q', value);
+			else url.searchParams.delete('q');
+		});
+	});
+
+	$effect(() => {
+		const value = debouncedQuery.trim();
+		if (value.length < MIN_FTS_LENGTH) {
+			recipeHits = [];
+			return;
+		}
+		fetch(`/api/search?${new URLSearchParams({ q: value, lang })}`)
+			.then((response) => response.json())
+			.then((data) => (recipeHits = data.recipes ?? []))
+			.catch(() => (recipeHits = []));
+	});
+
 	$effect(() => {
 		const search = new URLSearchParams({ lang });
 		if (debouncedQuery.trim()) search.set('q', debouncedQuery.trim());
@@ -101,25 +164,74 @@
 			.catch(() => (tiles = []));
 	});
 
-	$effect(() => {
-		if (selected.length === 0) {
-			results = [];
-			loading = false;
-			return;
-		}
+	/** The query for one page of matches. Reading the reactive values here is what
+	 *  registers them as dependencies of the effect below. */
+	function matchQuery(offset: number) {
 		const search = new URLSearchParams({ have: selected.join(','), lang });
 		if (cuisine) search.set('cuisine', cuisine);
 		if (meal) search.set('meal', meal);
 		if (diet) search.set('diet', diet);
 		if (sort) search.set('sort', sort);
+		if (offset) search.set('offset', String(offset));
+		return search.toString();
+	}
+
+	$effect(() => {
+		if (selected.length === 0) {
+			results = [];
+			total = 0;
+			loading = false;
+			return;
+		}
+		const query = matchQuery(0);
+		// Anything already in flight for a previous selection must not land on top
+		// of this one — see `loadMore`.
+		requestToken = query;
 
 		loading = true;
-		fetch(`/api/match?${search}`)
+		fetch(`/api/match?${query}`)
 			.then((response) => response.json())
-			.then((data) => (results = data.results ?? []))
-			.catch(() => (results = []))
-			.finally(() => (loading = false));
+			.then((data) => {
+				if (requestToken !== query) return;
+				results = data.results ?? [];
+				total = data.total ?? 0;
+				haveCount = data.haveCount ?? 0;
+			})
+			.catch(() => {
+				if (requestToken !== query) return;
+				results = [];
+				total = 0;
+				haveCount = 0;
+			})
+			.finally(() => {
+				if (requestToken === query) loading = false;
+			});
 	});
+
+	/**
+	 * Appends the next page. Not an `$effect`: offset must not be a reactive
+	 * dependency, or bumping it would re-run the effect above and replace the
+	 * accumulated list instead of extending it.
+	 *
+	 * The token guard is load-bearing. Without it, tapping an ingredient while a
+	 * page is in flight appends results for the *previous* selection to the new
+	 * one — the list would silently contain recipes that don't match.
+	 */
+	async function loadMore() {
+		const query = matchQuery(results.length);
+		const token = requestToken;
+		loadingMore = true;
+		try {
+			const data = await (await fetch(`/api/match?${query}`)).json();
+			if (requestToken !== token) return;
+			results = [...results, ...(data.results ?? [])];
+			total = data.total ?? total;
+		} catch {
+			// Leave what's already loaded in place; the button stays available.
+		} finally {
+			if (requestToken === token) loadingMore = false;
+		}
+	}
 </script>
 
 <SeoHead
@@ -142,6 +254,14 @@
 
 <div class="layout">
 	<div class="picker">
+		<!-- Above the mosaic, not in a dropdown: the search bar has never had a
+		     popup, and adding one would mean a whole combobox ARIA surface
+		     (aria-expanded / aria-activedescendant / arrow-key handling) that
+		     doesn't exist here. Recipe hits navigate; ingredient tiles below still
+		     toggle the selection — two behaviours, two visibly separate regions. -->
+		{#if recipeHits.length}
+			<RecipeHits recipes={recipeHits} {lang} {t} />
+		{/if}
 		<Mosaic {tiles} {selected} {t} onToggle={toggle} />
 	</div>
 
@@ -150,7 +270,8 @@
 			<div class="results-head">
 				<h2 id="results-heading">{t('results.heading')}</h2>
 				{#if selected.length > 0 && !loading}
-					<span class="pill">{results.length} {t('results.found')}</span>
+					<!-- The true total, not how many rows this page happened to carry. -->
+					<span class="pill">{total} {t('results.found')}</span>
 				{/if}
 			</div>
 
@@ -170,12 +291,46 @@
 			{:else if results.length === 0}
 				<p class="state"><strong>{t('results.empty')}</strong></p>
 				<p class="muted state">{t('results.emptyHint')}</p>
-			{:else}
+			{:else if almost.length === 0}
+				<!-- No near-misses to distinguish from, so the group headings would be
+				     noise: one flat list, and card titles stay directly under the h2. -->
 				<div class="list">
-					{#each results as recipe (recipe.id)}
+					{#each exact as recipe (recipe.id)}
 						<ResultCard {recipe} {lang} {t} />
 					{/each}
 				</div>
+			{:else}
+				{#if exact.length}
+					<h3 class="group-heading">
+						{t('results.exactHeading')}
+						<span class="group-count">{exact.length}</span>
+					</h3>
+					<div class="list">
+						{#each exact as recipe (recipe.id)}
+							<ResultCard {recipe} {lang} {t} headingLevel="h4" />
+						{/each}
+					</div>
+				{/if}
+				<h3 class="group-heading">
+					{t('results.almostHeading')}
+					<span class="group-count">{almost.length}</span>
+				</h3>
+				<p class="muted group-hint">{t('results.almostHint')}</p>
+				<div class="list">
+					{#each almost as recipe (recipe.id)}
+						<ResultCard {recipe} {lang} {t} headingLevel="h4" />
+					{/each}
+				</div>
+			{/if}
+
+			{#if !loading && results.length > 0 && results.length < total}
+				<!-- Full matches always sort before near-misses (see matchRecipes), so
+				     appending a page can only extend the groups in order, never
+				     interleave — the partition above stays correct as the list grows. -->
+				<button type="button" class="ghost load-more" onclick={loadMore} disabled={loadingMore}>
+					{loadingMore ? t('results.loading') : t('results.loadMore')}
+					<span class="load-more-count">{total - results.length}</span>
+				</button>
 			{/if}
 		</div>
 	</section>
@@ -186,7 +341,7 @@
 		<div class="tray-inner">
 			<div class="chips">
 				{#each selectedTiles as tile (tile.id)}
-					<button type="button" class="chip" onclick={() => toggle(tile.id)}>
+					<button type="button" class="chip" onclick={() => toggle(tile.canonical_key)}>
 						<span class="chip-art">
 							<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />
 						</span>
@@ -210,7 +365,7 @@
 				<button type="button" class="ghost" onclick={clearAll}>{t('mosaic.clear')}</button>
 				<a class="cta" href="#results">
 					{t('results.see')}
-					{#if !loading}<span class="badge">{results.length}</span>{/if}
+					{#if !loading}<span class="badge">{total}</span>{/if}
 				</a>
 			</div>
 		</div>
@@ -264,6 +419,45 @@
 	}
 	.state {
 		margin: var(--space-2) 0;
+	}
+
+	.group-heading {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-2);
+		margin: var(--space-4) 0 var(--space-1);
+		font-size: 1rem;
+	}
+	/* Same tabular-nums treatment as .pill, but in --muted rather than --primary:
+	   a group size is orientation, not a call to action. */
+	.group-count {
+		font-size: 0.8rem;
+		font-weight: 700;
+		color: var(--muted);
+		font-variant-numeric: tabular-nums;
+	}
+	.group-hint {
+		margin: 0 0 var(--space-2);
+		font-size: 0.85rem;
+	}
+
+	.load-more {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-2);
+		width: 100%;
+		/* 44px minimum target, same rule as the tiles and the recipe hits. */
+		min-height: 44px;
+		margin: var(--space-2) 0 var(--space-4);
+	}
+	.load-more[disabled] {
+		opacity: 0.6;
+		cursor: default;
+	}
+	.load-more-count {
+		font-variant-numeric: tabular-nums;
+		opacity: 0.75;
 	}
 
 	.skeleton {

@@ -6,9 +6,9 @@
 
 	interface Props {
 		tiles: Tile[];
-		selected: number[];
+		selected: string[];
 		t: (key: string) => string;
-		onToggle: (id: number) => void;
+		onToggle: (canonicalKey: string) => void;
 	}
 
 	let { tiles, selected, t, onToggle }: Props = $props();
@@ -31,7 +31,7 @@
 				? all
 				: [
 						...all.slice(0, COLLAPSED),
-						...all.slice(COLLAPSED).filter((tile) => selected.includes(tile.id))
+						...all.slice(COLLAPSED).filter((tile) => selected.includes(tile.canonical_key))
 					];
 			// Weight is relative to the category, not the whole mosaic: otherwise
 			// Onion would be the only large tile on the page and every other
@@ -57,7 +57,7 @@
 				<IngredientTile
 					{tile}
 					{index}
-					selected={selected.includes(tile.id)}
+					selected={selected.includes(tile.canonical_key)}
 					weight={tile.recipe_count / group.peak}
 					{onToggle}
 				/>

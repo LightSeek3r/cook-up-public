@@ -31,7 +31,8 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
 		db
 			.prepare(
 				`SELECT i.id, i.canonical_key, i.category,
-                COALESCE(t.name, en.name, i.canonical_key) AS name, ri.raw_text
+                COALESCE(t.name, en.name, i.canonical_key) AS name,
+                ri.raw_text, ri.quantity, ri.unit, ri.grams
          FROM recipe_ingredients ri
          JOIN ingredients i           ON i.id = ri.ingredient_id
          LEFT JOIN ingredient_i18n t  ON t.ingredient_id = i.id AND t.lang = ?

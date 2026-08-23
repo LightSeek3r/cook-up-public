@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { matchRecipes, type MatchParams } from './match';
+import { matchRecipes, resolveIngredientIds, slackFor, type MatchParams } from './match';
 import type { D1Database } from '@cloudflare/workers-types';
 
 /** Records the exact SQL text and bind array passed to db.prepare().bind(),
@@ -26,7 +26,7 @@ describe('matchRecipes', () => {
 	it('never touches the database when have is empty', async () => {
 		const { db, calls } = spyDb();
 		const result = await matchRecipes(db, { ...base, have: [] });
-		expect(result).toEqual({ results: [] });
+		expect(result).toEqual({ results: [], total: 0 });
 		expect(calls).toHaveLength(0);
 	});
 
@@ -155,6 +155,136 @@ describe('matchRecipes', () => {
 	it('returns [] rather than undefined when D1 reports no results', async () => {
 		const { db } = spyDb(undefined as never);
 		const result = await matchRecipes(db, base);
-		expect(result).toEqual({ results: [] });
+		expect(result).toEqual({ results: [], total: 0 });
 	});
+});
+
+describe('matchRecipes — total', () => {
+	it('reports the window-function total, not how many rows came back', async () => {
+		// The bug this fixes: the UI showed `results.length`, which is capped by the
+		// page size, so a selection matching 395 recipes displayed "50 recipes".
+		const page = Array.from({ length: 50 }, (_, i) => ({ id: i, total: 395 }));
+		const { db } = spyDb(page);
+		const { results, total } = await matchRecipes(db, base);
+		expect(results).toHaveLength(50);
+		expect(total).toBe(395);
+	});
+
+	it('selects the total as a window function so no second round-trip is needed', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, base);
+		expect(calls[0].sql).toContain('COUNT(*) OVER () AS total');
+		// One query, still.
+		expect(calls).toHaveLength(1);
+	});
+
+	it('reports 0 when nothing matched, since there is no row to read it from', async () => {
+		const { db } = spyDb([]);
+		expect(await matchRecipes(db, base)).toEqual({ results: [], total: 0 });
+	});
+});
+
+describe('resolveIngredientIds', () => {
+	it('binds the keys as one JSON array, so a big selection cannot hit D1s bind cap', async () => {
+		const { db, calls } = spyDb([{ id: 7 }, { id: 9 }]);
+		const ids = await resolveIngredientIds(db, ['onion', 'garlic']);
+		expect(ids).toEqual([7, 9]);
+		expect(calls[0].binds).toEqual([JSON.stringify(['onion', 'garlic'])]);
+		expect(calls[0].sql).toContain('json_each');
+	});
+
+	it('never queries for an empty selection', async () => {
+		const { db, calls } = spyDb();
+		expect(await resolveIngredientIds(db, [])).toEqual([]);
+		expect(calls).toHaveLength(0);
+	});
+
+	it('silently drops keys that do not exist rather than failing', async () => {
+		// A stale or hand-edited link should degrade to a smaller selection.
+		const { db } = spyDb([{ id: 7 }]);
+		expect(await resolveIngredientIds(db, ['onion', 'not_a_real_food'])).toEqual([7]);
+	});
+});
+
+describe('slackFor', () => {
+	it('gives no slack below three selections', () => {
+		// The strict list is already broad with one or two ingredients, and the
+		// feature exists for "I picked several and a recipe uses most of them".
+		expect(slackFor(0)).toBe(0);
+		expect(slackFor(1)).toBe(0);
+		expect(slackFor(2)).toBe(0);
+	});
+
+	it('scales with the selection rather than being fixed', () => {
+		// A fixed slack of 2 would let a 3-ingredient selection match on any
+		// single one of them — "unrelated", not "almost there".
+		expect(slackFor(3)).toBe(1);
+		expect(slackFor(5)).toBe(1);
+		expect(slackFor(6)).toBe(2);
+	});
+
+	it('caps at 2 however much is selected', () => {
+		expect(slackFor(20)).toBe(2);
+		expect(slackFor(100)).toBe(2);
+	});
+});
+
+describe('matchRecipes — slack', () => {
+	it('is behaviourally identical to the old strict equality when slack is 0', async () => {
+		// `matched` is capped at have.length by construction, so `>= have.length`
+		// is the old `= have.length`. Guards against the relaxation leaking into
+		// the default path.
+		const { db, calls } = spyDb();
+		await matchRecipes(db, base);
+		expect(calls[0].sql).toContain('HAVING matched >= ?');
+		expect(calls[0].binds).toContain(3);
+		expect(calls[0].sql).not.toContain('matched DESC');
+	});
+
+	it('lowers the floor by exactly the slack given', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, have: [1, 2, 3, 4, 5, 6], slack: 2 });
+		// 6 selected, 2 unused allowed -> a recipe must use at least 4.
+		const havingBind = calls[0].binds[calls[0].binds.length - 3];
+		expect(havingBind).toBe(4);
+	});
+
+	it('never lets the floor reach zero, so a recipe matching nothing is excluded', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, have: [1, 2], slack: 9 });
+		expect(calls[0].binds[calls[0].binds.length - 3]).toBe(1);
+	});
+
+	it('ranks full matches ahead of near-misses only when slack is on', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1 });
+		expect(calls[0].sql).toContain('matched DESC');
+		expect(calls[0].sql.indexOf('matched DESC')).toBeLessThan(calls[0].sql.indexOf('missing ASC'));
+	});
+
+	it('keeps full matches first even under an explicit nutrition sort', async () => {
+		// Coverage is a different kind of answer, not a worse score — so it
+		// outranks the user's chosen sort, which then orders within each group.
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, sort: 'grade' });
+		expect(calls[0].sql.indexOf('matched DESC')).toBeLessThan(
+			calls[0].sql.indexOf('r.balance_grade ASC')
+		);
+	});
+
+	it('selects unused_names so a near-miss can say which selections went unused', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1 });
+		expect(calls[0].sql).toContain('AS unused_names');
+	});
+
+	it.each([{ slack: 0 }, { slack: 1 }, { slack: 2 }, { slack: 9 }])(
+		'placeholder count still equals bind length with %o',
+		async (extra) => {
+			const { db, calls } = spyDb();
+			await matchRecipes(db, { ...base, ...extra, cuisine: 'italian', excludeAllergens: [7, 8] });
+			const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
+			expect(placeholders).toBe(calls[0].binds.length);
+		}
+	);
 });

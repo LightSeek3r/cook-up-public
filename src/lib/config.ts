@@ -64,11 +64,29 @@ export const LANG_NAMES: Record<Lang, string> = {
 	vi: 'Vietnamese'
 };
 
-/** Fixed vocabularies — labels come from the bundled i18n files, never the DB. */
+/**
+ * Fixed vocabularies — labels come from the bundled i18n files, never the DB.
+ *
+ * Must track `CUISINES` in `pipeline/02_parse.mjs`, which builds its category-tag
+ * patterns mechanically from this list (so a value here matches an "X recipes"
+ * tag automatically, with no second edit).
+ *
+ * Grown from 19 to 43 by measuring which nationality tags the corpus actually
+ * carries on recipes that had no cuisine. The bar for inclusion is **5 recipes**:
+ * below that a filter option matches almost nothing and is noise in a dropdown
+ * this long. The tail left out for that reason is real cuisine, not junk — Czech,
+ * Portuguese, Swiss, Ukrainian, Serbian, Argentine, Georgian, Armenian and ~30
+ * more sit at 1-3 recipes each; raise the bar's payoff by fetching more of the
+ * corpus, not by adding one-recipe values.
+ */
 export const CUISINES = [
-	'african', 'american', 'british', 'caribbean', 'chinese', 'french', 'german',
-	'greek', 'indian', 'italian', 'japanese', 'korean', 'mexican', 'middle_eastern',
-	'moroccan', 'spanish', 'thai', 'turkish', 'vietnamese'
+	'african', 'albanian', 'american', 'australian', 'austrian', 'belgian', 'brazilian',
+	'british', 'bulgarian', 'canadian', 'caribbean', 'chinese', 'colombian', 'danish',
+	'dutch', 'filipino', 'finnish', 'french', 'german', 'greek', 'hungarian', 'indian',
+	'indonesian', 'irish', 'italian', 'japanese', 'korean', 'malaysian', 'mexican',
+	'middle_eastern', 'moroccan', 'new_zealand', 'norwegian', 'peruvian', 'polish',
+	'romanian', 'russian', 'spanish', 'swedish', 'thai', 'turkish', 'venezuelan',
+	'vietnamese'
 ] as const;
 
 export const MEAL_TYPES = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'side'] as const;
@@ -87,6 +105,14 @@ export type IngredientCategory = (typeof INGREDIENT_CATEGORIES)[number];
 
 /** Result page size for /api/match. */
 export const MATCH_PAGE_SIZE = 50;
+
+/**
+ * Top of the source infobox's difficulty scale, and the number of pips the recipe
+ * page draws. Must track `DIFFICULTY_MAX` in `pipeline/02_parse.mjs`, which clamps
+ * to it — the corpus contains a stray 5 and an 8 that are editor error, not a
+ * wider scale.
+ */
+export const DIFFICULTY_MAX = 4;
 
 /**
  * Separator for match.ts's `missing_names` GROUP_CONCAT. The ASCII Unit

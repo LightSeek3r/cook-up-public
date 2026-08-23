@@ -2,10 +2,13 @@
 	interface Props {
 		missing: number;
 		names?: string[];
+		/** Selected ingredients this recipe does NOT use — the mirror of `names`.
+		 *  Only ever non-empty for a near-miss in the "almost there" group. */
+		unusedNames?: string[];
 		t: (key: string) => string;
 	}
 
-	let { missing, names = [], t }: Props = $props();
+	let { missing, names = [], unusedNames = [], t }: Props = $props();
 </script>
 
 {#if missing === 0}
@@ -29,6 +32,26 @@
 			<circle cx="10" cy="15.2" r="1.35" fill="currentColor" />
 		</svg>
 		{t('card.missing')}: {names.length ? names.join(', ') : missing}
+	</span>
+{/if}
+
+{#if unusedNames.length}
+	<!-- Deliberately neutral, not a warning: an unused ingredient is context for
+	     why this recipe sits below the exact matches, not a problem to fix. The
+	     slashed-circle icon carries that meaning without relying on colour. -->
+	<span class="chip unused">
+		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+			<circle
+				cx="10"
+				cy="10"
+				r="6.2"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+			/>
+			<path d="M5.6 5.6l8.8 8.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+		</svg>
+		{t('card.unused')}: {unusedNames.join(', ')}
 	</span>
 {/if}
 
@@ -61,5 +84,13 @@
 		background: color-mix(in srgb, var(--grade-d) 14%, var(--surface));
 		border-color: color-mix(in srgb, var(--grade-d) 35%, transparent);
 		color: var(--on-warn-tint);
+	}
+	/* `--muted` is already a contrast-verified body-text colour against
+	   `--surface` in both themes, so this needs no dedicated on-tint token the
+	   way .ok and .warn do — it sits on the plain card surface, not on a tint. */
+	.unused {
+		background: var(--surface-sunken);
+		border-color: var(--line);
+		color: var(--muted);
 	}
 </style>

@@ -3,15 +3,10 @@ import { requireDb } from '$lib/db';
 import { resolveLang } from '$lib/i18n';
 import type { IngredientTile } from '$lib/types';
 import type { RequestHandler } from './$types';
-
-/**
- * FTS5 phrase literal. Doubling `"` neutralises the query syntax, so user input
- * can never be interpreted as FTS operators.
- */
-const ftsPhrase = (q: string) => `"${q.replace(/"/g, '""')}"`;
-
-/** LIKE wildcards must be escaped for the short-query fallback path. */
-const likeTerm = (q: string) => q.replace(/[\\%_]/g, (c) => `\\${c}`);
+// One copy of the query hardening and the length thresholds, shared with the
+// recipe-title search — these are the same trust boundary, and two divergent
+// copies of an FTS escape is exactly the bug you don't find by reading.
+import { ftsPhrase, likeTerm, normaliseQuery, MIN_FTS_LENGTH } from '$lib/search';
 
 /**
  * Ingredient names fall back to English, then to the canonical key: a newly
@@ -26,11 +21,11 @@ const FALLBACK_JOINS = `LEFT JOIN ingredient_i18n t  ON t.ingredient_id = i.id A
 export const GET: RequestHandler = async ({ url, platform }) => {
 	const db = requireDb(platform);
 	const lang = resolveLang(url.searchParams.get('lang'));
-	const q = (url.searchParams.get('q') ?? '').trim().slice(0, 64);
+	const q = normaliseQuery(url.searchParams.get('q'));
 
 	// The trigram tokenizer cannot index terms shorter than 3 characters, so
 	// short queries (common in CJK) fall back to a LIKE scan.
-	if (q.length >= 3) {
+	if (q.length >= MIN_FTS_LENGTH) {
 		const { results } = await db
 			.prepare(
 				`SELECT ${COLS}

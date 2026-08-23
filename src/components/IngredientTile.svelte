@@ -9,7 +9,7 @@
 		weight: number;
 		/** Position within the category, used to stagger the reveal. */
 		index: number;
-		onToggle: (id: number) => void;
+		onToggle: (canonicalKey: string) => void;
 	}
 
 	let { tile, selected, weight, index, onToggle }: Props = $props();
@@ -30,7 +30,7 @@
 	class:bold
 	aria-pressed={selected}
 	style="--i: {Math.min(index, 24)}"
-	onclick={() => onToggle(tile.id)}
+	onclick={() => onToggle(tile.canonical_key)}
 >
 	<span class="art">
 		<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />

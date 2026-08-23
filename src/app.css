@@ -81,44 +81,52 @@
 :root {
 	color-scheme: light;
 
-	/* Brand. --accent is the complement of --primary (chili-red sits at ~9°,
-	   this teal at ~192°) rather than the olive green it replaced: same
-	   "you can make this" meaning, but opposite the primary on the wheel
-	   instead of adjacent to the warm ground. Contrast measured at full
-	   precision for every pair this token feeds, not rounded — cream on the
-	   fill 6.96:1, accent-as-text on its own 14% tint 5.80:1, accent-as-text
-	   on the kraft --bg 5.80:1 (the olive's equivalents were 5.60 / 4.77 /
-	   4.67, the tightest margins anywhere in this theme). */
-	--primary: #b23018;
-	--on-primary: #fbf3e4;
-	--accent: #2b5964;
-	--on-accent: #f7f3e4;
+	/* "Sorbet". Replaces the earlier kraft/butter-paper ground ("Market Stall",
+	   --bg #f0deac), which read as vanilla cream and was not wanted. Chosen from
+	   four near-white candidates screenshotted side by side — linen (warm
+	   near-white), porcelain (cool, palest), orchard (green, most saturated
+	   mosaic) and this one. See tasks/todo.md phase 10.
+
+	   The identity is in the *washes*, not the base: a peach radial meeting a
+	   lilac one across the header, and mint at the bottom right (see the
+	   html/body rule). The ground itself is near-white so the gradients read as
+	   light rather than as colour.
+
+	   --accent stays a blue-teal opposite the warm primary, same "you can make
+	   this" meaning as before. Contrast measured at full precision over the
+	   COMPOSITED ground, not the token pair, for all 18 pairs these feed:
+	   ink/bg 15.4494:1, muted/bg 6.6700:1, muted over the bg-tint wash
+	   6.4832:1, primary-as-link/surface 6.2034:1, on-primary/primary 5.9073:1,
+	   on-accent/accent 6.5063:1, on-ok-tint on its 14% tint 5.5311:1,
+	   on-warn-tint on its 14% tint 5.8832:1, muted on --surface-sunken (the
+	   .chip.unused ground) 6.2796:1. */
+	--primary: #b52a26;
+	--on-primary: #fff8f7;
+	--accent: #2f5f78;
+	--on-accent: #f4fafd;
 
 	/* Surfaces */
-	--bg: #f0deac;
-	--bg-tint: #e2c67e;
-	--surface: #faf6ec;
-	--surface-sunken: #f5e9c4;
-	--ink: #241d16;
-	/* Darkened from #6b5f4e. That value measured 4.6705:1 on --bg as a token
-	   pair, but --muted's most prominent use (.tagline) sits in the header —
-	   inside the reach of the --bg-tint radial wash, which peaks at 16.67%
-	   --bg-tint at the very top edge (the ellipse is centred 20rem above the
-	   page, 40rem vertical radius, transparent at 60%, so it dies out by
-	   y=4rem). Against that composited ground the old value was 4.1137:1 —
-	   a real WCAG failure, not a theoretical one. Now 4.8078:1 composited /
-	   5.4586:1 on raw --bg. Contrast gates here must run on the composited
-	   ground, not the token pair; see tasks/lessons.md. */
-	--muted: #605546;
-	--line: #d8c9a8;
-	--line-strong: #c2ae85;
+	--bg: #fdf8f8;
+	--bg-tint: #fbdcd0;
+	--surface: #ffffff;
+	--surface-sunken: #faf0f1;
+	--ink: #291b21;
+	/* --muted's most prominent use (.tagline) sits in the header, inside the
+	   reach of the --bg-tint radial wash, which peaks at ~16.7% --bg-tint at the
+	   very top edge. So it is gated against that composited ground, not the
+	   token pair — the previous theme shipped a real WCAG failure (4.1137:1)
+	   that a token-pair check scored as passing (4.6705:1). Here: 6.4832:1
+	   composited / 6.6700:1 on raw --bg. See tasks/lessons.md. */
+	--muted: #655059;
+	--line: #f0e0e2;
+	--line-strong: #d9bfc4;
 
 	/* Focus ring. Its own token rather than reusing --primary directly: the ring
 	   is only legible today because outline-offset lands it on the page ground
 	   instead of on the element's own fill (ring-on---primary is 1.00:1). Keeping
 	   it decoupled means a future primary- or accent-filled focusable surface can
 	   retune the ring in one place instead of discovering it has vanished. */
-	--focus: #b23018;
+	--focus: #b52a26;
 
 	/* Balance Grade — darkened so the badge's --on-grade text clears 4.5:1
 	   against every one. Measured at full precision, not rounded: --grade-e was
@@ -135,8 +143,8 @@
 	/* Text on the MissingChips tints. The fill colour is too light to double as
 	   the text colour on its own 14% tint (--grade-d on its tint measured
 	   3.61:1 light / 3.12:1 dark at 12.5px bold, well under 4.5:1). */
-	--on-warn-tint: #8f4a12;
-	--on-ok-tint: #2b5964;
+	--on-warn-tint: #8d4410;
+	--on-ok-tint: #2f5f78;
 
 	/* Spacing — density 6/10 (standard) */
 	--space-1: 0.25rem;
@@ -151,9 +159,11 @@
 	--radius-lg: 22px;
 	--radius-pill: 999px;
 
-	--shadow-1: 0 1px 2px rgb(36 29 22 / 8%), 0 1px 1px rgb(36 29 22 / 5%);
-	--shadow-2: 0 6px 16px -6px rgb(36 29 22 / 22%), 0 2px 4px rgb(36 29 22 / 8%);
-	--shadow-press: inset 0 2px 4px rgb(36 29 22 / 15%);
+	/* Lighter and longer-throw than the kraft theme's: on a near-white ground a
+	   heavy shadow reads as dirt rather than as elevation. */
+	--shadow-1: 0 1px 2px rgb(41 27 33 / 7%), 0 1px 1px rgb(41 27 33 / 4%);
+	--shadow-2: 0 10px 26px -12px rgb(41 27 33 / 20%), 0 2px 5px rgb(41 27 33 / 6%);
+	--shadow-press: inset 0 2px 4px rgb(41 27 33 / 12%);
 
 	/* Tactile: overshoot on release, quick on press. */
 	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -171,51 +181,60 @@
  * of shape (each category also has its own icon archetypes) and position (tiles
  * are grouped under labelled headings), so it never has to be read on its own.
  * Set once on a container; tiles just consume --cat-ink / --cat-tint / --cat-line.
+ *
+ * The --cat-ink hues are unchanged from the kraft theme (they were already dark
+ * enough to read on white), but every tint and line below was recomputed for the
+ * near-white ground: the old values were mixed against butter #f0deac and went
+ * muddy-yellow over #ffffff. Each is now its own ink composited over --surface —
+ * tint at 13%, line at 30%. Those two percentages ARE the theme's mosaic
+ * saturation: at 6% the tiles vanish into the page, at 16% the mosaic starts
+ * competing with the recipe cards for attention. Recompute both if --surface
+ * changes; do not nudge one triad on its own.
  */
 [data-cat='vegetable'] {
 	--cat-ink: #3c5a1e;
-	--cat-tint: #e6e6c9;
-	--cat-line: #c9cb9d;
+	--cat-tint: #e6eae2;
+	--cat-line: #c5cebc;
 }
 [data-cat='fruit'] {
 	--cat-ink: #9c2453;
-	--cat-tint: #f3dde1;
-	--cat-line: #e2b9c3;
+	--cat-tint: #f2e3e9;
+	--cat-line: #e1bdcb;
 }
 [data-cat='protein'] {
 	--cat-ink: #8a3324;
-	--cat-tint: #eeddd1;
-	--cat-line: #dcb9a4;
+	--cat-tint: #f0e4e3;
+	--cat-line: #dcc2bd;
 }
 [data-cat='dairy'] {
 	--cat-ink: #285f70;
-	--cat-tint: #dde7e4;
-	--cat-line: #b7cdc8;
+	--cat-tint: #e3eaec;
+	--cat-line: #bfcfd4;
 }
 [data-cat='grain'] {
 	--cat-ink: #7f5311;
-	--cat-tint: #eee0bf;
-	--cat-line: #d8bd85;
+	--cat-tint: #eee9e0;
+	--cat-line: #d9cbb8;
 }
 [data-cat='legume'] {
 	--cat-ink: #276456;
-	--cat-tint: #dde6da;
-	--cat-line: #b8ccb7;
+	--cat-tint: #e3ebe9;
+	--cat-line: #bed1cc;
 }
 [data-cat='nut'] {
 	--cat-ink: #6b3f22;
-	--cat-tint: #e6d9c3;
-	--cat-line: #ccb08a;
+	--cat-tint: #ece6e2;
+	--cat-line: #d3c5bd;
 }
 [data-cat='spice'] {
 	--cat-ink: #963e18;
-	--cat-tint: #ecdac2;
-	--cat-line: #d9b184;
+	--cat-tint: #f1e6e1;
+	--cat-line: #e0c5ba;
 }
 [data-cat='other'] {
 	--cat-ink: #524a3d;
-	--cat-tint: #e3ddce;
-	--cat-line: #c9bda2;
+	--cat-tint: #e9e7e6;
+	--cat-line: #cbc9c5;
 }
 
 /*
@@ -441,13 +460,29 @@ body {
 	margin: 0;
 	padding: 0;
 	/* Cookbook-endpaper ground: a faint, widely-spaced doodle pattern (herb
-	   sprig, chilli, onion, citrus slice) plus a fibre/grain texture over the
-	   butter-yellow wash, so the page reads as an illustrated paper, not a
-	   flat swatch or a busy repeat. */
+	   sprig, chilli, onion, citrus slice, and two smiling faces — the onion
+	   wears one too) plus a fibre/grain texture over the page wash, so the page
+	   reads as an illustrated paper, not a flat swatch or a busy repeat.
+	   The faces are drawn as plain paths inside the outer <g>, inheriting its
+	   stroke rather than declaring their own, which keeps the single
+	   stroke='...' == --ink pairing that theme-css.test.mjs asserts.
+
+	   Three washes, not one: a peach radial (--bg-tint) rising from the left of
+	   the header, a lilac one from the right, and mint at the bottom right. This
+	   is the Sorbet theme's whole identity — the base --bg is near-white, so the
+	   gradients are what stop the page reading as a blank sheet. The lilac and
+	   mint are literals rather than tokens because nothing else consumes them;
+	   promote them to tokens the moment a second rule needs either.
+
+	   Doodle stroke-opacity is 0.075 here, up from the kraft theme's 0.09 being
+	   tuned against a much darker ground — the pattern is on near-white now, and
+	   the grain layer below dropped to 0.045 for the same reason. */
 	background:
-		radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23241d16' stroke-opacity='0.09' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+		radial-gradient(66rem 30rem at 22% -12rem, var(--bg-tint), transparent 68%),
+		radial-gradient(58rem 34rem at 86% -6rem, #e8dcf6, transparent 68%),
+		radial-gradient(50rem 38rem at 100% 92%, #dcf1ee, transparent 66%),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23291b21' stroke-opacity='0.075' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3Cpath d='M-5,3 L-5,5'/%3E%3Cpath d='M5,3 L5,5'/%3E%3Cpath d='M-6,10 Q0,15 6,10'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='15'/%3E%3Cpath d='M-5,-5 L-5,-2'/%3E%3Cpath d='M5,-5 L5,-2'/%3E%3Cpath d='M-7,4 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Ccircle r='11'/%3E%3Cpath d='M-4,-4 L-4,-2'/%3E%3Cpath d='M4,-4 L4,-2'/%3E%3Cpath d='M-5,3 Q0,8 5,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
 		var(--bg);
 	color: var(--ink);
 	font-family: var(--font-body);
@@ -467,7 +502,7 @@ body {
 	:root:not([data-theme='light']) body {
 		background:
 			radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3Cpath d='M-5,3 L-5,5'/%3E%3Cpath d='M5,3 L5,5'/%3E%3Cpath d='M-6,10 Q0,15 6,10'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='15'/%3E%3Cpath d='M-5,-5 L-5,-2'/%3E%3Cpath d='M5,-5 L5,-2'/%3E%3Cpath d='M-7,4 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Ccircle r='11'/%3E%3Cpath d='M-4,-4 L-4,-2'/%3E%3Cpath d='M4,-4 L4,-2'/%3E%3Cpath d='M-5,3 Q0,8 5,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
 			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
 			var(--bg);
 	}
@@ -477,7 +512,7 @@ body {
 :root[data-theme='dark'] body {
 	background:
 		radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,34 L0,0'/%3E%3Cpath d='M0,8 Q-9,3 -14,-4'/%3E%3Cpath d='M0,16 Q9,11 14,4'/%3E%3Cpath d='M0,24 Q-9,19 -14,12'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M0,-18 C9,-9 14,0 14,10 A14,14 0 0 1 -14,10 C-14,0 -9,-9 0,-18Z'/%3E%3Cpath d='M0,-18 L0,-24'/%3E%3Cpath d='M-5,3 L-5,5'/%3E%3Cpath d='M5,3 L5,5'/%3E%3Cpath d='M-6,10 Q0,15 6,10'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='15'/%3E%3Cpath d='M-5,-5 L-5,-2'/%3E%3Cpath d='M5,-5 L5,-2'/%3E%3Cpath d='M-7,4 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Ccircle r='11'/%3E%3Cpath d='M-4,-4 L-4,-2'/%3E%3Cpath d='M4,-4 L4,-2'/%3E%3Cpath d='M-5,3 Q0,8 5,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
 		var(--bg);
 }
