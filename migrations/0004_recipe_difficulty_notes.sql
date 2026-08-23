@@ -1,0 +1,21 @@
+-- Two fields the source template and page body always carried and the pipeline
+-- discarded.
+--
+-- `difficulty` — the infobox's `Difficulty = N`, present on 96.6% of parsed pages
+-- (1 x679, 2 x1498, 3 x1215, 4 x82). Clamped to 1-4 in stage 02: the corpus also
+-- contains a lone 5 and an 8, both editor error. NULL for the 123 pages without
+-- one, so the UI can render nothing rather than an implied zero.
+--
+-- `notes` — the "Notes, tips, and variations" bullets, newline-separated, on
+-- 41.8% of pages (4,275 bullets). Deliberately on `recipes` and NOT on
+-- `recipe_i18n`: this is source-language text shown only when the reader's
+-- language matches `recipes.source_lang`, the same rule already applied to
+-- ingredient `raw_text`. Translating it would add ~537,000 characters (+24%) to a
+-- machine-translation backlog that still has seven of ten languages at zero, so
+-- the honest option is to show it where it is readable and omit it elsewhere.
+--
+-- Append-only: 0001 is frozen because remote D1 holds machine-translated content
+-- that cannot be regenerated. Both columns are nullable with no default, so this
+-- is a no-op for existing rows until the next seed.
+ALTER TABLE recipes ADD COLUMN difficulty INTEGER;
+ALTER TABLE recipes ADD COLUMN notes TEXT;

@@ -1,0 +1,11 @@
+-- Mirror of idx_ingredient_i18n_lang (0001_init.sql:154), which recipe_i18n has
+-- always been missing. It matters now that recipe titles are searchable: both
+-- branches of `searchRecipeTitles` join recipe_i18n twice per row — once for the
+-- requested language, once for the source language — and the FTS branch joins it
+-- a third time to resolve the matched rowid back to a recipe. Without an index on
+-- (lang, recipe_id) each of those is a scan.
+--
+-- Append-only, not an edit to 0001: remote D1 now holds thousands of
+-- machine-translated recipe_i18n rows that the pipeline cannot reproduce, so
+-- 0001 is frozen. See pipeline/gen_remote_seed.mjs.
+CREATE INDEX IF NOT EXISTS idx_recipe_i18n_lang ON recipe_i18n(lang, recipe_id);
