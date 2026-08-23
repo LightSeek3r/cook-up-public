@@ -1,0 +1,264 @@
+vanilla_pod	173471	Vanilla extract
+whole_cream	2346386	Cream, heavy
+bell_pepper	2258588	Peppers, bell, green, raw
+beef	2727573	Beef, tenderloin steak, raw
+olive_oil	748608	Oil, olive, extra virgin
+black_pepper	170931	Spices, pepper, black
+caster_sugar	334247	Sugars, granulated
+unsalted_butter	789828	Butter, stick, unsalted
+virgin_olive_oil	748608	Oil, olive, extra virgin
+granulated_sugar	334247	Sugars, granulated
+dijon_mustard	326698	Mustard, prepared, yellow
+broth	174536	Soup, chicken broth, ready-to-serve
+cheese	326135	Cheese, swiss
+coarse_salt	321505	Salt, table, iodized
+vanilla_extract	173471	Vanilla extract
+chocolate_chunk	168000	Chocolate-flavored hazelnut spread
+cream	2346386	Cream, heavy
+chipotle	2747661	Peppers, jalapeno, seeded, raw
+dried_oregano	171328	Spices, oregano, dried
+sea_salt	321505	Salt, table, iodized
+tomato_puree	321360	Tomatoes, grape, raw
+shrimp_paste	2684443	Crustaceans, shrimp, farm raised, raw
+garlic_salt	321505	Salt, table, iodized
+ginger_powder	169231	Ginger root, raw
+orange_zest	746771	Oranges, raw, navels
+clove	171321	Spices, cloves, ground
+chicken_broth	174536	Soup, chicken broth, ready-to-serve
+red_onion	790577	Onions, red, raw
+white_sugar	334247	Sugars, granulated
+red_chili_pepper	170106	Peppers, hot chili, red, raw
+smoked_bacon	168277	Pork, cured, bacon, unprepared
+beef_suet	170193	Beef, variety meats and by-products, suet, raw
+cumin_seeds	170923	Spices, cumin seed
+stock_cube	171560	Soup, beef broth or bouillon, powder, dry
+long_grain_rice	2512380	Rice, brown, long grain, unenriched, raw
+dark_brown_sugar	168833	Sugars, brown
+red_and_green_bell_peppers	2258588	Peppers, bell, green, raw
+jam	169641	Jams and preserves
+habanero_chili	170106	Peppers, hot chili, red, raw
+wine	172240	Vinegar, red wine
+cider_vinegar	173469	Vinegar, cider
+dried_chickpea	2644282	Chickpeas, (garbanzo beans, bengal gram), dry
+risotto_rice	2512381	Rice, white, long grain, unenriched, raw
+dry_white_wine	174837	Alcoholic beverage, wine, table, white
+vinegar	172237	Vinegar, distilled
+baguette	325871	Bread, white, commercially prepared
+green_peas	2644291	Peas, green, sweet, canned, sodium added, sugar added, drained and rinsed
+red_wine_vinegar	172240	Vinegar, red wine
+fresh_basil	172232	Basil, fresh
+fresh_tomatoes	321360	Tomatoes, grape, raw
+dried_kidney_beans	335930	Beans, Dry, Red (0% moisture)
+fresh_thyme	173470	Thyme, fresh
+pineapple_segments	2346398	Pineapple, raw
+beans	2346400	Beans, snap, green, raw
+creme_fraiche	173443	Sour cream, light
+sherry	172240	Vinegar, red wine
+green_pepper	2258588	Peppers, bell, green, raw
+ground_nutmeg	171326	Spices, nutmeg, ground
+meat_stock	174536	Soup, chicken broth, ready-to-serve
+black_peppercorns	170931	Spices, pepper, black
+cardamom	170919	Spices, cardamom
+broccoli_floret	321900	Broccoli, raw
+kosher_salt	321505	Salt, table, iodized
+pickled_gherkin	2346406	Cucumber, with peel, raw
+pitted_green_olives	332791	Olives, green, Manzanilla, stuffed with pimiento
+lemon_zest	167746	Lemons, raw, without peel
+brown_rice	2512380	Rice, brown, long grain, unenriched, raw
+fresh_chives	169994	Chives, raw
+fresh_rosemary	173473	Rosemary, fresh
+pork_fillet	2514745	Pork, ground, raw
+glace_cherry	171719	Cherries, sweet, raw
+white_distilled_vinegar	172237	Vinegar, distilled
+tamari	174278	Soy sauce made from soy (tamari)
+nutritional_yeast_flake	167717	Yeast extract spread
+cherry_tomato	321360	Tomatoes, grape, raw
+hot_paprika	171329	Spices, paprika
+long_grain_brown_rice	2512380	Rice, brown, long grain, unenriched, raw
+sunflower_seed	2515381	Seeds, sunflower seed, kernel, raw
+ground_almonds	170567	Nuts, almonds
+thai_basil	172232	Basil, fresh
+green_olive	332791	Olives, green, Manzanilla, stuffed with pimiento
+russet_potatoes	2346401	Potatoes, russet, without skin, raw
+ice_cream	167575	Ice creams, vanilla
+bamboo	169210	Bamboo shoots, raw
+fish_sauce	174531	Sauce, fish, ready-to-serve
+cinnamon_powder	171320	Spices, cinnamon, ground
+cocoa	169593	Cocoa, dry powder, unsweetened
+tarragon_vinegar	172237	Vinegar, distilled
+radish	170095	Radish seeds, sprouted, raw
+dried_pasta	2758998	Pasta, dry, enriched, spaghetti
+malt_vinegar	172237	Vinegar, distilled
+fenugreek	171324	Spices, fenugreek seed
+plain_yogurt	2259793	Yogurt, plain, whole milk
+sambal_oelek	170106	Peppers, hot chili, red, raw
+white_cabbage	2346407	Cabbage, green, raw
+green_bean	2346400	Beans, snap, green, raw
+turmeric_powder	172231	Spices, turmeric, ground
+cardamom_seed	170919	Spices, cardamom
+dark_soy_sauce	174278	Soy sauce made from soy (tamari)
+light_soy_sauce	174278	Soy sauce made from soy (tamari)
+mustard_powder	326698	Mustard, prepared, yellow
+sage	168007	Sage Valley, Gluten Free Vanilla Sandwich Cookies
+sweetcorn	2710826	Corn, sweet, yellow and white kernels,  fresh, raw
+white_sesame_seeds	170150	Seeds, sesame seeds, whole, dried
+fresh_cream	2346386	Cream, heavy
+yellow_split_pea	174534	Split pea soup, canned, reduced sodium, prepared with water or ready-to serve
+garlic_paste	1104647	Garlic, raw
+ginger_paste	169231	Ginger root, raw
+fenugreek_leaf	171324	Spices, fenugreek seed
+coconut_oil	330458	Oil, coconut
+mint_leaf	168766	Candies, NESTLE, AFTER EIGHT Mints
+dried_lima_bean	168396	Lima beans, immature seeds, raw
+haddock	333374	Fish, haddock, raw
+linguine	2758998	Pasta, dry, enriched, spaghetti
+firm_tofu	172475	Tofu, raw, firm, prepared with calcium sulfate
+garden_peas	2644291	Peas, green, sweet, canned, sodium added, sugar added, drained and rinsed
+ice	174158	Water, bottled, generic
+chili_paste	170106	Peppers, hot chili, red, raw
+pure_maple_syrup	169661	Syrups, maple
+grape_seed_oil	172370	Oil, vegetable, soybean, refined
+skimmed_milk	322892	Milk, whole, 3.25% milkfat, with added vitamin D
+pimiento	332791	Olives, green, Manzanilla, stuffed with pimiento
+dill	172233	Dill weed, fresh
+black_olive	332791	Olives, green, Manzanilla, stuffed with pimiento
+black_mustard_seed	326698	Mustard, prepared, yellow
+sweet_peas	2644291	Peas, green, sweet, canned, sodium added, sugar added, drained and rinsed
+yellow_mustard_seed	326698	Mustard, prepared, yellow
+fresh_yeast	167717	Yeast extract spread
+chopped_tomato	321360	Tomatoes, grape, raw
+peeled_tomatoes	321360	Tomatoes, grape, raw
+fresh_garlic	1104647	Garlic, raw
+toasted_sesame_oil	171016	Oil, sesame, salad or cooking
+hake	2747654	Cod, Pacific or Alaskan, frozen, wild caught
+round_rice	2512381	Rice, white, long grain, unenriched, raw
+cane_sugar	334247	Sugars, granulated
+light_cream	173443	Sour cream, light
+whole_milk	322892	Milk, whole, 3.25% milkfat, with added vitamin D
+basil_leaf	172232	Basil, fresh
+double_cream	2346386	Cream, heavy
+anchovy_paste	174182	Fish, anchovy, european, raw
+long_grain_white_rice	2512381	Rice, white, long grain, unenriched, raw
+semi_sweet_chocolate	168000	Chocolate-flavored hazelnut spread
+thai_rice	2512381	Rice, white, long grain, unenriched, raw
+tea_leaf	169828	Tea, herbal, brewed, Hohoysi (Hopi)
+yellow_corn	2710826	Corn, sweet, yellow and white kernels,  fresh, raw
+rice_vinegar	172237	Vinegar, distilled
+sweet_soy_sauce	174278	Soy sauce made from soy (tamari)
+non_iodised_salt	321505	Salt, table, iodized
+mung_bean_sprout	174256	Mung beans, mature seeds, raw
+seitan	168890	Wheat, hard red winter
+chicken_meat	2727566	Chicken, drumstick, meat and skin, raw
+black_cardamom	170919	Spices, cardamom
+single_cream	2346386	Cream, heavy
+corn_tortilla	2758997	Tortilla, corn, shelf stable
+bone	335061	Beef, short loin, t-bone steak, bone-in, separable lean only, trimmed to 1/8" fat, choice, cooked, grilled
+white_wine_vinegar	172237	Vinegar, distilled
+tamarind_paste	167763	Tamarinds, raw
+paprika_powder	171329	Spices, paprika
+hot_chili_peppers	170106	Peppers, hot chili, red, raw
+dried_marjoram	170928	Spices, marjoram, dried
+celery_stalk	2346405	Celery, raw
+clarified_butter	171314	Butter, Clarified butter (ghee)
+beef_steak	2727573	Beef, tenderloin steak, raw
+whole_wheat_kernels	168890	Wheat, hard red winter
+brown_lentils	2644283	Lentils, dry
+light_brown_sugar	168833	Sugars, brown
+cooking_apple	1105547	Apples, honeycrisp, with skin, raw
+duck_fat	173564	Fat, chicken
+jaggery	334247	Sugars, granulated
+english_mustard	326698	Mustard, prepared, yellow
+cracked_black_pepper	170931	Spices, pepper, black
+unrefined_sugar	334247	Sugars, granulated
+smoked_paprika	171329	Spices, paprika
+pure_vanilla_extract	173471	Vanilla extract
+dark_rum	174817	Alcoholic beverage, distilled, rum, 80 proof
+refined_wheat_flour	168913	Wheat flours, bread, unenriched
+squeezed_orange_juice	746771	Oranges, raw, navels
+coarse_sea_salt	321505	Salt, table, iodized
+tomato_juice	2003596	Tomato juice, with added ingredients, from concentrate, shelf stable
+white_rice	2512381	Rice, white, long grain, unenriched, raw
+rock_salt	321505	Salt, table, iodized
+sugar_cube	334247	Sugars, granulated
+penne	2758998	Pasta, dry, enriched, spaghetti
+tilapia_fillet	2684442	Fish, tilapia, farm raised, raw
+chopped_hazelnuts	169827	Hazelnuts, beaked (Northern Plains Indians)
+mild_cheddar	328637	Cheese, cheddar
+sultana_raisin	2758979	Raisins, golden, seedless
+brown_mustard	326698	Mustard, prepared, yellow
+yeast_extract	167717	Yeast extract spread
+white_basmati_rice	2512381	Rice, white, long grain, unenriched, raw
+sundried_tomatoes	321360	Tomatoes, grape, raw
+champignon	1750345	Mushroom, oyster
+palm_sugar	334247	Sugars, granulated
+sea_salt_flakes	321505	Salt, table, iodized
+daikon	170095	Radish seeds, sprouted, raw
+salmon_fillet	173686	Fish, salmon, Atlantic, wild, raw
+bilberry	172778	Pie, blueberry, commercially prepared
+reduced_fat_mayonnaise	171443	Mayonnaise, reduced fat, with olive oil
+coconut_flakes	170169	Nuts, coconut meat, raw
+liquid_honey	169640	Honey
+spice	170919	Spices, cardamom
+seedless_raisin	2758979	Raisins, golden, seedless
+red_and_yellow_peppers	2258588	Peppers, bell, green, raw
+corn_kernel	2710826	Corn, sweet, yellow and white kernels,  fresh, raw
+vanilla_powder	173471	Vanilla extract
+golden_raisin	2758979	Raisins, golden, seedless
+black_grape	2263890	Grapes, red, seedless, raw
+whole_egg	323604	Egg, whole, raw, frozen, pasteurized
+black_pepper_powder	170931	Spices, pepper, black
+seedless_grape	2263890	Grapes, red, seedless, raw
+strawberry_jam	169641	Jams and preserves
+friggitello	170106	Peppers, hot chili, red, raw
+pork_spare_ribs	2514745	Pork, ground, raw
+herring	173669	Fish, herring, Pacific, raw
+pigs_trotters	2514745	Pork, ground, raw
+green_chili_paste	170497	Peppers, hot chili, green, raw
+dried_sage	168007	Sage Valley, Gluten Free Vanilla Sandwich Cookies
+concentrated_orange_juice	746771	Oranges, raw, navels
+udon	168905	Noodles, chinese, chow mein
+green_apple	1105547	Apples, honeycrisp, with skin, raw
+soya_flour	789890	Flour, wheat, all-purpose, enriched, bleached
+iodised_salt	321505	Salt, table, iodized
+wax_bean	2346400	Beans, snap, green, raw
+blood_orange	746771	Oranges, raw, navels
+black_lentil_flour	2644283	Lentils, dry
+pickled_cucumber	2346406	Cucumber, with peel, raw
+roast_chicken	2727566	Chicken, drumstick, meat and skin, raw
+cow_s_milk	322892	Milk, whole, 3.25% milkfat, with added vitamin D
+rapini	2346407	Cabbage, green, raw
+marmalade	168819	Marmalade, orange
+dark_chocolate_chunks	169592	Candies, SPECIAL DARK Chocolate Bar
+pomegranate	169134	Pomegranates, raw
+red_shallot	2727586	Shallots, bulb, peeled, root removed, raw
+whole_chicken	2727566	Chicken, drumstick, meat and skin, raw
+pulp	2003591	Orange juice, no pulp, not fortified, from concentrate, refrigerated
+dried_lentils	2644283	Lentils, dry
+millet	2512379	Millet, whole grain
+garlic_puree	1104647	Garlic, raw
+cauliflower_florets	2685573	Cauliflower, raw
+matoki	173944	Bananas, raw
+puffed_cereal	173912	Cereals ready-to-eat, rice, puffed, fortified
+soya_oil	172370	Oil, vegetable, soybean, refined
+oyster_mushroom	1750345	Mushroom, oyster
+goat_meat	175303	Game meat, goat, raw
+limoncello	173665	Alcoholic beverage, liqueur, coffee, 63 proof
+soaked_chickpeas	2644282	Chickpeas, (garbanzo beans, bengal gram), dry
+sushi_rice	2512381	Rice, white, long grain, unenriched, raw
+raw_tuna	2747673	Tuna, ahi or yellowfin, frozen, wild caught
+cooked_basmati_rice	2512381	Rice, white, long grain, unenriched, raw
+kalamata_olive	332791	Olives, green, Manzanilla, stuffed with pimiento
+pearl_barley	170284	Barley, pearled, raw
+raw_cassava	169985	Cassava, raw
+nutritional_yeast	167717	Yeast extract spread
+quinoa	168874	Quinoa, uncooked
+durum_wheat_flour	168890	Wheat, hard red winter
+artichoke_heart	169205	Artichokes, (globe or french), raw
+chicken_breast_fillet	2727566	Chicken, drumstick, meat and skin, raw
+celery_leaves	2346405	Celery, raw
+toasted_hazelnuts	169827	Hazelnuts, beaked (Northern Plains Indians)
+curly_endive	168412	Endive, raw
+duck_meat	172408	Duck, domesticated, meat and skin, raw
+atlantic_bay_scallop	2747667	Scallops, sea, frozen, wild caught
+laver	168458	Seaweed, laver, raw
+nib_sugar	334247	Sugars, granulated
