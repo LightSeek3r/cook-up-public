@@ -11,8 +11,10 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { parseTaxonomy, matchIngredient, walkAnchors, walkProperty } from './lib/taxonomy.mjs';
+import { parseTaxonomy, ancestors, walkAnchors, walkProperty } from './lib/taxonomy.mjs';
 import { splitIngredientLine } from './lib/measure.mjs';
+import { resolveKey } from './lib/resolve_ingredient.mjs';
+import { MANUAL_INGREDIENTS } from './lib/manual_ingredients.mjs';
 
 const OUT_DIR = path.resolve('pipeline/out');
 
@@ -96,19 +98,35 @@ const ALLERGEN_PROPERTY_MAP = {
 	'en:sesame-seeds': 'sesame'
 };
 
-const STAPLES = new Set([
+// "Assume the kitchen already has it" — filtered out of the mosaic and out of a
+// recipe's missing-ingredient list. These are *roots*: membership walks the
+// taxonomy (see `isStaple`) rather than comparing keys directly, because once
+// matching became specificity-aware, `kosher_salt` and
+// `extra_virgin_olive_oil` started landing where `salt` and `olive_oil` used
+// to. Hand-listing every varietal would be a permanent maintenance tax and a
+// silent UX bug the first time one was missed — a recipe reading "missing
+// kosher salt" when salt is the one thing every kitchen has.
+const STAPLE_ROOTS = new Set([
 	'salt', 'sea_salt', 'water', 'black_pepper', 'pepper',
 	'oil', 'olive_oil', 'vegetable_oil', 'sunflower_oil', 'cooking_oil'
 ]);
 
+function isStaple(key, taxonomy) {
+	if (STAPLE_ROOTS.has(key)) return 1;
+	for (const k of ancestors(key, taxonomy)) if (STAPLE_ROOTS.has(k)) return 1;
+	return 0;
+}
+
 const BENEFICIAL_CATEGORIES = new Set(['vegetable', 'fruit', 'legume', 'nut']);
 
 function categoryFor(key, taxonomy) {
+	if (MANUAL_INGREDIENTS[key]) return MANUAL_INGREDIENTS[key].category;
 	if (CATEGORY_OVERRIDES[key]) return CATEGORY_OVERRIDES[key];
 	return walkAnchors(key, taxonomy, CATEGORY_ANCHORS, CATEGORY_PRIORITY) ?? 'other';
 }
 
 function allergensFor(key, taxonomy) {
+	if (MANUAL_INGREDIENTS[key]) return MANUAL_INGREDIENTS[key].allergens;
 	const value = walkProperty(key, taxonomy, 'allergens');
 	if (!value) return [];
 	return value
@@ -122,9 +140,11 @@ function allergensFor(key, taxonomy) {
  *  composite ingredients here, so treat "maybe" as disqualifying, same
  *  "don't fabricate a claim" posture as nutrition_coverage. */
 function isVegan(key, taxonomy) {
+	if (MANUAL_INGREDIENTS[key]) return MANUAL_INGREDIENTS[key].vegan;
 	return walkProperty(key, taxonomy, 'vegan') === 'yes';
 }
 function isVegetarian(key, taxonomy) {
+	if (MANUAL_INGREDIENTS[key]) return MANUAL_INGREDIENTS[key].vegetarian;
 	return walkProperty(key, taxonomy, 'vegetarian') === 'yes';
 }
 
@@ -154,16 +174,14 @@ async function main() {
 		let resolved = [];
 		for (let i = 0; i < recipe.ingredient_lines.length; i++) {
 			const line = recipe.ingredient_lines[i];
-			const link = recipe.ingredient_links[i];
+			const links = recipe.ingredient_links[i] ?? [];
 
 			// Quantity/unit extraction is independent of how the ingredient's
-			// *name* gets matched — always split the line, even when the
-			// wikilink target alone is enough to resolve the key (the common
-			// case, since most Wikibooks lines link the ingredient).
+			// *name* gets matched — always split the line, even when a wikilink
+			// target alone is enough to resolve the key (the common case, since
+			// most Wikibooks lines link the ingredient).
 			const split = splitIngredientLine(line);
-			let key = link ? matchIngredient(link, taxonomy) : null;
-			if (!key) key = matchIngredient(split.name, taxonomy);
-			if (!key) key = matchIngredient(line, taxonomy);
+			const key = resolveKey(line, links, split, taxonomy);
 
 			if (!key) {
 				unmatched.push(`${recipe.id}\t${line}`);
@@ -177,11 +195,20 @@ async function main() {
 		// "milk" in both the batter and the glaze) would otherwise collide.
 		// Keep the first mention; merging quantities across possibly-different
 		// units isn't worth the complexity for what's a rare, cosmetic case.
+		// Measured BEFORE the dedup below, and that ordering is the whole point.
+		// `matchRate` asks "did we understand this recipe's ingredient list?" — a
+		// recipe naming butter in both its cake and its frosting has been
+		// understood perfectly, but scoring it on the *deduplicated* count made it
+		// look like two lines had failed to parse. That dropped 52 otherwise-fine
+		// recipes, mostly baking (r111781: 18 lines, 16 matched, 12 distinct ->
+		// scored 67% and discarded).
+		const matchedLines = resolved.length;
+
 		const seenKeys = new Set();
 		resolved = resolved.filter((r) => (seenKeys.has(r.key) ? false : seenKeys.add(r.key)));
 
 		const matchRate = recipe.ingredient_lines.length
-			? resolved.length / recipe.ingredient_lines.length
+			? matchedLines / recipe.ingredient_lines.length
 			: 0;
 		if (matchRate < INGREDIENT_MATCH_MIN) {
 			recipesDroppedLowMatch++;
@@ -227,16 +254,21 @@ async function main() {
 	}
 
 	const ingredientLines = [...usedKeys].map((key) => {
-		const entry = taxonomy.byKey.get(key);
+		const manual = MANUAL_INGREDIENTS[key];
 		const names = {};
-		for (const lang of SUPPORTED_LANGS) {
-			const value = entry.names.get(lang)?.[0];
-			if (value) names[lang] = value;
+		if (manual) {
+			Object.assign(names, manual.names);
+		} else {
+			const entry = taxonomy.byKey.get(key);
+			for (const lang of SUPPORTED_LANGS) {
+				const value = entry.names.get(lang)?.[0];
+				if (value) names[lang] = value;
+			}
 		}
 		return JSON.stringify({
 			canonical_key: key,
 			category: categoryFor(key, taxonomy),
-			is_staple: STAPLES.has(key) ? 1 : 0,
+			is_staple: isStaple(key, taxonomy),
 			beneficial: BENEFICIAL_CATEGORIES.has(categoryFor(key, taxonomy)) ? 1 : 0,
 			allergens: allergensFor(key, taxonomy),
 			names

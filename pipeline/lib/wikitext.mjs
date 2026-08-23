@@ -90,17 +90,37 @@ export function parseTemplateParams(wikitext, namePattern) {
 	return params;
 }
 
-/** Text between `== Header ==` (first header whose text matches `names`,
- *  case-insensitive) and the next `==` heading, or end of text. */
+/** Text between `== Header ==` (first level-2 header whose text matches
+ *  `names`, case-insensitive) and the next heading at level <= 2, or end of
+ *  text. A level-3+ subsection (`=== Filling ===`, common in multi-component
+ *  recipes — a crust/filling/meringue breakdown, say) is content *within*
+ *  the section, not a boundary: matched here only to be skipped, never
+ *  mistaken for the terminator. An earlier version matched any `==...==`-
+ *  shaped line regardless of how many `=` it actually had, so the first
+ *  subsection heading silently ended the section right there — usually
+ *  leaving zero bullets/steps and dropping the whole recipe (confirmed
+ *  against the real corpus: 440/3,824 pages have a subsection inside
+ *  `==Ingredients==` alone). */
 export function extractSection(wikitext, names) {
-	const lines = wikitext.split('\n');
 	const wanted = new Set(names.map((n) => n.toLowerCase()));
+	return extractSectionWhere(wikitext, (heading) => wanted.has(heading.toLowerCase()));
+}
+
+/**
+ * `extractSection`, but the heading is chosen by predicate instead of by an exact
+ * name list — for sections whose title the corpus spells many different ways.
+ * "Notes, tips, and variations" alone appears under two dozen spellings
+ * (word-order swaps, `&` for "and", casing, and outright typos like
+ * "variatons"), which an exact-match list can only ever chase after the fact.
+ */
+export function extractSectionWhere(wikitext, matches) {
+	const lines = wikitext.split('\n');
 	let start = -1;
 	let end = lines.length;
 	for (let i = 0; i < lines.length; i++) {
-		const heading = lines[i].match(/^==\s*(.+?)\s*==\s*$/);
-		if (!heading) continue;
-		if (start === -1 && wanted.has(heading[1].toLowerCase())) {
+		const heading = lines[i].match(/^(=+)\s*(.+?)\s*=+\s*$/);
+		if (!heading || heading[1].length > 2) continue;
+		if (start === -1 && heading[1].length === 2 && matches(heading[2])) {
 			start = i + 1;
 			continue;
 		}
@@ -133,6 +153,35 @@ export function extractNumbered(sectionText) {
 		.map((m) => m[1].trim());
 }
 
+/**
+ * Every `[[File:...]]` / `[[Image:...]]` filename on the page, in appearance
+ * order, deduped — the infobox's lead image first, since it appears first.
+ *
+ * Read from the RAW wikitext on purpose. The infobox does carry an `image=`
+ * parameter, but `parseTemplateParams` runs every value through
+ * `stripWikitext`, which deletes File/Image links outright — so
+ * `summary.image` has always come back as the empty string. The data was
+ * fetched, parsed, and destroyed one line later.
+ *
+ * Returns bare filenames without the namespace prefix, since that is what the
+ * MediaWiki imageinfo API wants prefixed back on as `File:`.
+ */
+export function extractImageFiles(wikitext) {
+	if (!wikitext) return [];
+	const out = [];
+	const seen = new Set();
+	for (const m of wikitext.matchAll(/\[\[\s*(?:File|Image)\s*:\s*([^\]|]+)/gi)) {
+		const name = m[1].trim().replace(/_/g, ' ');
+		// Only still-image formats: the corpus also links a .webm and an .ogv.
+		if (!/\.(jpe?g|png|gif|webp)$/i.test(name)) continue;
+		const key = name.toLowerCase();
+		if (seen.has(key)) continue;
+		seen.add(key);
+		out.push(name);
+	}
+	return out;
+}
+
 /** All `[[Category:Name]]` tags anywhere in the page, in appearance order. */
 export function extractCategories(wikitext) {
 	const out = [];
@@ -142,14 +191,27 @@ export function extractCategories(wikitext) {
 	return out;
 }
 
-/** Last `[[Cookbook:Target|...]]` / `{{cb|Target}}` (its template shorthand)
- *  link target in a line, if any. Unit words ("cup", "teaspoon") are linked
- *  to their own Cookbook: glossary pages too, and consistently appear before
- *  the ingredient — so the last link, not the first, is the reliable
- *  ingredient-identity signal. */
+/** Every `[[Cookbook:Target|...]]` / `{{cb|Target}}` (its template shorthand)
+ *  link target in a line, in source order. An ingredient's name is routinely
+ *  split across several links — `½ [[Cookbook:Cup|cup]] [[Cookbook:Tomato|
+ *  tomato]] [[Cookbook:Puree|puree]]` — so no individual link is the
+ *  ingredient's identity on its own, and picking any single one of them
+ *  discards part of the name. Callers score the readings they can build from
+ *  the whole list instead. */
+export function extractCookbookLinks(line) {
+	if (!line) return [];
+	return [...line.matchAll(/\[\[Cookbook:([^\]|]+)|\{\{\s*cb\s*\|([^|}]+)/gi)]
+		.map((m) => (m[1] ?? m[2]).trim())
+		.filter(Boolean);
+}
+
+/** The last of `extractCookbookLinks`, or null. Unit words ("cup",
+ *  "teaspoon") link to their own Cookbook: glossary pages too and
+ *  consistently appear *before* the ingredient, so of the individual links
+ *  the last one is the best single guess. Retained for callers that want one
+ *  string, but note what it costs: on `[[cup]] [[tomato]] [[puree]]` it
+ *  returns "Puree" and silently drops "Tomato". Ingredient matching therefore
+ *  uses the full list — see `candidateReadings` in stage 03. */
 export function extractCookbookLink(line) {
-	const matches = [...line.matchAll(/\[\[Cookbook:([^\]|]+)|\{\{\s*cb\s*\|([^|}]+)/gi)];
-	if (!matches.length) return null;
-	const last = matches.at(-1);
-	return (last[1] ?? last[2]).trim();
+	return extractCookbookLinks(line).at(-1) ?? null;
 }

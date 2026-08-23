@@ -91,13 +91,23 @@ export function parseTaxonomy(raw) {
 		if (parentNames.length) unresolvedParentNames.set(key, parentNames);
 	}
 
+	// English only: `matchIngredient` only ever matches against recipe text,
+	// which is always English (source_lang is always 'en' for this corpus —
+	// non-English display names are read straight from `entry.names` per
+	// language elsewhere, not through this index at all). Real, confirmed
+	// bug from indexing every language into one shared namespace: Croatian's
+	// word for "yam" is "jam" — plain English "jam" (the fruit preserve)
+	// silently matched the *yam* entry instead of its own, because "yam"
+	// happens to appear earlier in the raw taxonomy file and first-registrant
+	// wins a slug. 51,032 non-English terms were occupying a synonym slot
+	// before this fix — most harmless (a French phrase never collides with
+	// English text), but there is no way to tell which of them are a second
+	// "jam" without eliminating the whole class.
 	const synonymIndex = new Map();
 	for (const entry of byKey.values()) {
-		for (const terms of entry.names.values()) {
-			for (const term of terms) {
-				const slug = slugify(term);
-				if (slug && !synonymIndex.has(slug)) synonymIndex.set(slug, entry.key);
-			}
+		for (const term of entry.names.get('en') ?? []) {
+			const slug = slugify(term);
+			if (slug && !synonymIndex.has(slug)) synonymIndex.set(slug, entry.key);
 		}
 	}
 
@@ -115,14 +125,52 @@ export function parseTaxonomy(raw) {
  *  never guesses further than that (unmatched lines are the caller's signal
  *  to extend the taxonomy deliberately, not to be fuzzy-matched away). */
 export function matchIngredient(text, taxonomy) {
+	return matchIngredientDetailed(text, taxonomy)?.key ?? null;
+}
+
+/** `matchIngredient`, plus how specific the hit was: `words` counts the words
+ *  in the phrase that actually matched. A caller holding several candidate
+ *  readings of one ingredient line — "tomato puree" from the line text, bare
+ *  "puree" from a wikilink — uses this to keep the most specific reading
+ *  rather than whichever it happened to try first. That is ordinary
+ *  longest-match dictionary resolution, and it is the only thing separating a
+ *  correct `tomato_puree` from a `puree` that is not even a food. */
+export function matchIngredientDetailed(text, taxonomy) {
 	if (!text) return null;
 	const slug = slugify(text);
 	if (!slug) return null;
-	if (taxonomy.synonymIndex.has(slug)) return taxonomy.synonymIndex.get(slug);
-	if (slug.endsWith('s') && taxonomy.synonymIndex.has(slug.slice(0, -1))) {
-		return taxonomy.synonymIndex.get(slug.slice(0, -1));
+	const words = slug.split('_');
+	// Only the head noun inflects in an English noun phrase, and in English it is
+	// the last word — "bay leaves" pluralises "leaf", not "bay".
+	for (const candidate of singularCandidates(words.at(-1))) {
+		const probe = [...words.slice(0, -1), candidate].join('_');
+		const key = taxonomy.synonymIndex.get(probe);
+		if (key) return { key, words: probe.split('_').length };
 	}
 	return null;
+}
+
+/**
+ * Singular candidates for one word, exact form first.
+ *
+ * Replaces a bare trailing-"s" chop, which handled "onions" but turned
+ * "tomatoes" into "tomatoe" and never touched "-ies" or "-ves" at all — so
+ * "berries", "leaves" and "loaves" could only ever match if the taxonomy
+ * happened to register the plural too.
+ *
+ * Deliberately a fixed list of English inflections and NOT a stemmer. A stemmer
+ * over-reaches, and over-reaching here silently maps distinct foods onto each
+ * other — precisely the failure `matchIngredient` refuses to risk elsewhere by
+ * never guessing. Every rule below is reversible and unambiguous.
+ */
+function singularCandidates(word) {
+	const out = [word];
+	if (/ies$/.test(word)) out.push(word.replace(/ies$/, 'y')); // berries -> berry
+	if (/ves$/.test(word)) out.push(word.replace(/ves$/, 'f'), word.replace(/ves$/, 'fe')); // leaves -> leaf, knives -> knife
+	if (/oes$/.test(word)) out.push(word.replace(/oes$/, 'o')); // tomatoes -> tomato
+	if (/(ch|sh|s|x|z)es$/.test(word)) out.push(word.replace(/es$/, '')); // peaches -> peach
+	if (/s$/.test(word) && !/ss$/.test(word)) out.push(word.slice(0, -1)); // onions -> onion
+	return [...new Set(out)];
 }
 
 /** BFS the full reachable ancestor set (self included), cycle-safe. Returns
@@ -131,7 +179,7 @@ export function matchIngredient(text, taxonomy) {
  *  hierarchy), so "first hit wins" is order-dependent on parent-list order,
  *  not a real signal. Collect everything and let the caller break ties by
  *  domain priority instead. */
-function ancestors(key, taxonomy) {
+export function ancestors(key, taxonomy) {
 	const seen = new Set();
 	let queue = [key];
 	while (queue.length) {

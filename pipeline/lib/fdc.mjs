@@ -131,6 +131,15 @@ function singularize(token) {
 	// "s" — a bare `-1` slice left "potatoes" as "potatoe", which then failed
 	// to match "potato" at all, silently hiding every raw-potato FDC entry.
 	if (token.length > 4 && token.endsWith('oes')) return token.slice(0, -2);
+	// KNOWN GAP, deliberately left alone for now: "-ies" has exactly the same
+	// problem and is not handled, so "strawberries" becomes "strawberrie" and
+	// "Strawberries, raw" is not even a CANDIDATE for `strawberry`. Same for
+	// "-ves". Fixing it here is correct in principle but changes 55 ingredient
+	// matches at once, and a trial run regressed several (`pumpkin` -> pumpkin
+	// SEEDS, `spaghetti` -> spaghetti SQUASH, `cassava` -> cassava FLOUR) while
+	// fixing others. The affected ingredients are pinned individually in
+	// FDC_OVERRIDES instead; revisit this as its own reviewed pass, with the
+	// OFF crosswalk agreement count as the metric.
 	if (token.length > 3 && token.endsWith('s') && !token.endsWith('ss')) return token.slice(0, -1);
 	return token;
 }
@@ -154,13 +163,14 @@ function tokens(text) {
  * the description's leading tokens, in order) tried before the looser
  * anywhere-match fallback.
  */
+const PREFIX_BONUS = 250;
+
 function scoreCandidates(needle, fdc, { prefixOnly }) {
 	let best = null; // { fdc_id, data_type, score }
 	for (const food of fdc.foods.values()) {
 		const hay = tokens(food.description);
-		const matches = prefixOnly
-			? needle.every((t, i) => hay[i] === t)
-			: needle.every((t) => hay.includes(t));
+		const isPrefix = needle.every((t, i) => hay[i] === t);
+		const matches = prefixOnly ? isPrefix : needle.every((t) => hay.includes(t));
 		if (!matches) continue;
 		// Prefer the shortest matching description (least-qualified match),
 		// Foundation Foods over SR Legacy, and — deliberately, not just a
@@ -170,7 +180,11 @@ function scoreCandidates(needle, fdc, { prefixOnly }) {
 		// on token count between "Potato flour" and "Potatoes, ... raw" and
 		// insertion order alone decided the (wrong) winner.
 		const isRaw = /\braw\b/i.test(food.description);
-		const score = hay.length - (food.data_type === 'foundation_food' ? 1000 : 0) - (isRaw ? 500 : 0);
+		const score =
+			hay.length -
+			(food.data_type === 'foundation_food' ? 1000 : 0) -
+			(isRaw ? 500 : 0) -
+			(isPrefix ? PREFIX_BONUS : 0);
 		if (!best || score < best.score) best = { fdc_id: food.fdc_id, data_type: food.data_type, score };
 	}
 	return best;
@@ -186,5 +200,70 @@ function scoreCandidates(needle, fdc, { prefixOnly }) {
 export function matchFdc(name, fdc) {
 	const needle = tokens(name);
 	if (!needle.length) return null;
+	// KNOWN DESIGN FLAW, left in place deliberately — see the note below.
+	//
+	// `prefixPass ?? anywherePass` means "if any description BEGINS with the query,
+	// discard every description that merely contains it". That is too strong: it
+	// throws away better-scoring entries entirely rather than ranking them.
+	// `almond` takes "Almond butter, creamy" (score -997) purely for starting with
+	// the word, while "Nuts, almonds, whole, raw" (-1497, a Foundation raw entry)
+	// is never compared. The same mechanism handed `icing_sugar` a *cookie* and
+	// `corn_starch` a *bread*.
+	//
+	// The principled fix is one pass with leading position as a bonus smaller than
+	// the raw/Foundation weights. Measured: it corrects bacon, almond, strawberry,
+	// salmon and cherry, but of 55 changed matches it also regresses `pumpkin` to
+	// pumpkin seeds, `spaghetti` to spaghetti squash and `cassava` to cassava
+	// flour, and drops `coriander_leaf` (189 rows) to no match at all. Net-positive
+	// is plausible but unproven, and the blast radius is every ingredient's
+	// nutrition — so the individual wins are pinned in FDC_OVERRIDES and this stays
+	// as-is until it can be changed with all 55 reviewed. See tasks/todo.md.
 	return scoreCandidates(needle, fdc, { prefixOnly: true }) ?? scoreCandidates(needle, fdc, { prefixOnly: false });
+}
+
+/**
+ * Every food this name matches, best-scoring first — the same passes and the same
+ * scoring as `matchFdc`, which returns only the winner.
+ *
+ * Exists because FDC's two datasets are asymmetric in a way that decides whether
+ * a recipe quantity can be converted to grams at all: of 469 Foundation foods
+ * only 116 carry any `food_portion` row, against 7,526 of 7,793 in SR Legacy. The
+ * -1000 Foundation preference in `scoreCandidates` is right for *nutrition* (it
+ * is the better-measured dataset) but it routinely lands on a food with no
+ * portions, so "1 large egg" cannot be weighed even though SR Legacy's egg entry
+ * says a medium egg is 44 g.
+ *
+ * Callers use this to borrow a GRAM WEIGHT from a lower-ranked sibling while
+ * keeping nutrition from the winner. Only the weight — never the nutrients; see
+ * stage 04.
+ *
+ * `maxExtraTokens` bounds how much more specific a sibling may be than the query.
+ * Without it "sugar" reaches "Sugar-apples (sweetsop), raw" and a teaspoon of
+ * sugar weighs 155 g.
+ */
+export function matchFdcCandidates(name, fdc, { limit = 24, maxExtraTokens = 2 } = {}) {
+	const needle = tokens(name);
+	if (!needle.length) return [];
+	const seen = new Set();
+	const out = [];
+	for (const prefixOnly of [true, false]) {
+		for (const food of fdc.foods.values()) {
+			if (seen.has(food.fdc_id)) continue;
+			const hay = tokens(food.description);
+			if (hay.length > needle.length + maxExtraTokens) continue;
+			const matches = prefixOnly
+				? needle.every((t, i) => hay[i] === t)
+				: needle.every((t) => hay.includes(t));
+			if (!matches) continue;
+			seen.add(food.fdc_id);
+			const isRaw = /\braw\b/i.test(food.description);
+			out.push({
+				fdc_id: food.fdc_id,
+				data_type: food.data_type,
+				description: food.description,
+				score: hay.length - (food.data_type === 'foundation_food' ? 1000 : 0) - (isRaw ? 500 : 0)
+			});
+		}
+	}
+	return out.sort((a, b) => a.score - b.score).slice(0, limit);
 }

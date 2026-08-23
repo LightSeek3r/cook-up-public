@@ -10,6 +10,7 @@
 
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { GENERIC_PAIRS_CLOSED } from './lib/generic_ingredients.mjs';
 
 const OUT_DIR = path.resolve('pipeline/out');
 const ALLERGENS = ['gluten', 'dairy', 'nut', 'peanut', 'egg', 'soy', 'fish', 'shellfish', 'sesame'];
@@ -38,23 +39,32 @@ async function readJsonl(name) {
 }
 
 async function main() {
-	const [recipes, ingredients, recipeIngredients, recipeDiets, recipeNutrition, ingredientNutrition, ingredientMicros, recipeMicros] =
+	const [recipes, ingredients, recipeIngredients, recipeGrams, recipeDiets, recipeNutrition, ingredientNutrition, ingredientMicros, recipeMicros, recipeImages] =
 		await Promise.all([
 			readJsonl('recipes.jsonl'),
 			readJsonl('ingredients.jsonl'),
 			readJsonl('recipe_ingredients.jsonl'),
+			readJsonl('recipe_ingredients.grams.jsonl'),
 			readJsonl('recipe_diets.jsonl'),
 			readJsonl('recipes.nutrition.jsonl'),
 			readJsonl('ingredient_nutrition.jsonl'),
 			readJsonl('ingredient_micronutrient.jsonl'),
-			readJsonl('recipe_micronutrient.jsonl')
+			readJsonl('recipe_micronutrient.jsonl'),
+			readJsonl('recipe_images.jsonl')
 		]);
 
 	const keptRecipeIds = new Set(recipeIngredients.map((r) => r.recipe_id));
 	const keptRecipes = recipes.filter((r) => keptRecipeIds.has(r.id));
 	const nutritionById = new Map(recipeNutrition.map((n) => [n.id, n]));
+	const imageById = new Map(recipeImages.map((i) => [i.recipe_id, i]));
 
 	const ingredientId = new Map(ingredients.map((ing, i) => [ing.canonical_key, i + 1]));
+
+	// (recipe_id, canonical_key) is unique per row after stage 03's dedup, so it
+	// keys the grams file back onto the ingredient rows.
+	const gramsByRow = new Map(
+		recipeGrams.map((g) => [`${g.recipe_id}|${g.canonical_key}`, g.grams])
+	);
 
 	const sql = [
 		'DELETE FROM recipe_micronutrient;',
@@ -63,6 +73,7 @@ async function main() {
 		'DELETE FROM recipe_i18n;',
 		'DELETE FROM recipes;',
 		'DELETE FROM ingredient_allergens;',
+		'DELETE FROM ingredient_generic_of;',
 		'DELETE FROM ingredient_micronutrient;',
 		'DELETE FROM ingredient_nutrition;',
 		'DELETE FROM ingredient_i18n;',
@@ -108,17 +119,35 @@ async function main() {
 	}
 	batchInsert(sql, 'ingredient_allergens', ['ingredient_id', 'allergen_id'], allergenRows);
 
+	// Both endpoints of a curated pair must actually be in THIS corpus — the pair
+	// list is fixed and hand-reviewed, but which canonical_keys exist varies run
+	// to run with the source data.
+	//
+	// Seeded from the CLOSED set, not the curated one: match.ts joins
+	// ingredient_generic_of a single time, so multi-hop chains only work if the
+	// table is transitively closed. See that export's comment.
+	const genericRows = GENERIC_PAIRS_CLOSED.filter(
+		([generic, specific]) => ingredientId.has(generic) && ingredientId.has(specific)
+	).map(([generic, specific]) => ({
+		specific_id: ingredientId.get(specific),
+		generic_id: ingredientId.get(generic)
+	}));
+	batchInsert(sql, 'ingredient_generic_of', ['specific_id', 'generic_id'], genericRows);
+
 	batchInsert(
 		sql,
 		'recipes',
 		[
 			'id', 'source_url', 'source_lang', 'license', 'attribution', 'cuisine', 'meal_type',
+			'difficulty', 'notes',
+			'image_url', 'image_width', 'image_height', 'image_page', 'image_author', 'image_licence',
 			'prep_minutes', 'total_minutes', 'servings', 'servings_assumed',
 			'kcal', 'protein_g', 'fat_g', 'sat_fat_g', 'carb_g', 'sugar_g', 'fiber_g', 'sodium_mg',
 			'balance_grade', 'balance_score', 'nutrition_coverage'
 		],
 		keptRecipes.map((r) => {
 			const n = nutritionById.get(r.id);
+			const img = imageById.get(r.id);
 			return {
 				id: r.id,
 				source_url: r.source_url,
@@ -127,6 +156,17 @@ async function main() {
 				attribution: r.attribution,
 				cuisine: r.cuisine,
 				meal_type: r.meal_type,
+				difficulty: r.difficulty ?? null,
+				image_url: img?.url ?? null,
+					image_width: img?.width ?? null,
+					image_height: img?.height ?? null,
+					image_page: img?.page ?? null,
+					image_author: img?.author ?? null,
+					image_licence: img?.licence ?? null,
+				// Bullets joined with newlines, same convention as `instructions`.
+				// NULL rather than '' when a recipe has none, so the UI branches on
+				// presence instead of on an empty string.
+				notes: r.notes?.length ? r.notes.join('\n') : null,
 				prep_minutes: r.prep_minutes,
 				total_minutes: r.total_minutes,
 				servings: r.servings,
@@ -143,7 +183,12 @@ async function main() {
 				balance_score: n?.balance_score ?? null,
 				nutrition_coverage: n?.nutrition_coverage ?? 0
 			};
-		})
+		}),
+		// 50, not the default 200: a recipes row now carries a Commons image URL, a
+		// file-page URL, an author and the notes text, and 200 of those in one
+		// statement exceeded SQLite's statement-length cap (SQLITE_TOOBIG). Same
+		// reason recipe_i18n below uses 20.
+		50
 	);
 
 	batchInsert(
@@ -163,13 +208,14 @@ async function main() {
 	batchInsert(
 		sql,
 		'recipe_ingredients',
-		['recipe_id', 'ingredient_id', 'raw_text', 'quantity', 'unit'],
+		['recipe_id', 'ingredient_id', 'raw_text', 'quantity', 'unit', 'grams'],
 		recipeIngredients.map((ri) => ({
 			recipe_id: ri.recipe_id,
 			ingredient_id: ingredientId.get(ri.canonical_key),
 			raw_text: ri.raw_text,
 			quantity: ri.quantity,
-			unit: ri.unit
+			unit: ri.unit,
+			grams: gramsByRow.get(`${ri.recipe_id}|${ri.canonical_key}`) ?? null
 		}))
 	);
 
@@ -214,7 +260,8 @@ async function main() {
 
 	await writeFile(path.join(OUT_DIR, 'seed.sql'), sql.join('\n\n') + '\n');
 	console.log(
-		`06_seed_d1: wrote pipeline/out/seed.sql — ${keptRecipes.length} recipes, ${ingredients.length} ingredients, ${recipeIngredients.length} recipe_ingredients rows`
+		`06_seed_d1: wrote pipeline/out/seed.sql — ${keptRecipes.length} recipes, ${ingredients.length} ingredients, ` +
+			`${recipeIngredients.length} recipe_ingredients rows, ${genericRows.length}/${GENERIC_PAIRS_CLOSED.length} generic-ingredient pairs`
 	);
 }
 
