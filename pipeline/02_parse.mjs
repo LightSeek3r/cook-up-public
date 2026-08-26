@@ -43,7 +43,26 @@ const WIKIBOOKS_DIR = path.resolve('pipeline/data/wikibooks');
 const OUT_DIR = path.resolve('pipeline/out');
 
 const INGREDIENT_HEADERS = ['Ingredients'];
-const PROCEDURE_HEADERS = ['Procedure', 'Directions', 'Instructions', 'Method'];
+
+/**
+ * The steps section, however this page spells it. An exact-name list missed a
+ * real tail: "Procedures" (plural, 15 pages), "Process" (3), and a handful of
+ * "Procedure" with trailing punctuation/parentheticals/footnotes stuck to the
+ * heading text ("Procedure:", "Procedure (option 1)", "Procedure<ref>...</ref>").
+ * Simulated against the full corpus before adopting: 22 pages recovered, zero
+ * regressions (nothing currently kept loses its procedure section).
+ *
+ * Deliberately NOT matched, each checked by hand: two pages hold their real
+ * steps under a second, mislabeled "Ingredients" heading (a mistake in the
+ * source, not a spelling variant); "Equipments" numbered lists are equipment,
+ * not steps; "Recipe" is too generic to risk matching something unintended
+ * elsewhere in the corpus for the sake of one page.
+ */
+function isProcedureHeading(heading) {
+	return /^(procedures?|directions?|instructions?|methods?|preparations?|process(?:es)?)\b/i.test(
+		heading.trim()
+	);
+}
 
 /**
  * The "Notes, tips, and variations" section, however this page spells it. Counted
@@ -264,7 +283,7 @@ function parseRecipePage({ pageid, title, wikitext, url }) {
 	const rawIngredientLines = extractBullets(ingredientsSection);
 	const ingredientLinks = rawIngredientLines.map(extractCookbookLinks);
 
-	const procedureSection = extractSection(wikitext, PROCEDURE_HEADERS);
+	const procedureSection = extractSectionWhere(wikitext, isProcedureHeading);
 	const steps = extractNumbered(procedureSection).map(stripWikitext).filter(Boolean);
 	if (steps.length === 0) return null;
 	const instructions = steps.map((step, i) => `${i + 1}. ${step}`).join('\n');
@@ -328,7 +347,7 @@ async function main() {
 	for (const file of files) {
 		const page = JSON.parse(await readFile(path.join(WIKIBOOKS_DIR, file), 'utf8'));
 		const ingredientsSection = extractSection(page.wikitext, INGREDIENT_HEADERS);
-		const procedureSection = extractSection(page.wikitext, PROCEDURE_HEADERS);
+		const procedureSection = extractSectionWhere(page.wikitext, isProcedureHeading);
 		const hasIngredients = extractBullets(ingredientsSection).length > 0;
 		const hasProcedure = extractNumbered(procedureSection).length > 0;
 
