@@ -1,0 +1,13 @@
+{
+  "wikibooks": {
+    "source": "https://en.wikibooks.org/wiki/Category:Recipes",
+    "license": "CC-BY-SA-3.0",
+    "retrieved_at": "2026-08-18T18:26:00.718Z",
+    "page_count": 3824
+  },
+  "off_taxonomy": {
+    "source": "https://github.com/openfoodfacts/openfoodfacts-server/blob/main/taxonomies/food/ingredients.txt",
+    "license": "ODbL",
+    "retrieved_at": "2026-08-18T18:26:00.718Z"
+  }
+}
