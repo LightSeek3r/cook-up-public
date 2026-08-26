@@ -20,12 +20,13 @@ dried_oregano	171328	Spices, oregano, dried
 sea_salt	321505	Salt, table, iodized
 tomato_puree	321360	Tomatoes, grape, raw
 shrimp_paste	2684443	Crustaceans, shrimp, farm raised, raw
-garlic_salt	321505	Salt, table, iodized
-ginger_powder	169231	Ginger root, raw
-orange_zest	746771	Oranges, raw, navels
-clove	171321	Spices, cloves, ground
 chicken_broth	174536	Soup, chicken broth, ready-to-serve
 red_onion	790577	Onions, red, raw
+garlic_salt	321505	Salt, table, iodized
+ginger_powder	169231	Ginger root, raw
+rice	2512381	Rice, white, long grain, unenriched, raw
+orange_zest	746771	Oranges, raw, navels
+clove	171321	Spices, cloves, ground
 white_sugar	334247	Sugars, granulated
 red_chili_pepper	170106	Peppers, hot chili, red, raw
 smoked_bacon	168277	Pork, cured, bacon, unprepared
@@ -40,7 +41,6 @@ habanero_chili	170106	Peppers, hot chili, red, raw
 wine	172240	Vinegar, red wine
 cider_vinegar	173469	Vinegar, cider
 dried_chickpea	2644282	Chickpeas, (garbanzo beans, bengal gram), dry
-risotto_rice	2512381	Rice, white, long grain, unenriched, raw
 dry_white_wine	174837	Alcoholic beverage, wine, table, white
 vinegar	172237	Vinegar, distilled
 baguette	325871	Bread, white, commercially prepared
@@ -216,6 +216,9 @@ pigs_trotters	2514745	Pork, ground, raw
 green_chili_paste	170497	Peppers, hot chili, green, raw
 dried_sage	168007	Sage Valley, Gluten Free Vanilla Sandwich Cookies
 concentrated_orange_juice	746771	Oranges, raw, navels
+black_quinoa	168874	Quinoa, uncooked
+nutritional_yeast	167717	Yeast extract spread
+hass_avocado	2710824	Avocado, Hass, peeled, raw
 udon	168905	Noodles, chinese, chow mein
 green_apple	1105547	Apples, honeycrisp, with skin, raw
 soya_flour	789890	Flour, wheat, all-purpose, enriched, bleached
@@ -231,10 +234,11 @@ marmalade	168819	Marmalade, orange
 dark_chocolate_chunks	169592	Candies, SPECIAL DARK Chocolate Bar
 pomegranate	169134	Pomegranates, raw
 red_shallot	2727586	Shallots, bulb, peeled, root removed, raw
+finger_millet	2512379	Millet, whole grain
 whole_chicken	2727566	Chicken, drumstick, meat and skin, raw
+curry	170924	Spices, curry powder
 pulp	2003591	Orange juice, no pulp, not fortified, from concentrate, refrigerated
 dried_lentils	2644283	Lentils, dry
-millet	2512379	Millet, whole grain
 garlic_puree	1104647	Garlic, raw
 cauliflower_florets	2685573	Cauliflower, raw
 matoki	173944	Bananas, raw
@@ -250,8 +254,6 @@ cooked_basmati_rice	2512381	Rice, white, long grain, unenriched, raw
 kalamata_olive	332791	Olives, green, Manzanilla, stuffed with pimiento
 pearl_barley	170284	Barley, pearled, raw
 raw_cassava	169985	Cassava, raw
-nutritional_yeast	167717	Yeast extract spread
-quinoa	168874	Quinoa, uncooked
 durum_wheat_flour	168890	Wheat, hard red winter
 artichoke_heart	169205	Artichokes, (globe or french), raw
 chicken_breast_fillet	2727566	Chicken, drumstick, meat and skin, raw

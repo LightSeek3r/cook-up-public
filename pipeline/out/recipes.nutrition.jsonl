@@ -39,6 +39,7 @@
 {"id":103038,"nutrition_coverage":0.7692,"kcal":27,"protein_g":14.75,"fat_g":1.57,"carb_g":5.24,"fiber_g":4.49,"sodium_mg":365.03,"sat_fat_g":0.38,"sugar_g":0.21,"balance_grade":"A","balance_score":82}
 {"id":103063,"nutrition_coverage":0.8,"kcal":1015.66,"protein_g":104.3,"fat_g":33,"carb_g":77.95,"fiber_g":3.07,"sodium_mg":435.6,"sat_fat_g":14.58,"sugar_g":0,"balance_grade":"A","balance_score":80}
 {"id":103108,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":103131,"nutrition_coverage":0.5556,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":103278,"nutrition_coverage":1,"kcal":1181.89,"protein_g":22.4,"fat_g":98.5,"carb_g":53.33,"fiber_g":9.94,"sodium_mg":864.15,"sat_fat_g":60.13,"sugar_g":9.98,"balance_grade":"C","balance_score":53}
 {"id":103364,"nutrition_coverage":0.4,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":103462,"nutrition_coverage":0.4545,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -182,6 +183,7 @@
 {"id":110667,"nutrition_coverage":0.5556,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":110766,"nutrition_coverage":1,"kcal":1842.78,"protein_g":6.67,"fat_g":1.61,"carb_g":468.99,"fiber_g":0,"sodium_mg":100.06,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":65}
 {"id":110777,"nutrition_coverage":0.875,"kcal":1171.21,"protein_g":26.33,"fat_g":6.63,"carb_g":257.62,"fiber_g":0.69,"sodium_mg":1750.34,"sat_fat_g":0.07,"sugar_g":99.8,"balance_grade":"C","balance_score":53}
+{"id":110789,"nutrition_coverage":0.8,"kcal":182.74,"protein_g":17.16,"fat_g":1.33,"carb_g":39.82,"fiber_g":3.43,"sodium_mg":1181.34,"sat_fat_g":1.4,"sugar_g":0.08,"balance_grade":"B","balance_score":71}
 {"id":110796,"nutrition_coverage":0.75,"kcal":59.16,"protein_g":0.63,"fat_g":2.43,"carb_g":4.01,"fiber_g":0,"sodium_mg":594.09,"sat_fat_g":0.34,"sugar_g":0.05,"balance_grade":"B","balance_score":71}
 {"id":110866,"nutrition_coverage":0.8333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":110873,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -291,6 +293,7 @@
 {"id":116650,"nutrition_coverage":0.8889,"kcal":528.35,"protein_g":9.25,"fat_g":45.36,"carb_g":88.63,"fiber_g":10.32,"sodium_mg":26.57,"sat_fat_g":9.22,"sugar_g":61.01,"balance_grade":"B","balance_score":60}
 {"id":11675,"nutrition_coverage":1,"kcal":900.15,"protein_g":11.53,"fat_g":26.5,"carb_g":157.43,"fiber_g":1.31,"sodium_mg":977.3,"sat_fat_g":5.11,"sugar_g":80.22,"balance_grade":"C","balance_score":53}
 {"id":11687,"nutrition_coverage":0.8889,"kcal":446.86,"protein_g":55.49,"fat_g":23.48,"carb_g":1.46,"fiber_g":0.74,"sodium_mg":930.32,"sat_fat_g":7.83,"sugar_g":0.02,"balance_grade":"B","balance_score":65}
+{"id":117608,"nutrition_coverage":1,"kcal":156.4,"protein_g":6,"fat_g":2.58,"carb_g":27.27,"fiber_g":2.98,"sodium_mg":34.49,"sat_fat_g":0.3,"sugar_g":0,"balance_grade":"B","balance_score":76}
 {"id":117889,"nutrition_coverage":1,"kcal":236.92,"protein_g":0.07,"fat_g":0.19,"carb_g":58.46,"fiber_g":0.07,"sodium_mg":10.54,"sat_fat_g":0.01,"sugar_g":9.71,"balance_grade":"B","balance_score":73}
 {"id":11800,"nutrition_coverage":1,"kcal":230.62,"protein_g":18.74,"fat_g":5.58,"carb_g":25.85,"fiber_g":1.97,"sodium_mg":58.37,"sat_fat_g":0,"sugar_g":0,"balance_grade":"A","balance_score":80}
 {"id":118583,"nutrition_coverage":0.8,"kcal":482.61,"protein_g":0.27,"fat_g":0.24,"carb_g":124.94,"fiber_g":0.42,"sodium_mg":23.61,"sat_fat_g":0.01,"sugar_g":61,"balance_grade":"C","balance_score":49}
@@ -301,6 +304,7 @@
 {"id":118905,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":118926,"nutrition_coverage":0.7273,"kcal":678.29,"protein_g":46.72,"fat_g":44.32,"carb_g":28.25,"fiber_g":5.72,"sodium_mg":280,"sat_fat_g":26.07,"sugar_g":19.03,"balance_grade":"B","balance_score":75}
 {"id":119068,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":119078,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":119231,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":119575,"nutrition_coverage":0.7143,"kcal":105.5,"protein_g":15.4,"fat_g":4.19,"carb_g":0.44,"fiber_g":0.11,"sodium_mg":74.42,"sat_fat_g":0.9,"sugar_g":0.01,"balance_grade":"A","balance_score":80}
 {"id":11958,"nutrition_coverage":1,"kcal":150,"protein_g":12.3,"fat_g":10.3,"carb_g":0.91,"fiber_g":0,"sodium_mg":121,"sat_fat_g":1.39,"sugar_g":0,"balance_grade":"B","balance_score":76}
@@ -386,6 +390,7 @@
 {"id":127707,"nutrition_coverage":0.75,"kcal":51.48,"protein_g":4.06,"fat_g":1.18,"carb_g":8.66,"fiber_g":1.67,"sodium_mg":379.69,"sat_fat_g":0.05,"sugar_g":1.5,"balance_grade":"B","balance_score":73}
 {"id":127715,"nutrition_coverage":0.5556,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":127733,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":127735,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":127740,"nutrition_coverage":0.8333,"kcal":266.88,"protein_g":13.66,"fat_g":11.57,"carb_g":27.23,"fiber_g":2.71,"sodium_mg":584.85,"sat_fat_g":4.06,"sugar_g":0.91,"balance_grade":"B","balance_score":73}
 {"id":127783,"nutrition_coverage":0.8333,"kcal":76.99,"protein_g":0.28,"fat_g":7.05,"carb_g":4.18,"fiber_g":0.79,"sodium_mg":2.43,"sat_fat_g":1.14,"sugar_g":2.14,"balance_grade":"B","balance_score":69}
 {"id":127784,"nutrition_coverage":0.75,"kcal":295.68,"protein_g":26.49,"fat_g":18.82,"carb_g":10.55,"fiber_g":1.49,"sodium_mg":438.96,"sat_fat_g":0.61,"sugar_g":1.66,"balance_grade":"B","balance_score":76}
@@ -507,6 +512,7 @@
 {"id":13847,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":13885,"nutrition_coverage":1,"kcal":554.76,"protein_g":12.13,"fat_g":21.97,"carb_g":78.75,"fiber_g":0.92,"sodium_mg":193.05,"sat_fat_g":13.22,"sugar_g":28.09,"balance_grade":"B","balance_score":65}
 {"id":13911,"nutrition_coverage":1,"kcal":376.76,"protein_g":12.52,"fat_g":23.77,"carb_g":33.53,"fiber_g":3.17,"sodium_mg":202.94,"sat_fat_g":13.03,"sugar_g":2.52,"balance_grade":"B","balance_score":73}
+{"id":13914,"nutrition_coverage":0.3,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":139257,"nutrition_coverage":1,"kcal":604.97,"protein_g":40.94,"fat_g":39.93,"carb_g":19.12,"fiber_g":0.29,"sodium_mg":527.87,"sat_fat_g":14.33,"sugar_g":15.66,"balance_grade":"B","balance_score":64}
 {"id":139284,"nutrition_coverage":0.4167,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":139286,"nutrition_coverage":0.8,"kcal":88.73,"protein_g":4.58,"fat_g":3.46,"carb_g":10.28,"fiber_g":2.25,"sodium_mg":54.02,"sat_fat_g":1.26,"sugar_g":1.64,"balance_grade":"A","balance_score":80}
@@ -666,6 +672,7 @@
 {"id":166802,"nutrition_coverage":1,"kcal":20.76,"protein_g":1.37,"fat_g":1.08,"carb_g":2.07,"fiber_g":1.46,"sodium_mg":357.9,"sat_fat_g":1.75,"sugar_g":0.3,"balance_grade":"B","balance_score":60}
 {"id":166814,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":16682,"nutrition_coverage":0.1667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":166836,"nutrition_coverage":0.8,"kcal":197.15,"protein_g":12.08,"fat_g":4.11,"carb_g":35.96,"fiber_g":1.9,"sodium_mg":7.86,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":78}
 {"id":167001,"nutrition_coverage":0.5556,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":167105,"nutrition_coverage":0.6923,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":167224,"nutrition_coverage":1,"kcal":60.84,"protein_g":5.8,"fat_g":3.63,"carb_g":1.23,"fiber_g":0,"sodium_mg":960.24,"sat_fat_g":1.87,"sugar_g":1.08,"balance_grade":"B","balance_score":67}
@@ -674,6 +681,7 @@
 {"id":167301,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":167445,"nutrition_coverage":0.8,"kcal":1637.16,"protein_g":47.95,"fat_g":5.96,"carb_g":357.73,"fiber_g":0.92,"sodium_mg":6289.08,"sat_fat_g":0,"sugar_g":0.23,"balance_grade":"B","balance_score":62}
 {"id":167451,"nutrition_coverage":1,"kcal":137.25,"protein_g":4.09,"fat_g":0.55,"carb_g":28.99,"fiber_g":0,"sodium_mg":1935.75,"sat_fat_g":0,"sugar_g":0,"balance_grade":"C","balance_score":56}
+{"id":167460,"nutrition_coverage":1,"kcal":260.41,"protein_g":8.01,"fat_g":2.33,"carb_g":52.09,"fiber_g":0,"sodium_mg":15.03,"sat_fat_g":0.72,"sugar_g":2.02,"balance_grade":"B","balance_score":75}
 {"id":167543,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":167676,"nutrition_coverage":1,"kcal":812.37,"protein_g":23.99,"fat_g":3.29,"carb_g":173.53,"fiber_g":0.16,"sodium_mg":1191.4,"sat_fat_g":0.01,"sugar_g":0,"balance_grade":"B","balance_score":65}
 {"id":167913,"nutrition_coverage":0.625,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -683,6 +691,7 @@
 {"id":168039,"nutrition_coverage":1,"kcal":432,"protein_g":16.31,"fat_g":6.01,"carb_g":77.7,"fiber_g":0,"sodium_mg":842.14,"sat_fat_g":0.72,"sugar_g":0,"balance_grade":"B","balance_score":65}
 {"id":168353,"nutrition_coverage":0.875,"kcal":191.97,"protein_g":1.39,"fat_g":1.19,"carb_g":46.91,"fiber_g":2.51,"sodium_mg":400.28,"sat_fat_g":0.01,"sugar_g":16.3,"balance_grade":"B","balance_score":76}
 {"id":168434,"nutrition_coverage":0.8,"kcal":22.46,"protein_g":0.22,"fat_g":0.25,"carb_g":5.49,"fiber_g":0.45,"sodium_mg":196.79,"sat_fat_g":0.04,"sugar_g":0.32,"balance_grade":"B","balance_score":73}
+{"id":168493,"nutrition_coverage":1,"kcal":138.44,"protein_g":1.4,"fat_g":2.38,"carb_g":31.78,"fiber_g":2.83,"sodium_mg":591.1,"sat_fat_g":0.99,"sugar_g":1.19,"balance_grade":"B","balance_score":78}
 {"id":168496,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":168570,"nutrition_coverage":0.75,"kcal":106.21,"protein_g":11.23,"fat_g":4.72,"carb_g":4.24,"fiber_g":0.05,"sodium_mg":1195.05,"sat_fat_g":2.2,"sugar_g":0,"balance_grade":"C","balance_score":58}
 {"id":168573,"nutrition_coverage":0.8333,"kcal":208.07,"protein_g":21.38,"fat_g":12.13,"carb_g":3.85,"fiber_g":1.67,"sodium_mg":203.03,"sat_fat_g":3.56,"sugar_g":0,"balance_grade":"A","balance_score":80}
@@ -793,6 +802,7 @@
 {"id":18243,"nutrition_coverage":0.8,"kcal":670.53,"protein_g":43.5,"fat_g":45.22,"carb_g":5.61,"fiber_g":1.1,"sodium_mg":204.31,"sat_fat_g":15.66,"sugar_g":3.06,"balance_grade":"B","balance_score":69}
 {"id":18244,"nutrition_coverage":1,"kcal":781.35,"protein_g":104.45,"fat_g":7.58,"carb_g":87.44,"fiber_g":43.97,"sodium_mg":26.3,"sat_fat_g":1.08,"sugar_g":0.02,"balance_grade":"A","balance_score":85}
 {"id":18246,"nutrition_coverage":0.75,"kcal":412.1,"protein_g":27.23,"fat_g":26.49,"carb_g":18.13,"fiber_g":2.89,"sodium_mg":195.49,"sat_fat_g":11.38,"sugar_g":0,"balance_grade":"B","balance_score":76}
+{"id":18247,"nutrition_coverage":0.7143,"kcal":34.86,"protein_g":13.08,"fat_g":1,"carb_g":7.72,"fiber_g":4.34,"sodium_mg":33.41,"sat_fat_g":0,"sugar_g":0,"balance_grade":"A","balance_score":96}
 {"id":18248,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":18251,"nutrition_coverage":0.6154,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":182982,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -823,6 +833,7 @@
 {"id":188298,"nutrition_coverage":0.7143,"kcal":212.69,"protein_g":10.46,"fat_g":7.74,"carb_g":29.24,"fiber_g":4.18,"sodium_mg":508.62,"sat_fat_g":0.89,"sugar_g":0.85,"balance_grade":"B","balance_score":76}
 {"id":18842,"nutrition_coverage":1,"kcal":466.54,"protein_g":25.38,"fat_g":27.7,"carb_g":28.91,"fiber_g":0.93,"sodium_mg":570.69,"sat_fat_g":7.09,"sugar_g":0,"balance_grade":"B","balance_score":75}
 {"id":188683,"nutrition_coverage":0.7,"kcal":428.69,"protein_g":13.66,"fat_g":4.19,"carb_g":84.5,"fiber_g":3.97,"sodium_mg":612.7,"sat_fat_g":1.69,"sugar_g":1.93,"balance_grade":"B","balance_score":75}
+{"id":18871,"nutrition_coverage":0.8333,"kcal":43.53,"protein_g":1.36,"fat_g":0.64,"carb_g":9,"fiber_g":2.14,"sodium_mg":33.14,"sat_fat_g":4.47,"sugar_g":2.49,"balance_grade":"B","balance_score":73}
 {"id":18873,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":18875,"nutrition_coverage":0.8333,"kcal":210.37,"protein_g":12.92,"fat_g":34.75,"carb_g":14.98,"fiber_g":2.92,"sodium_mg":595.96,"sat_fat_g":8.04,"sugar_g":0,"balance_grade":"B","balance_score":75}
 {"id":18877,"nutrition_coverage":0.8333,"kcal":404.08,"protein_g":32.9,"fat_g":48.82,"carb_g":8.75,"fiber_g":0.61,"sodium_mg":706.24,"sat_fat_g":13.83,"sugar_g":0,"balance_grade":"B","balance_score":64}
@@ -1298,7 +1309,9 @@
 {"id":213011,"nutrition_coverage":0.4444,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":213438,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":213639,"nutrition_coverage":1,"kcal":18.78,"protein_g":0.01,"fat_g":0,"carb_g":4.5,"fiber_g":0.04,"sodium_mg":0.64,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":71}
+{"id":213798,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":213812,"nutrition_coverage":1,"kcal":122.67,"protein_g":7.32,"fat_g":1.42,"carb_g":21.69,"fiber_g":2.78,"sodium_mg":215.21,"sat_fat_g":0.06,"sugar_g":0,"balance_grade":"A","balance_score":85}
+{"id":214042,"nutrition_coverage":0.7778,"kcal":590.37,"protein_g":18.32,"fat_g":10.65,"carb_g":103.11,"fiber_g":1.32,"sodium_mg":1437.69,"sat_fat_g":5.77,"sugar_g":0.04,"balance_grade":"B","balance_score":60}
 {"id":214381,"nutrition_coverage":0.5556,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":214394,"nutrition_coverage":0.75,"kcal":287.05,"protein_g":17.67,"fat_g":10.13,"carb_g":30.94,"fiber_g":3.12,"sodium_mg":588.67,"sat_fat_g":0.75,"sugar_g":0.45,"balance_grade":"B","balance_score":75}
 {"id":214526,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1334,6 +1347,7 @@
 {"id":21814,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":218195,"nutrition_coverage":1,"kcal":1607,"protein_g":5.18,"fat_g":120.23,"carb_g":130.54,"fiber_g":2.57,"sodium_mg":15.95,"sat_fat_g":71.14,"sugar_g":2.5,"balance_grade":"C","balance_score":45}
 {"id":21833,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":21837,"nutrition_coverage":0.8182,"kcal":566.13,"protein_g":41.07,"fat_g":13.5,"carb_g":66.03,"fiber_g":1.8,"sodium_mg":113.46,"sat_fat_g":1.54,"sugar_g":0.3,"balance_grade":"A","balance_score":80}
 {"id":21838,"nutrition_coverage":0.875,"kcal":281.16,"protein_g":12.09,"fat_g":17.48,"carb_g":37.21,"fiber_g":0.01,"sodium_mg":136.06,"sat_fat_g":2.13,"sugar_g":0.16,"balance_grade":"B","balance_score":75}
 {"id":21839,"nutrition_coverage":0.4444,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":21840,"nutrition_coverage":0.75,"kcal":843.04,"protein_g":34.66,"fat_g":48.79,"carb_g":69.09,"fiber_g":0.13,"sodium_mg":252.23,"sat_fat_g":19.28,"sugar_g":0.28,"balance_grade":"B","balance_score":75}
@@ -1377,6 +1391,7 @@
 {"id":223408,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":22344,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":223625,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":22382,"nutrition_coverage":0.75,"kcal":577.04,"protein_g":56.8,"fat_g":16.8,"carb_g":25.71,"fiber_g":4.82,"sodium_mg":187.85,"sat_fat_g":0,"sugar_g":0.74,"balance_grade":"A","balance_score":80}
 {"id":224062,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":224070,"nutrition_coverage":0.8889,"kcal":620.43,"protein_g":31.36,"fat_g":44.85,"carb_g":27.07,"fiber_g":5.55,"sodium_mg":1763.79,"sat_fat_g":36.18,"sugar_g":5.95,"balance_grade":"B","balance_score":60}
 {"id":22409,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1424,7 +1439,10 @@
 {"id":23358,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":234135,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":234180,"nutrition_coverage":0.75,"kcal":682.13,"protein_g":7.92,"fat_g":27.32,"carb_g":106.13,"fiber_g":10.2,"sodium_mg":21.38,"sat_fat_g":22.69,"sugar_g":5.17,"balance_grade":"B","balance_score":60}
+{"id":23426,"nutrition_coverage":0.2,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":23503,"nutrition_coverage":1,"kcal":1326.66,"protein_g":66.01,"fat_g":47.74,"carb_g":164.22,"fiber_g":16,"sodium_mg":1724.27,"sat_fat_g":36.45,"sugar_g":10.87,"balance_grade":"B","balance_score":75}
 {"id":23535,"nutrition_coverage":1,"kcal":618.16,"protein_g":3.91,"fat_g":24.66,"carb_g":94.4,"fiber_g":0,"sodium_mg":295.25,"sat_fat_g":4.94,"sugar_g":54.3,"balance_grade":"B","balance_score":65}
+{"id":235650,"nutrition_coverage":0.1429,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":236148,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":23653,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":236558,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1507,6 +1525,7 @@
 {"id":25636,"nutrition_coverage":1,"kcal":217,"protein_g":4.65,"fat_g":6.81,"carb_g":43.83,"fiber_g":0.22,"sodium_mg":140.3,"sat_fat_g":0.01,"sugar_g":0.58,"balance_grade":"B","balance_score":73}
 {"id":257299,"nutrition_coverage":0.7647,"kcal":267.79,"protein_g":4.25,"fat_g":18.64,"carb_g":35.67,"fiber_g":16.28,"sodium_mg":15.84,"sat_fat_g":8.74,"sugar_g":0.86,"balance_grade":"B","balance_score":71}
 {"id":25766,"nutrition_coverage":0.7692,"kcal":222.66,"protein_g":7.66,"fat_g":17.61,"carb_g":14.11,"fiber_g":1.95,"sodium_mg":539.62,"sat_fat_g":10.09,"sugar_g":0.05,"balance_grade":"B","balance_score":64}
+{"id":257781,"nutrition_coverage":0.5833,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":25781,"nutrition_coverage":1,"kcal":294.51,"protein_g":6.74,"fat_g":9.77,"carb_g":51.89,"fiber_g":2.08,"sodium_mg":146.86,"sat_fat_g":3.91,"sugar_g":11.13,"balance_grade":"B","balance_score":69}
 {"id":257889,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":257890,"nutrition_coverage":0.75,"kcal":642.52,"protein_g":44.5,"fat_g":46.72,"carb_g":7.97,"fiber_g":1.84,"sodium_mg":135.36,"sat_fat_g":0.01,"sugar_g":0,"balance_grade":"B","balance_score":78}
@@ -1595,6 +1614,7 @@
 {"id":28497,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":285181,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":28521,"nutrition_coverage":1,"kcal":655.75,"protein_g":17.44,"fat_g":9.78,"carb_g":125.99,"fiber_g":0.11,"sodium_mg":1187.99,"sat_fat_g":4.85,"sugar_g":0,"balance_grade":"C","balance_score":58}
+{"id":285226,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":285283,"nutrition_coverage":0.3636,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":28561,"nutrition_coverage":0.75,"kcal":37.48,"protein_g":0.8,"fat_g":2.19,"carb_g":5.4,"fiber_g":3.64,"sodium_mg":32.52,"sat_fat_g":0.31,"sugar_g":0.16,"balance_grade":"B","balance_score":71}
 {"id":28669,"nutrition_coverage":1,"kcal":177.03,"protein_g":6.21,"fat_g":10.03,"carb_g":17.26,"fiber_g":2.23,"sodium_mg":131.69,"sat_fat_g":19.46,"sugar_g":1,"balance_grade":"B","balance_score":64}
@@ -1617,6 +1637,7 @@
 {"id":290907,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":290958,"nutrition_coverage":0.75,"kcal":157.08,"protein_g":1.79,"fat_g":12.3,"carb_g":11.95,"fiber_g":0,"sodium_mg":15.12,"sat_fat_g":10.21,"sugar_g":0,"balance_grade":"C","balance_score":51}
 {"id":29145,"nutrition_coverage":0.4286,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":291664,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":292859,"nutrition_coverage":0.4643,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":293424,"nutrition_coverage":0.8333,"kcal":267.21,"protein_g":13.12,"fat_g":19.72,"carb_g":11.97,"fiber_g":3.89,"sodium_mg":392.77,"sat_fat_g":8.33,"sugar_g":0.01,"balance_grade":"B","balance_score":75}
 {"id":293425,"nutrition_coverage":0.75,"kcal":255.04,"protein_g":8.26,"fat_g":1.59,"carb_g":54.03,"fiber_g":1.26,"sodium_mg":142.23,"sat_fat_g":0,"sugar_g":0,"balance_grade":"A","balance_score":84}
@@ -1695,6 +1716,7 @@
 {"id":306075,"nutrition_coverage":0.75,"kcal":122.02,"protein_g":16.66,"fat_g":3.23,"carb_g":6.88,"fiber_g":0.12,"sodium_mg":1058.62,"sat_fat_g":0.95,"sugar_g":0,"balance_grade":"B","balance_score":71}
 {"id":306098,"nutrition_coverage":0.8,"kcal":940.13,"protein_g":50.82,"fat_g":17.32,"carb_g":147.95,"fiber_g":4.97,"sodium_mg":101.95,"sat_fat_g":3.23,"sugar_g":0.04,"balance_grade":"A","balance_score":80}
 {"id":306754,"nutrition_coverage":0.8571,"kcal":155.45,"protein_g":2.56,"fat_g":6.33,"carb_g":22.62,"fiber_g":0.01,"sodium_mg":107.36,"sat_fat_g":1.15,"sugar_g":0.01,"balance_grade":"B","balance_score":60}
+{"id":306887,"nutrition_coverage":1,"kcal":292.8,"protein_g":8.72,"fat_g":1.18,"carb_g":61.84,"fiber_g":0,"sodium_mg":3.97,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":75}
 {"id":30691,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":30692,"nutrition_coverage":0.75,"kcal":94.77,"protein_g":1.38,"fat_g":2.78,"carb_g":18.1,"fiber_g":2.62,"sodium_mg":149.8,"sat_fat_g":0.35,"sugar_g":2.55,"balance_grade":"A","balance_score":82}
 {"id":306955,"nutrition_coverage":0.7273,"kcal":129.95,"protein_g":2.63,"fat_g":21.5,"carb_g":10.29,"fiber_g":3.07,"sodium_mg":1453.34,"sat_fat_g":6.24,"sugar_g":0.55,"balance_grade":"C","balance_score":49}
@@ -1716,6 +1738,7 @@
 {"id":31180,"nutrition_coverage":1,"kcal":884.69,"protein_g":63.9,"fat_g":59.15,"carb_g":16.64,"fiber_g":2.4,"sodium_mg":3624.07,"sat_fat_g":15.82,"sugar_g":0.05,"balance_grade":"B","balance_score":64}
 {"id":31181,"nutrition_coverage":1,"kcal":70.6,"protein_g":2.74,"fat_g":5.44,"carb_g":0.71,"fiber_g":0.01,"sodium_mg":117.53,"sat_fat_g":1.83,"sugar_g":0.23,"balance_grade":"B","balance_score":64}
 {"id":31266,"nutrition_coverage":0.8,"kcal":407.33,"protein_g":12.29,"fat_g":13.42,"carb_g":67.73,"fiber_g":11.56,"sodium_mg":7238.4,"sat_fat_g":1.65,"sugar_g":0.77,"balance_grade":"B","balance_score":67}
+{"id":31311,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":31507,"nutrition_coverage":1,"kcal":2.73,"protein_g":0.07,"fat_g":0.06,"carb_g":0.61,"fiber_g":0.15,"sodium_mg":115.32,"sat_fat_g":0.01,"sugar_g":0.4,"balance_grade":"C","balance_score":53}
 {"id":31849,"nutrition_coverage":0.8333,"kcal":67.1,"protein_g":4.48,"fat_g":1.75,"carb_g":10.81,"fiber_g":3.85,"sodium_mg":769.86,"sat_fat_g":0.53,"sugar_g":1.31,"balance_grade":"B","balance_score":71}
 {"id":31852,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1735,6 +1758,7 @@
 {"id":32970,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":32973,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":33031,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":33062,"nutrition_coverage":0.7,"kcal":256.25,"protein_g":2.4,"fat_g":23.96,"carb_g":12.46,"fiber_g":2.75,"sodium_mg":867.53,"sat_fat_g":19.18,"sugar_g":0.1,"balance_grade":"C","balance_score":53}
 {"id":33064,"nutrition_coverage":1,"kcal":317.67,"protein_g":17.95,"fat_g":7.55,"carb_g":43.55,"fiber_g":7.45,"sodium_mg":1589.98,"sat_fat_g":2,"sugar_g":7.49,"balance_grade":"B","balance_score":67}
 {"id":33066,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":33222,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1785,8 +1809,13 @@
 {"id":3588,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":3593,"nutrition_coverage":0.8333,"kcal":346.73,"protein_g":48.22,"fat_g":14.92,"carb_g":2.06,"fiber_g":1.06,"sodium_mg":116.77,"sat_fat_g":0.12,"sugar_g":0.11,"balance_grade":"B","balance_score":78}
 {"id":359627,"nutrition_coverage":0.75,"kcal":846.82,"protein_g":49.55,"fat_g":44.08,"carb_g":63.73,"fiber_g":5.87,"sodium_mg":722.11,"sat_fat_g":0.67,"sugar_g":0,"balance_grade":"B","balance_score":78}
+{"id":359628,"nutrition_coverage":1,"kcal":376.88,"protein_g":7.4,"fat_g":23.45,"carb_g":63.8,"fiber_g":1.6,"sodium_mg":165.27,"sat_fat_g":0.92,"sugar_g":3.62,"balance_grade":"B","balance_score":73}
+{"id":359630,"nutrition_coverage":0.75,"kcal":16.27,"protein_g":0.63,"fat_g":0.03,"carb_g":4.81,"fiber_g":0.48,"sodium_mg":0.91,"sat_fat_g":0,"sugar_g":3.32,"balance_grade":"B","balance_score":76}
+{"id":360467,"nutrition_coverage":0.9,"kcal":284.53,"protein_g":18.9,"fat_g":4.75,"carb_g":50.06,"fiber_g":1.12,"sodium_mg":2209.31,"sat_fat_g":0.22,"sugar_g":1.3,"balance_grade":"B","balance_score":64}
+{"id":360469,"nutrition_coverage":1,"kcal":45.42,"protein_g":0.28,"fat_g":5,"carb_g":1.33,"fiber_g":0.53,"sodium_mg":8.38,"sat_fat_g":4.11,"sugar_g":0.44,"balance_grade":"C","balance_score":49}
 {"id":360478,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":360622,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":360624,"nutrition_coverage":0.875,"kcal":254.17,"protein_g":5.4,"fat_g":4.42,"carb_g":52.73,"fiber_g":5.98,"sodium_mg":347.97,"sat_fat_g":3.33,"sugar_g":20.55,"balance_grade":"B","balance_score":71}
 {"id":360917,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":361319,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":36151,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1836,6 +1865,7 @@
 {"id":380508,"nutrition_coverage":0.2,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":38074,"nutrition_coverage":1,"kcal":144.48,"protein_g":6.24,"fat_g":15.9,"carb_g":25.59,"fiber_g":3.74,"sodium_mg":23.79,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":73}
 {"id":38078,"nutrition_coverage":1,"kcal":9.02,"protein_g":0.27,"fat_g":11.59,"carb_g":1.91,"fiber_g":0,"sodium_mg":2.65,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":73}
+{"id":380848,"nutrition_coverage":0.8333,"kcal":51.01,"protein_g":1.79,"fat_g":3.6,"carb_g":3.4,"fiber_g":0.86,"sodium_mg":475.52,"sat_fat_g":0.51,"sugar_g":0.18,"balance_grade":"B","balance_score":60}
 {"id":38086,"nutrition_coverage":0.8571,"kcal":615.76,"protein_g":17.01,"fat_g":46.59,"carb_g":49.34,"fiber_g":6.62,"sodium_mg":136.48,"sat_fat_g":11.3,"sugar_g":31.52,"balance_grade":"B","balance_score":60}
 {"id":38091,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":38104,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -1859,6 +1889,7 @@
 {"id":38404,"nutrition_coverage":1,"kcal":33.53,"protein_g":4.97,"fat_g":6.83,"carb_g":1.12,"fiber_g":0.03,"sodium_mg":681.68,"sat_fat_g":0.28,"sugar_g":0.54,"balance_grade":"B","balance_score":69}
 {"id":38412,"nutrition_coverage":0.2,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":385022,"nutrition_coverage":1,"kcal":346.48,"protein_g":16.77,"fat_g":9.99,"carb_g":47.96,"fiber_g":0.61,"sodium_mg":143.61,"sat_fat_g":17.46,"sugar_g":0,"balance_grade":"B","balance_score":73}
+{"id":38515,"nutrition_coverage":0.3846,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":38523,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":38535,"nutrition_coverage":1,"kcal":558.16,"protein_g":23.4,"fat_g":28.66,"carb_g":59.38,"fiber_g":4.66,"sodium_mg":1481.06,"sat_fat_g":9.96,"sugar_g":1.16,"balance_grade":"B","balance_score":69}
 {"id":38544,"nutrition_coverage":0.8571,"kcal":783.65,"protein_g":9.77,"fat_g":63.22,"carb_g":44.66,"fiber_g":2.95,"sodium_mg":57.75,"sat_fat_g":33.86,"sugar_g":0.42,"balance_grade":"C","balance_score":53}
@@ -1936,6 +1967,14 @@
 {"id":403553,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":403907,"nutrition_coverage":0.375,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":404200,"nutrition_coverage":0.9091,"kcal":427.76,"protein_g":19.14,"fat_g":17.4,"carb_g":55.97,"fiber_g":8.68,"sodium_mg":535.94,"sat_fat_g":1.8,"sugar_g":2.6,"balance_grade":"A","balance_score":84}
+{"id":404201,"nutrition_coverage":1,"kcal":848.14,"protein_g":33.9,"fat_g":70.45,"carb_g":35.15,"fiber_g":16.1,"sodium_mg":32.74,"sat_fat_g":5.14,"sugar_g":7.58,"balance_grade":"A","balance_score":87}
+{"id":404203,"nutrition_coverage":0.8889,"kcal":860.24,"protein_g":16.34,"fat_g":60.17,"carb_g":80.5,"fiber_g":5.92,"sodium_mg":50.6,"sat_fat_g":22.53,"sugar_g":62.46,"balance_grade":"B","balance_score":64}
+{"id":404204,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":404205,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":404206,"nutrition_coverage":0.75,"kcal":634.24,"protein_g":13.75,"fat_g":34.38,"carb_g":73.51,"fiber_g":8.08,"sodium_mg":1422.75,"sat_fat_g":9.1,"sugar_g":0.63,"balance_grade":"C","balance_score":55}
+{"id":404207,"nutrition_coverage":0.8571,"kcal":176.73,"protein_g":8.47,"fat_g":3.88,"carb_g":30.58,"fiber_g":9.71,"sodium_mg":1387.47,"sat_fat_g":2.39,"sugar_g":0.27,"balance_grade":"B","balance_score":75}
+{"id":404208,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":404209,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":404301,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":404365,"nutrition_coverage":0.5556,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":404658,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2016,6 +2055,7 @@
 {"id":415267,"nutrition_coverage":1,"kcal":456.51,"protein_g":9.43,"fat_g":14.68,"carb_g":72.54,"fiber_g":0.05,"sodium_mg":664.45,"sat_fat_g":2.78,"sugar_g":0.01,"balance_grade":"B","balance_score":64}
 {"id":415277,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":415341,"nutrition_coverage":1,"kcal":267.76,"protein_g":8.26,"fat_g":3.11,"carb_g":57.26,"fiber_g":6.25,"sodium_mg":337.63,"sat_fat_g":0.01,"sugar_g":0.02,"balance_grade":"B","balance_score":78}
+{"id":415349,"nutrition_coverage":1,"kcal":242.78,"protein_g":6.34,"fat_g":3.32,"carb_g":46.93,"fiber_g":5.31,"sodium_mg":596.81,"sat_fat_g":0.54,"sugar_g":1.1,"balance_grade":"B","balance_score":75}
 {"id":415428,"nutrition_coverage":1,"kcal":58.56,"protein_g":1.74,"fat_g":0.24,"carb_g":12.37,"fiber_g":0,"sodium_mg":473.46,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":60}
 {"id":415433,"nutrition_coverage":0.6364,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":415603,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2040,6 +2080,7 @@
 {"id":417718,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":418864,"nutrition_coverage":0.2857,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":419915,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":42010,"nutrition_coverage":1,"kcal":42.28,"protein_g":1.03,"fat_g":0.29,"carb_g":9.64,"fiber_g":1.89,"sodium_mg":2.28,"sat_fat_g":2.29,"sugar_g":0.01,"balance_grade":"B","balance_score":75}
 {"id":420643,"nutrition_coverage":0.1667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":420644,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":420698,"nutrition_coverage":0.6875,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2211,6 +2252,7 @@
 {"id":447188,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447203,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447215,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":447220,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447234,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447252,"nutrition_coverage":0.8,"kcal":780.19,"protein_g":24.73,"fat_g":5,"carb_g":159.27,"fiber_g":0.24,"sodium_mg":152.74,"sat_fat_g":1.16,"sugar_g":0.06,"balance_grade":"B","balance_score":76}
 {"id":447255,"nutrition_coverage":1,"kcal":381.32,"protein_g":8.17,"fat_g":9.97,"carb_g":72.43,"fiber_g":1.92,"sodium_mg":229.5,"sat_fat_g":2.09,"sugar_g":8.12,"balance_grade":"B","balance_score":71}
@@ -2234,6 +2276,7 @@
 {"id":447558,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447566,"nutrition_coverage":0.2,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447573,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":447593,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447595,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447597,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447599,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2242,11 +2285,17 @@
 {"id":447636,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447637,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447638,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":447640,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":447642,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447643,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":44775,"nutrition_coverage":0.8889,"kcal":394.35,"protein_g":6.53,"fat_g":28.18,"carb_g":35.05,"fiber_g":5.88,"sodium_mg":44.34,"sat_fat_g":4.11,"sugar_g":4.67,"balance_grade":"A","balance_score":84}
 {"id":447782,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447783,"nutrition_coverage":1,"kcal":264.08,"protein_g":6.72,"fat_g":27.37,"carb_g":15.83,"fiber_g":0.4,"sodium_mg":625.47,"sat_fat_g":11.69,"sugar_g":2.23,"balance_grade":"B","balance_score":62}
+{"id":447806,"nutrition_coverage":1,"kcal":508.57,"protein_g":16.77,"fat_g":18.31,"carb_g":74.98,"fiber_g":3.28,"sodium_mg":82.85,"sat_fat_g":0,"sugar_g":0,"balance_grade":"A","balance_score":80}
+{"id":447807,"nutrition_coverage":1,"kcal":1644.26,"protein_g":28.34,"fat_g":60.63,"carb_g":252.98,"fiber_g":11.11,"sodium_mg":168.96,"sat_fat_g":0,"sugar_g":110.91,"balance_grade":"B","balance_score":65}
 {"id":447808,"nutrition_coverage":1,"kcal":463.8,"protein_g":5.73,"fat_g":0.45,"carb_g":113.36,"fiber_g":0,"sodium_mg":83.35,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":71}
+{"id":447822,"nutrition_coverage":1,"kcal":1146.05,"protein_g":41.21,"fat_g":57.51,"carb_g":132.21,"fiber_g":10.51,"sodium_mg":165.44,"sat_fat_g":0,"sugar_g":0,"balance_grade":"A","balance_score":80}
+{"id":447823,"nutrition_coverage":1,"kcal":466.87,"protein_g":5.73,"fat_g":0.27,"carb_g":113.65,"fiber_g":0,"sodium_mg":83.51,"sat_fat_g":0,"sugar_g":55.46,"balance_grade":"C","balance_score":58}
 {"id":447824,"nutrition_coverage":1,"kcal":463.8,"protein_g":5.73,"fat_g":0.45,"carb_g":113.36,"fiber_g":0,"sodium_mg":82.78,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":71}
 {"id":447855,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":447881,"nutrition_coverage":0.875,"kcal":326.84,"protein_g":3.47,"fat_g":5.59,"carb_g":69.13,"fiber_g":2.05,"sodium_mg":122.95,"sat_fat_g":3.22,"sugar_g":32.76,"balance_grade":"C","balance_score":56}
@@ -2413,6 +2462,7 @@
 {"id":456108,"nutrition_coverage":0.8333,"kcal":12.62,"protein_g":0.34,"fat_g":0.23,"carb_g":2.85,"fiber_g":1.34,"sodium_mg":1.35,"sat_fat_g":0.12,"sugar_g":0.11,"balance_grade":"A","balance_score":80}
 {"id":456109,"nutrition_coverage":1,"kcal":653.49,"protein_g":16.71,"fat_g":12.85,"carb_g":135.04,"fiber_g":42.22,"sodium_mg":4500.92,"sat_fat_g":0.21,"sugar_g":0.53,"balance_grade":"A","balance_score":82}
 {"id":456118,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":456121,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":45616,"nutrition_coverage":1,"kcal":980.27,"protein_g":13.87,"fat_g":54.91,"carb_g":109.29,"fiber_g":0,"sodium_mg":898.22,"sat_fat_g":22.79,"sugar_g":0.31,"balance_grade":"C","balance_score":45}
 {"id":456164,"nutrition_coverage":0.2,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":456170,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2443,6 +2493,7 @@
 {"id":456648,"nutrition_coverage":0.8,"kcal":274.06,"protein_g":8.94,"fat_g":4.74,"carb_g":49.4,"fiber_g":0,"sodium_mg":640.1,"sat_fat_g":1.06,"sugar_g":0,"balance_grade":"B","balance_score":67}
 {"id":456653,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":456697,"nutrition_coverage":0.9231,"kcal":194.56,"protein_g":5.49,"fat_g":14.12,"carb_g":15.93,"fiber_g":3.82,"sodium_mg":48.7,"sat_fat_g":2.05,"sugar_g":1.78,"balance_grade":"B","balance_score":78}
+{"id":456725,"nutrition_coverage":0.4,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":456726,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":456733,"nutrition_coverage":1,"kcal":895.5,"protein_g":13.13,"fat_g":10.99,"carb_g":184.37,"fiber_g":2.21,"sodium_mg":956.96,"sat_fat_g":1.38,"sugar_g":0.08,"balance_grade":"B","balance_score":65}
 {"id":456735,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2492,6 +2543,7 @@
 {"id":456951,"nutrition_coverage":0.8,"kcal":528.9,"protein_g":55.39,"fat_g":29.35,"carb_g":10.96,"fiber_g":2.79,"sodium_mg":776.29,"sat_fat_g":2.51,"sugar_g":0.01,"balance_grade":"B","balance_score":76}
 {"id":456952,"nutrition_coverage":0.8,"kcal":838.38,"protein_g":18.62,"fat_g":2.62,"carb_g":188.26,"fiber_g":0.37,"sodium_mg":175.84,"sat_fat_g":0,"sugar_g":0.08,"balance_grade":"B","balance_score":73}
 {"id":456953,"nutrition_coverage":1,"kcal":202.05,"protein_g":7.22,"fat_g":10.22,"carb_g":24.15,"fiber_g":2.49,"sodium_mg":796.24,"sat_fat_g":1.07,"sugar_g":0.55,"balance_grade":"A","balance_score":80}
+{"id":456955,"nutrition_coverage":1,"kcal":180.96,"protein_g":4.14,"fat_g":1.68,"carb_g":43.02,"fiber_g":8.77,"sodium_mg":12.39,"sat_fat_g":0.2,"sugar_g":15.36,"balance_grade":"A","balance_score":80}
 {"id":456963,"nutrition_coverage":1,"kcal":258.31,"protein_g":5.85,"fat_g":3.7,"carb_g":50.36,"fiber_g":2.26,"sodium_mg":522.52,"sat_fat_g":1.57,"sugar_g":0.54,"balance_grade":"B","balance_score":71}
 {"id":456964,"nutrition_coverage":1,"kcal":141.03,"protein_g":3.56,"fat_g":7.88,"carb_g":17.16,"fiber_g":6.26,"sodium_mg":15.38,"sat_fat_g":1.11,"sugar_g":1.76,"balance_grade":"A","balance_score":85}
 {"id":456965,"nutrition_coverage":0.8333,"kcal":28.62,"protein_g":1.29,"fat_g":1.07,"carb_g":5.06,"fiber_g":1.97,"sodium_mg":599.3,"sat_fat_g":1.18,"sugar_g":0.28,"balance_grade":"C","balance_score":58}
@@ -2516,6 +2568,7 @@
 {"id":457031,"nutrition_coverage":0.7778,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457041,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457042,"nutrition_coverage":0.4286,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":457043,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457044,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457054,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457055,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2557,6 +2610,7 @@
 {"id":457174,"nutrition_coverage":0.4545,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457175,"nutrition_coverage":0.3,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457191,"nutrition_coverage":0.8095,"kcal":534.26,"protein_g":40.29,"fat_g":11.72,"carb_g":68.33,"fiber_g":5.25,"sodium_mg":227.84,"sat_fat_g":1.19,"sugar_g":0.26,"balance_grade":"A","balance_score":85}
+{"id":457194,"nutrition_coverage":0.8,"kcal":193.26,"protein_g":23.85,"fat_g":13.41,"carb_g":6.12,"fiber_g":1.59,"sodium_mg":412.05,"sat_fat_g":1.13,"sugar_g":0.56,"balance_grade":"B","balance_score":76}
 {"id":457195,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457196,"nutrition_coverage":0.7143,"kcal":41.97,"protein_g":2.41,"fat_g":0.87,"carb_g":6.61,"fiber_g":1.23,"sodium_mg":1221.55,"sat_fat_g":1.14,"sugar_g":1.12,"balance_grade":"B","balance_score":65}
 {"id":457197,"nutrition_coverage":0.75,"kcal":372.52,"protein_g":23.85,"fat_g":2.45,"carb_g":66.46,"fiber_g":11.62,"sodium_mg":317.93,"sat_fat_g":1.48,"sugar_g":0.05,"balance_grade":"A","balance_score":82}
@@ -2622,6 +2676,8 @@
 {"id":457343,"nutrition_coverage":0.8333,"kcal":694.89,"protein_g":61.11,"fat_g":41.01,"carb_g":23.46,"fiber_g":6.54,"sodium_mg":1064.98,"sat_fat_g":5.47,"sugar_g":1.2,"balance_grade":"A","balance_score":80}
 {"id":457344,"nutrition_coverage":0.7,"kcal":401.22,"protein_g":11.95,"fat_g":34.34,"carb_g":17.47,"fiber_g":5.02,"sodium_mg":936.3,"sat_fat_g":13.25,"sugar_g":3.15,"balance_grade":"B","balance_score":65}
 {"id":457345,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":457346,"nutrition_coverage":0.75,"kcal":1747.88,"protein_g":210.93,"fat_g":60.51,"carb_g":91.07,"fiber_g":33.87,"sodium_mg":472.57,"sat_fat_g":0.24,"sugar_g":13.43,"balance_grade":"A","balance_score":84}
+{"id":457348,"nutrition_coverage":0.2222,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":457353,"nutrition_coverage":0.9,"kcal":216.87,"protein_g":24.97,"fat_g":9.62,"carb_g":7.1,"fiber_g":2.01,"sodium_mg":105.23,"sat_fat_g":4.19,"sugar_g":0.43,"balance_grade":"B","balance_score":78}
 {"id":457354,"nutrition_coverage":0.7692,"kcal":259.54,"protein_g":24.75,"fat_g":8.89,"carb_g":22.3,"fiber_g":7.92,"sodium_mg":300.42,"sat_fat_g":1.54,"sugar_g":2.04,"balance_grade":"A","balance_score":84}
 {"id":457355,"nutrition_coverage":0.8,"kcal":348.57,"protein_g":28.44,"fat_g":22.13,"carb_g":9.65,"fiber_g":3.28,"sodium_mg":1113.01,"sat_fat_g":6.82,"sugar_g":0.62,"balance_grade":"B","balance_score":75}
@@ -2728,6 +2784,7 @@
 {"id":461584,"nutrition_coverage":0.8333,"kcal":443.57,"protein_g":15.23,"fat_g":36.63,"carb_g":20.66,"fiber_g":6.33,"sodium_mg":135.14,"sat_fat_g":6.03,"sugar_g":0.03,"balance_grade":"A","balance_score":87}
 {"id":461585,"nutrition_coverage":0.8889,"kcal":496.55,"protein_g":12.37,"fat_g":28.55,"carb_g":102.48,"fiber_g":0.03,"sodium_mg":338.9,"sat_fat_g":0.53,"sugar_g":14.83,"balance_grade":"B","balance_score":69}
 {"id":461644,"nutrition_coverage":0.8333,"kcal":408.73,"protein_g":17.01,"fat_g":8.6,"carb_g":69.11,"fiber_g":1.14,"sodium_mg":87.43,"sat_fat_g":6.61,"sugar_g":1.49,"balance_grade":"B","balance_score":76}
+{"id":461702,"nutrition_coverage":1,"kcal":64.3,"protein_g":3.66,"fat_g":3.3,"carb_g":5.15,"fiber_g":0,"sodium_mg":42,"sat_fat_g":1.93,"sugar_g":0.46,"balance_grade":"B","balance_score":75}
 {"id":461703,"nutrition_coverage":1,"kcal":902.06,"protein_g":1.44,"fat_g":2.09,"carb_g":232.32,"fiber_g":8.58,"sodium_mg":80.88,"sat_fat_g":0.99,"sugar_g":213.85,"balance_grade":"C","balance_score":53}
 {"id":461704,"nutrition_coverage":0.8,"kcal":432.39,"protein_g":8.4,"fat_g":9.61,"carb_g":124.32,"fiber_g":64.86,"sodium_mg":152.42,"sat_fat_g":2.84,"sugar_g":2.65,"balance_grade":"A","balance_score":82}
 {"id":461706,"nutrition_coverage":1,"kcal":761.52,"protein_g":0.69,"fat_g":1.93,"carb_g":196.43,"fiber_g":4.63,"sodium_mg":13.13,"sat_fat_g":0.49,"sugar_g":0.18,"balance_grade":"B","balance_score":69}
@@ -2750,10 +2807,12 @@
 {"id":461939,"nutrition_coverage":0.5833,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":461943,"nutrition_coverage":1,"kcal":531.1,"protein_g":5.71,"fat_g":2.28,"carb_g":123.38,"fiber_g":3.63,"sodium_mg":37.49,"sat_fat_g":0.46,"sugar_g":63.47,"balance_grade":"C","balance_score":58}
 {"id":461945,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":461946,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":461950,"nutrition_coverage":0.8571,"kcal":268.26,"protein_g":3.44,"fat_g":3.88,"carb_g":55.99,"fiber_g":1.08,"sodium_mg":17.33,"sat_fat_g":2.7,"sugar_g":0.42,"balance_grade":"B","balance_score":67}
 {"id":461951,"nutrition_coverage":0.875,"kcal":270.31,"protein_g":27.33,"fat_g":15.66,"carb_g":4.05,"fiber_g":1.02,"sodium_mg":62.8,"sat_fat_g":1.25,"sugar_g":0.17,"balance_grade":"B","balance_score":78}
 {"id":461953,"nutrition_coverage":0.8,"kcal":136.17,"protein_g":1.34,"fat_g":5.95,"carb_g":35.2,"fiber_g":3.72,"sodium_mg":4.05,"sat_fat_g":0.14,"sugar_g":21.63,"balance_grade":"B","balance_score":78}
 {"id":461955,"nutrition_coverage":1,"kcal":101.26,"protein_g":3.91,"fat_g":5.14,"carb_g":21.02,"fiber_g":3.22,"sodium_mg":965.68,"sat_fat_g":0.16,"sugar_g":0.62,"balance_grade":"B","balance_score":69}
+{"id":461964,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462077,"nutrition_coverage":1,"kcal":82.5,"protein_g":6.77,"fat_g":5.67,"carb_g":0.5,"fiber_g":0,"sodium_mg":66.55,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":78}
 {"id":462078,"nutrition_coverage":0.625,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462079,"nutrition_coverage":1,"kcal":196.73,"protein_g":7.18,"fat_g":1.75,"carb_g":42.87,"fiber_g":8.02,"sodium_mg":54.82,"sat_fat_g":3.1,"sugar_g":1.61,"balance_grade":"A","balance_score":82}
@@ -2774,9 +2833,12 @@
 {"id":462326,"nutrition_coverage":0.2857,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462329,"nutrition_coverage":1,"kcal":135.33,"protein_g":1.45,"fat_g":6.13,"carb_g":32.22,"fiber_g":1.77,"sodium_mg":176.07,"sat_fat_g":0.07,"sugar_g":14.78,"balance_grade":"B","balance_score":69}
 {"id":462330,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":462331,"nutrition_coverage":0.75,"kcal":176.75,"protein_g":1.06,"fat_g":36.78,"carb_g":2.03,"fiber_g":0.02,"sodium_mg":603.23,"sat_fat_g":10.76,"sugar_g":0,"balance_grade":"D","balance_score":36}
 {"id":462334,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462348,"nutrition_coverage":0.25,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462351,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":462352,"nutrition_coverage":0.8182,"kcal":723.54,"protein_g":78.94,"fat_g":47.67,"carb_g":11.36,"fiber_g":1.2,"sodium_mg":495.53,"sat_fat_g":7.25,"sugar_g":0.15,"balance_grade":"B","balance_score":76}
+{"id":462355,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462357,"nutrition_coverage":0.75,"kcal":904.12,"protein_g":21.27,"fat_g":56.34,"carb_g":98.31,"fiber_g":22.59,"sodium_mg":28.42,"sat_fat_g":6.07,"sugar_g":51.32,"balance_grade":"A","balance_score":84}
 {"id":462359,"nutrition_coverage":1,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":462362,"nutrition_coverage":1,"kcal":176.21,"protein_g":4.28,"fat_g":8.63,"carb_g":26.83,"fiber_g":0.81,"sodium_mg":216.57,"sat_fat_g":4.4,"sugar_g":8.07,"balance_grade":"C","balance_score":56}
@@ -2790,6 +2852,7 @@
 {"id":463297,"nutrition_coverage":1,"kcal":207,"protein_g":6.29,"fat_g":6.44,"carb_g":48.32,"fiber_g":19.92,"sodium_mg":51.32,"sat_fat_g":2.15,"sugar_g":0.84,"balance_grade":"A","balance_score":80}
 {"id":463520,"nutrition_coverage":1,"kcal":263.84,"protein_g":4.85,"fat_g":4.34,"carb_g":49.87,"fiber_g":0.08,"sodium_mg":58.18,"sat_fat_g":0,"sugar_g":0,"balance_grade":"B","balance_score":73}
 {"id":464043,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":464385,"nutrition_coverage":0.4286,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":464492,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":464494,"nutrition_coverage":0.8,"kcal":256.24,"protein_g":16.27,"fat_g":15.58,"carb_g":11.68,"fiber_g":0.31,"sodium_mg":436.58,"sat_fat_g":5.24,"sugar_g":0,"balance_grade":"B","balance_score":67}
 {"id":464616,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2827,6 +2890,7 @@
 {"id":469315,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":469466,"nutrition_coverage":1,"kcal":100.31,"protein_g":2.68,"fat_g":7.53,"carb_g":17.15,"fiber_g":0.45,"sodium_mg":1.05,"sat_fat_g":0,"sugar_g":5.87,"balance_grade":"B","balance_score":69}
 {"id":469521,"nutrition_coverage":1,"kcal":1324.82,"protein_g":172.6,"fat_g":56.79,"carb_g":36.26,"fiber_g":1.56,"sodium_mg":2530.26,"sat_fat_g":25.8,"sugar_g":0.04,"balance_grade":"B","balance_score":75}
+{"id":4696,"nutrition_coverage":1,"kcal":454.29,"protein_g":10.19,"fat_g":27.35,"carb_g":95.67,"fiber_g":0.04,"sodium_mg":88.23,"sat_fat_g":0.53,"sugar_g":0.08,"balance_grade":"B","balance_score":73}
 {"id":470139,"nutrition_coverage":1,"kcal":195.89,"protein_g":4.96,"fat_g":2.83,"carb_g":38.86,"fiber_g":7.8,"sodium_mg":303.14,"sat_fat_g":0.47,"sugar_g":0.4,"balance_grade":"B","balance_score":76}
 {"id":470195,"nutrition_coverage":0.75,"kcal":183.2,"protein_g":3.76,"fat_g":0.91,"carb_g":41.67,"fiber_g":0.54,"sodium_mg":2,"sat_fat_g":0.01,"sugar_g":0.35,"balance_grade":"B","balance_score":76}
 {"id":470198,"nutrition_coverage":0.4286,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2914,6 +2978,7 @@
 {"id":477595,"nutrition_coverage":0.75,"kcal":1480.03,"protein_g":52.47,"fat_g":127.23,"carb_g":33.7,"fiber_g":0.31,"sodium_mg":6266.92,"sat_fat_g":57.62,"sugar_g":0.01,"balance_grade":"C","balance_score":55}
 {"id":477770,"nutrition_coverage":0.2,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":477885,"nutrition_coverage":0.9091,"kcal":74.59,"protein_g":1.01,"fat_g":4.19,"carb_g":12.13,"fiber_g":0.63,"sodium_mg":48.79,"sat_fat_g":2.53,"sugar_g":5.2,"balance_grade":"C","balance_score":51}
+{"id":47816,"nutrition_coverage":0.6,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":479138,"nutrition_coverage":0.4,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":479397,"nutrition_coverage":0.9,"kcal":109.53,"protein_g":6.4,"fat_g":8.28,"carb_g":2.95,"fiber_g":0.97,"sodium_mg":229.13,"sat_fat_g":0.33,"sugar_g":0.38,"balance_grade":"B","balance_score":71}
 {"id":479461,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
@@ -2967,6 +3032,7 @@
 {"id":483079,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":483083,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":483084,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":483088,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":483127,"nutrition_coverage":1,"kcal":364.17,"protein_g":9.52,"fat_g":4.98,"carb_g":70.39,"fiber_g":7.96,"sodium_mg":11.41,"sat_fat_g":0.81,"sugar_g":1.66,"balance_grade":"B","balance_score":76}
 {"id":483139,"nutrition_coverage":0.2857,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":483140,"nutrition_coverage":1,"kcal":1600,"protein_g":13.6,"fat_g":2.8,"carb_g":380.6,"fiber_g":18,"sodium_mg":140,"sat_fat_g":0.74,"sugar_g":17,"balance_grade":"A","balance_score":82}
@@ -3033,6 +3099,7 @@
 {"id":51861,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":51909,"nutrition_coverage":0.6667,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":52168,"nutrition_coverage":0.8,"kcal":65.13,"protein_g":0.28,"fat_g":29.07,"carb_g":3.03,"fiber_g":0.41,"sodium_mg":7.41,"sat_fat_g":0.76,"sugar_g":0.93,"balance_grade":"B","balance_score":73}
+{"id":52284,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":52287,"nutrition_coverage":0.8571,"kcal":41.06,"protein_g":2,"fat_g":0.52,"carb_g":8.51,"fiber_g":1.86,"sodium_mg":47.12,"sat_fat_g":0.06,"sugar_g":0.07,"balance_grade":"A","balance_score":85}
 {"id":52296,"nutrition_coverage":0.875,"kcal":278.02,"protein_g":3.92,"fat_g":23.11,"carb_g":14.21,"fiber_g":1.13,"sodium_mg":39.16,"sat_fat_g":13.22,"sugar_g":4.8,"balance_grade":"B","balance_score":60}
 {"id":52298,"nutrition_coverage":0.75,"kcal":513.42,"protein_g":15.88,"fat_g":12.68,"carb_g":93.29,"fiber_g":12.22,"sodium_mg":135.93,"sat_fat_g":6.7,"sugar_g":43.73,"balance_grade":"B","balance_score":78}
@@ -3172,6 +3239,7 @@
 {"id":71848,"nutrition_coverage":0.9167,"kcal":168.79,"protein_g":4.24,"fat_g":8.96,"carb_g":18.46,"fiber_g":1.51,"sodium_mg":177.07,"sat_fat_g":1.55,"sugar_g":6.4,"balance_grade":"B","balance_score":65}
 {"id":71892,"nutrition_coverage":1,"kcal":686.26,"protein_g":5.82,"fat_g":34.98,"carb_g":90.99,"fiber_g":0.82,"sodium_mg":543.81,"sat_fat_g":11.29,"sugar_g":43.82,"balance_grade":"C","balance_score":45}
 {"id":71932,"nutrition_coverage":0.5714,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":72182,"nutrition_coverage":0.25,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":72236,"nutrition_coverage":0.3333,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":72513,"nutrition_coverage":0.7857,"kcal":244.13,"protein_g":32.84,"fat_g":3.01,"carb_g":21.98,"fiber_g":4.33,"sodium_mg":669.44,"sat_fat_g":3.57,"sugar_g":3.22,"balance_grade":"B","balance_score":76}
 {"id":72542,"nutrition_coverage":0.8182,"kcal":102.68,"protein_g":3.1,"fat_g":0.83,"carb_g":22.24,"fiber_g":2.94,"sodium_mg":658.35,"sat_fat_g":0.04,"sugar_g":0.19,"balance_grade":"A","balance_score":80}
@@ -3215,6 +3283,8 @@
 {"id":77131,"nutrition_coverage":0.4286,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":77142,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":77147,"nutrition_coverage":0.5,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":77191,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
+{"id":77213,"nutrition_coverage":0.75,"kcal":171.82,"protein_g":12.8,"fat_g":12.43,"carb_g":1.35,"fiber_g":0.27,"sodium_mg":5688.37,"sat_fat_g":5.14,"sugar_g":0,"balance_grade":"C","balance_score":51}
 {"id":77216,"nutrition_coverage":0.7778,"kcal":1123.42,"protein_g":46.46,"fat_g":100.93,"carb_g":13.85,"fiber_g":2.8,"sodium_mg":1039.59,"sat_fat_g":44.74,"sugar_g":1.24,"balance_grade":"C","balance_score":55}
 {"id":77220,"nutrition_coverage":0.7,"kcal":176.07,"protein_g":15.45,"fat_g":29.54,"carb_g":6.78,"fiber_g":0.64,"sodium_mg":242,"sat_fat_g":3.01,"sugar_g":0.97,"balance_grade":"B","balance_score":76}
 {"id":77271,"nutrition_coverage":0.7778,"kcal":101.23,"protein_g":8.27,"fat_g":4.95,"carb_g":7.1,"fiber_g":2.51,"sodium_mg":522.64,"sat_fat_g":7.51,"sugar_g":0.98,"balance_grade":"B","balance_score":71}
@@ -3295,6 +3365,7 @@
 {"id":87315,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":87385,"nutrition_coverage":1,"kcal":1254.92,"protein_g":21.43,"fat_g":124.77,"carb_g":292.87,"fiber_g":7.6,"sodium_mg":84.7,"sat_fat_g":0.11,"sugar_g":4.43,"balance_grade":"B","balance_score":73}
 {"id":87409,"nutrition_coverage":0.7143,"kcal":90.28,"protein_g":7.08,"fat_g":2.98,"carb_g":10.53,"fiber_g":2.4,"sodium_mg":109.78,"sat_fat_g":1.62,"sugar_g":0,"balance_grade":"A","balance_score":80}
+{"id":87421,"nutrition_coverage":0,"kcal":null,"protein_g":null,"fat_g":null,"carb_g":null,"fiber_g":null,"sodium_mg":null,"sat_fat_g":null,"sugar_g":null,"balance_grade":null,"balance_score":null}
 {"id":87424,"nutrition_coverage":0.8571,"kcal":260.38,"protein_g":12.41,"fat_g":19.14,"carb_g":10.6,"fiber_g":0.09,"sodium_mg":995.04,"sat_fat_g":6.07,"sugar_g":1.07,"balance_grade":"B","balance_score":69}
 {"id":87841,"nutrition_coverage":0.7778,"kcal":50.25,"protein_g":0.48,"fat_g":3.28,"carb_g":11.82,"fiber_g":0.31,"sodium_mg":24.52,"sat_fat_g":0.04,"sugar_g":3.61,"balance_grade":"B","balance_score":62}
 {"id":88062,"nutrition_coverage":0.8333,"kcal":332.81,"protein_g":10.07,"fat_g":22.83,"carb_g":22.7,"fiber_g":2.42,"sodium_mg":744.15,"sat_fat_g":2.76,"sugar_g":0.13,"balance_grade":"B","balance_score":64}

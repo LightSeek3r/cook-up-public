@@ -144,6 +144,13 @@
 {"canonical_key":"galangal","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"Galangal","es":"galangal","fr":"galanga","de":"Galgant","zh":"高良薑","ja":"ガランガル","ko":"고량강"}}
 {"canonical_key":"coconut_milk","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"coconut milk","es":"Leche de coco","fr":"lait de noix de coco","de":"Kokosnussmilch","zh":"椰子奶","ja":"ココナッツミルク"}}
 {"canonical_key":"shrimp_paste","category":"protein","is_staple":0,"beneficial":0,"allergens":["shellfish"],"names":{"en":"shrimp paste","fr":"pâte de crevettes","de":"Garnelenpaste","ja":"海老ペスト"}}
+{"canonical_key":"pumpkin","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"pumpkin","es":"calabaza","fr":"courge","de":"Kürbis","ar":"قرع","hi":"कुम्हड़ा","zh":"南瓜","ja":"カボチャ","ko":"호박","vi":"Bí ngô"}}
+{"canonical_key":"marjoram","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"marjoram","es":"mejorana","fr":"marjolaine","de":"Majoran","hi":"मरुआ","zh":"墨角蘭","ja":"マジョラム","ko":"마저럼"}}
+{"canonical_key":"chicken_broth","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"chicken broth","es":"Caldo de pollo","fr":"Bouillon de poulet","de":"Hühnerbrühe","ja":"チキンスープ"}}
+{"canonical_key":"red_onion","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"red onion","es":"cebolla roja","fr":"oignon rouge","de":"rote Zwiebel","ar":"بصل أحمر","hi":"लाल प्याज","ja":"赤たまねぎ"}}
+{"canonical_key":"risotto_rice","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"risotto rice","es":"arroz de risotto","fr":"riz pour risotto","de":"Risotto-Reis"}}
+{"canonical_key":"vermouth","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"vermouth","es":"vermut","de":"Wermut","ar":"فيرموت","zh":"威末酒","ja":"ベルモット","ko":"베르무트"}}
+{"canonical_key":"parmigiano_reggiano","category":"dairy","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"parmigiano reggiano","es":"queso parmesano","fr":"parmesan","de":"Parmesan","ar":"بارميجيانو ريجيانو","zh":"帕馬森乾酪","ja":"パルメザン","ko":"파르미자노 레자노","vi":"Pho mát Parmesan"}}
 {"canonical_key":"shortening","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"shortening"}}
 {"canonical_key":"white_vinegar","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"white vinegar","es":"Vinagre blanco","fr":"vinaigre blanc","de":"Weißer Essig"}}
 {"canonical_key":"macaroni","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"macaroni","de":"Makkaroni"}}
@@ -155,7 +162,6 @@
 {"canonical_key":"vegetable_shortening","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"vegetable shortening"}}
 {"canonical_key":"ginger_powder","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"ginger powder","es":"Gengibre en polvo","fr":"gingembre moulu","de":"gemahlener Ingwer"}}
 {"canonical_key":"ground_clove","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"ground clove"}}
-{"canonical_key":"pumpkin","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"pumpkin","es":"calabaza","fr":"courge","de":"Kürbis","ar":"قرع","hi":"कुम्हड़ा","zh":"南瓜","ja":"カボチャ","ko":"호박","vi":"Bí ngô"}}
 {"canonical_key":"evaporated_milk","category":"dairy","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"evaporated milk","es":"leche evaporada","fr":"lait concentré non sucré","de":"evaporierte Milch","zh":"淡奶","ja":"無糖練乳","ko":"무당연유"}}
 {"canonical_key":"whipped_cream","category":"other","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"whipped cream","es":"crema de leche montada","fr":"crème fouettée","de":"Schlagsahne"}}
 {"canonical_key":"rice","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"rice","es":"arroz","fr":"riz","de":"Reis","ar":"أرز","hi":"चावल","zh":"稻","ja":"米","ko":"쌀","vi":"Gạo"}}
@@ -177,13 +183,10 @@
 {"canonical_key":"black_salt","category":"other","is_staple":1,"beneficial":0,"allergens":[],"names":{"en":"black salt","de":"schwarzes Salz"}}
 {"canonical_key":"lima_bean","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"lima bean","es":"Garrofones","fr":"haricot de Lima","de":"Limabohne","zh":"棉豆","ja":"ライマメ","ko":"리마콩","vi":"dâu ngu"}}
 {"canonical_key":"dried_basil","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"dried basil","es":"albahaca seca","fr":"basilic séché","de":"getrocknetes Basilikum"}}
-{"canonical_key":"parmigiano_reggiano","category":"dairy","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"parmigiano reggiano","es":"queso parmesano","fr":"parmesan","de":"Parmesan","ar":"بارميجيانو ريجيانو","zh":"帕馬森乾酪","ja":"パルメザン","ko":"파르미자노 레자노","vi":"Pho mát Parmesan"}}
 {"canonical_key":"mayonnaise","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"mayonnaise","es":"mayonesa","fr":"mayonnaise","de":"Mayonnaise","ar":"مايونيز","hi":"मेयोनेज़","zh":"蛋黃醬","ja":"マヨネーズ","ko":"마요네즈","vi":"Mayonne"}}
 {"canonical_key":"apple_cider_vinegar","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"apple cider vinegar","es":"vinagre de sidra de manzana","fr":"vinaigre de cidre de pomme","de":"Apfelweinessig","zh":"苹果醋片","ko":"사과식초","vi":"Giấm táo"}}
 {"canonical_key":"white_wine","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"white wine","es":"vino blanco","fr":"vin blanc","de":"Weißwein","ar":"نبيذ أبيض","zh":"白葡萄酒","ja":"白ワイン","ko":"백포도주","vi":"Rượu vang trắng"}}
 {"canonical_key":"beef_broth","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"beef broth","es":"Caldo de carne de vaca","fr":"bouillon de bœuf","de":"Rinderbrühe"}}
-{"canonical_key":"chicken_broth","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"chicken broth","es":"Caldo de pollo","fr":"Bouillon de poulet","de":"Hühnerbrühe","ja":"チキンスープ"}}
-{"canonical_key":"red_onion","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"red onion","es":"cebolla roja","fr":"oignon rouge","de":"rote Zwiebel","ar":"بصل أحمر","hi":"लाल प्याज","ja":"赤たまねぎ"}}
 {"canonical_key":"wheat_flour","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"wheat flour","es":"harina de trigo","fr":"farine de blé","de":"Weizenmehl","ar":"طحين القمح","zh":"小麥麵粉","ja":"小麦粉","vi":"Bột mì"}}
 {"canonical_key":"bacon","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"bacon","es":"panceta","fr":"bacon","de":"Speck","ar":"باكون","zh":"煙肉","ja":"ベーコン","ko":"베이컨","vi":"Thịt muối"}}
 {"canonical_key":"tomato_sauce","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"tomato sauce","es":"salsa de tomate","fr":"sauce tomate","de":"Tomatensauce","ar":"صلصة البندورة","hi":"टमाटर की चटनी","zh":"番茄沙司","ja":"トマトソース","ko":"토마토 소스","vi":"Sốt cà"}}
@@ -261,7 +264,6 @@
 {"canonical_key":"dried_chickpea","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"dried chickpea","fr":"pois chiche secs"}}
 {"canonical_key":"black_cumin","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"black cumin","es":"abésoda","fr":"cumin noir","de":"Schwarzkümmel"}}
 {"canonical_key":"garam_masala","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"garam masala","fr":"garam masala","de":"garam masala"}}
-{"canonical_key":"risotto_rice","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"risotto rice","es":"arroz de risotto","fr":"riz pour risotto","de":"Risotto-Reis"}}
 {"canonical_key":"lemon_peel","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"lemon peel","es":"cáscara de limón","fr":"écorce de citron","de":"Zitronenschalen"}}
 {"canonical_key":"dry_white_wine","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"dry white wine","fr":"vin blanc sec","de":"trockener Weißwein","zh":"乾白葡萄酒"}}
 {"canonical_key":"truffle","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"truffle","es":"trufa","fr":"truffe","de":"trüffel","ar":"ترافل","hi":"ट्रफल","zh":"松露","ko":"서양송로","vi":"truffle"}}
@@ -345,7 +347,6 @@
 {"canonical_key":"pork_fillet","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"pork fillet","fr":"filet de porc","de":"Schweinefilet","zh":"豬柳","vi":"Nạc thăn"}}
 {"canonical_key":"chocolate_bar","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"chocolate bar"}}
 {"canonical_key":"glace_cherry","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"glacé cherry","fr":"cerises confites","de":"kandierte Kirsche"}}
-{"canonical_key":"vermouth","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"vermouth","es":"vermut","de":"Wermut","ar":"فيرموت","zh":"威末酒","ja":"ベルモット","ko":"베르무트"}}
 {"canonical_key":"white_distilled_vinegar","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"white distilled vinegar","es":"vinagre blanco destilado","fr":"Vinaigre blanc distillé","de":"weißer destillierter Essig"}}
 {"canonical_key":"tamari","category":"other","is_staple":0,"beneficial":0,"allergens":["soy"],"names":{"en":"tamari","es":"tamari","fr":"tamari","de":"Tamari","ja":"たまり"}}
 {"canonical_key":"nutritional_yeast_flake","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"nutritional yeast flake","fr":"flocons de levure alimentaire"}}
@@ -425,6 +426,7 @@
 {"canonical_key":"broad_bean","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"broad bean","es":"haba","fr":"fève","de":"Ackerbohne","ar":"فول","hi":"बकला","zh":"蚕豆","ja":"ソラマメ","ko":"누에콩","vi":"Đậu răng ngựa"}}
 {"canonical_key":"fenugreek","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"fenugreek","es":"fenogreco","fr":"fenugrec","de":"bockshornklee","ar":"حلبة","hi":"मेथी","zh":"胡芦巴","ja":"フェヌグリーク","ko":"큰노랑꽃자리풀","vi":"cỏ ca ri"}}
 {"canonical_key":"plain_yogurt","category":"other","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"plain yogurt"}}
+{"canonical_key":"quinoa","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"quinoa","es":"quinoa","fr":"quinoa","de":"Quinoa","ar":"كينوا","hi":"क्विन्वा","ja":"キヌア","ko":"퀴노아","vi":"diêm mạch"}}
 {"canonical_key":"sambal_oelek","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"sambal oelek","de":"Sambal Oelek"}}
 {"canonical_key":"macadamia_nut","category":"nut","is_staple":0,"beneficial":1,"allergens":["nut"],"names":{"en":"macadamia nut","es":"nueces macadamia","fr":"noix de macadamia","de":"Makadamianuss","ar":"المكاداميا","zh":"夏威夷果","ja":"マカダミアナッツ"}}
 {"canonical_key":"white_cabbage","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"white cabbage","es":"col blanca","fr":"chou blanc","de":"Weißkohl","ar":"ملفوف","hi":"बंद गोभी","zh":"卷心菜","ko":"양배추","vi":"cải bắp"}}
@@ -579,7 +581,6 @@
 {"canonical_key":"aniseed","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"aniseed","es":"semilla de anís","fr":"anis","de":"Anissamen"}}
 {"canonical_key":"long_grain_white_rice","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"long grain white rice","fr":"riz long grain blanc","de":"weißer Langkornreis"}}
 {"canonical_key":"adzuki_bean","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"Adzuki bean","fr":"haricot azuki","de":"Adzukibohne","ar":"لوبياء مقرنة","zh":"紅豆","ja":"アズキ","ko":"팥","vi":"Đậu đỏ"}}
-{"canonical_key":"marjoram","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"marjoram","es":"mejorana","fr":"marjolaine","de":"Majoran","hi":"मरुआ","zh":"墨角蘭","ja":"マジョラム","ko":"마저럼"}}
 {"canonical_key":"vanilla_sugar","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"vanilla sugar","es":"azúcar vainillada","fr":"sucre vanillé","de":"vanillezucker"}}
 {"canonical_key":"quark","category":"dairy","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"Quark","es":"Queso quark","fr":"quark","de":"Quark","ar":"كوارك","zh":"奶渣","ja":"クワルク","ko":"크바르크"}}
 {"canonical_key":"semi_sweet_chocolate","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"semi-sweet chocolate","fr":"chocolat mi-sucré"}}
@@ -627,6 +628,7 @@
 {"canonical_key":"citric_acid","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"citric acid"}}
 {"canonical_key":"corn_tortilla","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"corn tortilla","fr":"tortilla de maïs","de":"Maistortilla"}}
 {"canonical_key":"roe","category":"protein","is_staple":0,"beneficial":0,"allergens":["fish"],"names":{"en":"roe","fr":"Oeufs de poisson","de":"Rogen"}}
+{"canonical_key":"barley","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"barley","es":"cebada","fr":"orge","de":"Gerste","ar":"شعير","hi":"जौ","zh":"大麦","ja":"オオムギ","ko":"보리","vi":"đại mạch"}}
 {"canonical_key":"bone","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"bone","es":"hueso","fr":"os","de":"Knochen","ar":"عظم","hi":"अस्थि","zh":"骨骼","ja":"骨","ko":"뼈","vi":"xương"}}
 {"canonical_key":"espagnole_sauce","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"espagnole sauce","es":"salsa española","fr":"sauce espagnole","de":"Spanische Sauce","zh":"棕醬","ja":"エスパニョールソース"}}
 {"canonical_key":"grape","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"grape","es":"uva","fr":"raisin","de":"Traube","ar":"عنب","hi":"अंगूर","zh":"葡萄","ja":"ブドウ","ko":"포도","vi":"nho"}}
@@ -665,6 +667,7 @@
 {"canonical_key":"summer_savory","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"summer savory","es":"ajedrea","fr":"sariette","de":"Bohnenkraut"}}
 {"canonical_key":"sauerkraut","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"sauerkraut","es":"Chucrut","fr":"choucroute","de":"Sauerkraut","ar":"ساوركراوت","zh":"德国酸菜","ja":"ザワークラウト","ko":"자우어크라우트","vi":"Dưa cải Đức"}}
 {"canonical_key":"hot_chili_peppers","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"hot chili peppers","es":"guindilla fuerte","fr":"piment fort","de":"scharfe chilischoten"}}
+{"canonical_key":"white_beans","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"white beans","es":"Alubias blancas","fr":"haricots blancs","de":"weiße Bohnen"}}
 {"canonical_key":"dried_marjoram","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"dried marjoram","fr":"Marjolaine séchée"}}
 {"canonical_key":"grape_leaf","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"grape leaf"}}
 {"canonical_key":"celery_stalk","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"celery stalk","fr":"céleri branche","de":"Stangensellerie"}}
@@ -781,7 +784,6 @@
 {"canonical_key":"bilberry","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"bilberry"}}
 {"canonical_key":"reduced_fat_mayonnaise","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"Reduced fat mayonnaise","fr":"mayonnaise allégée en matière grasse"}}
 {"canonical_key":"coconut_flakes","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"coconut flakes","es":"Hojuelas de coco","fr":"flocons de coco","de":"Kokosflocken"}}
-{"canonical_key":"white_beans","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"white beans","es":"Alubias blancas","fr":"haricots blancs","de":"weiße Bohnen"}}
 {"canonical_key":"mixed_condiments","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"mixed condiments","es":"Condimentos varios","fr":"mélange de condiments","de":"Würzmischung"}}
 {"canonical_key":"greek_yogurt","category":"other","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"greek yogurt","es":"yogur griego","fr":"yaourt grec","de":"griechischer Joghurt"}}
 {"canonical_key":"baby_carrots","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"baby carrots","fr":"jeunes carottes","de":"Babykarotten"}}
@@ -813,6 +815,7 @@
 {"canonical_key":"smoked_sausage","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"smoked sausage","es":"salchicha ahumada","fr":"saucisses fumées","de":"geräucherte Wurst"}}
 {"canonical_key":"pork_chops","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"Pork chops","es":"costillas de cerdo","fr":"Côtes de porc"}}
 {"canonical_key":"cassava_flour","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"cassava flour","fr":"farine de manioc","de":"Maniokmehl"}}
+{"canonical_key":"cress","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"cress","fr":"Cresson","de":"Kresse"}}
 {"canonical_key":"black_pepper_powder","category":"spice","is_staple":1,"beneficial":0,"allergens":[],"names":{"en":"black pepper powder"}}
 {"canonical_key":"seedless_grape","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"seedless grape","fr":"raisin sans pépin","de":"kernlose Traube"}}
 {"canonical_key":"nectarine","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"nectarine","es":"melocotonero","fr":"nectarine","de":"Nektarine","ar":"زليقة","zh":"桃駁李","ja":"ネクタリン","vi":"du đào"}}
@@ -827,13 +830,16 @@
 {"canonical_key":"shelled_peanut","category":"nut","is_staple":0,"beneficial":1,"allergens":["peanut"],"names":{"en":"shelled peanut","fr":"cacahuètes décortiquées","de":"geschälte Erdnüsse"}}
 {"canonical_key":"friggitello","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"friggitello"}}
 {"canonical_key":"muesli","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"müesli","es":"Muesli","fr":"muesli","de":"Müesli","hi":"safad musali","zh":"木斯里","ja":"ミューズリー","ko":"뮈슬리"}}
-{"canonical_key":"barley","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"barley","es":"cebada","fr":"orge","de":"Gerste","ar":"شعير","hi":"जौ","zh":"大麦","ja":"オオムギ","ko":"보리","vi":"đại mạch"}}
 {"canonical_key":"tangerine","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"tangerine"}}
 {"canonical_key":"cooked_beef_meat","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"cooked beef meat","es":"carne de res cocida","fr":"viande de bœuf cuite","de":"gekochtes Rindfleisch"}}
 {"canonical_key":"asian_pear","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"Asian pear","fr":"nashi","de":"Nashibirne"}}
 {"canonical_key":"spelt","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"spelt","es":"espelta","fr":"épeautre","de":"Dinkel","ar":"حنطة","zh":"斯佩耳特小麦","ja":"スペルトコムギ","ko":"스펠트밀"}}
 {"canonical_key":"reduced_fat_sour_cream","category":"other","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"reduced fat sour cream"}}
 {"canonical_key":"beef_heart","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"beef heart","es":"corazón de res","fr":"Cœur de bœuf","de":"Rinderherz"}}
+{"canonical_key":"orange_essential_oil","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"orange essential oil","es":"aceite esencial de naranja","fr":"huile essentielle d'orange","de":"Orangenöl"}}
+{"canonical_key":"lime_oil","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"lime oil","es":"aceite de lima","fr":"Huile de citron vert","de":"Limettenöl"}}
+{"canonical_key":"lemon_oil","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"lemon oil","es":"Aceite de limón","fr":"essence de citron","de":"Zitronenöl"}}
+{"canonical_key":"caffeine","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"caffeine","es":"cafeina","fr":"caféine","de":"Coffein","ar":"كافيين","hi":"कैफ़ीन","zh":"咖啡因","ja":"カフェイン","ko":"카페인","vi":"Caffein"}}
 {"canonical_key":"yam","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"yam","fr":"igname","de":"Yam"}}
 {"canonical_key":"pork_spare_ribs","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"Pork spare-ribs","fr":"Travers de porc"}}
 {"canonical_key":"legume","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"legume","es":"legumbre","fr":"légumineuse","de":"Hülsenfrucht","ar":"بقول","hi":"फली","zh":"荚果","ja":"豆果","ko":"협과","vi":"Quả đậu"}}
@@ -842,7 +848,9 @@
 {"canonical_key":"sorrel","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"sorrel","es":"acedera común","fr":"oseille","de":"Sauerampfer","ar":"حماض بستاني","hi":"खट्टा पालक","zh":"酸模","ja":"スイバ","ko":"수영","vi":"chút chít"}}
 {"canonical_key":"endive","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"endive","es":"escarola","fr":"scarole","de":"Endivie","zh":"苦苣","ja":"エンダイブ","ko":"꽃상추","vi":"rau cúc đắng"}}
 {"canonical_key":"herring","category":"protein","is_staple":0,"beneficial":0,"allergens":["fish"],"names":{"en":"herring","es":"Arenque","fr":"hareng","de":"Hering","zh":"鯡魚","ja":"ニシン","ko":"대서양청어"}}
+{"canonical_key":"watermelon","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"watermelon","es":"Sandía","fr":"pastèque","de":"Wassermelone","ar":"بطيخ أحمر","hi":"तरबूज","zh":"西瓜","ja":"スイカ","ko":"수박","vi":"Dưa hấu"}}
 {"canonical_key":"arborio_rice","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"Arborio rice","fr":"riz arborio","de":"Arborioreis"}}
+{"canonical_key":"buckwheat_flour","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"buckwheat flour","es":"harina de sarraceno","fr":"farine de sarrasin","de":"Buchweizenmehl","ja":"蕎麦粉"}}
 {"canonical_key":"pigs_trotters","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"pigs trotters","es":"patas de cerdo","de":"Schweinepfoten"}}
 {"canonical_key":"alcohol","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"alcohol","es":"alcohol","fr":"alcool","de":"Alkohol","ja":"アルコール"}}
 {"canonical_key":"quail_eggs","category":"dairy","is_staple":0,"beneficial":0,"allergens":["egg"],"names":{"en":"Quail eggs","fr":"œufs de caille","de":"Wachteleier","zh":"鹌鹑蛋","ja":"うずら卵","ko":"메추리알","vi":"Trứng cút"}}
@@ -852,6 +860,7 @@
 {"canonical_key":"green_chili_paste","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"green chili paste"}}
 {"canonical_key":"bitter_melon","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"bitter melon","es":"melón amargo","fr":"melon amer","de":"Bittermelone","ja":"ゴーヤ"}}
 {"canonical_key":"cake","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"cake","es":"Pasteles","fr":"gâteaux","de":"Kuchen","ar":"كعك","hi":"केक","zh":"蛋糕","ja":"ケーキ","ko":"케이크","vi":"bánh ngọt"}}
+{"canonical_key":"wakame","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"wakame","es":"wakame","fr":"wakamé","de":"wakame","ar":"واكامي","zh":"海帶芽","ja":"ワカメ","ko":"미역","vi":"Tảo bẹ Undaria"}}
 {"canonical_key":"dried_sage","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"dried sage","fr":"sauge séchée"}}
 {"canonical_key":"concentrated_orange_juice","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"concentrated orange juice","es":"Zumo de naranja concentrado","fr":"jus d'orange concentré","de":"Orangensaftkonzentrat"}}
 {"canonical_key":"salted_dried_cod","category":"protein","is_staple":0,"beneficial":0,"allergens":["fish"],"names":{"en":"salted dried cod","fr":"morue salée sèche"}}
@@ -859,6 +868,11 @@
 {"canonical_key":"wheat_germ","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"wheat germ","es":"germen de trigo","fr":"germe de blé","de":"Weizenkeime"}}
 {"canonical_key":"lemonade","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"lemonade","es":"limonada","fr":"limonade","de":"limonade","ar":"شراب الليمون","zh":"檸檬水","ja":"レモネード","ko":"레모네이드"}}
 {"canonical_key":"black_quinoa","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"black quinoa","es":"quinoa negra","fr":"quinoa noir","de":"schwarzes Quinoa"}}
+{"canonical_key":"chia_seed","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"chia seed","es":"semillas de chia","fr":"graine de chia","de":"Chiasamen","ar":"بذرة الشيا","hi":"चिया सीड्ज़","zh":"奇亞籽","ja":"チアシード"}}
+{"canonical_key":"wholemeal_oat","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"wholemeal oat","es":"Avena integral","fr":"avoine complète","de":"Vollkornhafer"}}
+{"canonical_key":"millet","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"millet","es":"mijo","fr":"millet","de":"Hirse","ar":"دخن","hi":"बाजरा","zh":"杂谷","ja":"雑穀","ko":"서곡","vi":"kê"}}
+{"canonical_key":"nutritional_yeast","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"nutritional yeast","fr":"levure alimentaire","de":"nährhefe","ar":"رقائق الخميرة المغذية","ja":"イーストフード"}}
+{"canonical_key":"hass_avocado","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"hass avocado","es":"aguacate Hass","fr":"avocat Hass","de":"Hass-Avocado","zh":"哈斯牛油果","ja":"ハスアボカド","ko":"할아버지 아보카도"}}
 {"canonical_key":"udon","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"udon","fr":"nouille udon","de":"Udon-Nudeln"}}
 {"canonical_key":"sardine","category":"protein","is_staple":0,"beneficial":0,"allergens":["fish"],"names":{"en":"sardine","es":"sardina","fr":"sardine","de":"sardine","ar":"سردين","zh":"沙丁魚","ja":"イワシ","ko":"정어리","vi":"cá mòi"}}
 {"canonical_key":"cotija_cheese","category":"dairy","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"Cotija cheese","es":"Queso Cotija","fr":"Queso Cotija","de":"Cotija-Käse","ja":"コテハ・チーズ","ko":"코티하 치즈"}}
@@ -890,7 +904,6 @@
 {"canonical_key":"popcorn","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"popcorn","fr":"Popcorn","de":"Popkorn"}}
 {"canonical_key":"hummus","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"hummus","fr":"houmous","de":"Hummus","ar":"حمص بطحينة","hi":"हुम्मुस","zh":"鹰嘴豆泥","ja":"フムス","ko":"훔무스"}}
 {"canonical_key":"kaffir_lime","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"kaffir lime","es":"lima kaffir","fr":"combava","de":"Kaffernlimette","zh":"箭叶橙","ja":"コブミカン","ko":"카피르라임","vi":"Trấp"}}
-{"canonical_key":"caffeine","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"caffeine","es":"cafeina","fr":"caféine","de":"Coffein","ar":"كافيين","hi":"कैफ़ीन","zh":"咖啡因","ja":"カフェイン","ko":"카페인","vi":"Caffein"}}
 {"canonical_key":"black_lentil_flour","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"black lentil flour","fr":"farine de lentilles noires"}}
 {"canonical_key":"dehydrated_onion","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"dehydrated onion","es":"cebolla deshidratada","fr":"oignons déshydratés","de":"Zwiebeln getrocknet","ja":"ドライ玉ねぎ"}}
 {"canonical_key":"mustard_oil","category":"other","is_staple":1,"beneficial":0,"allergens":[],"names":{"en":"mustard oil","fr":"Huile de moutarde/Huile de graines de moutarde/Huile de sénevé","de":"Senföl"}}
@@ -907,7 +920,6 @@
 {"canonical_key":"edamame","category":"legume","is_staple":0,"beneficial":1,"allergens":["soy"],"names":{"en":"edamame","fr":"edamame","de":"Edamame Bohnen","ja":"枝豆"}}
 {"canonical_key":"palm_kernel_oil","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"palm kernel oil","es":"aceite de palmiste","fr":"huile de palmiste","de":"Palmkernöl"}}
 {"canonical_key":"papaya","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"papaya","es":"papaya","fr":"papaye","de":"Papaya","ar":"ببايا","hi":"पपीता","zh":"番木瓜","ja":"パパイア","ko":"파파야","vi":"đu đủ"}}
-{"canonical_key":"watermelon","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"watermelon","es":"Sandía","fr":"pastèque","de":"Wassermelone","ar":"بطيخ أحمر","hi":"तरबूज","zh":"西瓜","ja":"スイカ","ko":"수박","vi":"Dưa hấu"}}
 {"canonical_key":"muscovado","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"muscovado","es":"Azúcar mascabado","fr":"Sucre muscovado","de":"Muscovado-Zucker","ja":"黒砂糖"}}
 {"canonical_key":"poultry_liver","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"poultry liver","fr":"foie de volaille","de":"Geflügel-leber","zh":"禽类肝脏"}}
 {"canonical_key":"marmalade","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"marmalade","de":"Marmelade"}}
@@ -928,12 +940,12 @@
 {"canonical_key":"berries","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"berries","es":"bayas","fr":"baies","de":"Beere","ja":"ベリーズ"}}
 {"canonical_key":"chocolate_powder","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"chocolate powder","es":"chocolate en polvo","fr":"chocolat en poudre","de":"Schokoladenpulver","zh":"巧克力粉"}}
 {"canonical_key":"goat_milk","category":"dairy","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"goat milk","es":"leche de cabra","fr":"lait de chèvre","de":"Ziegenmilch","ja":"ヤギ乳","ko":"염소젖","vi":"sữa dê"}}
-{"canonical_key":"wakame","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"wakame","es":"wakame","fr":"wakamé","de":"wakame","ar":"واكامي","zh":"海帶芽","ja":"ワカメ","ko":"미역","vi":"Tảo bẹ Undaria"}}
+{"canonical_key":"curry","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"curry","es":"curry","fr":"curry","de":"Curry","ar":"كاري","hi":"सालन","zh":"咖哩","ja":"カレー"}}
 {"canonical_key":"pumpkin_leaves","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"pumpkin leaves"}}
 {"canonical_key":"pulp","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"pulp","fr":"pulpe","de":"Fruchtfleisch"}}
 {"canonical_key":"dried_lentils","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"Dried lentils","es":"Lentejas secas","fr":"Lentilles sèches","de":"Getrocknete Linsen"}}
 {"canonical_key":"white_fish_fillets","category":"protein","is_staple":0,"beneficial":0,"allergens":["fish"],"names":{"en":"white fish fillets"}}
-{"canonical_key":"millet","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"millet","es":"mijo","fr":"millet","de":"Hirse","ar":"دخن","hi":"बाजरा","zh":"杂谷","ja":"雑穀","ko":"서곡","vi":"kê"}}
+{"canonical_key":"clotted_cream","category":"other","is_staple":0,"beneficial":0,"allergens":["dairy"],"names":{"en":"clotted cream"}}
 {"canonical_key":"harissa","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"harissa","ar":"هريسة","hi":"हरीसा","zh":"哈里薩辣醬","ja":"ハリッサ","ko":"하리사"}}
 {"canonical_key":"chicken_thigh","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"chicken thigh","es":"muslo de pollo","fr":"cuisse de poulet","de":"Hähnchenschenkel"}}
 {"canonical_key":"garlic_puree","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"garlic puree","es":"puré de ajo","fr":"purée d'ail","de":"Knoblauchpüree"}}
@@ -947,6 +959,7 @@
 {"canonical_key":"matoki","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"matoki","fr":"matooke"}}
 {"canonical_key":"raspberry_liqueur","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"raspberry liqueur","es":"licor de frambuesas","fr":"liqueur de framboises","de":"Himbeerlikör"}}
 {"canonical_key":"puffed_cereal","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"puffed cereal","fr":"céréales soufflées","de":"gepufftes Getreide"}}
+{"canonical_key":"organic_tomato","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"organic tomato","es":"tomate orgánico","fr":"tomates biologiques","de":"Biologische Tomaten"}}
 {"canonical_key":"coffee_powder","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"coffee powder","es":"café en polvo","fr":"café en poudre","de":"Kaffeepulver"}}
 {"canonical_key":"brussels_sprouts","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"brussels sprouts","es":"col de Bruselas","fr":"chou de Bruxelles","de":"Rosenkohl","ar":"كرنب بروكسل","zh":"抱子甘藍","ja":"メキャベツ","ko":"방울다다기","vi":"cải brussels"}}
 {"canonical_key":"milkfish","category":"protein","is_staple":0,"beneficial":0,"allergens":["fish"],"names":{"en":"milkfish"}}
@@ -959,7 +972,6 @@
 {"canonical_key":"goat_meat","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"goat meat","es":"cabrito al pastor","fr":"viande de chèvre","de":"Ziegenfleisch","ar":"لحم الماعز","zh":"山羊肉","ja":"ヤギ肉","ko":"염소고기","vi":"Thịt dê"}}
 {"canonical_key":"limoncello","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"limoncello","de":"Limoncello","zh":"檸檬酒","ja":"リモンチェッロ","ko":"리몬첼로"}}
 {"canonical_key":"clementine","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"clementine","es":"clementina","fr":"clémentine","de":"Clementine","ar":"كليمونتين","zh":"克里曼丁红橘","ja":"クレメンタイン","vi":"Clementine"}}
-{"canonical_key":"buckwheat_flour","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"buckwheat flour","es":"harina de sarraceno","fr":"farine de sarrasin","de":"Buchweizenmehl","ja":"蕎麦粉"}}
 {"canonical_key":"freekeh","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"freekeh","fr":"frik","de":"Freekeh","ar":"فريكة","zh":"翡麦","ja":"フリーカ"}}
 {"canonical_key":"soaked_chickpeas","category":"legume","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"soaked chickpeas","es":"garbanzos remojados","fr":"Pois chiches trempés dans l'eau","de":"gequellte Kichererbsen"}}
 {"canonical_key":"coconut_flour","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"coconut flour","es":"harina de coco","fr":"farine de noix de coco","de":"kokosmehl"}}
@@ -979,15 +991,12 @@
 {"canonical_key":"fresh_spearmint","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"fresh spearmint"}}
 {"canonical_key":"prune","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"prune","es":"ciruela pasa","fr":"pruneau","de":"Trockenpflaume","ar":"برقوق مجفف","zh":"梅乾","ja":"プルーン","ko":"프룬","vi":"mận khô"}}
 {"canonical_key":"prickly_pear","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"prickly pear"}}
-{"canonical_key":"orange_essential_oil","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"orange essential oil","es":"aceite esencial de naranja","fr":"huile essentielle d'orange","de":"Orangenöl"}}
-{"canonical_key":"lemon_oil","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"lemon oil","es":"Aceite de limón","fr":"essence de citron","de":"Zitronenöl"}}
 {"canonical_key":"tea_extract","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"tea extract","es":"Extracto de té","fr":"extrait de thé","de":"Tee-Extrakt"}}
 {"canonical_key":"liquorice_root","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"liquorice root","fr":"racine de réglisse","de":"Sussholzwurzel"}}
 {"canonical_key":"ginseng","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"ginseng","fr":"gingseng","de":"Ginseng"}}
 {"canonical_key":"pomegranate_juice","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"pomegranate juice","es":"zumo de granada","fr":"jus de grenade","de":"Granatapfelsaft"}}
 {"canonical_key":"raw_cassava","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"raw cassava"}}
 {"canonical_key":"mate","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"mate","es":"Mate","fr":"maté","de":"Mate","ar":"متة","zh":"瑪黛茶","ja":"マテ茶","ko":"마테차"}}
-{"canonical_key":"lime_oil","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"lime oil","es":"aceite de lima","fr":"Huile de citron vert","de":"Limettenöl"}}
 {"canonical_key":"pepper_mix","category":"spice","is_staple":1,"beneficial":0,"allergens":[],"names":{"en":"pepper mix"}}
 {"canonical_key":"spinach_leaves","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"spinach leaves","fr":"épinards en branches","de":"Blattspinat"}}
 {"canonical_key":"tuber","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"tuber","es":"tubérculo","fr":"tubercule","de":"Knollengemüse","ar":"درنة نبات","zh":"塊莖與塊根","ja":"球根","ko":"알뿌리","vi":"củ"}}
@@ -995,10 +1004,8 @@
 {"canonical_key":"soy_protein","category":"other","is_staple":0,"beneficial":0,"allergens":["soy"],"names":{"en":"soy protein","es":"Proteina de soya","fr":"protéine de soja","de":"Sojaprotein","ja":"大豆たんぱく"}}
 {"canonical_key":"brazil_nut","category":"nut","is_staple":0,"beneficial":1,"allergens":["nut"],"names":{"en":"brazil nut","es":"nueces de Brasil","fr":"noix du Brésil","de":"Paranuss","ja":"ブラジルナッツ"}}
 {"canonical_key":"goose","category":"protein","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"goose","es":"ganso","fr":"oie","de":"Gans"}}
-{"canonical_key":"nutritional_yeast","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"nutritional yeast","fr":"levure alimentaire","de":"nährhefe","ar":"رقائق الخميرة المغذية","ja":"イーストフード"}}
 {"canonical_key":"rose_hip","category":"fruit","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"rose hip","es":"escaramujo","fr":"cynorrhodon","de":"Hagebutte","ar":"وردة المسك","zh":"蔷薇果","ja":"ローズヒップ","ko":"로즈힙"}}
 {"canonical_key":"pumpkin_seed","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"pumpkin seed","es":"semillas de calabaza","fr":"graine de courge","de":"Kürbiskern","ar":"لب","zh":"南瓜籽","ja":"かぼちゃの種","ko":"호박씨","vi":"hạt bí"}}
-{"canonical_key":"quinoa","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"quinoa","es":"quinoa","fr":"quinoa","de":"Quinoa","ar":"كينوا","hi":"क्विन्वा","ja":"キヌア","ko":"퀴노아","vi":"diêm mạch"}}
 {"canonical_key":"casing","category":"other","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"casing","es":"Cubierto","fr":"enveloppe","de":"Hülle"}}
 {"canonical_key":"durum_wheat_flour","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"durum wheat flour","es":"harina de trigo duro","fr":"farine de blé dur","de":"Hartweizenmehl"}}
 {"canonical_key":"wheat_bran","category":"grain","is_staple":0,"beneficial":0,"allergens":["gluten"],"names":{"en":"wheat bran","es":"salvado de trigo","fr":"son de blé","de":"Weizenkleie","ja":"小麦ふすま"}}
@@ -1010,6 +1017,7 @@
 {"canonical_key":"chayotte","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"chayotte","fr":"chayotte"}}
 {"canonical_key":"celery_leaves","category":"spice","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"celery leaves","es":"apio hoja","fr":"feuilles de céleri","de":"Sellerieblätter"}}
 {"canonical_key":"kimchi","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"kimchi","ko":"김치"}}
+{"canonical_key":"hot_jalapeno_pepper","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"hot jalapeno pepper"}}
 {"canonical_key":"toasted_hazelnuts","category":"nut","is_staple":0,"beneficial":1,"allergens":["nut"],"names":{"en":"toasted hazelnuts"}}
 {"canonical_key":"curly_endive","category":"vegetable","is_staple":0,"beneficial":1,"allergens":[],"names":{"en":"curly endive","es":"escarola rizada","fr":"chicorée frisée","de":"krauser Salat"}}
 {"canonical_key":"lasagne","category":"grain","is_staple":0,"beneficial":0,"allergens":[],"names":{"en":"lasagne","es":"lasaña","fr":"lasagnes","de":"lasagne","ar":"لازانيا","hi":"लज़ान्या","zh":"千層麵","ja":"ラザニア","ko":"라자냐","vi":"lasagna"}}

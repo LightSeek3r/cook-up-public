@@ -368,6 +368,7 @@
 168211	Potato and Garlic Filling
 168211	Smoked Salmon Filling
 168211	Spinach and Ricotta Filling
+168493	1 Tbsp fresh ginger, scraped and finely chopped
 168496	4 vol-au-vent shells
 168578	1 cup shallot tops
 168622	1 lb filet of pike
@@ -783,6 +784,7 @@
 21245	3 pounds chuck roast or ground beef, cubed or formed into small meatballs
 21245	3 cups tomato juice or V8
 213438	2 teaspoons (10 mL) tandoori powder
+213798	3 hot yellow South American chilis (seeds and filaments removed): Adjust quantity for individual taste.
 215946	½–¾ cup (120–180 ml) white sugar for colouring
 21640	1 cup finely-ground pure cannabis
 21711	1 can (290 g) of poutine sauce (French: mélange à sauce poutine) or gravy
@@ -1019,6 +1021,9 @@
 31180	2 cups oatmeal, toasted in a 375°F (200°C) oven for 10 minutes
 31180	1 teaspoon dried thyme, whole
 31180	3 beef CAPS (Talk to a sausage shop about these)
+31311	2 teaspoons (10.0 g / 10 mL) food-grade gum arabic
+31311	2 tbsp (30 mL) caramel color
+31311	2 tsp (10 mL) Flavoring Formula
 31910	1 lb (450 g) Velveeta cheese
 31910	Tortilla chips or fritos for serving
 31914	1 tablespoon grated orange rind
@@ -1026,6 +1031,7 @@
 32868	1 recipe Flaky Pie Crust
 32897	1 flaky pie crust
 32951	Extra boiling water as needed
+33062	1 teaspoon ginger-garlic paste
 33222	1 teaspoon or more of the following:
 33309	5 g agar powder
 33309	½ tsp almond extract
@@ -1060,7 +1066,11 @@
 359571	15 g of 5.5% alpha acid
 359571	London ale (White Labs #WLP013)
 359627	1 tbsp dill salt or herbes de Provence
+359629	1 package gluten-free all-purpose baking mix
+359629	3 tsp Chinese five-spice powder
+360467	¼–1 cup plain or Italian bread crumbs
 360622	3 tbsp panko or fine dry breadcrumbs
+360624	¼ cup (60 ml/65 g) unsweetened applesauce
 36159	1 teaspoon of achiote (annatto)
 3640	Heavy pinch of sea salt
 36448	¼ cup moderately hot water, about 110 °F (45 °C)
@@ -1074,6 +1084,8 @@
 37551	1 kg hilsa fish (kelee shad), cut into 10 pieces
 37551	3 tbsp capsicum
 37564	½ cup bagoong alamang
+380848	1 pinch cayenne salt, if necessary
+380849	2 cups of Silk Nog (vegan eggnog substitute)
 38086	1 cup (60 g / 2.1 oz) puffed rice cereal
 381706	200 g whole sweetfish, cleaned and gutted
 381706	Doenjang
@@ -1085,6 +1097,7 @@
 381837	Food coloring (for varieties of color)
 382322	1 can (about 400 g) fried ghormeh sabzi herbs
 38412	2–3 spoonfuls condiment for seasoning minestrone
+38515	Smoked ham or tongue
 38738	½ teaspoon almond extract
 389691	⅛ tsp green mango powder
 39094	1 teaspoon stevia
@@ -1114,6 +1127,9 @@
 4032	Sarza criolla
 4032	Cooked meat or seafood
 404200	½ teaspoon chili garlic sauce
+404201	¼ recipe shortbread crust (see above)
+404205	8 oz (230 g) white button mushroom, stems removed
+404206	1 tablespoon coconut aminos
 404925	1 box (18.25 oz) of yellow cake mix
 405427	1 tbsp red pepper paste (like Korean gochujang or similar)
 405427	Around ⅛–¼ cup water
@@ -1428,6 +1444,7 @@
 456920	4–6 pieces of soft flatbread or pita bread
 456921	4–6 pieces of pita bread or Egyptian flatbread
 456953	2 East African chapati (homemade or purchased)
+456955	1 medium-size green pepper, neatly chopped
 456965	4 whole pigeons, cleaned and gutted
 456979	1–1½ cups Cameroonian smoked fish
 456979	½ teaspoon country onion spice
@@ -1466,6 +1483,7 @@
 457161	4 ea. (32 oz) swordfish fillets, deboned
 457174	15 djansang seeds
 457174	4 lb tilapia fish
+457194	Lemon wedges, for serving
 457195	1 tablespoon mitmita spice blend
 457195	Injera, for serving
 457195	Ayib (Ethiopian cheese), crumbled, for serving (optional)
@@ -1492,7 +1510,10 @@
 457314	2 tablespoons chicken-flavour bouillon cube or powder
 457319	10 njansan seeds
 457319	6 tablespoons mbongo spice
+457334	Oatmeal
 457339	2 cups wheat flour or sorghum flour
+457346	1 lb smoked catfish or any fish of your choice
+457348	3 pieces smoked catfish
 457353	2 cups palm nuts (either fresh, frozen, or canned)
 457353	1 smoked fish (optional), deboned and flaked
 457355	1 bunch of bitterleaf (substitute with more spinach if unavailable)
@@ -1540,8 +1561,10 @@
 461924	½ tablespoon ginger-garlic paste
 461939	½ hatxora (Citrus macroptera|citrus macroptera)
 461939	2 tablespoons ginger-garlic paste
+461946	Panch puran (optional)
 461951	1 teaspoon hatxora
 461951	Garlic, tomato, and naga sauce (extremely spicy)
+461964	½ cup onion paste
 462077	500 g matzah meal
 462078	1 teaspoon mixed spice
 462084	2 strips Smart vegetarian bacon or other breakfast meat substitute
@@ -1561,8 +1584,13 @@
 462333	3 fresh utazi leaves
 462333	Garden egg leaves
 462348	1 can (8 oz / 250 g) cream of mushroom soup
+462352	3 cups red wine, young and full-bodied (like Beaujolais, Côtes du Rhone or Burgundy)
+462352	2 ½–3 ½ cups brown beef stock
+462352	1 pound mushrooms, fresh and quartered
+462387	4–5 ea. 4-inch (10 cm) long sheets of kombu seaweed
 464046	1 grain musk (substitute edible musk essence)
 464046	1 grain ambergris (no modern substitute)
+464385	Monosodium glutamate (optional)
 464428	⅓ cup nata de coco (coconut gel in syrup)
 464428	¼ cup kaong in syrup
 464428	2 ea. 2 inch cubes leche flan
@@ -1603,6 +1631,8 @@
 469252	½ tsp green food coloring (optional)
 469252	8 ea. 2 cm pieces of pandan leaf
 469253	A few drops of food coloring (desired color; optional)
+470079	Food coloring (concentrated variety)
+470079	Filling as desired (see notes)
 470195	2 cups chicken and vegetable stock
 470263	½ teaspoon potash
 470263	2 tablespoons baobab leaf flour (kuka)
@@ -1735,6 +1765,13 @@
 483084	7-10 pieces stock fish ear
 483084	1 cup of ground tatashe
 483084	smoked fish(2-3 medium)
+483088	150 grams smoked fish (eja igbe), deboned
+483088	300 grams efo tete or efo shoko (African spinach), washed and shredded
+483089	Assorted meat (beef, shaki, ponmo, oxtail)
+483089	Smoked fish, deboned
+483089	Beletete (dried banga herb)
+483089	Oburunbebe stick (banga spice)
+483089	Uziza leaves
 483097	1 kilogram fresh palm fruits (or canned palm fruit concentrate)
 483097	1 tablespoon ogiri okpei (fermented locust bean paste)
 483097	1 teaspoons ground ehuru (African nutmeg)
@@ -1897,6 +1934,7 @@
 7671	¼ cup gravy
 77142	Vanilla custard
 77147	Blue cheese dressing
+77191	1 large jar of Alfredo sauce
 77216	1 piece coal
 77622	1 Tbsp ginger-garlic paste
 77634	2 oz (60 g) plain white flour
@@ -1929,6 +1967,7 @@
 8658	Baharat
 87224	1 cup (240 ml) Bisquick baking mix
 87224	A little over ¾ cup (200 ml) warm milk
+87421	Butter-flavored nonstick spray
 87422	Leftover bones from roast duck
 87422	Pan drippings
 87422	Duck giblets (gizzard, heart, neck, skinned/peeled duck feet)

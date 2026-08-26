@@ -337,6 +337,18 @@
 {"recipe_id":103108,"canonical_key":"oil","raw_text":"2 tbsp cooking oil","quantity":2,"unit":"tbsp"}
 {"recipe_id":103108,"canonical_key":"chili_pepper","raw_text":"2 hot chiles (optional)","quantity":2,"unit":null}
 {"recipe_id":103108,"canonical_key":"shrimp_paste","raw_text":"¼ tsp terasi (fermented shrimp paste)","quantity":0.25,"unit":"tsp"}
+{"recipe_id":103131,"canonical_key":"pumpkin","raw_text":"1½ pounds (650 g) pumpkin or winter squash, whole","quantity":1.5,"unit":"lb"}
+{"recipe_id":103131,"canonical_key":"salt","raw_text":"½ teaspoon salt","quantity":0.5,"unit":"tsp"}
+{"recipe_id":103131,"canonical_key":"pepper","raw_text":"6 grinds freshly cracked black pepper","quantity":6,"unit":null}
+{"recipe_id":103131,"canonical_key":"marjoram","raw_text":"1 bunch fresh marjoram, chopped (some reserved for garnish)","quantity":1,"unit":"bunch"}
+{"recipe_id":103131,"canonical_key":"garlic","raw_text":"2 cloves garlic, peeled and thickly sliced","quantity":2,"unit":"clove"}
+{"recipe_id":103131,"canonical_key":"extra_virgin_olive_oil","raw_text":"5 tablespoons extra-virgin olive oil, divided","quantity":5,"unit":"tbsp"}
+{"recipe_id":103131,"canonical_key":"chicken_broth","raw_text":"1 quart (120 ml) chicken stock/broth","quantity":1,"unit":"quart"}
+{"recipe_id":103131,"canonical_key":"butter","raw_text":"10 tablespoons unsalted butter at room temperature, divided","quantity":10,"unit":"tbsp"}
+{"recipe_id":103131,"canonical_key":"red_onion","raw_text":"1 medium red onion, finely diced","quantity":1,"unit":"medium"}
+{"recipe_id":103131,"canonical_key":"risotto_rice","raw_text":"1½ cups (360 g) risotto rice","quantity":1.5,"unit":"cup"}
+{"recipe_id":103131,"canonical_key":"vermouth","raw_text":"5 tablespoons extra-dry white vermouth","quantity":5,"unit":"tbsp"}
+{"recipe_id":103131,"canonical_key":"parmigiano_reggiano","raw_text":"1½ cups (360 g) Parmiggiano Reggiano, finely grated, plus extra to sprinkle at the table","quantity":1.5,"unit":"cup"}
 {"recipe_id":103278,"canonical_key":"chickpea_flour","raw_text":"3 cups (700 g) flour","quantity":3,"unit":"cup"}
 {"recipe_id":103278,"canonical_key":"shortening","raw_text":"1¼ cup (300 g) shortening","quantity":1.25,"unit":"cup"}
 {"recipe_id":103278,"canonical_key":"salt","raw_text":"1 teaspoon salt","quantity":1,"unit":"tsp"}
@@ -1529,6 +1541,20 @@
 {"recipe_id":110777,"canonical_key":"brown_sugar","raw_text":"¾ cup (150 g / 5.3 oz) tightly packed dark brown sugar","quantity":0.75,"unit":"cup"}
 {"recipe_id":110777,"canonical_key":"honey","raw_text":"½ cup (150 g / 5.3 oz) honey","quantity":0.5,"unit":"cup"}
 {"recipe_id":110777,"canonical_key":"egg","raw_text":"2 large eggs","quantity":2,"unit":"large"}
+{"recipe_id":110789,"canonical_key":"black_bean","raw_text":"1 lb (500 g) dried black beans","quantity":1,"unit":"lb"}
+{"recipe_id":110789,"canonical_key":"bell_pepper","raw_text":"1 large green pepper, cut in half with seeds and stem removed","quantity":1,"unit":"large"}
+{"recipe_id":110789,"canonical_key":"olive_oil","raw_text":"⅓ cup olive oil","quantity":0.3333,"unit":"cup"}
+{"recipe_id":110789,"canonical_key":"onion","raw_text":"1 large onion, chopped","quantity":1,"unit":"large"}
+{"recipe_id":110789,"canonical_key":"garlic","raw_text":"4 cloves of garlic, smashed and chopped","quantity":4,"unit":"clove"}
+{"recipe_id":110789,"canonical_key":"green_pepper","raw_text":"1 large green pepper, seeds and stem removed, then chopped","quantity":1,"unit":"large"}
+{"recipe_id":110789,"canonical_key":"salt","raw_text":"4 tsp salt","quantity":4,"unit":"tsp"}
+{"recipe_id":110789,"canonical_key":"pepper","raw_text":"½ tsp pepper","quantity":0.5,"unit":"tsp"}
+{"recipe_id":110789,"canonical_key":"oregano","raw_text":"1 tsp oregano","quantity":1,"unit":"tsp"}
+{"recipe_id":110789,"canonical_key":"bay_leaf","raw_text":"1 bay leaf","quantity":1,"unit":null}
+{"recipe_id":110789,"canonical_key":"sugar","raw_text":"2 tbsp sugar (or ½ packet of low-calorie sweetener)","quantity":2,"unit":"tbsp"}
+{"recipe_id":110789,"canonical_key":"cider_vinegar","raw_text":"2 tbsp cider vinegar","quantity":2,"unit":"tbsp"}
+{"recipe_id":110789,"canonical_key":"dry_white_wine","raw_text":"2 tbsp dry white wine (cooking wine or dry sherry is fine)","quantity":2,"unit":"tbsp"}
+{"recipe_id":110789,"canonical_key":"rice","raw_text":"2 cups converted rice","quantity":2,"unit":"cup"}
 {"recipe_id":110796,"canonical_key":"cucumber","raw_text":"2 cucumbers","quantity":2,"unit":null}
 {"recipe_id":110796,"canonical_key":"white_onion","raw_text":"1 white onion","quantity":1,"unit":null}
 {"recipe_id":110796,"canonical_key":"white_distilled_vinegar","raw_text":"2 cups (480 ml) distilled white vinegar","quantity":2,"unit":"cup"}
@@ -2499,6 +2525,9 @@
 {"recipe_id":11687,"canonical_key":"allspice","raw_text":"½ tsp ground allspice","quantity":0.5,"unit":"tsp"}
 {"recipe_id":11687,"canonical_key":"vinegar","raw_text":"½ cup brown vinegar","quantity":0.5,"unit":"cup"}
 {"recipe_id":11687,"canonical_key":"brandy","raw_text":"1½ brandy (optional)","quantity":1.5,"unit":null}
+{"recipe_id":117608,"canonical_key":"quinoa","raw_text":"1 cup quinoa","quantity":1,"unit":"cup"}
+{"recipe_id":117608,"canonical_key":"water","raw_text":"2 cups water","quantity":2,"unit":"cup"}
+{"recipe_id":117608,"canonical_key":"salt","raw_text":"1 pinch salt","quantity":1,"unit":"pinch"}
 {"recipe_id":117889,"canonical_key":"sugar","raw_text":"1 cup (about 240 ml) sugar","quantity":1,"unit":"cup"}
 {"recipe_id":117889,"canonical_key":"ginger_powder","raw_text":"1 tablespoon (15 ml) ground ginger","quantity":1,"unit":"tbsp"}
 {"recipe_id":117889,"canonical_key":"water","raw_text":"1 quart (1 liter) water","quantity":1,"unit":"quart"}
@@ -2571,6 +2600,11 @@
 {"recipe_id":119068,"canonical_key":"mozzarella","raw_text":"¼ pound fresh mozzarella cheese","quantity":0.25,"unit":"lb"}
 {"recipe_id":119068,"canonical_key":"breadcrumbs","raw_text":"½ cup seasoned bread crumbs","quantity":0.5,"unit":"cup"}
 {"recipe_id":119068,"canonical_key":"egg","raw_text":"1 large egg","quantity":1,"unit":"large"}
+{"recipe_id":119078,"canonical_key":"baguette","raw_text":"Pa de pagès (Catalan bread) or 1 loaf French bread, sliced","quantity":null,"unit":null}
+{"recipe_id":119078,"canonical_key":"tomato","raw_text":"2 ripe red tomatoes","quantity":2,"unit":null}
+{"recipe_id":119078,"canonical_key":"olive_oil","raw_text":"2 tbsp olive oil","quantity":2,"unit":"tbsp"}
+{"recipe_id":119078,"canonical_key":"sea_salt","raw_text":"Sea salt","quantity":null,"unit":null}
+{"recipe_id":119078,"canonical_key":"ham","raw_text":"120 g (¼ lb) sliced cured ham","quantity":120,"unit":"g"}
 {"recipe_id":119231,"canonical_key":"sausage","raw_text":"1 beef hot dog","quantity":1,"unit":null}
 {"recipe_id":119231,"canonical_key":"bacon","raw_text":"1 strip bacon","quantity":1,"unit":null}
 {"recipe_id":119231,"canonical_key":"egg","raw_text":"1 large egg","quantity":1,"unit":"large"}
@@ -3299,6 +3333,13 @@
 {"recipe_id":127733,"canonical_key":"pea","raw_text":"1 bag (8 ounces) frozen peas","quantity":1,"unit":"bag"}
 {"recipe_id":127733,"canonical_key":"breadcrumbs","raw_text":"1 cup bread crumbs","quantity":1,"unit":"cup"}
 {"recipe_id":127733,"canonical_key":"butter","raw_text":"2 tablespoons butter, melted","quantity":2,"unit":"tbsp"}
+{"recipe_id":127735,"canonical_key":"tomato","raw_text":"2 large red tomatoes, finely diced","quantity":2,"unit":"large"}
+{"recipe_id":127735,"canonical_key":"spring_onion","raw_text":"2 scallions, finely chopped","quantity":2,"unit":null}
+{"recipe_id":127735,"canonical_key":"oil","raw_text":"¼ cup oil","quantity":0.25,"unit":"cup"}
+{"recipe_id":127735,"canonical_key":"allspice","raw_text":"Allspice","quantity":null,"unit":null}
+{"recipe_id":127735,"canonical_key":"stock_cube","raw_text":"Chicken bouillon cube","quantity":null,"unit":null}
+{"recipe_id":127735,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":127735,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
 {"recipe_id":127740,"canonical_key":"milk","raw_text":"3 cups milk","quantity":3,"unit":"cup"}
 {"recipe_id":127740,"canonical_key":"cornmeal","raw_text":"1 cup white or yellow corn meal","quantity":1,"unit":"cup"}
 {"recipe_id":127740,"canonical_key":"black_pepper","raw_text":"¼ teaspoon black pepper","quantity":0.25,"unit":"tsp"}
@@ -4287,6 +4328,17 @@
 {"recipe_id":13911,"canonical_key":"sugar","raw_text":"1 tbsp sugar","quantity":1,"unit":"tbsp"}
 {"recipe_id":13911,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
 {"recipe_id":13911,"canonical_key":"pepper","raw_text":"Pepper to taste","quantity":null,"unit":null}
+{"recipe_id":13914,"canonical_key":"courgette","raw_text":"2 large courgettes (zucchini)","quantity":2,"unit":"large"}
+{"recipe_id":13914,"canonical_key":"onion","raw_text":"1 large onion","quantity":1,"unit":"large"}
+{"recipe_id":13914,"canonical_key":"garlic","raw_text":"Garlic","quantity":null,"unit":null}
+{"recipe_id":13914,"canonical_key":"olive_oil","raw_text":"Olive oil","quantity":null,"unit":null}
+{"recipe_id":13914,"canonical_key":"green_bell_pepper","raw_text":"1 large green bell pepper","quantity":1,"unit":"large"}
+{"recipe_id":13914,"canonical_key":"tomato","raw_text":"2 large tomatoes","quantity":2,"unit":"large"}
+{"recipe_id":13914,"canonical_key":"herb","raw_text":"Herbs","quantity":null,"unit":null}
+{"recipe_id":13914,"canonical_key":"brown_rice","raw_text":"4 oz cooked brown rice","quantity":4,"unit":"oz"}
+{"recipe_id":13914,"canonical_key":"mustard","raw_text":"Mustard","quantity":null,"unit":null}
+{"recipe_id":13914,"canonical_key":"coating","raw_text":"Seasoning","quantity":null,"unit":null}
+{"recipe_id":13914,"canonical_key":"cheddar","raw_text":"Cheddar cheese","quantity":null,"unit":null}
 {"recipe_id":139257,"canonical_key":"black_pepper","raw_text":"¼ teaspoon black pepper","quantity":0.25,"unit":"tsp"}
 {"recipe_id":139257,"canonical_key":"flour","raw_text":"1½ tablespoons flour","quantity":1.5,"unit":"tbsp"}
 {"recipe_id":139257,"canonical_key":"mustard","raw_text":"1 teaspoon ground mustard","quantity":1,"unit":"tsp"}
@@ -5576,6 +5628,14 @@
 {"recipe_id":16682,"canonical_key":"vodka","raw_text":"Vodka","quantity":null,"unit":null}
 {"recipe_id":16682,"canonical_key":"roe","raw_text":"1 tsp caviar (or lumpfish roe)","quantity":1,"unit":"tsp"}
 {"recipe_id":16682,"canonical_key":"lemon","raw_text":"Whole lemon","quantity":null,"unit":"whole"}
+{"recipe_id":166836,"canonical_key":"lentils","raw_text":"1 cup (240 ml) lentils","quantity":1,"unit":"cup"}
+{"recipe_id":166836,"canonical_key":"barley","raw_text":"2 heaped tablespoons (30 ml) barley","quantity":2,"unit":null}
+{"recipe_id":166836,"canonical_key":"butter","raw_text":"1 tablespoon (15 ml) butter","quantity":1,"unit":"tbsp"}
+{"recipe_id":166836,"canonical_key":"onion","raw_text":"1 onion, diced","quantity":1,"unit":null}
+{"recipe_id":166836,"canonical_key":"water","raw_text":"3 cups (720 ml) water","quantity":3,"unit":"cup"}
+{"recipe_id":166836,"canonical_key":"tomato","raw_text":"2 tomatoes, peeled, seeded, and diced","quantity":2,"unit":null}
+{"recipe_id":166836,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":166836,"canonical_key":"pepper","raw_text":"Pepper, to taste","quantity":null,"unit":null}
 {"recipe_id":167001,"canonical_key":"beef","raw_text":"3 lb beef shin bones, sawn into 2-inch lengths","quantity":3,"unit":"lb"}
 {"recipe_id":167001,"canonical_key":"veal","raw_text":"2 lb veal shank, sawn into 2-inch lengths","quantity":2,"unit":"lb"}
 {"recipe_id":167001,"canonical_key":"chicken","raw_text":"1 lb chicken carcasses","quantity":1,"unit":"lb"}
@@ -5631,6 +5691,10 @@
 {"recipe_id":167451,"canonical_key":"flour","raw_text":"150 g (½ cup) flour","quantity":150,"unit":"g"}
 {"recipe_id":167451,"canonical_key":"water","raw_text":"Water, warmed","quantity":null,"unit":null}
 {"recipe_id":167451,"canonical_key":"coarse_salt","raw_text":"20 g (2 tsp) coarse salt (or 1½ tsp table salt)","quantity":20,"unit":"g"}
+{"recipe_id":167460,"canonical_key":"yogurt","raw_text":"125 g (½ cup) plain yoghurt","quantity":125,"unit":"g"}
+{"recipe_id":167460,"canonical_key":"water","raw_text":"125 g (½ cup) water","quantity":125,"unit":"g"}
+{"recipe_id":167460,"canonical_key":"honey","raw_text":"2 tsp honey","quantity":2,"unit":"tsp"}
+{"recipe_id":167460,"canonical_key":"flour","raw_text":"250 g (1 cup) all-purpose flour","quantity":250,"unit":"g"}
 {"recipe_id":167543,"canonical_key":"parmigiano_reggiano","raw_text":"¼ cup finely grated Parmigiano Reggiano","quantity":0.25,"unit":"cup"}
 {"recipe_id":167543,"canonical_key":"gruyere","raw_text":"¼ cup finely grated gruyère cheese","quantity":0.25,"unit":"cup"}
 {"recipe_id":167543,"canonical_key":"bechamel_sauce","raw_text":"1½ cups sauce béchamel","quantity":1.5,"unit":"cup"}
@@ -5677,6 +5741,12 @@
 {"recipe_id":168434,"canonical_key":"salt","raw_text":"1 tsp salt","quantity":1,"unit":"tsp"}
 {"recipe_id":168434,"canonical_key":"cayenne_pepper","raw_text":"⅛ tsp cayenne pepper","quantity":0.125,"unit":"tsp"}
 {"recipe_id":168434,"canonical_key":"lime","raw_text":"2–3 Tbsp fresh orange juice, or a mixture of orange and lime juice","quantity":2,"unit":"tbsp"}
+{"recipe_id":168493,"canonical_key":"mango","raw_text":"2 almost-ripe mangoes","quantity":2,"unit":null}
+{"recipe_id":168493,"canonical_key":"coconut","raw_text":"1 Tbsp fresh or canned coconut, finely chopped","quantity":1,"unit":"tbsp"}
+{"recipe_id":168493,"canonical_key":"mint","raw_text":"1 tsp cilantro or mint, chopped","quantity":1,"unit":"tsp"}
+{"recipe_id":168493,"canonical_key":"salt","raw_text":"1 tsp salt","quantity":1,"unit":"tsp"}
+{"recipe_id":168493,"canonical_key":"cayenne_pepper","raw_text":"½ tsp cayenne pepper","quantity":0.5,"unit":"tsp"}
+{"recipe_id":168493,"canonical_key":"lime","raw_text":"2–3 Tbsp fresh orange juice, or a mixture of orange and lime juice","quantity":2,"unit":"tbsp"}
 {"recipe_id":168496,"canonical_key":"shallot","raw_text":"1 shallot, chopped","quantity":1,"unit":null}
 {"recipe_id":168496,"canonical_key":"turkey","raw_text":"2 large chicken or turkey breasts","quantity":2,"unit":"large"}
 {"recipe_id":168496,"canonical_key":"button_mushroom","raw_text":"4 oz small or medium button mushrooms","quantity":4,"unit":"oz"}
@@ -6623,6 +6693,14 @@
 {"recipe_id":18246,"canonical_key":"sunflower_oil","raw_text":"Sunflower oil","quantity":null,"unit":null}
 {"recipe_id":18246,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
 {"recipe_id":18246,"canonical_key":"parsley","raw_text":"Parsley, finely chopped","quantity":null,"unit":null}
+{"recipe_id":18247,"canonical_key":"white_beans","raw_text":"200 g white beans","quantity":200,"unit":"g"}
+{"recipe_id":18247,"canonical_key":"carrot","raw_text":"2–3 carrots","quantity":2,"unit":null}
+{"recipe_id":18247,"canonical_key":"celery","raw_text":"½ a celery","quantity":0.5,"unit":null}
+{"recipe_id":18247,"canonical_key":"onion","raw_text":"1 onion","quantity":1,"unit":null}
+{"recipe_id":18247,"canonical_key":"tomato","raw_text":"1–2 tomatoes","quantity":1,"unit":null}
+{"recipe_id":18247,"canonical_key":"bell_pepper","raw_text":"1–2 bell peppers","quantity":1,"unit":null}
+{"recipe_id":18247,"canonical_key":"chili_pepper","raw_text":"1–2 chiles","quantity":1,"unit":null}
+{"recipe_id":18247,"canonical_key":"sunflower_oil","raw_text":"Optional: parsley, mint, sunflower oil, salt","quantity":null,"unit":null}
 {"recipe_id":18248,"canonical_key":"aubergine","raw_text":"2–3 aubergines","quantity":2,"unit":null}
 {"recipe_id":18248,"canonical_key":"bell_pepper","raw_text":"4–5 bell peppers","quantity":4,"unit":null}
 {"recipe_id":18248,"canonical_key":"tomato","raw_text":"2–3 tomatoes, diced or grated","quantity":2,"unit":null}
@@ -6902,6 +6980,14 @@
 {"recipe_id":188683,"canonical_key":"tomato_sauce","raw_text":"3 tbsp tomato sauce","quantity":3,"unit":"tbsp"}
 {"recipe_id":188683,"canonical_key":"hot_sauce","raw_text":"3 tbsp chili sauce","quantity":3,"unit":"tbsp"}
 {"recipe_id":188683,"canonical_key":"pepper","raw_text":"1 tbsp pepper","quantity":1,"unit":"tbsp"}
+{"recipe_id":18871,"canonical_key":"beans","raw_text":"2 cups of dry white beans","quantity":2,"unit":"cup"}
+{"recipe_id":18871,"canonical_key":"onion","raw_text":"½ cup chopped onions","quantity":0.5,"unit":"cup"}
+{"recipe_id":18871,"canonical_key":"olive_oil","raw_text":"½ cup olive oil","quantity":0.5,"unit":"cup"}
+{"recipe_id":18871,"canonical_key":"tomato_sauce","raw_text":"2 tablespoons tomato sauce","quantity":2,"unit":"tbsp"}
+{"recipe_id":18871,"canonical_key":"parsley","raw_text":"1 tablespoon chopped parsley","quantity":1,"unit":"tbsp"}
+{"recipe_id":18871,"canonical_key":"mint","raw_text":"1 tablespoon chopped mint","quantity":1,"unit":"tbsp"}
+{"recipe_id":18871,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":18871,"canonical_key":"chili_pepper","raw_text":"Chile powder","quantity":null,"unit":null}
 {"recipe_id":18873,"canonical_key":"flour","raw_text":"2 tbsp flour","quantity":2,"unit":"tbsp"}
 {"recipe_id":18873,"canonical_key":"walnut","raw_text":"15 shelled walnuts, finely crushed","quantity":15,"unit":null}
 {"recipe_id":18873,"canonical_key":"egg_yolk","raw_text":"2 egg yolks, beaten","quantity":2,"unit":null}
@@ -10838,10 +10924,36 @@
 {"recipe_id":213438,"canonical_key":"chili_pepper","raw_text":"1 small, dried, crunched piri-piri chile pepper","quantity":1,"unit":"small"}
 {"recipe_id":213639,"canonical_key":"corn_starch","raw_text":"1 tablespoon cornstarch","quantity":1,"unit":"tbsp"}
 {"recipe_id":213639,"canonical_key":"water","raw_text":"2 tablespoons cold water","quantity":2,"unit":"tbsp"}
+{"recipe_id":213798,"canonical_key":"chicken","raw_text":"1300 g (4 lb) chicken","quantity":1300,"unit":"g"}
+{"recipe_id":213798,"canonical_key":"olive_oil","raw_text":"120 ml (½ cup) of olive oil","quantity":120,"unit":"ml"}
+{"recipe_id":213798,"canonical_key":"onion","raw_text":"1 large finely chopped onion","quantity":1,"unit":"large"}
+{"recipe_id":213798,"canonical_key":"garlic","raw_text":"8 cloves of minced garlic","quantity":8,"unit":"clove"}
+{"recipe_id":213798,"canonical_key":"pepper","raw_text":"Salt and pepper to taste","quantity":null,"unit":null}
+{"recipe_id":213798,"canonical_key":"broth","raw_text":"1 chicken stock cube","quantity":1,"unit":null}
+{"recipe_id":213798,"canonical_key":"bread","raw_text":"¼ loaf of bread","quantity":0.25,"unit":null}
+{"recipe_id":213798,"canonical_key":"pecan_nut","raw_text":"110 g (¼ lb) of chopped pecans","quantity":110,"unit":"g"}
+{"recipe_id":213798,"canonical_key":"parmigiano_reggiano","raw_text":"110 g (4 ounces)  grated Parmesan cheese","quantity":110,"unit":"g"}
+{"recipe_id":213798,"canonical_key":"evaporated_milk","raw_text":"1 can of evaporated milk","quantity":1,"unit":"can"}
+{"recipe_id":213798,"canonical_key":"rice","raw_text":"1.6 kg (3.5 lbs) boiled rice (flavored with chopped garlic and salt)","quantity":1.6,"unit":"kg"}
+{"recipe_id":213798,"canonical_key":"hard_boiled_egg","raw_text":"4 hard boiled eggs","quantity":4,"unit":null}
+{"recipe_id":213798,"canonical_key":"potato","raw_text":"6 potatoes","quantity":6,"unit":null}
+{"recipe_id":213798,"canonical_key":"black_olive","raw_text":"120 g (½ cup) black olives","quantity":120,"unit":"g"}
 {"recipe_id":213812,"canonical_key":"potato","raw_text":"15 ounces (425 g) canned potatoes, or 2 small boiled potatoes","quantity":15,"unit":"oz"}
 {"recipe_id":213812,"canonical_key":"tomato","raw_text":"28 ounces (794 g) canned tomatoes in juice, or 2 large tomatoes and tomato juice","quantity":28,"unit":"oz"}
 {"recipe_id":213812,"canonical_key":"clam","raw_text":"6.5 ounces (184 g) canned chopped clams, minimum","quantity":6.5,"unit":"oz"}
 {"recipe_id":213812,"canonical_key":"celery","raw_text":"2 stalks of celery","quantity":2,"unit":"stalk"}
+{"recipe_id":214042,"canonical_key":"oil","raw_text":"3 tbsp oil","quantity":3,"unit":"tbsp"}
+{"recipe_id":214042,"canonical_key":"garlic","raw_text":"3 cloves garlic","quantity":3,"unit":"clove"}
+{"recipe_id":214042,"canonical_key":"leek","raw_text":"2 leeks, chopped finely","quantity":2,"unit":null}
+{"recipe_id":214042,"canonical_key":"red_chili_pepper","raw_text":"2 red chiles, chopped finely","quantity":2,"unit":null}
+{"recipe_id":214042,"canonical_key":"egg","raw_text":"2 eggs, beaten","quantity":2,"unit":null}
+{"recipe_id":214042,"canonical_key":"carrot","raw_text":"100 g diced carrot","quantity":100,"unit":"g"}
+{"recipe_id":214042,"canonical_key":"shrimp","raw_text":"200 g prawn, diced small","quantity":200,"unit":"g"}
+{"recipe_id":214042,"canonical_key":"green_peas","raw_text":"100 g green peas","quantity":100,"unit":"g"}
+{"recipe_id":214042,"canonical_key":"rice","raw_text":"600 g rice","quantity":600,"unit":"g"}
+{"recipe_id":214042,"canonical_key":"salt","raw_text":"1 tbsp salt","quantity":1,"unit":"tbsp"}
+{"recipe_id":214042,"canonical_key":"pepper","raw_text":"1 tbsp pepper","quantity":1,"unit":"tbsp"}
+{"recipe_id":214042,"canonical_key":"chicken_broth","raw_text":"2 tbsp chicken powder","quantity":2,"unit":"tbsp"}
 {"recipe_id":214381,"canonical_key":"beans","raw_text":"1 pound (450 g) dried white beans (e.g. navy, great northern, cannellini)","quantity":1,"unit":"lb"}
 {"recipe_id":214381,"canonical_key":"clam","raw_text":"24 live littleneck or mahogany clams","quantity":24,"unit":null}
 {"recipe_id":214381,"canonical_key":"garlic","raw_text":"3 cloves garlic","quantity":3,"unit":"clove"}
@@ -11167,6 +11279,20 @@
 {"recipe_id":21833,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
 {"recipe_id":21833,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
 {"recipe_id":21833,"canonical_key":"coriander_leaf","raw_text":"Culantro or cilantro","quantity":null,"unit":null}
+{"recipe_id":21837,"canonical_key":"garlic","raw_text":"3 cloves of garlic, minced","quantity":3,"unit":"clove"}
+{"recipe_id":21837,"canonical_key":"olive_oil","raw_text":"2 tbsp olive oil","quantity":2,"unit":"tbsp"}
+{"recipe_id":21837,"canonical_key":"lemon_juice","raw_text":"Lemon juice","quantity":null,"unit":null}
+{"recipe_id":21837,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":21837,"canonical_key":"water","raw_text":"4 cups (1 litre) water","quantity":4,"unit":"cup"}
+{"recipe_id":21837,"canonical_key":"rice","raw_text":"1 pound (450 g) washed rice","quantity":1,"unit":"lb"}
+{"recipe_id":21837,"canonical_key":"onion","raw_text":"1 onion, finely chopped","quantity":1,"unit":null}
+{"recipe_id":21837,"canonical_key":"minced_beef","raw_text":"2 pounds (900 g) ground beef","quantity":2,"unit":"lb"}
+{"recipe_id":21837,"canonical_key":"tomato","raw_text":"2 tomatoes, finely chopped","quantity":2,"unit":null}
+{"recipe_id":21837,"canonical_key":"tomato_concentrate","raw_text":"1 tbsp tomato paste","quantity":1,"unit":"tbsp"}
+{"recipe_id":21837,"canonical_key":"raisin","raw_text":"4 tbsp of raisins","quantity":4,"unit":"tbsp"}
+{"recipe_id":21837,"canonical_key":"black_olive","raw_text":"5 black olives, chopped","quantity":5,"unit":null}
+{"recipe_id":21837,"canonical_key":"hard_boiled_egg","raw_text":"3 hard boiled eggs; 2 chopped, 1 whole","quantity":3,"unit":null}
+{"recipe_id":21837,"canonical_key":"parsley","raw_text":"1 tbsp parsley, finely minced","quantity":1,"unit":"tbsp"}
 {"recipe_id":21838,"canonical_key":"milk","raw_text":"2 cups milk","quantity":2,"unit":"cup"}
 {"recipe_id":21838,"canonical_key":"flour","raw_text":"½ cup flour","quantity":0.5,"unit":"cup"}
 {"recipe_id":21838,"canonical_key":"baking_powder","raw_text":"⅓ teaspoon baking powder","quantity":0.3333,"unit":"tsp"}
@@ -11512,6 +11638,17 @@
 {"recipe_id":223625,"canonical_key":"corn","raw_text":"1 corn cob, quarter-sliced","quantity":1,"unit":null}
 {"recipe_id":223625,"canonical_key":"salt","raw_text":"½ teaspoon salt","quantity":0.5,"unit":"tsp"}
 {"recipe_id":223625,"canonical_key":"chives","raw_text":"2 onion chives","quantity":2,"unit":null}
+{"recipe_id":22382,"canonical_key":"beef","raw_text":"1 kg beef (blade steak or stewing shoulder cut)","quantity":1,"unit":"kg"}
+{"recipe_id":22382,"canonical_key":"onion","raw_text":"3 large onions, chopped","quantity":3,"unit":"large"}
+{"recipe_id":22382,"canonical_key":"garlic","raw_text":"1–2 cloves of garlic","quantity":1,"unit":"clove"}
+{"recipe_id":22382,"canonical_key":"carrot","raw_text":"300 g of chopped carrot","quantity":300,"unit":"g"}
+{"recipe_id":22382,"canonical_key":"button_mushroom","raw_text":"300 g of button mushrooms","quantity":300,"unit":"g"}
+{"recipe_id":22382,"canonical_key":"thyme","raw_text":"Bouquet of herbs: basil, rosemary and thyme tied with string","quantity":null,"unit":null}
+{"recipe_id":22382,"canonical_key":"red_wine","raw_text":"2–4 cups of red wine","quantity":2,"unit":"cup"}
+{"recipe_id":22382,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":22382,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
+{"recipe_id":22382,"canonical_key":"olive_oil","raw_text":"Olive oil","quantity":null,"unit":null}
+{"recipe_id":22382,"canonical_key":"flour","raw_text":"Flour","quantity":null,"unit":null}
 {"recipe_id":224062,"canonical_key":"chickpea_flour","raw_text":"250 g chickpea flour","quantity":250,"unit":"g"}
 {"recipe_id":224062,"canonical_key":"flour","raw_text":"2 generous Tbsp wheat flour","quantity":2,"unit":null}
 {"recipe_id":224062,"canonical_key":"salt","raw_text":"1 tsp salt","quantity":1,"unit":"tsp"}
@@ -11875,11 +12012,36 @@
 {"recipe_id":234180,"canonical_key":"palm_sugar","raw_text":"150 g gula jawa (palm sugar)","quantity":150,"unit":"g"}
 {"recipe_id":234180,"canonical_key":"coconut","raw_text":"300 g grated coconut","quantity":300,"unit":"g"}
 {"recipe_id":234180,"canonical_key":"water","raw_text":"Water","quantity":null,"unit":null}
+{"recipe_id":23426,"canonical_key":"bacon","raw_text":"Bacon, sliced into rashers","quantity":null,"unit":null}
+{"recipe_id":23426,"canonical_key":"lettuce","raw_text":"Lettuce, washed and shredded, torn, or in whole leaves","quantity":null,"unit":null}
+{"recipe_id":23426,"canonical_key":"tomato","raw_text":"Ripe tomato, sliced into thin disks","quantity":null,"unit":null}
+{"recipe_id":23426,"canonical_key":"bread","raw_text":"2 slices of any type of bread","quantity":2,"unit":"slice"}
+{"recipe_id":23426,"canonical_key":"cream_cheese","raw_text":"Sandwich spread or condiments (e.g., butter, margarine, mayonnaise, cream cheese, or mustard, although mayonnaise is traditional)","quantity":null,"unit":null}
+{"recipe_id":23426,"canonical_key":"pepper","raw_text":"Ground black pepper, if desired","quantity":null,"unit":null}
+{"recipe_id":23503,"canonical_key":"shrimp","raw_text":"3 lbs (1.2 kg) medium size shrimp","quantity":3,"unit":"lb"}
+{"recipe_id":23503,"canonical_key":"cassava","raw_text":"3 lb (1.2 kg) yuca root","quantity":3,"unit":"lb"}
+{"recipe_id":23503,"canonical_key":"onion","raw_text":"2 cups onion, chopped","quantity":2,"unit":"cup"}
+{"recipe_id":23503,"canonical_key":"garlic","raw_text":"3 cloves garlic, chopped","quantity":3,"unit":"clove"}
+{"recipe_id":23503,"canonical_key":"olive_oil","raw_text":"½ cup olive oil","quantity":0.5,"unit":"cup"}
+{"recipe_id":23503,"canonical_key":"tomato","raw_text":"6 medium tomatoes, peeled and seeded (or a large can of whole tomatoes)","quantity":6,"unit":"medium"}
+{"recipe_id":23503,"canonical_key":"coriander_leaf","raw_text":"¼ cup cilantro, chopped","quantity":0.25,"unit":"cup"}
+{"recipe_id":23503,"canonical_key":"coconut_milk","raw_text":"2 cups coconut milk","quantity":2,"unit":"cup"}
+{"recipe_id":23503,"canonical_key":"palm_oil","raw_text":"¼ cup palm oil (also known as dendê)","quantity":0.25,"unit":"cup"}
+{"recipe_id":23503,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":23503,"canonical_key":"pepper","raw_text":"Pepper to taste","quantity":null,"unit":null}
 {"recipe_id":23535,"canonical_key":"sweet_potato","raw_text":"6 sweet potatoes","quantity":6,"unit":null}
 {"recipe_id":23535,"canonical_key":"margarine","raw_text":"½ cup margarine","quantity":0.5,"unit":"cup"}
 {"recipe_id":23535,"canonical_key":"brown_sugar","raw_text":"1 cup brown sugar","quantity":1,"unit":"cup"}
 {"recipe_id":23535,"canonical_key":"vanilla_extract","raw_text":"2 tbsp vanilla extract","quantity":2,"unit":"tbsp"}
 {"recipe_id":23535,"canonical_key":"water","raw_text":"¼ cup water","quantity":0.25,"unit":"cup"}
+{"recipe_id":235650,"canonical_key":"brandy","raw_text":"¼ L of Chilean brandy","quantity":0.25,"unit":"l"}
+{"recipe_id":235650,"canonical_key":"nutmeg","raw_text":"1 nutmeg","quantity":1,"unit":null}
+{"recipe_id":235650,"canonical_key":"cinnamon","raw_text":"2 cinnamon sticks","quantity":2,"unit":null}
+{"recipe_id":235650,"canonical_key":"coffee","raw_text":"4 spoonfuls coffee","quantity":4,"unit":null}
+{"recipe_id":235650,"canonical_key":"clove","raw_text":"4 cloves","quantity":4,"unit":"clove"}
+{"recipe_id":235650,"canonical_key":"water","raw_text":"½ cup water","quantity":0.5,"unit":"cup"}
+{"recipe_id":235650,"canonical_key":"milk","raw_text":"9 cups (2.1 L) milk","quantity":9,"unit":"cup"}
+{"recipe_id":235650,"canonical_key":"sugar","raw_text":"12 spoonfuls sugar","quantity":12,"unit":null}
 {"recipe_id":236148,"canonical_key":"sweetened_condensed_milk","raw_text":"200 g sweetened condensed milk","quantity":200,"unit":"g"}
 {"recipe_id":236148,"canonical_key":"yogurt","raw_text":"200 g natural set or Greek yoghurt","quantity":200,"unit":"g"}
 {"recipe_id":236148,"canonical_key":"cardamom","raw_text":"1 pinch of green cardamom powder","quantity":1,"unit":"pinch"}
@@ -12614,6 +12776,21 @@
 {"recipe_id":25766,"canonical_key":"granulated_sugar","raw_text":"1 ½ tsp granulated sugar","quantity":1.5,"unit":"tsp"}
 {"recipe_id":25766,"canonical_key":"parsley","raw_text":"¼ cup parsley, chopped","quantity":0.25,"unit":"cup"}
 {"recipe_id":25766,"canonical_key":"parmigiano_reggiano","raw_text":"½ cup grated Parmesan cheese","quantity":0.5,"unit":"cup"}
+{"recipe_id":257781,"canonical_key":"squid","raw_text":"300 g squid tubes","quantity":300,"unit":"g"}
+{"recipe_id":257781,"canonical_key":"shrimp","raw_text":"300 g peeled king prawns","quantity":300,"unit":"g"}
+{"recipe_id":257781,"canonical_key":"scallop","raw_text":"200 g scallops","quantity":200,"unit":"g"}
+{"recipe_id":257781,"canonical_key":"oil","raw_text":"Oil","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"balsamic_vinegar","raw_text":"Balsamic vinegar","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"oregano","raw_text":"Oregano","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"broth","raw_text":"About 1 L fish stock/broth","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"risotto_rice","raw_text":"400 g (14 oz) risotto rice (see notes)","quantity":400,"unit":"g"}
+{"recipe_id":257781,"canonical_key":"onion","raw_text":"1 onion, finely-chopped","quantity":1,"unit":null}
+{"recipe_id":257781,"canonical_key":"garlic","raw_text":"2 cloves of garlic, minced","quantity":2,"unit":"clove"}
+{"recipe_id":257781,"canonical_key":"wine","raw_text":"1 glass of dry white wine","quantity":1,"unit":null}
+{"recipe_id":257781,"canonical_key":"parsley","raw_text":"Parsley, finely chopped","quantity":null,"unit":null}
+{"recipe_id":257781,"canonical_key":"butter","raw_text":"25 g (1 ounce) butter, cubed","quantity":25,"unit":"g"}
 {"recipe_id":25781,"canonical_key":"sugar","raw_text":"½ cup (100 g) white granulated sugar","quantity":0.5,"unit":"cup"}
 {"recipe_id":25781,"canonical_key":"flour","raw_text":"6 tablespoons all purpose flour","quantity":6,"unit":"tbsp"}
 {"recipe_id":25781,"canonical_key":"salt","raw_text":"¼ teaspoon salt","quantity":0.25,"unit":"tsp"}
@@ -13320,6 +13497,13 @@
 {"recipe_id":28521,"canonical_key":"salt","raw_text":"2 teaspoons salt","quantity":2,"unit":"tsp"}
 {"recipe_id":28521,"canonical_key":"shortening","raw_text":"2 tablespoons lard or vegetable shortening","quantity":2,"unit":"tbsp"}
 {"recipe_id":28521,"canonical_key":"baking_powder","raw_text":"4 teaspoons baking powder (optional, for thicker and chewier tortillas)","quantity":4,"unit":"tsp"}
+{"recipe_id":285226,"canonical_key":"black_eyed_pea","raw_text":"1 cup dried black eyed peas","quantity":1,"unit":"cup"}
+{"recipe_id":285226,"canonical_key":"green_peas","raw_text":"1 can (500 grams) green peas","quantity":1,"unit":"can"}
+{"recipe_id":285226,"canonical_key":"onion","raw_text":"3 small onion, chopped","quantity":3,"unit":"small"}
+{"recipe_id":285226,"canonical_key":"carrot","raw_text":"2 medium carrots, diced","quantity":2,"unit":"medium"}
+{"recipe_id":285226,"canonical_key":"celery","raw_text":"2 stalk celery, chopped","quantity":2,"unit":"stalk"}
+{"recipe_id":285226,"canonical_key":"olive_oil","raw_text":"½ cup olive oil","quantity":0.5,"unit":"cup"}
+{"recipe_id":285226,"canonical_key":"salt","raw_text":"salt","quantity":null,"unit":null}
 {"recipe_id":285283,"canonical_key":"beans","raw_text":"500 g (about 1 lb) dried white haricot/navy beans","quantity":500,"unit":"g"}
 {"recipe_id":285283,"canonical_key":"cumin","raw_text":"Cumin","quantity":null,"unit":null}
 {"recipe_id":285283,"canonical_key":"pork","raw_text":"1 pig ear or pork rind (optional)","quantity":1,"unit":null}
@@ -13515,6 +13699,12 @@
 {"recipe_id":29145,"canonical_key":"rice_noodles","raw_text":"Rice noodles, cooked","quantity":null,"unit":null}
 {"recipe_id":29145,"canonical_key":"red_bell_pepper","raw_text":"Red bell pepper, sliced thin","quantity":null,"unit":null}
 {"recipe_id":29145,"canonical_key":"shallot","raw_text":"Shallots, sliced thin","quantity":null,"unit":null}
+{"recipe_id":291664,"canonical_key":"basil","raw_text":"Purple basil","quantity":null,"unit":null}
+{"recipe_id":291664,"canonical_key":"cress","raw_text":"Cress","quantity":null,"unit":null}
+{"recipe_id":291664,"canonical_key":"tarragon","raw_text":"Tarragon","quantity":null,"unit":null}
+{"recipe_id":291664,"canonical_key":"radish","raw_text":"Radishes","quantity":null,"unit":null}
+{"recipe_id":291664,"canonical_key":"spring_onion","raw_text":"Green onions","quantity":null,"unit":null}
+{"recipe_id":291664,"canonical_key":"mint","raw_text":"Mint","quantity":null,"unit":null}
 {"recipe_id":292859,"canonical_key":"rice","raw_text":"750 g (3 cups) khaima or jeerakasala rice","quantity":750,"unit":"g"}
 {"recipe_id":292859,"canonical_key":"ghee","raw_text":"3 tbsp ghee","quantity":3,"unit":"tbsp"}
 {"recipe_id":292859,"canonical_key":"cinnamon","raw_text":"Cinnamon sticks, as needed","quantity":null,"unit":null}
@@ -14182,6 +14372,8 @@
 {"recipe_id":306754,"canonical_key":"baking_soda","raw_text":"1 tsp bicarbonate of soda (optional)","quantity":1,"unit":"tsp"}
 {"recipe_id":306754,"canonical_key":"golden_syrup","raw_text":"440 g (2 cups / 16 oz / 1 lb) tin golden syrup (Tate & Lyle's brand preferred)","quantity":440,"unit":"g"}
 {"recipe_id":306754,"canonical_key":"margarine","raw_text":"220 g (1 cup / 8 oz) hard margarine","quantity":220,"unit":"g"}
+{"recipe_id":306887,"canonical_key":"flour","raw_text":"2 cups all-purpose flour","quantity":2,"unit":"cup"}
+{"recipe_id":306887,"canonical_key":"water","raw_text":"2 cups water","quantity":2,"unit":"cup"}
 {"recipe_id":30691,"canonical_key":"leek","raw_text":"3 large leeks, white parts only, split in half lengthwise and cut into bite-sized pieces","quantity":3,"unit":"large"}
 {"recipe_id":30691,"canonical_key":"onion","raw_text":"1 medium red onion, cut into eighths","quantity":1,"unit":"medium"}
 {"recipe_id":30691,"canonical_key":"bell_pepper","raw_text":"1–2 red bell peppers, cut into wide strips","quantity":1,"unit":null}
@@ -14388,6 +14580,14 @@
 {"recipe_id":31266,"canonical_key":"chili_pepper","raw_text":"1–2 tablespoons ground chilli","quantity":1,"unit":"tbsp"}
 {"recipe_id":31266,"canonical_key":"garam_masala","raw_text":"2–4 tablespoons garam masala","quantity":2,"unit":"tbsp"}
 {"recipe_id":31266,"canonical_key":"mint","raw_text":"5 sprigs of mint","quantity":5,"unit":"sprig"}
+{"recipe_id":31311,"canonical_key":"orange_essential_oil","raw_text":"¾ tsp (3.50 mL) orange oil","quantity":0.75,"unit":"tsp"}
+{"recipe_id":31311,"canonical_key":"lime_oil","raw_text":"½ tsp (2.75 mL) lime oil","quantity":0.5,"unit":"tsp"}
+{"recipe_id":31311,"canonical_key":"oil","raw_text":"¼ tsp (1.25 mL) cassia oil","quantity":0.25,"unit":"tsp"}
+{"recipe_id":31311,"canonical_key":"lemon_oil","raw_text":"¼ tsp (1 mL) lemon oil","quantity":0.25,"unit":"tsp"}
+{"recipe_id":31311,"canonical_key":"water","raw_text":"⅔ teaspoon (3 mL) water","quantity":0.6667,"unit":"tsp"}
+{"recipe_id":31311,"canonical_key":"white_sugar","raw_text":"11 cups (2.36 kg / 5.2 lb) plain granulated white table sugar","quantity":11,"unit":"cup"}
+{"recipe_id":31311,"canonical_key":"citric_acid","raw_text":"3½ tsp (17.25 mL) 75% phosphoric acid or citric acid","quantity":3.5,"unit":"tsp"}
+{"recipe_id":31311,"canonical_key":"caffeine","raw_text":"½ tsp (2.5 mL) caffeine (optional)","quantity":0.5,"unit":"tsp"}
 {"recipe_id":31507,"canonical_key":"paprika","raw_text":"¼ cup paprika","quantity":0.25,"unit":"cup"}
 {"recipe_id":31507,"canonical_key":"light_brown_sugar","raw_text":"¼ cup light brown sugar","quantity":0.25,"unit":"cup"}
 {"recipe_id":31507,"canonical_key":"salt","raw_text":"3 tbsp salt","quantity":3,"unit":"tbsp"}
@@ -14553,6 +14753,19 @@
 {"recipe_id":33031,"canonical_key":"parsley","raw_text":"2 tbsp parsley","quantity":2,"unit":"tbsp"}
 {"recipe_id":33031,"canonical_key":"thyme","raw_text":"1 tbsp thyme","quantity":1,"unit":"tbsp"}
 {"recipe_id":33031,"canonical_key":"lemon","raw_text":"½ cup of lemon","quantity":0.5,"unit":"cup"}
+{"recipe_id":33062,"canonical_key":"oil","raw_text":"6 tablespoons oil","quantity":6,"unit":"tbsp"}
+{"recipe_id":33062,"canonical_key":"paneer","raw_text":"8 oz (200 g) paneer, cut in 1” cubes","quantity":8,"unit":"oz"}
+{"recipe_id":33062,"canonical_key":"onion","raw_text":"1 cup chopped onions","quantity":1,"unit":"cup"}
+{"recipe_id":33062,"canonical_key":"tomato","raw_text":"1 cup puréed tomatoes","quantity":1,"unit":"cup"}
+{"recipe_id":33062,"canonical_key":"chili_pepper","raw_text":"3 green chilies, seeded and finely chopped","quantity":3,"unit":null}
+{"recipe_id":33062,"canonical_key":"cumin_seeds","raw_text":"½ teaspoon cumin seeds","quantity":0.5,"unit":"tsp"}
+{"recipe_id":33062,"canonical_key":"turmeric_powder","raw_text":"¼ teaspoon turmeric powder","quantity":0.25,"unit":"tsp"}
+{"recipe_id":33062,"canonical_key":"chili_powder","raw_text":"½ teaspoon red chilli powder","quantity":0.5,"unit":"tsp"}
+{"recipe_id":33062,"canonical_key":"coriander","raw_text":"1 teaspoon coriander powder","quantity":1,"unit":"tsp"}
+{"recipe_id":33062,"canonical_key":"garam_masala","raw_text":"Garam masala","quantity":null,"unit":null}
+{"recipe_id":33062,"canonical_key":"salt","raw_text":"1 teaspoon salt","quantity":1,"unit":"tsp"}
+{"recipe_id":33062,"canonical_key":"pea","raw_text":"½ cup peas","quantity":0.5,"unit":"cup"}
+{"recipe_id":33062,"canonical_key":"water","raw_text":"¾ cup (200 ml) water","quantity":0.75,"unit":"cup"}
 {"recipe_id":33064,"canonical_key":"chickpea_flour","raw_text":"3 cups (450 g) plain flour","quantity":3,"unit":"cup"}
 {"recipe_id":33064,"canonical_key":"yogurt","raw_text":"1 cup (240 ml) yogurt","quantity":1,"unit":"cup"}
 {"recipe_id":33064,"canonical_key":"baking_soda","raw_text":"1 teaspoon baking soda","quantity":1,"unit":"tsp"}
@@ -14943,6 +15156,37 @@
 {"recipe_id":359627,"canonical_key":"olive_oil","raw_text":"1 tbsp olive oil","quantity":1,"unit":"tbsp"}
 {"recipe_id":359627,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
 {"recipe_id":359627,"canonical_key":"pepper","raw_text":"Pepper to taste","quantity":null,"unit":null}
+{"recipe_id":359628,"canonical_key":"flour","raw_text":"2 cups all-purpose flour, sifted","quantity":2,"unit":"cup"}
+{"recipe_id":359628,"canonical_key":"baking_powder","raw_text":"3 tsp baking powder","quantity":3,"unit":"tsp"}
+{"recipe_id":359628,"canonical_key":"salt","raw_text":"½ tsp salt","quantity":0.5,"unit":"tsp"}
+{"recipe_id":359628,"canonical_key":"butter","raw_text":"½ cup (1 stick) butter, room temperature","quantity":0.5,"unit":"cup"}
+{"recipe_id":359628,"canonical_key":"white_sugar","raw_text":"1 cup white sugar","quantity":1,"unit":"cup"}
+{"recipe_id":359628,"canonical_key":"egg","raw_text":"2 eggs, room temperature and beaten","quantity":2,"unit":null}
+{"recipe_id":359628,"canonical_key":"banana","raw_text":"2 bananas (a little over-ripe is best)","quantity":2,"unit":null}
+{"recipe_id":359628,"canonical_key":"lemon_juice","raw_text":"1 tsp lemon juice","quantity":1,"unit":"tsp"}
+{"recipe_id":359628,"canonical_key":"pecan_nut","raw_text":"1 cup chopped pecans","quantity":1,"unit":"cup"}
+{"recipe_id":359630,"canonical_key":"watermelon","raw_text":"1.5 cup cubed frozen watermelon","quantity":1.5,"unit":"cup"}
+{"recipe_id":359630,"canonical_key":"honey","raw_text":"1 tbsp or less of honey (optional)","quantity":1,"unit":"tbsp"}
+{"recipe_id":359630,"canonical_key":"lime","raw_text":"1 lime, juiced","quantity":1,"unit":null}
+{"recipe_id":359630,"canonical_key":"water","raw_text":"3–4 oz water (depending how on thick you want it)","quantity":3,"unit":"oz"}
+{"recipe_id":359630,"canonical_key":"mint","raw_text":"4–5 mint sprigs","quantity":4,"unit":null}
+{"recipe_id":360467,"canonical_key":"lentils","raw_text":"1½ cups dried lentils, picked through","quantity":1.5,"unit":"cup"}
+{"recipe_id":360467,"canonical_key":"broth","raw_text":"3–4 cups water or vegetable stock","quantity":3,"unit":"cup"}
+{"recipe_id":360467,"canonical_key":"garlic_salt","raw_text":"1 tbsp garlic salt","quantity":1,"unit":"tbsp"}
+{"recipe_id":360467,"canonical_key":"butter","raw_text":"1 tbsp butter","quantity":1,"unit":"tbsp"}
+{"recipe_id":360467,"canonical_key":"olive_oil","raw_text":"1 tsp olive oil","quantity":1,"unit":"tsp"}
+{"recipe_id":360467,"canonical_key":"carrot","raw_text":"1 medium to large carrot, finely diced","quantity":1,"unit":"medium"}
+{"recipe_id":360467,"canonical_key":"celery","raw_text":"1 stalk celery, finely diced","quantity":1,"unit":"stalk"}
+{"recipe_id":360467,"canonical_key":"onion","raw_text":"2 tbsp minced onion","quantity":2,"unit":"tbsp"}
+{"recipe_id":360467,"canonical_key":"parsley","raw_text":"4 tbsp dried parsley","quantity":4,"unit":"tbsp"}
+{"recipe_id":360467,"canonical_key":"worcestershire_sauce","raw_text":"1–2 tbsp Worcestershire sauce","quantity":1,"unit":"tbsp"}
+{"recipe_id":360467,"canonical_key":"egg","raw_text":"2 whole eggs","quantity":2,"unit":"whole"}
+{"recipe_id":360467,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":360467,"canonical_key":"pepper","raw_text":"Pepper to taste","quantity":null,"unit":null}
+{"recipe_id":360469,"canonical_key":"coconut_oil","raw_text":"⅓ cup (45 g) coconut oil","quantity":0.3333,"unit":"cup"}
+{"recipe_id":360469,"canonical_key":"cocoa_powder","raw_text":"¼ cup (25 g) unsweetened cocoa powder","quantity":0.25,"unit":"cup"}
+{"recipe_id":360469,"canonical_key":"maple_syrup","raw_text":"⅛ cup + 1 tsp (30 ml + 1 tsp) maple syrup","quantity":0.125,"unit":"cup"}
+{"recipe_id":360469,"canonical_key":"salt","raw_text":"1 pinch salt","quantity":1,"unit":"pinch"}
 {"recipe_id":360478,"canonical_key":"arborio_rice","raw_text":"1 lb of arborio rice (this is the type of rice used to make risotto)","quantity":1,"unit":"lb"}
 {"recipe_id":360478,"canonical_key":"mozzarella","raw_text":"4 oz of fresh mozzarella, grated","quantity":4,"unit":"oz"}
 {"recipe_id":360478,"canonical_key":"parmigiano_reggiano","raw_text":"¼ cup of grated Parmesan cheese","quantity":0.25,"unit":"cup"}
@@ -14961,6 +15205,14 @@
 {"recipe_id":360622,"canonical_key":"mustard_powder","raw_text":"1 tsp mustard powder","quantity":1,"unit":"tsp"}
 {"recipe_id":360622,"canonical_key":"parmigiano_reggiano","raw_text":"3 tbsp freshly-grated Parmesan","quantity":3,"unit":"tbsp"}
 {"recipe_id":360622,"canonical_key":"egg","raw_text":"1 egg, beaten","quantity":1,"unit":null}
+{"recipe_id":360624,"canonical_key":"buckwheat_flour","raw_text":"1 cup (135 g) buckwheat flour","quantity":1,"unit":"cup"}
+{"recipe_id":360624,"canonical_key":"baking_powder","raw_text":"1 tsp baking powder","quantity":1,"unit":"tsp"}
+{"recipe_id":360624,"canonical_key":"baking_soda","raw_text":"1 tsp baking soda","quantity":1,"unit":"tsp"}
+{"recipe_id":360624,"canonical_key":"maple_syrup","raw_text":"¼ cup (60 ml/70 g) maple syrup","quantity":0.25,"unit":"cup"}
+{"recipe_id":360624,"canonical_key":"lemon","raw_text":"Juice of ½ lemon","quantity":null,"unit":null}
+{"recipe_id":360624,"canonical_key":"ginger","raw_text":"1 tbsp (8 g) grated fresh ginger","quantity":1,"unit":"tbsp"}
+{"recipe_id":360624,"canonical_key":"banana","raw_text":"3 very ripe bananas (should have dark spots on the peel)","quantity":3,"unit":null}
+{"recipe_id":360624,"canonical_key":"chocolate","raw_text":"¼ cup (30 g) roughly-chopped dark chocolate or chocolate chips","quantity":0.25,"unit":"cup"}
 {"recipe_id":360917,"canonical_key":"egg","raw_text":"4 eggs","quantity":4,"unit":null}
 {"recipe_id":360917,"canonical_key":"garlic","raw_text":"1 clove of garlic, minced","quantity":1,"unit":"clove"}
 {"recipe_id":360917,"canonical_key":"parsley","raw_text":"Parsley, finely chopped","quantity":null,"unit":null}
@@ -15326,6 +15578,13 @@
 {"recipe_id":38078,"canonical_key":"water","raw_text":"1 cup (250 ml / 8.5 oz) water","quantity":1,"unit":"cup"}
 {"recipe_id":38078,"canonical_key":"flour","raw_text":"2 teaspoons flour","quantity":2,"unit":"tsp"}
 {"recipe_id":38078,"canonical_key":"unsalted_butter","raw_text":"2 oz unsalted butter","quantity":2,"unit":"oz"}
+{"recipe_id":380848,"canonical_key":"wakame","raw_text":"1 ounce assorted dried seaweed or wakame","quantity":1,"unit":"oz"}
+{"recipe_id":380848,"canonical_key":"red_onion","raw_text":"¼ cup minced shallot, scallion or red onion","quantity":0.25,"unit":"cup"}
+{"recipe_id":380848,"canonical_key":"soy_sauce","raw_text":"2 tbsp soy sauce","quantity":2,"unit":"tbsp"}
+{"recipe_id":380848,"canonical_key":"rice_vinegar","raw_text":"1 tbsp rice vinegar","quantity":1,"unit":"tbsp"}
+{"recipe_id":380848,"canonical_key":"mirin","raw_text":"1 tsp mirin (or sugar)","quantity":1,"unit":"tsp"}
+{"recipe_id":380848,"canonical_key":"sesame_oil","raw_text":"½ tbsp dark sesame oil","quantity":0.5,"unit":"tbsp"}
+{"recipe_id":380848,"canonical_key":"sesame_seeds","raw_text":"1 tbsp toasted sesame seeds","quantity":1,"unit":"tbsp"}
 {"recipe_id":38086,"canonical_key":"peanut_butter","raw_text":"1 cup (300 g / 11 oz) peanut butter","quantity":1,"unit":"cup"}
 {"recipe_id":38086,"canonical_key":"butter","raw_text":"2 tablespoons melted butter","quantity":2,"unit":"tbsp"}
 {"recipe_id":38086,"canonical_key":"nut","raw_text":"½ cup (50 g / 1.8 oz) chopped nuts","quantity":0.5,"unit":"cup"}
@@ -15532,6 +15791,21 @@
 {"recipe_id":385022,"canonical_key":"onion","raw_text":"1 onion","quantity":1,"unit":null}
 {"recipe_id":385022,"canonical_key":"olive_oil","raw_text":"500 ml olive oil","quantity":500,"unit":"ml"}
 {"recipe_id":385022,"canonical_key":"salt","raw_text":"1 pinch salt","quantity":1,"unit":"pinch"}
+{"recipe_id":38515,"canonical_key":"beef","raw_text":"600 g beef (best from the neck), finely chopped","quantity":600,"unit":"g"}
+{"recipe_id":38515,"canonical_key":"bacon","raw_text":"150 g smoked ham or bacon, finely chopped","quantity":150,"unit":"g"}
+{"recipe_id":38515,"canonical_key":"suet","raw_text":"50–60 g suet from ox kidneys, finely chopped","quantity":50,"unit":"g"}
+{"recipe_id":38515,"canonical_key":"pork","raw_text":"200 g pork, finely chopped","quantity":200,"unit":"g"}
+{"recipe_id":38515,"canonical_key":"mutton","raw_text":"Mutton (optional), finely chopped","quantity":null,"unit":null}
+{"recipe_id":38515,"canonical_key":"onion","raw_text":"2 large onions, chopped","quantity":2,"unit":"large"}
+{"recipe_id":38515,"canonical_key":"garlic","raw_text":"Some garlic","quantity":null,"unit":null}
+{"recipe_id":38515,"canonical_key":"clove","raw_text":"Cloves","quantity":null,"unit":"clove"}
+{"recipe_id":38515,"canonical_key":"lemon_peel","raw_text":"Grated lemon rind","quantity":null,"unit":null}
+{"recipe_id":38515,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":38515,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
+{"recipe_id":38515,"canonical_key":"cinnamon","raw_text":"Some ground cinnamon","quantity":null,"unit":null}
+{"recipe_id":38515,"canonical_key":"nutmeg","raw_text":"1 grind nutmeg","quantity":1,"unit":null}
+{"recipe_id":38515,"canonical_key":"sauerkraut","raw_text":"1 head of whole pickled cabbage (sauerkraut) or fresh white of grape leaves","quantity":1,"unit":"head"}
+{"recipe_id":38515,"canonical_key":"broth","raw_text":"Broth or water","quantity":null,"unit":null}
 {"recipe_id":38523,"canonical_key":"water","raw_text":"1 qt water","quantity":1,"unit":null}
 {"recipe_id":38523,"canonical_key":"cornmeal","raw_text":"Cornmeal","quantity":null,"unit":null}
 {"recipe_id":38523,"canonical_key":"butter","raw_text":"1 oz butter","quantity":1,"unit":"oz"}
@@ -16152,6 +16426,85 @@
 {"recipe_id":404200,"canonical_key":"spring_onion","raw_text":"3 scallions, thinly sliced","quantity":3,"unit":null}
 {"recipe_id":404200,"canonical_key":"bell_pepper","raw_text":"6 mini red bell peppers, thinly sliced","quantity":6,"unit":null}
 {"recipe_id":404200,"canonical_key":"coriander_leaf","raw_text":"½ cup loosely packed cilantro leaves","quantity":0.5,"unit":"cup"}
+{"recipe_id":404201,"canonical_key":"almond_flour","raw_text":"2 cups almond flour","quantity":2,"unit":"cup"}
+{"recipe_id":404201,"canonical_key":"coconut_oil","raw_text":"2 tbsp coconut oil","quantity":2,"unit":"tbsp"}
+{"recipe_id":404201,"canonical_key":"salt","raw_text":"1 pinch salt","quantity":1,"unit":"pinch"}
+{"recipe_id":404201,"canonical_key":"vanilla_extract","raw_text":"1 tsp vanilla extract","quantity":1,"unit":"tsp"}
+{"recipe_id":404201,"canonical_key":"maple_syrup","raw_text":"⅓ cup maple syrup","quantity":0.3333,"unit":"cup"}
+{"recipe_id":404201,"canonical_key":"raspberry","raw_text":"2 cups frozen raspberries","quantity":2,"unit":"cup"}
+{"recipe_id":404201,"canonical_key":"lemon_juice","raw_text":"1 tbsp freshly-squeezed lemon juice","quantity":1,"unit":"tbsp"}
+{"recipe_id":404201,"canonical_key":"chia_seed","raw_text":"1 tsp chia seeds","quantity":1,"unit":"tsp"}
+{"recipe_id":404201,"canonical_key":"tapioca","raw_text":"1 tsp tapioca starch","quantity":1,"unit":"tsp"}
+{"recipe_id":404201,"canonical_key":"almond","raw_text":"¼ cup chopped almonds","quantity":0.25,"unit":"cup"}
+{"recipe_id":404203,"canonical_key":"wholemeal_oat","raw_text":"3 cups whole grain oats","quantity":3,"unit":"cup"}
+{"recipe_id":404203,"canonical_key":"almond_flour","raw_text":"1 cup almond flour","quantity":1,"unit":"cup"}
+{"recipe_id":404203,"canonical_key":"salt","raw_text":"1 dash of salt","quantity":1,"unit":"dash"}
+{"recipe_id":404203,"canonical_key":"coconut_oil","raw_text":"½ cup coconut oil, melted","quantity":0.5,"unit":"cup"}
+{"recipe_id":404203,"canonical_key":"brown_sugar","raw_text":"½ cup packed brown sugar","quantity":0.5,"unit":"cup"}
+{"recipe_id":404203,"canonical_key":"honey","raw_text":"¼ cup honey","quantity":0.25,"unit":"cup"}
+{"recipe_id":404203,"canonical_key":"vanilla_extract","raw_text":"1 teaspoon vanilla extract","quantity":1,"unit":"tsp"}
+{"recipe_id":404203,"canonical_key":"cinnamon","raw_text":"¼ teaspoon ground cinnamon","quantity":0.25,"unit":"tsp"}
+{"recipe_id":404203,"canonical_key":"butter","raw_text":"2 teaspoons almond butter","quantity":2,"unit":"tsp"}
+{"recipe_id":404203,"canonical_key":"blackberry","raw_text":"2 pints fresh blackberries","quantity":2,"unit":"pint"}
+{"recipe_id":404203,"canonical_key":"sugar","raw_text":"2 tablespoons sugar","quantity":2,"unit":"tbsp"}
+{"recipe_id":404204,"canonical_key":"millet","raw_text":"2 cups cooked millet","quantity":2,"unit":"cup"}
+{"recipe_id":404204,"canonical_key":"walnut","raw_text":"1 cup walnuts, lightly toasted and finely chopped","quantity":1,"unit":"cup"}
+{"recipe_id":404204,"canonical_key":"extra_virgin_olive_oil","raw_text":"5 tbsp extra-virgin olive oil, divided","quantity":5,"unit":"tbsp"}
+{"recipe_id":404204,"canonical_key":"corn","raw_text":"4 ears of corn, off the cob","quantity":4,"unit":null}
+{"recipe_id":404204,"canonical_key":"spring_onion","raw_text":"1 bunch scallions, thinly sliced","quantity":1,"unit":"bunch"}
+{"recipe_id":404204,"canonical_key":"cauliflower","raw_text":"1 package riced cauliflower","quantity":1,"unit":"packet"}
+{"recipe_id":404204,"canonical_key":"salt","raw_text":"1½ tsp salt, divided","quantity":1.5,"unit":"tsp"}
+{"recipe_id":404204,"canonical_key":"tofu","raw_text":"2 packages gluten-free baked tofu, teriyaki flavor, diced into ¼-inch squares (optional)","quantity":2,"unit":"packet"}
+{"recipe_id":404204,"canonical_key":"chipotle","raw_text":"1–2 tsp chipotle pepper in adobo sauce, chopped","quantity":1,"unit":"tsp"}
+{"recipe_id":404204,"canonical_key":"black_pepper","raw_text":"¼ tsp black pepper","quantity":0.25,"unit":"tsp"}
+{"recipe_id":404204,"canonical_key":"radish","raw_text":"1 bunch radishes, thinly sliced","quantity":1,"unit":"bunch"}
+{"recipe_id":404204,"canonical_key":"fresh_chives","raw_text":"1 bunch fresh chives, thinly sliced","quantity":1,"unit":"bunch"}
+{"recipe_id":404205,"canonical_key":"pasta","raw_text":"1 serving uncooked pasta (⅔ cup / 75 g / 2.6 oz) (suggestion: whole wheat linguine)","quantity":1,"unit":null}
+{"recipe_id":404205,"canonical_key":"unsalted_butter","raw_text":"1 tablespoon unsalted butter","quantity":1,"unit":"tbsp"}
+{"recipe_id":404205,"canonical_key":"garlic","raw_text":"2 garlic cloves, minced","quantity":2,"unit":null}
+{"recipe_id":404205,"canonical_key":"dry_white_wine","raw_text":"2 tablespoons dry white wine","quantity":2,"unit":"tbsp"}
+{"recipe_id":404205,"canonical_key":"heavy_cream","raw_text":"¼ cup (60 ml / 2 oz) heavy cream","quantity":0.25,"unit":"cup"}
+{"recipe_id":404205,"canonical_key":"broth","raw_text":"¼ cup (60 ml / 2 oz) low-sodium chicken bone broth","quantity":0.25,"unit":"cup"}
+{"recipe_id":404205,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":404205,"canonical_key":"parmigiano_reggiano","raw_text":"¼ cup (30 g / 1.1 oz) grated parmesan cheese","quantity":0.25,"unit":"cup"}
+{"recipe_id":404205,"canonical_key":"black_pepper","raw_text":"Freshly-ground black pepper","quantity":null,"unit":null}
+{"recipe_id":404205,"canonical_key":"parsley","raw_text":"Chopped fresh parsley for garnishing","quantity":null,"unit":null}
+{"recipe_id":404206,"canonical_key":"noodle","raw_text":"1 pound Shanghai noodles (the thick ones)","quantity":1,"unit":"lb"}
+{"recipe_id":404206,"canonical_key":"sesame_oil","raw_text":"3 tablespoons sesame oil","quantity":3,"unit":"tbsp"}
+{"recipe_id":404206,"canonical_key":"shiitake","raw_text":"10 shiitake mushrooms, sliced","quantity":10,"unit":null}
+{"recipe_id":404206,"canonical_key":"pak_choi","raw_text":"6 ounces baby bok choy, trimmed and quartered","quantity":6,"unit":"oz"}
+{"recipe_id":404206,"canonical_key":"dark_soy_sauce","raw_text":"2 tablespoons dark soy sauce","quantity":2,"unit":"tbsp"}
+{"recipe_id":404207,"canonical_key":"nutritional_yeast","raw_text":"¼ cup nutritional yeast","quantity":0.25,"unit":"cup"}
+{"recipe_id":404207,"canonical_key":"red_chili_pepper","raw_text":"½ tsp crushed red pepper","quantity":0.5,"unit":"tsp"}
+{"recipe_id":404207,"canonical_key":"red_onion","raw_text":"1 red onion, sliced","quantity":1,"unit":null}
+{"recipe_id":404207,"canonical_key":"coconut_oil","raw_text":"1 tbsp coconut oil","quantity":1,"unit":"tbsp"}
+{"recipe_id":404207,"canonical_key":"salt","raw_text":"1 ½ tsp salt","quantity":1.5,"unit":"tsp"}
+{"recipe_id":404207,"canonical_key":"water","raw_text":"1 ½ cups water","quantity":1.5,"unit":"cup"}
+{"recipe_id":404207,"canonical_key":"mushroom","raw_text":"1 ½ cups mushroom, chopped","quantity":1.5,"unit":"cup"}
+{"recipe_id":404207,"canonical_key":"green_bean","raw_text":"1 ½ lb green beans","quantity":1.5,"unit":"lb"}
+{"recipe_id":404207,"canonical_key":"parsnip","raw_text":"2 cups chopped parsnips","quantity":2,"unit":"cup"}
+{"recipe_id":404207,"canonical_key":"garlic","raw_text":"3 cloves garlic, minced","quantity":3,"unit":"clove"}
+{"recipe_id":404207,"canonical_key":"pepper","raw_text":"Pepper to taste","quantity":null,"unit":null}
+{"recipe_id":404208,"canonical_key":"red_onion","raw_text":"¼ cup red onion, diced","quantity":0.25,"unit":"cup"}
+{"recipe_id":404208,"canonical_key":"jalapeno_pepper","raw_text":"1 jalapeño pepper, seeded and minced","quantity":1,"unit":null}
+{"recipe_id":404208,"canonical_key":"coriander_leaf","raw_text":"1 small bunch of cilantro, chopped (about 1 cup, packed)","quantity":1,"unit":"small"}
+{"recipe_id":404208,"canonical_key":"hass_avocado","raw_text":"3 Hass avocados, peeled, cored, and diced","quantity":3,"unit":null}
+{"recipe_id":404208,"canonical_key":"mango","raw_text":"1 ripe mango, peeled, cored, and diced (about 1 cup)","quantity":1,"unit":null}
+{"recipe_id":404208,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":404208,"canonical_key":"pepper","raw_text":"Pepper to taste","quantity":null,"unit":null}
+{"recipe_id":404208,"canonical_key":"lime","raw_text":"Juice of 1 lime","quantity":null,"unit":null}
+{"recipe_id":404209,"canonical_key":"olive_oil","raw_text":"2 tablespoons olive oil","quantity":2,"unit":"tbsp"}
+{"recipe_id":404209,"canonical_key":"yellow_onion","raw_text":"1 medium yellow onion, diced (about 1 cup)","quantity":1,"unit":"medium"}
+{"recipe_id":404209,"canonical_key":"garlic","raw_text":"4 cloves garlic, minced","quantity":4,"unit":"clove"}
+{"recipe_id":404209,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":404209,"canonical_key":"chili_pepper","raw_text":"2 teaspoons chile powder","quantity":2,"unit":"tsp"}
+{"recipe_id":404209,"canonical_key":"cumin","raw_text":"1 teaspoon ground cumin","quantity":1,"unit":"tsp"}
+{"recipe_id":404209,"canonical_key":"cinnamon","raw_text":"½ teaspoon ground cinnamon","quantity":0.5,"unit":"tsp"}
+{"recipe_id":404209,"canonical_key":"black_bean","raw_text":"2 cans (30 ounces) black beans, undrained","quantity":2,"unit":"can"}
+{"recipe_id":404209,"canonical_key":"kale","raw_text":"4 cups firmly-packed chopped kale","quantity":4,"unit":"cup"}
+{"recipe_id":404209,"canonical_key":"tomato","raw_text":"1 cup fresh diced tomato","quantity":1,"unit":"cup"}
+{"recipe_id":404209,"canonical_key":"lemon","raw_text":"Juice of 1 lemon","quantity":null,"unit":null}
+{"recipe_id":404209,"canonical_key":"white_sesame_seeds","raw_text":"White sesame seeds for garnishing (optional)","quantity":null,"unit":null}
 {"recipe_id":404301,"canonical_key":"quail_eggs","raw_text":"Quail eggs","quantity":null,"unit":null}
 {"recipe_id":404301,"canonical_key":"water","raw_text":"3 cups water","quantity":3,"unit":"cup"}
 {"recipe_id":404301,"canonical_key":"soy_sauce","raw_text":"1 cup soy sauce","quantity":1,"unit":"cup"}
@@ -16740,6 +17093,9 @@
 {"recipe_id":415341,"canonical_key":"rock_salt","raw_text":"1 tsp rock salt","quantity":1,"unit":"tsp"}
 {"recipe_id":415341,"canonical_key":"yeast","raw_text":"2 tsp dried yeast","quantity":2,"unit":"tsp"}
 {"recipe_id":415341,"canonical_key":"vegetable_oil","raw_text":"Dab of margarine or vegetable oil for greasing pan","quantity":null,"unit":null}
+{"recipe_id":415349,"canonical_key":"cornmeal","raw_text":"2 cups maize meal","quantity":2,"unit":"cup"}
+{"recipe_id":415349,"canonical_key":"water","raw_text":"2 cups water","quantity":2,"unit":"cup"}
+{"recipe_id":415349,"canonical_key":"salt","raw_text":"1 teaspoon salt","quantity":1,"unit":"tsp"}
 {"recipe_id":415428,"canonical_key":"flour","raw_text":"½ cup flour","quantity":0.5,"unit":"cup"}
 {"recipe_id":415428,"canonical_key":"water","raw_text":"250 g water","quantity":250,"unit":"g"}
 {"recipe_id":415428,"canonical_key":"salt","raw_text":"1 tsp salt","quantity":1,"unit":"tsp"}
@@ -16933,6 +17289,15 @@
 {"recipe_id":419915,"canonical_key":"dill","raw_text":"Dill (either dried dill leaf tips, or 1 bunch finely-chopped fresh dill)","quantity":null,"unit":null}
 {"recipe_id":419915,"canonical_key":"water","raw_text":"Water","quantity":null,"unit":null}
 {"recipe_id":419915,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":42010,"canonical_key":"virgin_olive_oil","raw_text":"6 tablespoons virgin olive oil","quantity":6,"unit":"tbsp"}
+{"recipe_id":42010,"canonical_key":"onion","raw_text":"225 grams (8 ounces) Spanish onion, diced","quantity":225,"unit":"g"}
+{"recipe_id":42010,"canonical_key":"garlic","raw_text":"4 cloves garlic, thinly sliced","quantity":4,"unit":"clove"}
+{"recipe_id":42010,"canonical_key":"thyme","raw_text":"2 teaspoons fresh thyme leaves (or ½ teaspoon dried)","quantity":2,"unit":"tsp"}
+{"recipe_id":42010,"canonical_key":"basil","raw_text":"4 teaspoons fresh basil leaves (or 1 teaspoon dried)","quantity":4,"unit":"tsp"}
+{"recipe_id":42010,"canonical_key":"red_bell_pepper","raw_text":"85 grams (3 ounces) red bell pepper, diced","quantity":85,"unit":"g"}
+{"recipe_id":42010,"canonical_key":"tomato","raw_text":"1.3 kilograms (1 pound and 14 ounces) skinless plum tomatoes, crushed by hand","quantity":1.3,"unit":null}
+{"recipe_id":42010,"canonical_key":"sugar","raw_text":"1 tablespoon sugar","quantity":1,"unit":"tbsp"}
+{"recipe_id":42010,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
 {"recipe_id":420643,"canonical_key":"vodka","raw_text":"¼ part vodka","quantity":0.25,"unit":null}
 {"recipe_id":420643,"canonical_key":"rum","raw_text":"¼ part white rum","quantity":0.25,"unit":null}
 {"recipe_id":420643,"canonical_key":"gin","raw_text":"¼ part gin","quantity":0.25,"unit":null}
@@ -18085,6 +18450,8 @@
 {"recipe_id":447215,"canonical_key":"milk","raw_text":"Fresh cow's milk","quantity":null,"unit":null}
 {"recipe_id":447215,"canonical_key":"salt","raw_text":"Salt (optional)","quantity":null,"unit":null}
 {"recipe_id":447215,"canonical_key":"parsley","raw_text":"Herbs (e.g. thyme, rosemary, parsley, etc; optional)","quantity":null,"unit":null}
+{"recipe_id":447220,"canonical_key":"watermelon","raw_text":"Watermelon","quantity":null,"unit":null}
+{"recipe_id":447220,"canonical_key":"milk","raw_text":"Milk","quantity":null,"unit":null}
 {"recipe_id":447234,"canonical_key":"milk","raw_text":"1 gallon homogenized whole milk","quantity":1,"unit":null}
 {"recipe_id":447234,"canonical_key":"yogurt","raw_text":"1 cup unflavored (plain) yogurt","quantity":1,"unit":"cup"}
 {"recipe_id":447234,"canonical_key":"citric_acid","raw_text":"1 teaspoon citric acid (optional)","quantity":1,"unit":"tsp"}
@@ -18237,6 +18604,9 @@
 {"recipe_id":447573,"canonical_key":"vegetable_oil","raw_text":"Vegetable oil","quantity":null,"unit":null}
 {"recipe_id":447573,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
 {"recipe_id":447573,"canonical_key":"white_pepper","raw_text":"White pepper","quantity":null,"unit":null}
+{"recipe_id":447593,"canonical_key":"orange","raw_text":"Oranges","quantity":null,"unit":null}
+{"recipe_id":447593,"canonical_key":"sugar","raw_text":"Sugar","quantity":null,"unit":null}
+{"recipe_id":447593,"canonical_key":"water","raw_text":"Water","quantity":null,"unit":null}
 {"recipe_id":447595,"canonical_key":"cassava","raw_text":"1 tuber of cassava","quantity":1,"unit":null}
 {"recipe_id":447595,"canonical_key":"salt","raw_text":"1–2 teaspoons salt, to taste","quantity":1,"unit":"tsp"}
 {"recipe_id":447595,"canonical_key":"coconut","raw_text":"½ cup fresh coconut pieces","quantity":0.5,"unit":"cup"}
@@ -18269,6 +18639,12 @@
 {"recipe_id":447638,"canonical_key":"carrot","raw_text":"Carrots","quantity":null,"unit":null}
 {"recipe_id":447638,"canonical_key":"sugar","raw_text":"Sugar","quantity":null,"unit":null}
 {"recipe_id":447638,"canonical_key":"water","raw_text":"Water","quantity":null,"unit":null}
+{"recipe_id":447640,"canonical_key":"date","raw_text":"Dates","quantity":null,"unit":null}
+{"recipe_id":447640,"canonical_key":"cinnamon_powder","raw_text":"Cinnamon powder","quantity":null,"unit":null}
+{"recipe_id":447640,"canonical_key":"sugar","raw_text":"Sugar","quantity":null,"unit":null}
+{"recipe_id":447640,"canonical_key":"ice","raw_text":"Ice cubes","quantity":null,"unit":null}
+{"recipe_id":447642,"canonical_key":"coconut","raw_text":"Large coconut","quantity":null,"unit":"large"}
+{"recipe_id":447642,"canonical_key":"water","raw_text":"Water","quantity":null,"unit":null}
 {"recipe_id":447643,"canonical_key":"pumpkin","raw_text":"Pumpkin","quantity":null,"unit":null}
 {"recipe_id":447643,"canonical_key":"cinnamon","raw_text":"Ground cinnamon","quantity":null,"unit":null}
 {"recipe_id":447643,"canonical_key":"paprika","raw_text":"Paprika","quantity":null,"unit":null}
@@ -18299,9 +18675,24 @@
 {"recipe_id":447783,"canonical_key":"dry_white_wine","raw_text":"½ cup dry white wine","quantity":0.5,"unit":"cup"}
 {"recipe_id":447783,"canonical_key":"whipping_cream","raw_text":"2 cups whipping cream","quantity":2,"unit":"cup"}
 {"recipe_id":447783,"canonical_key":"dijon_mustard","raw_text":"½ tsp Dijon mustard","quantity":0.5,"unit":"tsp"}
+{"recipe_id":447806,"canonical_key":"almond_flour","raw_text":"5 oz (150 g) almond meal","quantity":5,"unit":"oz"}
+{"recipe_id":447806,"canonical_key":"flour","raw_text":"2¼ oz (70 g) cake flour","quantity":2.25,"unit":"oz"}
+{"recipe_id":447806,"canonical_key":"sugar","raw_text":"8 oz (250 g) superfine sugar","quantity":8,"unit":"oz"}
+{"recipe_id":447806,"canonical_key":"egg_white","raw_text":"8 oz (250 g) egg whites","quantity":8,"unit":"oz"}
+{"recipe_id":447807,"canonical_key":"egg_white","raw_text":"1 lb (500 g) egg whites","quantity":1,"unit":"lb"}
+{"recipe_id":447807,"canonical_key":"sugar","raw_text":"1 lb (500 g) superfine sugar","quantity":1,"unit":"lb"}
+{"recipe_id":447807,"canonical_key":"icing_sugar","raw_text":"1 lb (500 g) confectioners' sugar","quantity":1,"unit":"lb"}
+{"recipe_id":447807,"canonical_key":"hazelnut","raw_text":"1 lb (500 g) skinned hazelnuts, finely chopped","quantity":1,"unit":"lb"}
 {"recipe_id":447808,"canonical_key":"water","raw_text":"4 oz (125 ml) water","quantity":4,"unit":"oz"}
 {"recipe_id":447808,"canonical_key":"egg_white","raw_text":"8 oz (250 g) egg whites","quantity":8,"unit":"oz"}
 {"recipe_id":447808,"canonical_key":"granulated_sugar","raw_text":"1 lb (500 g) granulated sugar","quantity":1,"unit":"lb"}
+{"recipe_id":447822,"canonical_key":"egg_white","raw_text":"4 oz (120 g / 3 ea.) egg whites","quantity":4,"unit":"oz"}
+{"recipe_id":447822,"canonical_key":"sugar","raw_text":"4 oz (120 g) superfine sugar","quantity":4,"unit":"oz"}
+{"recipe_id":447822,"canonical_key":"almond_flour","raw_text":"4 oz (120 g) almond meal","quantity":4,"unit":"oz"}
+{"recipe_id":447823,"canonical_key":"egg_white","raw_text":"8 oz (250 g) egg whites","quantity":8,"unit":"oz"}
+{"recipe_id":447823,"canonical_key":"cream_of_tartar","raw_text":"¼ tsp cream of tartar or a few drops lemon juice","quantity":0.25,"unit":"tsp"}
+{"recipe_id":447823,"canonical_key":"granulated_sugar","raw_text":"8 oz (250 g) granulated sugar","quantity":8,"unit":"oz"}
+{"recipe_id":447823,"canonical_key":"icing_sugar","raw_text":"8 oz (250 g) superfine sugar or sifted confectioners' sugar","quantity":8,"unit":"oz"}
 {"recipe_id":447824,"canonical_key":"egg_white","raw_text":"8 oz (250 g) egg whites","quantity":8,"unit":"oz"}
 {"recipe_id":447824,"canonical_key":"sugar","raw_text":"1 lb (500 g) superfine sugar","quantity":1,"unit":"lb"}
 {"recipe_id":447855,"canonical_key":"anchovy","raw_text":"1 sextarius (2 ⅓ cup/546 mL) anchovies or other fatty fish","quantity":1,"unit":null}
@@ -19519,6 +19910,11 @@
 {"recipe_id":456118,"canonical_key":"ground_clove","raw_text":"1 pinch ground cloves (optional)","quantity":1,"unit":"pinch"}
 {"recipe_id":456118,"canonical_key":"saffron","raw_text":"1 pinch saffron (optional)","quantity":1,"unit":"pinch"}
 {"recipe_id":456118,"canonical_key":"almond","raw_text":"Crushed almonds (optional)","quantity":null,"unit":null}
+{"recipe_id":456121,"canonical_key":"duck","raw_text":"1 ea. (4–5 pounds, 1.8–3.6 kg) whole pekin duckling","quantity":1,"unit":"each"}
+{"recipe_id":456121,"canonical_key":"lemon","raw_text":"1 lemon, cut into quarters","quantity":1,"unit":null}
+{"recipe_id":456121,"canonical_key":"orange","raw_text":"1 orange, cut into quarters or eighths","quantity":1,"unit":null}
+{"recipe_id":456121,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":456121,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
 {"recipe_id":45616,"canonical_key":"margarine","raw_text":"½ cup butter or margarine","quantity":0.5,"unit":"cup"}
 {"recipe_id":45616,"canonical_key":"shortening","raw_text":"½ cup shortening","quantity":0.5,"unit":"cup"}
 {"recipe_id":45616,"canonical_key":"granulated_sugar","raw_text":"⅔ cup white granulated sugar","quantity":0.6667,"unit":"cup"}
@@ -19727,6 +20123,18 @@
 {"recipe_id":456697,"canonical_key":"ginger_paste","raw_text":"1 tsp ginger paste","quantity":1,"unit":"tsp"}
 {"recipe_id":456697,"canonical_key":"beef","raw_text":"Beef sirloin steak, in 1-inch cubes","quantity":null,"unit":null}
 {"recipe_id":456697,"canonical_key":"coriander_leaf","raw_text":"80 g fresh coriander, finely chopped","quantity":80,"unit":"g"}
+{"recipe_id":456725,"canonical_key":"plantain","raw_text":"8–10 medium-size plantains","quantity":8,"unit":"medium"}
+{"recipe_id":456725,"canonical_key":"lemon","raw_text":"1 lemon (optional), juiced","quantity":1,"unit":null}
+{"recipe_id":456725,"canonical_key":"vegetable_oil","raw_text":"Vegetable oil for frying","quantity":null,"unit":null}
+{"recipe_id":456725,"canonical_key":"tomato","raw_text":"2–3 tomatoes, chopped","quantity":2,"unit":null}
+{"recipe_id":456725,"canonical_key":"onion","raw_text":"1 onion, chopped","quantity":1,"unit":null}
+{"recipe_id":456725,"canonical_key":"green_bell_pepper","raw_text":"1 green bell pepper, chopped","quantity":1,"unit":null}
+{"recipe_id":456725,"canonical_key":"chili_pepper","raw_text":"1 chile pepper, chopped","quantity":1,"unit":null}
+{"recipe_id":456725,"canonical_key":"garlic","raw_text":"2–3 garlic cloves, crushed","quantity":2,"unit":null}
+{"recipe_id":456725,"canonical_key":"curry","raw_text":"Curry spices to taste","quantity":null,"unit":null}
+{"recipe_id":456725,"canonical_key":"meat","raw_text":"Beef stew meat (optional), cut in bite-size pieces","quantity":null,"unit":null}
+{"recipe_id":456725,"canonical_key":"beef_broth","raw_text":"1 cup beef stock (optional)","quantity":1,"unit":"cup"}
+{"recipe_id":456725,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
 {"recipe_id":456726,"canonical_key":"beef","raw_text":"250 g beef, cubed and rinsed","quantity":250,"unit":"g"}
 {"recipe_id":456726,"canonical_key":"salt","raw_text":"1 tbsp salt","quantity":1,"unit":"tbsp"}
 {"recipe_id":456726,"canonical_key":"tomato","raw_text":"1 tomato, grated","quantity":1,"unit":null}
@@ -20208,6 +20616,16 @@
 {"recipe_id":456953,"canonical_key":"black_pepper_powder","raw_text":"½ tablespoon black pepper powder","quantity":0.5,"unit":"tbsp"}
 {"recipe_id":456953,"canonical_key":"salt","raw_text":"½ tablespoon salt or to taste","quantity":0.5,"unit":"tbsp"}
 {"recipe_id":456953,"canonical_key":"vegetable_oil","raw_text":"2 tablespoons vegetable oil","quantity":2,"unit":"tbsp"}
+{"recipe_id":456955,"canonical_key":"banana","raw_text":"500 g peeled green bananas (matooke)","quantity":500,"unit":"g"}
+{"recipe_id":456955,"canonical_key":"oil","raw_text":"Cooking oil","quantity":null,"unit":null}
+{"recipe_id":456955,"canonical_key":"onion","raw_text":"1 medium-size onion, neatly chopped","quantity":1,"unit":"medium"}
+{"recipe_id":456955,"canonical_key":"tomato","raw_text":"3 medium-size grated tomatoes","quantity":3,"unit":"medium"}
+{"recipe_id":456955,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":456955,"canonical_key":"water","raw_text":"2 cups water","quantity":2,"unit":"cup"}
+{"recipe_id":456955,"canonical_key":"black_pepper","raw_text":"1 teaspoon black pepper","quantity":1,"unit":"tsp"}
+{"recipe_id":456955,"canonical_key":"cumin","raw_text":"1 teaspoon cumin","quantity":1,"unit":"tsp"}
+{"recipe_id":456955,"canonical_key":"curry_powder","raw_text":"1 teaspoon curry powder","quantity":1,"unit":"tsp"}
+{"recipe_id":456955,"canonical_key":"beans","raw_text":"250 g boiled beans","quantity":250,"unit":"g"}
 {"recipe_id":456963,"canonical_key":"olive_oil","raw_text":"2 tablespoons butter or olive oil","quantity":2,"unit":"tbsp"}
 {"recipe_id":456963,"canonical_key":"noodle","raw_text":"½ cup 1–2 inch-long vermicelli noodles","quantity":0.5,"unit":"cup"}
 {"recipe_id":456963,"canonical_key":"long_grain_rice","raw_text":"1 cup long-grain rice","quantity":1,"unit":"cup"}
@@ -20400,6 +20818,13 @@
 {"recipe_id":457042,"canonical_key":"orange_blossom_water","raw_text":"1 teaspoon orange blossom water","quantity":1,"unit":"tsp"}
 {"recipe_id":457042,"canonical_key":"cinnamon","raw_text":"Ground cinnamon for garnish","quantity":null,"unit":null}
 {"recipe_id":457042,"canonical_key":"almond","raw_text":"Crushed pistachios or almonds for garnish","quantity":null,"unit":null}
+{"recipe_id":457043,"canonical_key":"pastry","raw_text":"1 package (450 grams) kataifi pastry","quantity":1,"unit":"packet"}
+{"recipe_id":457043,"canonical_key":"butter","raw_text":"1 cup ghee or melted butter","quantity":1,"unit":"cup"}
+{"recipe_id":457043,"canonical_key":"granulated_sugar","raw_text":"2 cups granulated sugar","quantity":2,"unit":"cup"}
+{"recipe_id":457043,"canonical_key":"water","raw_text":"1 cup water","quantity":1,"unit":"cup"}
+{"recipe_id":457043,"canonical_key":"lemon_juice","raw_text":"1 tablespoon lemon juice","quantity":1,"unit":"tbsp"}
+{"recipe_id":457043,"canonical_key":"clotted_cream","raw_text":"2 cups ashta (similar to clotted cream)","quantity":2,"unit":"cup"}
+{"recipe_id":457043,"canonical_key":"almond","raw_text":"Crushed pistachios or almonds for garnish","quantity":null,"unit":null}
 {"recipe_id":457044,"canonical_key":"plantain","raw_text":"Plantain","quantity":null,"unit":null}
 {"recipe_id":457044,"canonical_key":"vegetable_oil","raw_text":"Vegetable oil","quantity":null,"unit":null}
 {"recipe_id":457044,"canonical_key":"egg","raw_text":"Egg","quantity":null,"unit":null}
@@ -20835,6 +21260,19 @@
 {"recipe_id":457191,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
 {"recipe_id":457191,"canonical_key":"pepper","raw_text":"Pepper, to taste","quantity":null,"unit":null}
 {"recipe_id":457191,"canonical_key":"coriander_leaf","raw_text":"Fresh parsley or cilantro, chopped, for garnish","quantity":null,"unit":null}
+{"recipe_id":457194,"canonical_key":"olive_oil","raw_text":"2 tablespoons olive oil","quantity":2,"unit":"tbsp"}
+{"recipe_id":457194,"canonical_key":"onion","raw_text":"1 large onion, finely chopped","quantity":1,"unit":"large"}
+{"recipe_id":457194,"canonical_key":"garlic","raw_text":"3 cloves of garlic, minced","quantity":3,"unit":"clove"}
+{"recipe_id":457194,"canonical_key":"chicken","raw_text":"500 grams (1 lb) boneless meat (beef, lamb, or chicken), cut into bite-sized pieces","quantity":500,"unit":"g"}
+{"recipe_id":457194,"canonical_key":"berbere_spice_blend","raw_text":"1 tablespoon berbere spice blend","quantity":1,"unit":"tbsp"}
+{"recipe_id":457194,"canonical_key":"paprika","raw_text":"1 teaspoon paprika","quantity":1,"unit":"tsp"}
+{"recipe_id":457194,"canonical_key":"cumin","raw_text":"½ teaspoon ground cumin","quantity":0.5,"unit":"tsp"}
+{"recipe_id":457194,"canonical_key":"salt","raw_text":"½ teaspoon salt, or to taste","quantity":0.5,"unit":"tsp"}
+{"recipe_id":457194,"canonical_key":"black_pepper","raw_text":"¼ teaspoon black pepper","quantity":0.25,"unit":"tsp"}
+{"recipe_id":457194,"canonical_key":"cayenne_pepper","raw_text":"¼ teaspoon ground cayenne pepper, optional (for extra spiciness)","quantity":0.25,"unit":"tsp"}
+{"recipe_id":457194,"canonical_key":"lemon_juice","raw_text":"¼ cup lemon juice","quantity":0.25,"unit":"cup"}
+{"recipe_id":457194,"canonical_key":"butter","raw_text":"2 tablespoons butter","quantity":2,"unit":"tbsp"}
+{"recipe_id":457194,"canonical_key":"coriander_leaf","raw_text":"Fresh parsley or cilantro, chopped, for garnish","quantity":null,"unit":null}
 {"recipe_id":457195,"canonical_key":"beef","raw_text":"500 grams (1 lb) lean beef, finely minced","quantity":500,"unit":"g"}
 {"recipe_id":457195,"canonical_key":"olive_oil","raw_text":"2 tablespoons clarified butter or olive oil","quantity":2,"unit":"tbsp"}
 {"recipe_id":457195,"canonical_key":"clarified_butter","raw_text":"1 tablespoon spiced clarified butter (optional)","quantity":1,"unit":"tbsp"}
@@ -21471,6 +21909,24 @@
 {"recipe_id":457345,"canonical_key":"plantain","raw_text":"2–3 ripe plantains","quantity":2,"unit":null}
 {"recipe_id":457345,"canonical_key":"vegetable_oil","raw_text":"Vegetable oil, for frying","quantity":null,"unit":null}
 {"recipe_id":457345,"canonical_key":"salt","raw_text":"Salt (optional)","quantity":null,"unit":null}
+{"recipe_id":457346,"canonical_key":"beef","raw_text":"2 lbs lean beef, cut into chunks","quantity":2,"unit":"lb"}
+{"recipe_id":457346,"canonical_key":"onion","raw_text":"2 medium onions, chopped","quantity":2,"unit":"medium"}
+{"recipe_id":457346,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
+{"recipe_id":457346,"canonical_key":"okra","raw_text":"2 lbs okra, diced into small cubes","quantity":2,"unit":"lb"}
+{"recipe_id":457346,"canonical_key":"palm_oil","raw_text":"Palm oil","quantity":null,"unit":null}
+{"recipe_id":457346,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"spinach","raw_text":"Spinach","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"water","raw_text":"1 cup water","quantity":1,"unit":"cup"}
+{"recipe_id":457348,"canonical_key":"broth","raw_text":"1 cup stock","quantity":1,"unit":"cup"}
+{"recipe_id":457348,"canonical_key":"tomato","raw_text":"Tomatoes, chopped","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"habanero_chili","raw_text":"Habanero chile pepper (optional), chopped","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"onion","raw_text":"½ onion, chopped","quantity":0.5,"unit":null}
+{"recipe_id":457348,"canonical_key":"garlic","raw_text":"2 garlic cloves, minced","quantity":2,"unit":null}
+{"recipe_id":457348,"canonical_key":"dehydrated_broth","raw_text":"Bouillon powder","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"black_pepper","raw_text":"Black pepper","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"peanut_butter","raw_text":"Peanut butter","quantity":null,"unit":null}
+{"recipe_id":457348,"canonical_key":"palm_oil","raw_text":"Palm oil","quantity":null,"unit":null}
 {"recipe_id":457353,"canonical_key":"palm_oil","raw_text":"2–3 tablespoons red palm oil","quantity":2,"unit":"tbsp"}
 {"recipe_id":457353,"canonical_key":"onion","raw_text":"1 medium-sized onion, chopped","quantity":1,"unit":"medium"}
 {"recipe_id":457353,"canonical_key":"garlic","raw_text":"2–3 cloves of garlic, minced","quantity":2,"unit":"clove"}
@@ -22387,6 +22843,8 @@
 {"recipe_id":461644,"canonical_key":"corn","raw_text":"1 cup corn","quantity":1,"unit":"cup"}
 {"recipe_id":461644,"canonical_key":"lemon_juice","raw_text":"½ cup freshly-squeezed lemon juice (from 2–3 lemons)","quantity":0.5,"unit":"cup"}
 {"recipe_id":461644,"canonical_key":"extra_virgin_olive_oil","raw_text":"½ cup extra-virgin olive oil","quantity":0.5,"unit":"cup"}
+{"recipe_id":461702,"canonical_key":"kefir","raw_text":"50 grams (1¾ oz) of kefir grains (see note)","quantity":50,"unit":"g"}
+{"recipe_id":461702,"canonical_key":"milk","raw_text":"500 ml (1 pint) fresh milk (see note)","quantity":500,"unit":"ml"}
 {"recipe_id":461703,"canonical_key":"brown_sugar","raw_text":"1 cup (180 g) brown sugar","quantity":1,"unit":"cup"}
 {"recipe_id":461703,"canonical_key":"cinnamon","raw_text":"2 teaspoons ground cinnamon","quantity":2,"unit":"tsp"}
 {"recipe_id":461703,"canonical_key":"ground_clove","raw_text":"1 teaspoon ground cloves","quantity":1,"unit":"tsp"}
@@ -22551,6 +23009,14 @@
 {"recipe_id":461945,"canonical_key":"onion","raw_text":"1 onion, finely chopped (optional)","quantity":1,"unit":null}
 {"recipe_id":461945,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
 {"recipe_id":461945,"canonical_key":"mint","raw_text":"Fresh cilantro leaves and spearmint for garnish","quantity":null,"unit":null}
+{"recipe_id":461946,"canonical_key":"onion","raw_text":"2 medium-sized onions, chopped","quantity":2,"unit":"medium"}
+{"recipe_id":461946,"canonical_key":"ginger","raw_text":"1 thumb-sized piece of ginger","quantity":1,"unit":null}
+{"recipe_id":461946,"canonical_key":"water","raw_text":"570 ml boiling water","quantity":570,"unit":"ml"}
+{"recipe_id":461946,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":461946,"canonical_key":"turmeric_powder","raw_text":"Turmeric powder","quantity":null,"unit":null}
+{"recipe_id":461946,"canonical_key":"rice_flour","raw_text":"300 grams rice flour","quantity":300,"unit":"g"}
+{"recipe_id":461946,"canonical_key":"rice","raw_text":"120 grams ground rice","quantity":120,"unit":"g"}
+{"recipe_id":461946,"canonical_key":"coriander","raw_text":"Chopped coriander (optional)","quantity":null,"unit":null}
 {"recipe_id":461950,"canonical_key":"rice","raw_text":"1 cup rice","quantity":1,"unit":"cup"}
 {"recipe_id":461950,"canonical_key":"milk","raw_text":"1 cup milk (optional)","quantity":1,"unit":"cup"}
 {"recipe_id":461950,"canonical_key":"sugar","raw_text":"1 cup sugar","quantity":1,"unit":"cup"}
@@ -22584,6 +23050,12 @@
 {"recipe_id":461955,"canonical_key":"flour","raw_text":"2 tablespoons all-purpose flour","quantity":2,"unit":"tbsp"}
 {"recipe_id":461955,"canonical_key":"pepper","raw_text":"¼ teaspoon pepper","quantity":0.25,"unit":"tsp"}
 {"recipe_id":461955,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":461964,"canonical_key":"organic_tomato","raw_text":"1 kg organic tomatoes, chopped","quantity":1,"unit":"kg"}
+{"recipe_id":461964,"canonical_key":"vegetable_oil","raw_text":"Vegetable oil (e.g. canola, sunflower, or olive oil)","quantity":null,"unit":null}
+{"recipe_id":461964,"canonical_key":"garlic","raw_text":"½ cup organic garlic, minced","quantity":0.5,"unit":"cup"}
+{"recipe_id":461964,"canonical_key":"salt","raw_text":"Salt, to taste","quantity":null,"unit":null}
+{"recipe_id":461964,"canonical_key":"turmeric","raw_text":"Turmeric","quantity":null,"unit":null}
+{"recipe_id":461964,"canonical_key":"water","raw_text":"2 cups boiling water","quantity":2,"unit":"cup"}
 {"recipe_id":462077,"canonical_key":"salt","raw_text":"1 heaping tsp salt","quantity":1,"unit":null}
 {"recipe_id":462077,"canonical_key":"egg","raw_text":"5 eggs","quantity":5,"unit":null}
 {"recipe_id":462077,"canonical_key":"water","raw_text":"6½–7 cups water","quantity":6.5,"unit":null}
@@ -22758,6 +23230,12 @@
 {"recipe_id":462330,"canonical_key":"salt","raw_text":"½ tsp salt","quantity":0.5,"unit":"tsp"}
 {"recipe_id":462330,"canonical_key":"ground_nutmeg","raw_text":"¼ tsp ground nutmeg","quantity":0.25,"unit":"tsp"}
 {"recipe_id":462330,"canonical_key":"whipped_cream","raw_text":"Ice cream or whipped cream, for serving","quantity":null,"unit":null}
+{"recipe_id":462331,"canonical_key":"heavy_cream","raw_text":"1¾ cups (400 ml) heavy cream","quantity":1.75,"unit":"cup"}
+{"recipe_id":462331,"canonical_key":"unsalted_butter","raw_text":"6 tbsp unsalted butter","quantity":6,"unit":"tbsp"}
+{"recipe_id":462331,"canonical_key":"parmigiano_reggiano","raw_text":"8.5 ounces (240 g) grated Parmesan cheese or asiago cheese","quantity":8.5,"unit":"oz"}
+{"recipe_id":462331,"canonical_key":"salt","raw_text":"1 tsp salt","quantity":1,"unit":"tsp"}
+{"recipe_id":462331,"canonical_key":"pepper","raw_text":"Fresh-ground black pepper","quantity":null,"unit":null}
+{"recipe_id":462331,"canonical_key":"nutmeg","raw_text":"1 pinch of fresh-ground nutmeg","quantity":1,"unit":"pinch"}
 {"recipe_id":462334,"canonical_key":"ice_cream","raw_text":"1 scoop vanilla ice cream","quantity":1,"unit":null}
 {"recipe_id":462334,"canonical_key":"coffee_powder","raw_text":"1 tsp coffee powder","quantity":1,"unit":"tsp"}
 {"recipe_id":462334,"canonical_key":"brandy","raw_text":"1 tsp brandy","quantity":1,"unit":"tsp"}
@@ -22772,6 +23250,26 @@
 {"recipe_id":462351,"canonical_key":"ketchup","raw_text":"1 cup ketchup (catsup)","quantity":1,"unit":"cup"}
 {"recipe_id":462351,"canonical_key":"molasses","raw_text":"½ cup molasses","quantity":0.5,"unit":"cup"}
 {"recipe_id":462351,"canonical_key":"liquid_smoke","raw_text":"½ teaspoon \"concentrated\" liquid smoke flavoring","quantity":0.5,"unit":"tsp"}
+{"recipe_id":462352,"canonical_key":"bacon","raw_text":"6 ounces (170 g) of chunk bacon","quantity":6,"unit":"oz"}
+{"recipe_id":462352,"canonical_key":"olive_oil","raw_text":"3 ½ tablespoons olive oil","quantity":3.5,"unit":"tbsp"}
+{"recipe_id":462352,"canonical_key":"beef","raw_text":"3 pounds (1360 g) lean stewing beef, cut into 2-inch cubes","quantity":3,"unit":"lb"}
+{"recipe_id":462352,"canonical_key":"carrot","raw_text":"1 carrot, sliced","quantity":1,"unit":null}
+{"recipe_id":462352,"canonical_key":"onion","raw_text":"1 onion, sliced","quantity":1,"unit":null}
+{"recipe_id":462352,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":462352,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
+{"recipe_id":462352,"canonical_key":"flour","raw_text":"2 tablespoons flour","quantity":2,"unit":"tbsp"}
+{"recipe_id":462352,"canonical_key":"tomato_concentrate","raw_text":"1 tablespoon tomato paste","quantity":1,"unit":"tbsp"}
+{"recipe_id":462352,"canonical_key":"garlic","raw_text":"2 cloves mashed garlic","quantity":2,"unit":"clove"}
+{"recipe_id":462352,"canonical_key":"thyme","raw_text":"½ teaspoon thyme","quantity":0.5,"unit":"tsp"}
+{"recipe_id":462352,"canonical_key":"bay_leaf","raw_text":"1 crumbled bay leaf","quantity":1,"unit":null}
+{"recipe_id":462352,"canonical_key":"white_onion","raw_text":"18–24 white onions, small","quantity":18,"unit":null}
+{"recipe_id":462352,"canonical_key":"butter","raw_text":"3 ½ tablespoons butter","quantity":3.5,"unit":"tbsp"}
+{"recipe_id":462355,"canonical_key":"butter","raw_text":"2 tablespoons margarine or butter","quantity":2,"unit":"tbsp"}
+{"recipe_id":462355,"canonical_key":"flour","raw_text":"2.5 tablespoons flour","quantity":2.5,"unit":"tbsp"}
+{"recipe_id":462355,"canonical_key":"milk","raw_text":"1 cup milk","quantity":1,"unit":"cup"}
+{"recipe_id":462355,"canonical_key":"cheese","raw_text":"1 cup grated cheese (pizza, mozzarella, or cheddar)","quantity":1,"unit":"cup"}
+{"recipe_id":462355,"canonical_key":"mustard","raw_text":"Dash of mustard","quantity":null,"unit":"dash"}
+{"recipe_id":462355,"canonical_key":"nutmeg","raw_text":"Dash of nutmeg","quantity":null,"unit":"dash"}
 {"recipe_id":462357,"canonical_key":"date","raw_text":"300 g dates or date spread, finely chopped","quantity":300,"unit":"g"}
 {"recipe_id":462357,"canonical_key":"raisin","raw_text":"300 g raisins, finely chopped","quantity":300,"unit":"g"}
 {"recipe_id":462357,"canonical_key":"fig","raw_text":"100 g dried figs, finely chopped","quantity":100,"unit":"g"}
@@ -22873,6 +23371,15 @@
 {"recipe_id":464043,"canonical_key":"flour","raw_text":"1 pound all-purpose flour","quantity":1,"unit":"lb"}
 {"recipe_id":464043,"canonical_key":"nutmeg","raw_text":"½ pod nutmeg, grated","quantity":0.5,"unit":null}
 {"recipe_id":464043,"canonical_key":"caraway_seed","raw_text":"A few caraway seeds","quantity":null,"unit":null}
+{"recipe_id":464385,"canonical_key":"oil","raw_text":"1 spoon cooking oil","quantity":1,"unit":null}
+{"recipe_id":464385,"canonical_key":"onion","raw_text":"1 onion, chopped","quantity":1,"unit":null}
+{"recipe_id":464385,"canonical_key":"garlic","raw_text":"1 head garlic, minced","quantity":1,"unit":"head"}
+{"recipe_id":464385,"canonical_key":"pork_belly","raw_text":"1 kg pork belly","quantity":1,"unit":"kg"}
+{"recipe_id":464385,"canonical_key":"shrimp_paste","raw_text":"½ kg bagoong alamang (shrimp paste)","quantity":0.5,"unit":"kg"}
+{"recipe_id":464385,"canonical_key":"chili_pepper","raw_text":"15 pieces siling labuyo (bird's eye chili)","quantity":15,"unit":"piece"}
+{"recipe_id":464385,"canonical_key":"sugar","raw_text":"2 spoons sugar","quantity":2,"unit":null}
+{"recipe_id":464385,"canonical_key":"black_pepper","raw_text":"1 teaspoon black pepper","quantity":1,"unit":"tsp"}
+{"recipe_id":464385,"canonical_key":"coconut_milk","raw_text":"1 can (400 ml) coconut milk","quantity":1,"unit":"can"}
 {"recipe_id":464492,"canonical_key":"brussels_sprouts","raw_text":"Brussels sprouts","quantity":null,"unit":null}
 {"recipe_id":464492,"canonical_key":"olive_oil","raw_text":"Olive oil","quantity":null,"unit":null}
 {"recipe_id":464492,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
@@ -23143,6 +23650,14 @@
 {"recipe_id":469521,"canonical_key":"pepper","raw_text":"5 teaspoons whole black peppercorns","quantity":5,"unit":"tsp"}
 {"recipe_id":469521,"canonical_key":"salt","raw_text":"3 teaspoons salt","quantity":3,"unit":"tsp"}
 {"recipe_id":469521,"canonical_key":"water","raw_text":"6 dl water","quantity":6,"unit":"dl"}
+{"recipe_id":4696,"canonical_key":"butter","raw_text":"1 cup (240 g / 8.5 oz) butter","quantity":1,"unit":"cup"}
+{"recipe_id":4696,"canonical_key":"milk","raw_text":"1 cup (240 ml / 8.1 oz) milk","quantity":1,"unit":"cup"}
+{"recipe_id":4696,"canonical_key":"vanilla_extract","raw_text":"1 teaspoon vanilla extract","quantity":1,"unit":"tsp"}
+{"recipe_id":4696,"canonical_key":"sugar","raw_text":"2 cups (450 g / 16 oz) white granulated sugar","quantity":2,"unit":"cup"}
+{"recipe_id":4696,"canonical_key":"flour","raw_text":"3 cups (400 g / 14 oz) all-purpose flour","quantity":3,"unit":"cup"}
+{"recipe_id":4696,"canonical_key":"baking_powder","raw_text":"3 teaspoons baking powder","quantity":3,"unit":"tsp"}
+{"recipe_id":4696,"canonical_key":"salt","raw_text":"3 pinches of salt","quantity":3,"unit":"pinch"}
+{"recipe_id":4696,"canonical_key":"egg","raw_text":"4 eggs","quantity":4,"unit":null}
 {"recipe_id":470139,"canonical_key":"barley","raw_text":"1 cup barley","quantity":1,"unit":"cup"}
 {"recipe_id":470139,"canonical_key":"water","raw_text":"3 cups water","quantity":3,"unit":"cup"}
 {"recipe_id":470139,"canonical_key":"salt","raw_text":"½ tsp salt (optional)","quantity":0.5,"unit":"tsp"}
@@ -23859,6 +24374,12 @@
 {"recipe_id":477885,"canonical_key":"unsalted_butter","raw_text":"¼ cup unsalted butter, melted","quantity":0.25,"unit":"cup"}
 {"recipe_id":477885,"canonical_key":"olive_oil","raw_text":"¼ cup olive oil","quantity":0.25,"unit":"cup"}
 {"recipe_id":477885,"canonical_key":"chocolate_chunk","raw_text":"1 cup chocolate chips (can omit or use only half)","quantity":1,"unit":"cup"}
+{"recipe_id":47816,"canonical_key":"chicken","raw_text":"6–8 chicken pieces, preferably legs and wings","quantity":6,"unit":null}
+{"recipe_id":47816,"canonical_key":"coconut","raw_text":"⅓ cup (80 ml) vinegar made from coconut juice (as a variant, try balsamic vinegar)","quantity":0.3333,"unit":"cup"}
+{"recipe_id":47816,"canonical_key":"soy_sauce","raw_text":"¼ cup (60 ml) soy sauce","quantity":0.25,"unit":"cup"}
+{"recipe_id":47816,"canonical_key":"garlic","raw_text":"4 cloves of garlic, crushed","quantity":4,"unit":"clove"}
+{"recipe_id":47816,"canonical_key":"bay_leaf","raw_text":"1–2 bay leaves","quantity":1,"unit":null}
+{"recipe_id":47816,"canonical_key":"pepper","raw_text":"½ tsp (2.5 ml) freshly cracked (not ground) black peppercorns","quantity":0.5,"unit":"tsp"}
 {"recipe_id":479138,"canonical_key":"olive_oil","raw_text":"1 tbsp olive oil or neutral cooking oil","quantity":1,"unit":"tbsp"}
 {"recipe_id":479138,"canonical_key":"yellow_onion","raw_text":"1 medium yellow onion, roughly chopped","quantity":1,"unit":"medium"}
 {"recipe_id":479138,"canonical_key":"black_pepper","raw_text":"Salt and pepper to taste","quantity":null,"unit":null}
@@ -24245,6 +24766,17 @@
 {"recipe_id":483084,"canonical_key":"carob_bean","raw_text":"2-3 cups of iru (locust beans)","quantity":2,"unit":"cup"}
 {"recipe_id":483084,"canonical_key":"palm_oil","raw_text":"Palm oil (200ml)","quantity":null,"unit":null}
 {"recipe_id":483084,"canonical_key":"stock_cube","raw_text":"3 Seasoning cubes","quantity":3,"unit":null}
+{"recipe_id":483088,"canonical_key":"palm_oil","raw_text":"0.3 cups palm oil","quantity":0.3,"unit":"cup"}
+{"recipe_id":483088,"canonical_key":"meat","raw_text":"700 grams assorted meat (beef, shaki/tripe, ponmo)","quantity":700,"unit":"g"}
+{"recipe_id":483088,"canonical_key":"cod","raw_text":"200 grams stockfish (panla), soaked and cleaned","quantity":200,"unit":"g"}
+{"recipe_id":483088,"canonical_key":"crayfish","raw_text":"3 tablespoons ground crayfish","quantity":3,"unit":"tbsp"}
+{"recipe_id":483088,"canonical_key":"pepper","raw_text":"4 scotch bonnet peppers (rodo)","quantity":4,"unit":null}
+{"recipe_id":483088,"canonical_key":"red_bell_pepper","raw_text":"2 tatashe (red bell pepper)","quantity":2,"unit":null}
+{"recipe_id":483088,"canonical_key":"onion","raw_text":"2 onions","quantity":2,"unit":null}
+{"recipe_id":483088,"canonical_key":"carob_bean","raw_text":"2 tablespoons iru (locust bean)","quantity":2,"unit":"tbsp"}
+{"recipe_id":483088,"canonical_key":"chicken_broth","raw_text":"1.5 cups beef or chicken stock","quantity":1.5,"unit":"cup"}
+{"recipe_id":483088,"canonical_key":"stock_cube","raw_text":"2 seasoning cubes","quantity":2,"unit":null}
+{"recipe_id":483088,"canonical_key":"salt","raw_text":"1 teaspoons salt","quantity":1,"unit":"tsp"}
 {"recipe_id":483127,"canonical_key":"cornmeal","raw_text":"3 cups of Mealie Meal/ White Cornmeal","quantity":3,"unit":"cup"}
 {"recipe_id":483127,"canonical_key":"water","raw_text":"1 Litre Boiling water","quantity":1,"unit":"l"}
 {"recipe_id":483139,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
@@ -24791,6 +25323,17 @@
 {"recipe_id":52168,"canonical_key":"butter","raw_text":"10–12 Tbsp unsalted butter, very cold and in cubes or lumps","quantity":10,"unit":"tbsp"}
 {"recipe_id":52168,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
 {"recipe_id":52168,"canonical_key":"white_pepper","raw_text":"White pepper","quantity":null,"unit":null}
+{"recipe_id":52284,"canonical_key":"egg","raw_text":"2 standard eggs","quantity":2,"unit":null}
+{"recipe_id":52284,"canonical_key":"broccoli","raw_text":"240 ml (1 cup) chopped broccoli","quantity":240,"unit":"ml"}
+{"recipe_id":52284,"canonical_key":"almond","raw_text":"120 ml (&frac12; cup) chopped toasted almonds","quantity":120,"unit":"ml"}
+{"recipe_id":52284,"canonical_key":"red_onion","raw_text":"190 ml (&frac34; cup) chopped red onion","quantity":190,"unit":"ml"}
+{"recipe_id":52284,"canonical_key":"breadcrumbs","raw_text":"120 ml (&frac12; cup) seasoned dry bread crumbs","quantity":120,"unit":"ml"}
+{"recipe_id":52284,"canonical_key":"water","raw_text":"80 ml (&frac14; cup) water","quantity":80,"unit":"ml"}
+{"recipe_id":52284,"canonical_key":"salt","raw_text":"Salt to taste","quantity":null,"unit":null}
+{"recipe_id":52284,"canonical_key":"pepper","raw_text":"Pepper, to taste","quantity":null,"unit":null}
+{"recipe_id":52284,"canonical_key":"bread","raw_text":"Toasted buns or bread","quantity":null,"unit":null}
+{"recipe_id":52284,"canonical_key":"mayonnaise","raw_text":"Mayonnaise","quantity":null,"unit":null}
+{"recipe_id":52284,"canonical_key":"lettuce","raw_text":"Lettuce","quantity":null,"unit":null}
 {"recipe_id":52287,"canonical_key":"tomato","raw_text":"1 large, ripe tomato","quantity":1,"unit":"large"}
 {"recipe_id":52287,"canonical_key":"mushroom","raw_text":"1 large, or 2 small culinary mushrooms","quantity":1,"unit":"large"}
 {"recipe_id":52287,"canonical_key":"onion","raw_text":"1 sliced onion slab, or coin, about ¼ inch (0.5 cm) thick","quantity":1,"unit":null}
@@ -26013,6 +26556,20 @@
 {"recipe_id":71932,"canonical_key":"mushroom","raw_text":"400 g mushrooms, sliced","quantity":400,"unit":"g"}
 {"recipe_id":71932,"canonical_key":"bread","raw_text":"4–8 slices of bread (traditionally white)","quantity":4,"unit":"slice"}
 {"recipe_id":71932,"canonical_key":"beans","raw_text":"1 tin baked beans (optional)","quantity":1,"unit":"can"}
+{"recipe_id":72182,"canonical_key":"maple_syrup","raw_text":"3 tablespoons honey or maple syrup","quantity":3,"unit":"tbsp"}
+{"recipe_id":72182,"canonical_key":"curry_powder","raw_text":"1 teaspoon curry powder","quantity":1,"unit":"tsp"}
+{"recipe_id":72182,"canonical_key":"olive_oil","raw_text":"½–1 cup (120–240 ml) vegetable oil or olive oil","quantity":0.5,"unit":null}
+{"recipe_id":72182,"canonical_key":"salt","raw_text":"Salt (1 heaping teaspoon per kilogram of chicken works well)","quantity":null,"unit":null}
+{"recipe_id":72182,"canonical_key":"celery","raw_text":"Chopped parsley or celery leaves (optional)","quantity":null,"unit":null}
+{"recipe_id":72182,"canonical_key":"chicken_breast","raw_text":"4 chicken breasts","quantity":4,"unit":null}
+{"recipe_id":72182,"canonical_key":"almond","raw_text":"1 handful almonds","quantity":1,"unit":"handful"}
+{"recipe_id":72182,"canonical_key":"leek","raw_text":"1 onion or leek","quantity":1,"unit":null}
+{"recipe_id":72182,"canonical_key":"red_bell_pepper","raw_text":"1 red pepper","quantity":1,"unit":null}
+{"recipe_id":72182,"canonical_key":"tomato","raw_text":"2–4 tomatoes","quantity":2,"unit":null}
+{"recipe_id":72182,"canonical_key":"aubergine","raw_text":"1 zucchini or eggplant","quantity":1,"unit":null}
+{"recipe_id":72182,"canonical_key":"vegetable","raw_text":"Other vegetables as desired","quantity":null,"unit":null}
+{"recipe_id":72182,"canonical_key":"cherry_tomato","raw_text":"Cherry tomatoes (optional)","quantity":null,"unit":null}
+{"recipe_id":72182,"canonical_key":"cooked_rice","raw_text":"Cooked rice","quantity":null,"unit":null}
 {"recipe_id":72236,"canonical_key":"onion","raw_text":"2 large onions or equivalent","quantity":2,"unit":"large"}
 {"recipe_id":72236,"canonical_key":"red_bell_pepper","raw_text":"2 red bell peppers","quantity":2,"unit":null}
 {"recipe_id":72236,"canonical_key":"tomato","raw_text":"2 tomatoes","quantity":2,"unit":null}
@@ -26395,6 +26952,16 @@
 {"recipe_id":77147,"canonical_key":"tomato","raw_text":"2 tomato slices","quantity":2,"unit":null}
 {"recipe_id":77147,"canonical_key":"red_onion","raw_text":"1 red onion sliced (if it's strong, only use a few rings)","quantity":1,"unit":null}
 {"recipe_id":77147,"canonical_key":"hot_sauce","raw_text":"2 tablespoon hot sauce","quantity":2,"unit":"tbsp"}
+{"recipe_id":77191,"canonical_key":"chicken","raw_text":"2 boneless, skinless chicken breasts","quantity":2,"unit":null}
+{"recipe_id":77191,"canonical_key":"pizza_dough","raw_text":"Pizza dough (e.g. Basic Pizza Crust or a pre-packaged dough for convenience)","quantity":null,"unit":null}
+{"recipe_id":77191,"canonical_key":"mozzarella","raw_text":"1 large package of shredded cheese (e.g. cheddar, mozzarella)","quantity":1,"unit":"large"}
+{"recipe_id":77191,"canonical_key":"pepperoni","raw_text":"1 package of pepperoni","quantity":1,"unit":"packet"}
+{"recipe_id":77213,"canonical_key":"pork","raw_text":"3 cups (700 g) ½-inch cubed boneless pork butt with fat","quantity":3,"unit":"cup"}
+{"recipe_id":77213,"canonical_key":"peanut_oil","raw_text":"3 tablespoons lard or peanut oil","quantity":3,"unit":"tbsp"}
+{"recipe_id":77213,"canonical_key":"salt","raw_text":"½ cup (120 ml) vinegar mixed with 1 cup (240 ml) water and 1 tablespoon salt","quantity":0.5,"unit":"cup"}
+{"recipe_id":77213,"canonical_key":"onion","raw_text":"1 medium-sized yellow onion, peeled and sliced","quantity":1,"unit":"medium"}
+{"recipe_id":77213,"canonical_key":"garlic","raw_text":"3 cloves garlic, peeled and crushed","quantity":3,"unit":"clove"}
+{"recipe_id":77213,"canonical_key":"hot_jalapeno_pepper","raw_text":"2 hot jalapeño peppers, seeded and chopped","quantity":2,"unit":null}
 {"recipe_id":77216,"canonical_key":"oil","raw_text":"1 cup oil","quantity":1,"unit":"cup"}
 {"recipe_id":77216,"canonical_key":"onion","raw_text":"3 medium onions, peeled and thinly sliced","quantity":3,"unit":"medium"}
 {"recipe_id":77216,"canonical_key":"red_chili_pepper","raw_text":"7–8 whole red chillis","quantity":7,"unit":"whole"}
@@ -27120,6 +27687,9 @@
 {"recipe_id":87409,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
 {"recipe_id":87409,"canonical_key":"paprika","raw_text":"Paprika","quantity":null,"unit":null}
 {"recipe_id":87409,"canonical_key":"garlic","raw_text":"4 cloves garlic, minced","quantity":4,"unit":"clove"}
+{"recipe_id":87421,"canonical_key":"duck","raw_text":"1 whole pekin duckling (3–6 lbs, 1.5–3 kg)","quantity":1,"unit":"whole"}
+{"recipe_id":87421,"canonical_key":"salt","raw_text":"Salt","quantity":null,"unit":null}
+{"recipe_id":87421,"canonical_key":"pepper","raw_text":"Pepper","quantity":null,"unit":null}
 {"recipe_id":87424,"canonical_key":"broth","raw_text":"4 cups (950 ml) duck stock","quantity":4,"unit":"cup"}
 {"recipe_id":87424,"canonical_key":"egg_yolk","raw_text":"3 duck egg yolks (chicken egg yolks will work too)","quantity":3,"unit":null}
 {"recipe_id":87424,"canonical_key":"milk","raw_text":"2 cups (480 ml) milk or half and half","quantity":2,"unit":"cup"}
