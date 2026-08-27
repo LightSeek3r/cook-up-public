@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ url, platform }) => {
 		return new Response(null, { status: 204 });
 	}
 
-	const ping = fetch(`${TRACK_ENDPOINT}?url=${encodeURIComponent(path)}`).catch(() => {});
+	const ping = fetch(`${TRACK_ENDPOINT}?url=${encodeURIComponent(path)}&source=CookUp`).catch(() => {});
 	platform?.ctx.waitUntil(ping);
 
 	return new Response(null, { status: 204 });
