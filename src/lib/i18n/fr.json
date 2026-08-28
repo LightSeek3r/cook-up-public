@@ -165,5 +165,10 @@
   "cuisine.venezuelan": "Vénézuélienne",
   "recipe.photo": "Photo",
   "recipe.photoUnknownAuthor": "auteur inconnu",
-  "recipe.viaCommons": "via Wikimedia Commons"
+  "recipe.viaCommons": "via Wikimedia Commons",
+  "recipe.downloadPdf": "Télécharger en PDF",
+  "favorite.add": "Ajouter aux favoris",
+  "favorite.remove": "Retirer des favoris",
+  "favorites.heading": "Mes favoris",
+  "favorites.empty": "Aucun favori pour l'instant. Touchez le cœur d'une recette pour l'enregistrer ici."
 }

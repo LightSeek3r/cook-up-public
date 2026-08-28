@@ -165,5 +165,10 @@
   "cuisine.venezuelan": "Venezuela",
   "recipe.photo": "Ảnh",
   "recipe.photoUnknownAuthor": "không rõ tác giả",
-  "recipe.viaCommons": "qua Wikimedia Commons"
+  "recipe.viaCommons": "qua Wikimedia Commons",
+  "recipe.downloadPdf": "Tải xuống dạng PDF",
+  "favorite.add": "Thêm vào yêu thích",
+  "favorite.remove": "Xóa khỏi yêu thích",
+  "favorites.heading": "Món yêu thích của tôi",
+  "favorites.empty": "Chưa có món yêu thích nào. Nhấn vào biểu tượng tim trên một công thức để lưu vào đây."
 }

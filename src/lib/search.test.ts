@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
 	searchRecipeTitles,
+	getRecipesByIds,
 	ftsPhrase,
 	likeTerm,
 	normaliseQuery,
@@ -118,5 +119,40 @@ describe('searchRecipeTitles', () => {
 	it('returns [] rather than undefined when D1 reports no results', async () => {
 		const { db } = spyDb(undefined as never);
 		expect(await searchRecipeTitles(db, { q: 'goulash', lang: 'en' })).toEqual({ recipes: [] });
+	});
+});
+
+describe('getRecipesByIds', () => {
+	it('never touches the database for an empty id list', async () => {
+		const { db, calls } = spyDb();
+		expect(await getRecipesByIds(db, { ids: [], lang: 'en' })).toEqual({ recipes: [] });
+		expect(calls).toHaveLength(0);
+	});
+
+	it('builds one placeholder per id, matching bind length', async () => {
+		const { db, calls } = spyDb();
+		await getRecipesByIds(db, { ids: [3, 1, 2], lang: 'en' });
+		expect(calls[0].sql).toContain('WHERE r.id IN (?,?,?)');
+		const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
+		expect(placeholders).toBe(calls[0].binds.length);
+		expect(calls[0].binds).toEqual(['en', 3, 1, 2]);
+	});
+
+	it('collapses one recipe to one row', async () => {
+		const { db, calls } = spyDb();
+		await getRecipesByIds(db, { ids: [1], lang: 'en' });
+		expect(calls[0].sql).toContain('GROUP BY r.id');
+	});
+
+	it('resolves the displayed title through the language fallback', async () => {
+		const { db, calls } = spyDb();
+		await getRecipesByIds(db, { ids: [1], lang: 'de' });
+		expect(calls[0].sql).toContain('COALESCE(t.title, src.title)');
+		expect(calls[0].binds[0]).toBe('de');
+	});
+
+	it('returns [] rather than undefined when D1 reports no results', async () => {
+		const { db } = spyDb(undefined as never);
+		expect(await getRecipesByIds(db, { ids: [1], lang: 'en' })).toEqual({ recipes: [] });
 	});
 });

@@ -165,5 +165,10 @@
   "cuisine.venezuelan": "فنزويلية",
   "recipe.photo": "صورة",
   "recipe.photoUnknownAuthor": "مؤلف غير معروف",
-  "recipe.viaCommons": "عبر ويكيميديا كومنز"
+  "recipe.viaCommons": "عبر ويكيميديا كومنز",
+  "recipe.downloadPdf": "تنزيل بصيغة PDF",
+  "favorite.add": "إضافة إلى المفضلة",
+  "favorite.remove": "إزالة من المفضلة",
+  "favorites.heading": "المفضلة",
+  "favorites.empty": "لا توجد عناصر مفضلة حتى الآن. اضغط على القلب في أي وصفة لحفظها هنا."
 }

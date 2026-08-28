@@ -3,6 +3,7 @@
 	import NutritionPanel from '$components/NutritionPanel.svelte';
 	import SubstitutionTips from '$components/SubstitutionTips.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
+	import FavoriteButton from '$components/FavoriteButton.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
 	import { DIFFICULTY_MAX } from '$lib/config';
 	import { t as translator } from '$lib/i18n';
@@ -92,19 +93,37 @@
 />
 
 <article>
-	<a class="back" href="/?lang={data.lang}">
-		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-			<path
-				d="M12 4 6 10l6 6"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			/>
-		</svg>
-		{t('recipe.back')}
-	</a>
+	<div class="toolbar no-print">
+		<a class="back" href="/?lang={data.lang}">
+			<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+				<path
+					d="M12 4 6 10l6 6"
+					fill="none"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+			{t('recipe.back')}
+		</a>
+		<div class="toolbar-actions">
+			<FavoriteButton id={data.recipe.id} {t} />
+			<button type="button" class="print-btn" onclick={() => window.print()}>
+				<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+					<path
+						d="M10 2.8v9.4m0 0-3.2-3.2M10 12.2l3.2-3.2M4.4 14v1.8c0 .66.54 1.2 1.2 1.2h8.8c.66 0 1.2-.54 1.2-1.2V14"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.7"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+					/>
+				</svg>
+				{t('recipe.downloadPdf')}
+			</button>
+		</div>
+	</div>
 
 	<header class="hero">
 		{#if data.recipe.image_url}
@@ -308,6 +327,19 @@
 </article>
 
 <style>
+	.toolbar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+	}
+	.toolbar-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
+	}
+
 	.back {
 		display: inline-flex;
 		align-items: center;
@@ -329,6 +361,46 @@
 	/* The chevron points back along the reading direction in both scripts. */
 	:global([dir='rtl']) .back svg {
 		transform: scaleX(-1);
+	}
+
+	.print-btn {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.4rem;
+		min-height: 2.75rem;
+		padding: 0.4rem 0.9rem;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-pill);
+		background: var(--surface);
+		color: var(--muted);
+		font-size: 0.85rem;
+		font-weight: 600;
+		box-shadow: var(--shadow-1);
+	}
+	.print-btn:hover {
+		color: var(--primary);
+		border-color: var(--primary);
+	}
+	.print-btn svg {
+		width: 1.1em;
+		height: 1.1em;
+	}
+
+	/* Flatten this page's own hero gradients for print ("no gradients") and
+	   keep each logical block from splitting across a page break. Chrome hiding
+	   (.no-print) and the global light-palette/doodle override live in app.css. */
+	@media print {
+		.hero {
+			background: var(--surface) !important;
+			box-shadow: none;
+		}
+		.hero,
+		.panel,
+		.method li,
+		.ingredients li,
+		.notes {
+			break-inside: avoid;
+		}
 	}
 
 	/* Editorial opener: the title carries the page and the numbers sit under it as

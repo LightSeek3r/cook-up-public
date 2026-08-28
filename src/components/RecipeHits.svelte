@@ -7,17 +7,21 @@
 		recipes: RecipeHit[];
 		lang: string;
 		t: (key: string) => string;
+		/** Defaults to the search-hits heading; /favorites passes its own. */
+		heading?: string;
 	}
 
-	let { recipes, lang, t }: Props = $props();
+	let { recipes, lang, t, heading }: Props = $props();
 </script>
 
 <!-- Only ever rendered when there are hits, so there is no empty state here: an
      "no recipes match" line would fire on every partial word typed on the way to
-     a real query, and the mosaic below is already answering the same keystrokes. -->
+     a real query, and the mosaic below is already answering the same keystrokes.
+     (/favorites, the other caller, handles its own empty state before rendering
+     this component at all.) -->
 <section class="hits" aria-labelledby="recipe-hits-heading">
 	<h2 id="recipe-hits-heading">
-		{t('search.recipeHits')}
+		{heading ?? t('search.recipeHits')}
 		<span class="count">{recipes.length}</span>
 	</h2>
 	<ul>

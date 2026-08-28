@@ -6,6 +6,7 @@
 	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
 	import { goto } from '$app/navigation';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
+	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 
 	let { children } = $props();
 
@@ -27,6 +28,7 @@
 	// to that domain directly.
 	const VISIT_KEY = 'cookup_visited';
 	onMount(() => {
+		hydrateFavorites();
 		if (sessionStorage.getItem(VISIT_KEY)) return;
 		sessionStorage.setItem(VISIT_KEY, '1');
 		fetch(`/api/track?path=${encodeURIComponent(location.pathname)}`, { method: 'POST' }).catch(
@@ -42,7 +44,7 @@
 	}
 </script>
 
-<a class="skip" href="#main">{t('app.skipToContent')}</a>
+<a class="skip no-print" href="#main">{t('app.skipToContent')}</a>
 
 <div class="page">
 	<header>
@@ -68,7 +70,19 @@
 			</a>
 			<!-- Wrapper, not two more flex children: .bar is space-between with the
 			     brand at one end, so a third direct child would spread them apart. -->
-			<div class="controls">
+			<div class="controls no-print">
+				<a class="favorites-link" href="/favorites?lang={lang}" aria-label={t('favorites.heading')}>
+					<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+						<path
+							d="M10 16.5 3.6 10.3a4 4 0 0 1 5.5-5.8L10 5.6l.9-1.1a4 4 0 0 1 5.5 5.8Z"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.7"
+							stroke-linejoin="round"
+						/>
+					</svg>
+					{#if favoriteIds.length}<span class="count">{favoriteIds.length}</span>{/if}
+				</a>
 				<ThemeToggle
 					label={t('app.theme')}
 					optionLabels={{
@@ -169,6 +183,26 @@
 		border-radius: var(--radius);
 		background: var(--surface);
 		box-shadow: var(--shadow-1);
+	}
+	.favorites-link {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
+		min-height: 2.75rem;
+		padding: 0 0.5rem;
+		color: var(--muted);
+	}
+	.favorites-link:hover {
+		color: var(--primary);
+	}
+	.favorites-link svg {
+		width: 1.2rem;
+		height: 1.2rem;
+	}
+	.favorites-link .count {
+		font-size: 0.75rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
 	}
 	.tagline {
 		color: var(--muted);

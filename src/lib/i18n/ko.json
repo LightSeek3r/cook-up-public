@@ -165,5 +165,10 @@
   "cuisine.venezuelan": "베네수엘라",
   "recipe.photo": "사진",
   "recipe.photoUnknownAuthor": "작자 미상",
-  "recipe.viaCommons": "위키미디어 공용 제공"
+  "recipe.viaCommons": "위키미디어 공용 제공",
+  "recipe.downloadPdf": "PDF로 다운로드",
+  "favorite.add": "즐겨찾기에 추가",
+  "favorite.remove": "즐겨찾기에서 제거",
+  "favorites.heading": "즐겨찾기",
+  "favorites.empty": "아직 즐겨찾기가 없습니다. 레시피의 하트를 눌러 저장하세요."
 }

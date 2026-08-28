@@ -165,5 +165,10 @@
   "cuisine.venezuelan": "ベネズエラ料理",
   "recipe.photo": "写真",
   "recipe.photoUnknownAuthor": "作者不明",
-  "recipe.viaCommons": "ウィキメディア・コモンズより"
+  "recipe.viaCommons": "ウィキメディア・コモンズより",
+  "recipe.downloadPdf": "PDFでダウンロード",
+  "favorite.add": "お気に入りに追加",
+  "favorite.remove": "お気に入りから削除",
+  "favorites.heading": "お気に入り",
+  "favorites.empty": "お気に入りはまだありません。レシピのハートをタップして保存してください。"
 }

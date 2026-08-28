@@ -165,5 +165,10 @@
   "cuisine.venezuelan": "Venezolana",
   "recipe.photo": "Foto",
   "recipe.photoUnknownAuthor": "autor desconocido",
-  "recipe.viaCommons": "vía Wikimedia Commons"
+  "recipe.viaCommons": "vía Wikimedia Commons",
+  "recipe.downloadPdf": "Descargar en PDF",
+  "favorite.add": "Añadir a favoritos",
+  "favorite.remove": "Quitar de favoritos",
+  "favorites.heading": "Mis favoritos",
+  "favorites.empty": "Aún no tienes favoritos. Toca el corazón de una receta para guardarla aquí."
 }

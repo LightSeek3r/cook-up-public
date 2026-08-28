@@ -55,6 +55,14 @@ export const normaliseQuery = (raw: string | null): string =>
  * fallback that `match.ts` uses, so this stays correct on its own terms if
  * titles ever do become translated.
  */
+/** RecipeHit projection + the i18n title fallback, shared by every function
+ *  in this file that returns RecipeHit rows. */
+const HIT_COLS = `r.id,
+       COALESCE(t.title, src.title) AS title,
+       r.cuisine, r.total_minutes, r.balance_grade, r.nutrition_coverage`;
+const HIT_JOINS = `LEFT JOIN recipe_i18n t   ON t.recipe_id = r.id AND t.lang = ?
+       LEFT JOIN recipe_i18n src ON src.recipe_id = r.id AND src.lang = r.source_lang`;
+
 export async function searchRecipeTitles(
 	db: D1Database,
 	p: { q: string; lang: Lang; limit?: number }
@@ -63,11 +71,6 @@ export async function searchRecipeTitles(
 	if (!q) return { recipes: [] };
 
 	const limit = p.limit ?? RECIPE_HIT_LIMIT;
-	const cols = `r.id,
-       COALESCE(t.title, src.title) AS title,
-       r.cuisine, r.total_minutes, r.balance_grade, r.nutrition_coverage`;
-	const joins = `LEFT JOIN recipe_i18n t   ON t.recipe_id = r.id AND t.lang = ?
-       LEFT JOIN recipe_i18n src ON src.recipe_id = r.id AND src.lang = r.source_lang`;
 
 	// Ranking: a recipe we can describe nutritionally first, then the quicker
 	// one. There is no relevance score to sort by — every hit is a substring
@@ -77,11 +80,11 @@ export async function searchRecipeTitles(
 	if (q.length >= MIN_FTS_LENGTH) {
 		const { results } = await db
 			.prepare(
-				`SELECT ${cols}
+				`SELECT ${HIT_COLS}
          FROM recipe_title_fts f
          JOIN recipe_i18n m ON m.rowid = f.rowid
          JOIN recipes r     ON r.id = m.recipe_id
-         ${joins}
+         ${HIT_JOINS}
          WHERE f.title MATCH ?
          GROUP BY r.id
          ${order}
@@ -94,15 +97,41 @@ export async function searchRecipeTitles(
 
 	const { results } = await db
 		.prepare(
-			`SELECT ${cols}
+			`SELECT ${HIT_COLS}
        FROM recipes r
-       ${joins}
+       ${HIT_JOINS}
        WHERE COALESCE(t.title, src.title) LIKE ? ESCAPE '\\'
        GROUP BY r.id
        ${order}
        LIMIT ?`
 		)
 		.bind(p.lang, `%${likeTerm(q)}%`, limit)
+		.all<RecipeHit>();
+	return { recipes: results ?? [] };
+}
+
+/**
+ * Recipes by id — the summary-row fetch behind the client-only favorites
+ * page, which already knows its own id list from localStorage and only needs
+ * display data. Same RecipeHit projection and i18n-title fallback as
+ * searchRecipeTitles. `WHERE id IN (...)` makes no ordering promise; the
+ * favorites page re-sorts client-side by its own stored order.
+ */
+export async function getRecipesByIds(
+	db: D1Database,
+	p: { ids: number[]; lang: Lang }
+): Promise<{ recipes: RecipeHit[] }> {
+	if (p.ids.length === 0) return { recipes: [] };
+	const placeholders = p.ids.map(() => '?').join(',');
+	const { results } = await db
+		.prepare(
+			`SELECT ${HIT_COLS}
+       FROM recipes r
+       ${HIT_JOINS}
+       WHERE r.id IN (${placeholders})
+       GROUP BY r.id`
+		)
+		.bind(p.lang, ...p.ids)
 		.all<RecipeHit>();
 	return { recipes: results ?? [] };
 }
