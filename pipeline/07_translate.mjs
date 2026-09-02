@@ -127,12 +127,23 @@ async function main() {
 	// shared deployment rather than hammering it.
 	const CONCURRENCY = 12;
 
+	// Once the daily neuron allocation is gone, every remaining call fails —
+	// the first full run burned ~16,000 doomed requests that way before
+	// finishing. The endpoint returns an opaque 500 (it can't distinguish
+	// AiError 4006 from any other failure without a redeploy), so treat a
+	// sustained failure streak as "stop, come back tomorrow" instead.
+	const ABORT_AFTER_CONSECUTIVE_FAILURES = 20;
+	let consecutiveFailures = 0;
+	let aborted = false;
+
 	async function processGap(gap, lang) {
 		let result;
 		try {
 			result = await translate(gap.id, lang);
+			consecutiveFailures = 0;
 		} catch (err) {
 			console.error(`translate ${gap.id}/${lang} failed:`, err.message);
+			if (++consecutiveFailures >= ABORT_AFTER_CONSECUTIVE_FAILURES) aborted = true;
 			return;
 		}
 
@@ -151,7 +162,7 @@ async function main() {
 	}
 
 	for (const lang of TARGET_LANGS) {
-		if (remaining <= 0) break;
+		if (remaining <= 0 || aborted) break;
 		const gaps = d1(
 			`SELECT r.id, r.source_lang, s.title, s.instructions
 			 FROM recipes r
@@ -161,7 +172,7 @@ async function main() {
 			{ local }
 		);
 
-		for (let i = 0; i < gaps.length && remaining > 0; i += CONCURRENCY) {
+		for (let i = 0; i < gaps.length && remaining > 0 && !aborted; i += CONCURRENCY) {
 			const batch = gaps.slice(i, i + Math.min(CONCURRENCY, remaining));
 			remaining -= batch.length;
 			await Promise.all(batch.map((gap) => processGap(gap, lang)));
@@ -171,6 +182,14 @@ async function main() {
 		}
 	}
 	flush();
+
+	if (aborted) {
+		console.error(
+			`07_translate: ABORTED after ${ABORT_AFTER_CONSECUTIVE_FAILURES} consecutive failures — ` +
+				`almost certainly the daily neuron allocation (AiError 4006). Everything translated ` +
+				`before this point is already saved; re-run tomorrow to continue from the gap.`
+		);
+	}
 
 	if (!dryRun && translatedCount > 0) {
 		d1("INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');", { local, json: false });
