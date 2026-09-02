@@ -48,6 +48,13 @@ swap exists, a substitution tip.
   the source's own "notes, tips and variations" where it has them, and every quantity shown in the
   other measuring system plus a real gram weight where one could be resolved.
 - **Attribution built in** — every recipe links back to its source and license.
+- **No third-party tracking** — the app contacts no third party at all. One row per page view
+  goes into its own D1: path, language, coarse country, referrer host and mobile/desktop.
+  No IP address, no cookie, no session id, no user-agent string, and never the query string,
+  which on this site *is* the visitor's ingredient selection.
+- **Admin dashboard** — `/admin`, behind a six-digit code emailed on request, showing traffic,
+  translation completeness and corpus health. Its most useful panel is "translate these next":
+  recipes that have readers in a language they have no translation for.
 
 ## Tech stack
 
@@ -63,7 +70,7 @@ swap exists, a substitution tip.
 ```
 src/                    SvelteKit app
   routes/                 pages + API endpoints (/api/match, /api/ingredients, /api/search,
-                          /api/translate, /api/track)
+                          /api/translate, /api/track) plus /admin, the OTP-gated dashboard
   components/             Mosaic, ResultCard, NutritionPanel, SubstitutionTips, RecipeHits, ...
   lib/                     matching/search/nutrition/i18n logic, config, types — the pure,
                            testable core. SQL lives here, not inline in routes, so it can be
@@ -89,6 +96,9 @@ npm run dev                 # vite dev, with D1/KV emulated locally
 ```
 
 All configuration is via `wrangler.toml` bindings — there's no `.env` file in this project.
+The three `/admin` secrets are the one exception, and they are set with `wrangler secret put`
+rather than committed (see **Deployment**). For `npm run dev`, put the same three in a
+git-ignored `.dev.vars`; without them the app runs normally and only `/admin` is unusable.
 
 Without seeded data the app runs but has nothing to show. See **Data pipeline** below to
 build a real dataset, or ask whoever set up the project for a `seed.sql` to load directly:
@@ -182,6 +192,19 @@ as static assets plus its own API routes. Bindings live in `wrangler.toml`:
 - `TRANSLATIONS` — KV, caches on-demand translations
 - `AI` — Workers AI, always remote-proxied; required for a deploy (see **Getting started**)
 
+Three secrets are set with `wrangler secret put` instead, because they must not be in the repo:
+
+```bash
+wrangler secret put RESEND_API_KEY   # Resend key, used only to send the /admin sign-in code
+wrangler secret put RESEND_FROM      # verified sender, e.g. cook-up@unit42.fr
+wrangler secret put ADMIN_EMAILS     # comma-separated allowlist of addresses that may sign in
+```
+
+With any of them missing, `/admin` still renders and still accepts an address — it just never
+sends anything. That is deliberate: the form answers identically whether or not an address is
+allowlisted, so it cannot be used to discover who the admin is. Check `wrangler secret list`
+rather than the UI when a code fails to arrive.
+
 **Local and remote D1 are not interchangeable.** Remote accumulates machine-translated recipe
 content over time, via a daily job (`npm run db:translate:daily`) hitting the live
 `/api/translate` endpoint — thousands of rows that exist *only* there and that the pipeline
@@ -212,4 +235,5 @@ because the two have different authors and often different licences.
 
 `upload.wikimedia.org` is the one third-party origin the site contacts, allowed explicitly in
 `svelte.config.js`'s `img-src`. Photos are hotlinked rather than mirrored — a deliberate trade
-documented at that line.
+documented at that line. That sentence is now literally true: `/api/track` used to forward each
+visit to an external endpoint, and no longer leaves the Worker.

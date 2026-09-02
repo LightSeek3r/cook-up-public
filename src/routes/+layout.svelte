@@ -4,7 +4,7 @@
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
 	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
-	import { goto } from '$app/navigation';
+	import { afterNavigate, goto } from '$app/navigation';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 
@@ -19,21 +19,36 @@
 		document.documentElement.dir = dirFor(lang);
 	});
 
-	// This layout mounts once per browser session and survives client-side
-	// navigation, so `onMount` — unlike `$effect` — fires exactly once no
-	// matter how much clicking-around happens. sessionStorage (not a cookie)
-	// is what makes this "once per visit": it clears when the tab/browser
-	// closes, so a later visit still counts as a new one. The actual call to
-	// unit42.fr happens server-side via /api/track — the browser never talks
-	// to that domain directly.
+	// `afterNavigate` fires on first load *and* on every client-side navigation,
+	// which is what turns this into a page-view counter rather than the
+	// once-per-session ping it replaced. sessionStorage (not a cookie) is what
+	// still separates a "visit" from a "view": it clears when the tab closes, so
+	// only the first view of a session carries `new=1`. Everything is written to
+	// our own D1 by /api/track — no third party is contacted, by the browser or
+	// by the Worker.
 	const VISIT_KEY = 'cookup_visited';
-	onMount(() => {
-		hydrateFavorites();
-		if (sessionStorage.getItem(VISIT_KEY)) return;
-		sessionStorage.setItem(VISIT_KEY, '1');
-		fetch(`/api/track?path=${encodeURIComponent(location.pathname)}`, { method: 'POST' }).catch(
-			() => {}
-		);
+
+	onMount(hydrateFavorites);
+
+	afterNavigate(({ to }) => {
+		const path = to?.url.pathname ?? location.pathname;
+
+		let isNewVisit = false;
+		try {
+			isNewVisit = !sessionStorage.getItem(VISIT_KEY);
+			if (isNewVisit) sessionStorage.setItem(VISIT_KEY, '1');
+		} catch {
+			// Storage can be blocked outright; a view still counts, just never as new.
+		}
+
+		const params = new URLSearchParams({ path, lang });
+		if (isNewVisit) {
+			params.set('new', '1');
+			// Only the host is kept server-side, and only when it is not our own.
+			if (document.referrer) params.set('ref', document.referrer);
+		}
+
+		fetch(`/api/track?${params}`, { method: 'POST' }).catch(() => {});
 	});
 
 	function switchLang(event: Event) {
