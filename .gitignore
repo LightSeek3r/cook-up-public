@@ -1,0 +1,17 @@
+node_modules
+.svelte-kit
+.wrangler
+build
+dist
+.DS_Store
+.env
+.env.*
+!.env.example
+.dev.vars
+pipeline/data
+pipeline/out
+*.local
+debug.log
+# Scratch screenshot captures; the published ones live in the web repo.
+.shots
+/top*.txt

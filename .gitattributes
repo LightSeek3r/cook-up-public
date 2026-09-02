@@ -1,0 +1,11 @@
+# Without this, a clone on Windows checks out CRLF while the pipeline writes LF,
+# and every one of the ~100 text files reports as modified without any edit.
+* text=auto eol=lf
+
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.webp binary
+*.ico  binary
+*.woff  binary
+*.woff2 binary
