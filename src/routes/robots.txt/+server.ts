@@ -6,6 +6,6 @@ import type { RequestHandler } from './$types';
  * configured in wrangler.toml).
  */
 export const GET: RequestHandler = ({ url }) => {
-	const body = `User-agent: *\nAllow: /\n\nSitemap: ${url.origin}/sitemap.xml\n`;
+	const body = `User-agent: *\nAllow: /\nDisallow: /admin\n\nSitemap: ${url.origin}/sitemap.xml\n`;
 	return new Response(body, { headers: { 'content-type': 'text/plain; charset=utf-8' } });
 };
