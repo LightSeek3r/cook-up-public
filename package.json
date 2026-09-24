@@ -16,6 +16,7 @@
     "db:seed:prototype": "node pipeline/prototype/seed_themealdb.mjs && wrangler d1 execute cook-up-db --local --file=pipeline/out/seed_themealdb.sql",
     "db:translate:daily": "node pipeline/07_translate.mjs --limit=500",
     "db:translate:all": "node pipeline/07_translate.mjs",
+    "db:translate:manual": "node pipeline/tools/apply_manual_translations.mjs",
     "pipeline:fetch": "node pipeline/01_fetch.mjs",
     "pipeline:parse": "node pipeline/02_parse.mjs",
     "pipeline:normalize": "node pipeline/03_normalize_ingredients.mjs",
