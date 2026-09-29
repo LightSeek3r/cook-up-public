@@ -461,8 +461,11 @@ DELETE FROM allergens;`);
 	// Mosaic tile weights, then the external-content FTS indexes.
 	parts.push(`UPDATE ingredients SET recipe_count =
   (SELECT COUNT(*) FROM recipe_ingredients ri WHERE ri.ingredient_id = ingredients.id);`);
+	// Source-lang rows only — see migrations/0008_recipe_title_fts_source_only.sql.
 	parts.push(`INSERT INTO ingredient_fts(ingredient_fts) VALUES('rebuild');
-INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');`);
+INSERT INTO recipe_title_fts(rowid, title)
+  SELECT i.rowid, i.title FROM recipe_i18n i
+  JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang;`);
 
 	return parts.join('\n\n');
 }

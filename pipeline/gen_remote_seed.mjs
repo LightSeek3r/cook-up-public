@@ -371,7 +371,14 @@ async function main() {
 	sql.push(
 		"UPDATE ingredients SET recipe_count = (SELECT COUNT(*) FROM recipe_ingredients ri WHERE ri.ingredient_id = ingredients.id);",
 		"INSERT INTO ingredient_fts(ingredient_fts) VALUES('rebuild');",
-		"INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');"
+		// Source-lang rows only — see migrations/0008_recipe_title_fts_source_only.sql.
+		// This script never touches recipe_i18n (point 1 above), and remote
+		// accumulates translated rows over time, so a blanket 'rebuild' here would
+		// re-read and re-index every language's copy of the same untranslated
+		// title on every reseed — the exact bug that burned the D1 read quota.
+		`INSERT INTO recipe_title_fts(rowid, title)
+		 SELECT i.rowid, i.title FROM recipe_i18n i
+		 JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang;`
 	);
 
 	// Pack consecutive statements into ~MAX_CHUNK_BYTES files, never splitting

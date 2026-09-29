@@ -34,17 +34,14 @@
  *   node pipeline/07_translate.mjs                        # fill every remaining gap
  */
 
-import { execFileSync } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { esc, d1 } from './lib/d1.mjs';
+import { nonEmptyLineCount } from './lib/translate_gate.mjs';
+import { TARGET_LANGS } from './lib/langs.mjs';
 
 const BASE_URL = 'https://cook-up.asakura-account.workers.dev';
 const OUT_DIR = path.resolve('pipeline/out');
-
-// Must track src/lib/config.ts's SUPPORTED_LANGS minus the source language —
-// every phase-2/3 recipe is source_lang='en'. pipeline/ is plain Node ESM and
-// can't import the SvelteKit TS module directly.
-const TARGET_LANGS = ['es', 'fr', 'de', 'ar', 'hi', 'zh', 'ja', 'ko', 'vi'];
 
 function parseArgs() {
 	const args = process.argv.slice(2);
@@ -58,34 +55,6 @@ function parseArgs() {
 		local: args.includes('--local')
 	};
 }
-
-function esc(v) {
-	if (v === null || v === undefined) return 'NULL';
-	if (typeof v === 'number') return String(v);
-	return `'${String(v).replace(/'/g, "''")}'`;
-}
-
-const WRANGLER_BIN = path.resolve('node_modules/wrangler/bin/wrangler.js');
-
-/** Shells out to wrangler for both reads and writes — this stage needs live
- *  D1 state interleaved with network calls, unlike the file-based jsonl
- *  stages before it. Invokes wrangler's own JS entry point directly via
- *  `node`, with the SQL as one argv element — no shell involved at all, so
- *  none of its quoting rules apply. (Two dead ends first: `execSync` with a
- *  command *string* went through cmd.exe, which mangled the embedded single
- *  quotes and newlines; `execFileSync('npx.cmd', ...)` can't spawn without a
- *  shell either, since `.cmd` files aren't directly executable. `--file=`
- *  avoids both but only returns execution stats, not row data, so it's
- *  useless for the SELECTs this stage needs.) */
-function d1(sql, { local, json = true }) {
-	const args = [WRANGLER_BIN, 'd1', 'execute', 'cook-up-db', local ? '--local' : '--remote'];
-	if (json) args.push('--json');
-	args.push('--command', sql);
-	const out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 100 });
-	return json ? JSON.parse(out)[0]?.results ?? [] : out;
-}
-
-const nonEmptyLineCount = (text) => text.split('\n').map((l) => l.trim()).filter(Boolean).length;
 
 async function translate(id, lang) {
 	// cache=0: this stage writes straight to recipe_i18n and never re-requests
@@ -191,9 +160,12 @@ async function main() {
 		);
 	}
 
-	if (!dryRun && translatedCount > 0) {
-		d1("INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');", { local, json: false });
-	}
+	// No FTS rebuild here (deliberate, not an oversight): recipe_title_fts now
+	// indexes only source-lang rows (migrations/0008_recipe_title_fts_source_only.sql)
+	// because titles are never translated, so a translated row is never indexed
+	// and there is nothing to rebuild. Rebuilding after every batch used to
+	// re-read and rewrite the whole table — the actual cause of exhausting the
+	// D1 free-tier read quota twice. Do not reintroduce a 'rebuild' call here.
 
 	if (mismatches.length) {
 		await writeFile(path.join(OUT_DIR, 'translate_mismatches.txt'), mismatches.join('\n') + '\n');

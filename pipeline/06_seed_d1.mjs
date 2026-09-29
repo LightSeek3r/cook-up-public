@@ -255,7 +255,12 @@ async function main() {
 	sql.push(
 		"UPDATE ingredients SET recipe_count = (SELECT COUNT(*) FROM recipe_ingredients ri WHERE ri.ingredient_id = ingredients.id);",
 		"INSERT INTO ingredient_fts(ingredient_fts) VALUES('rebuild');",
-		"INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');"
+		// Source-lang rows only — see migrations/0008_recipe_title_fts_source_only.sql.
+		// A blanket 'rebuild' would index every language's copy of the same
+		// untranslated title once translations exist.
+		`INSERT INTO recipe_title_fts(rowid, title)
+		 SELECT i.rowid, i.title FROM recipe_i18n i
+		 JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang;`
 	);
 
 	await writeFile(path.join(OUT_DIR, 'seed.sql'), sql.join('\n\n') + '\n');

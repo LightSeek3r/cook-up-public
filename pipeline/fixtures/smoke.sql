@@ -15,4 +15,11 @@ INSERT INTO recipe_ingredients (recipe_id, ingredient_id, raw_text, quantity, un
  (1,1,'2 tomatoes',2,'unit',240), (1,2,'1 onion',1,'unit',110), (1,3,'salt to taste',NULL,NULL,NULL);
 
 INSERT INTO ingredient_fts(ingredient_fts) VALUES('rebuild');
-INSERT INTO recipe_title_fts(recipe_title_fts) VALUES('rebuild');
+
+-- Source-lang rows only — see migrations/0008_recipe_title_fts_source_only.sql
+-- for why a blanket 'rebuild' is wrong now (it would index every language's
+-- copy of the same untranslated title).
+INSERT INTO recipe_title_fts(rowid, title)
+SELECT i.rowid, i.title
+FROM recipe_i18n i
+JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang;

@@ -15,12 +15,9 @@ import { parseTaxonomy, ancestors, walkAnchors, walkProperty } from './lib/taxon
 import { splitIngredientLine } from './lib/measure.mjs';
 import { resolveKey } from './lib/resolve_ingredient.mjs';
 import { MANUAL_INGREDIENTS } from './lib/manual_ingredients.mjs';
+import { SUPPORTED_LANGS } from './lib/langs.mjs';
 
 const OUT_DIR = path.resolve('pipeline/out');
-
-// Must track src/lib/config.ts's SUPPORTED_LANGS — pipeline/ is plain Node
-// ESM and can't import the SvelteKit TS module directly.
-const SUPPORTED_LANGS = ['en', 'es', 'fr', 'de', 'ar', 'hi', 'zh', 'ja', 'ko', 'vi'];
 
 // A recipe missing more than this share of its ingredient lines ships
 // nothing useful and would misrepresent "you can make this" — drop it
