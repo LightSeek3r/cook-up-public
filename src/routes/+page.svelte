@@ -9,6 +9,9 @@
 	import SeoHead from '$components/SeoHead.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { MIN_FTS_LENGTH } from '$lib/search';
+	import { ALLERGENS } from '$lib/config';
+	import { slackFor } from '$lib/match';
+	import { loadFridge, saveFridge } from '$lib/fridge';
 	import type { IngredientTile, MatchResult, RecipeHit } from '$lib/types';
 
 	let tiles = $state<IngredientTile[]>([]);
@@ -55,6 +58,28 @@
 	const meal = $derived(params.get('meal') ?? '');
 	const diet = $derived(params.get('diet') ?? '');
 	const sort = $derived(params.get('sort') ?? '');
+	const noAllergen = $derived(
+		(params.get('noAllergen') ?? '')
+			.split(',')
+			.map((key) => key.trim().toLowerCase())
+			.filter((key): key is (typeof ALLERGENS)[number] =>
+				(ALLERGENS as readonly string[]).includes(key)
+			)
+	);
+	// How many selections a recipe may leave unused and still count as a
+	// near-miss — see slackFor. Below 3 selections this is 0, and "must use"
+	// pins are hidden in that case: with no slack every selection is already
+	// required, so pinning one would do nothing.
+	const slack = $derived(slackFor(selected.length));
+	// Canonical keys the user has pinned as "must actually use this", a
+	// subset of `selected` — an id outside the current selection could never
+	// be satisfied, so it's filtered out here rather than trusted from the URL.
+	const must = $derived(
+		(params.get('must') ?? '')
+			.split(',')
+			.map((key) => key.trim().toLowerCase())
+			.filter((key) => /^[a-z][a-z0-9_]*$/.test(key) && selected.includes(key))
+	);
 
 	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.canonical_key)));
 
@@ -109,6 +134,24 @@
 		updateUrl((url) => {
 			if (next.length) url.searchParams.set('have', next.join(','));
 			else url.searchParams.delete('have');
+			// A pin on an ingredient that just got deselected could never be
+			// satisfied (see matchRecipes' mustUse check) — drop it from `must`
+			// too rather than leave a dead pin sitting in the URL.
+			if (!next.includes(canonicalKey) && must.includes(canonicalKey)) {
+				const nextMust = must.filter((key) => key !== canonicalKey);
+				if (nextMust.length) url.searchParams.set('must', nextMust.join(','));
+				else url.searchParams.delete('must');
+			}
+		});
+	}
+
+	function toggleMust(canonicalKey: string) {
+		const next = must.includes(canonicalKey)
+			? must.filter((key) => key !== canonicalKey)
+			: [...must, canonicalKey];
+		updateUrl((url) => {
+			if (next.length) url.searchParams.set('must', next.join(','));
+			else url.searchParams.delete('must');
 		});
 	}
 
@@ -119,10 +162,56 @@
 		});
 	}
 
+	function setAllergens(next: string[]) {
+		updateUrl((url) => {
+			if (next.length) url.searchParams.set('noAllergen', next.join(','));
+			else url.searchParams.delete('noAllergen');
+		});
+	}
+
 	function clearAll() {
 		handOffFocusIfTrayCloses(0);
-		updateUrl((url) => url.searchParams.delete('have'));
+		updateUrl((url) => {
+			url.searchParams.delete('have');
+			url.searchParams.delete('must');
+		});
 	}
+
+	function pickForMe() {
+		// Ceiling: only among already-loaded results (MATCH_PAGE_SIZE per
+		// page). Under the default sort every ready-now recipe comes first; under
+		// kcal/grade/time some may sit unloaded — fine for a random pick, fetch
+		// ids server-side if that ever matters.
+		const candidates = exact.filter((recipe) => recipe.missing === 0);
+		const pool = candidates.length ? candidates : exact;
+		const pick = pool[Math.floor(Math.random() * pool.length)];
+		if (pick) goto(`/recipe/${pick.id}?lang=${lang}`);
+	}
+
+	let fridgeHydrated = false;
+
+	/**
+	 * Restores a locally remembered selection into an otherwise-empty URL on
+	 * first load, then keeps that memory in sync with every later selection.
+	 * The URL stays the single source of truth (see `selected` above) — the
+	 * fridge only ever seeds an *empty* URL, so opening a shared link (which
+	 * arrives with `have` already set) replaces the fridge rather than
+	 * merging with it.
+	 */
+	$effect(() => {
+		const keys = selected;
+		if (!fridgeHydrated) {
+			fridgeHydrated = true;
+			if (keys.length === 0) {
+				const stored = loadFridge();
+				if (stored.length) updateUrl((url) => url.searchParams.set('have', stored.join(',')));
+				// Saving here would overwrite the just-restored fridge with the
+				// empty selection this very run started with.
+				return;
+			}
+		}
+		saveFridge(keys);
+	});
 
 	// Typing must not fire one request per keystroke against FTS.
 	$effect(() => {
@@ -172,6 +261,11 @@
 		if (meal) search.set('meal', meal);
 		if (diet) search.set('diet', diet);
 		if (sort) search.set('sort', sort);
+		if (noAllergen.length) search.set('noAllergen', noAllergen.join(','));
+		// Only meaningful once `slack` lets a recipe skip part of the
+		// selection — see MatchParams.mustUse — so there's nothing to send
+		// when slack is 0, matching the API route's own guard.
+		if (must.length && slack > 0) search.set('must', must.join(','));
 		if (offset) search.set('offset', String(offset));
 		return search.toString();
 	}
@@ -247,9 +341,11 @@
 	{diet}
 	{sort}
 	{query}
+	allergens={noAllergen}
 	{t}
 	onFilter={setFilter}
 	onQuery={(value) => (query = value)}
+	onAllergens={setAllergens}
 />
 
 <div class="layout">
@@ -269,10 +365,17 @@
 		<div class="results-inner">
 			<div class="results-head">
 				<h2 id="results-heading">{t('results.heading')}</h2>
-				{#if selected.length > 0 && !loading}
-					<!-- The true total, not how many rows this page happened to carry. -->
-					<span class="pill">{total} {t('results.found')}</span>
-				{/if}
+				<div class="results-head-actions">
+					{#if selected.length > 0 && !loading}
+						<!-- The true total, not how many rows this page happened to carry. -->
+						<span class="pill">{total} {t('results.found')}</span>
+					{/if}
+					{#if exact.length > 0 && !loading}
+						<button type="button" class="ghost" onclick={pickForMe}>
+							{t('results.pickForMe')}
+						</button>
+					{/if}
+				</div>
 			</div>
 
 			<!-- One always-mounted live region. A role="status" that is created at the
@@ -296,7 +399,7 @@
 				     noise: one flat list, and card titles stay directly under the h2. -->
 				<div class="list">
 					{#each exact as recipe (recipe.id)}
-						<ResultCard {recipe} {lang} {t} />
+						<ResultCard {recipe} {lang} {t} onAdd={toggle} />
 					{/each}
 				</div>
 			{:else}
@@ -307,7 +410,7 @@
 					</h3>
 					<div class="list">
 						{#each exact as recipe (recipe.id)}
-							<ResultCard {recipe} {lang} {t} headingLevel="h4" />
+							<ResultCard {recipe} {lang} {t} headingLevel="h4" onAdd={toggle} />
 						{/each}
 					</div>
 				{/if}
@@ -318,7 +421,7 @@
 				<p class="muted group-hint">{t('results.almostHint')}</p>
 				<div class="list">
 					{#each almost as recipe (recipe.id)}
-						<ResultCard {recipe} {lang} {t} headingLevel="h4" />
+						<ResultCard {recipe} {lang} {t} headingLevel="h4" onAdd={toggle} />
 					{/each}
 				</div>
 			{/if}
@@ -341,24 +444,44 @@
 		<div class="tray-inner">
 			<div class="chips">
 				{#each selectedTiles as tile (tile.id)}
-					<button type="button" class="chip" onclick={() => toggle(tile.canonical_key)}>
-						<span class="chip-art">
-							<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />
-						</span>
-						{tile.name}
-						<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-							<path
-								d="M6 6l8 8M14 6l-8 8"
-								stroke="currentColor"
-								stroke-width="2.2"
-								stroke-linecap="round"
-							/>
-						</svg>
-						<!-- `mosaic.remove`, not `mosaic.clear`: this button removes ONE
-						     ingredient, but "Clear all" made it announce as "Tomato Clear
-						     all" — and made every chip claim to wipe the selection. -->
-						<span class="sr-only">{t('mosaic.remove')}</span>
-					</button>
+					<span class="chip-wrap">
+						<button type="button" class="chip" onclick={() => toggle(tile.canonical_key)}>
+							<span class="chip-art">
+								<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />
+							</span>
+							{tile.name}
+							<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+								<path
+									d="M6 6l8 8M14 6l-8 8"
+									stroke="currentColor"
+									stroke-width="2.2"
+									stroke-linecap="round"
+								/>
+							</svg>
+							<!-- `mosaic.remove`, not `mosaic.clear`: this button removes ONE
+							     ingredient, but "Clear all" made it announce as "Tomato Clear
+							     all" — and made every chip claim to wipe the selection. -->
+							<span class="sr-only">{t('mosaic.remove')}</span>
+						</button>
+						{#if slack > 0}
+							<!-- A sibling of the chip, not nested inside it — two buttons
+							     can't nest. Only shown with slack > 0: with no slack every
+							     selection is already required, so pinning one is a no-op. -->
+							<button
+								type="button"
+								class="pin"
+								class:pinned={must.includes(tile.canonical_key)}
+								aria-pressed={must.includes(tile.canonical_key)}
+								aria-label={t('mosaic.mustUse').replace('{name}', tile.name)}
+								onclick={() => toggleMust(tile.canonical_key)}
+							>
+								<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+									<circle cx="10" cy="7" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8" />
+									<path d="M10 10.4V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+								</svg>
+							</button>
+						{/if}
+					</span>
 				{/each}
 			</div>
 			<div class="tray-actions">
@@ -404,9 +527,18 @@
 		align-items: baseline;
 		justify-content: space-between;
 		gap: var(--space-2);
+		/* The heading text length varies a lot by language (German/Arabic run
+		   long); wrap rather than force the pill and pick-for-me button to
+		   shrink off a 360px screen. */
+		flex-wrap: wrap;
 	}
 	.results-head h2 {
 		margin: var(--space-4) 0 var(--space-2);
+	}
+	.results-head-actions {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
 	}
 	.pill {
 		font-size: 0.8rem;
@@ -532,6 +664,14 @@
 	:global([dir='rtl']) .chips:focus-within {
 		mask-image: none;
 	}
+	/* One flex item per ingredient in `.chips`' scroll row — was the `.chip`
+	   button itself before the pin toggle needed a sibling slot beside it. */
+	.chip-wrap {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.2rem;
+		flex: none;
+	}
 	.chip {
 		display: inline-flex;
 		align-items: center;
@@ -561,6 +701,41 @@
 		width: 1.1rem;
 		height: 1.1rem;
 		flex: none;
+	}
+
+	/* Compact rather than the chip's 44px: this is a secondary toggle beside
+	   the primary "remove" control, not the only way to do something. */
+	.pin {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.9rem;
+		height: 1.9rem;
+		flex: none;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-pill);
+		background: var(--surface);
+		color: var(--muted);
+		transition:
+			transform var(--dur) var(--ease-spring),
+			background var(--dur-fast) ease,
+			color var(--dur-fast) ease;
+	}
+	.pin svg {
+		width: 0.9rem;
+		height: 0.9rem;
+	}
+	.pin:hover {
+		border-color: var(--primary);
+		color: var(--primary);
+	}
+	.pin:active {
+		transform: scale(0.9);
+	}
+	.pin.pinned {
+		background: var(--primary);
+		border-color: var(--primary);
+		color: var(--on-primary);
 	}
 
 	.tray-actions {

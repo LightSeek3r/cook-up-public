@@ -2,13 +2,26 @@
 	interface Props {
 		missing: number;
 		names?: string[];
+		/** canonical_keys aligned 1:1 with `names` (both are a GROUP_CONCAT of
+		 *  the same rows in the same pass — see MatchResult.missing_keys). Lets
+		 *  a tap add the ingredient straight into the selection, since `names`
+		 *  is display text and can't round-trip back into `have`. */
+		keys?: string[];
+		/** Present only where there's a selection to add to. Missing
+		 *  ingredients render as plain text, exactly as before, when absent. */
+		onAdd?: (key: string) => void;
 		/** Selected ingredients this recipe does NOT use — the mirror of `names`.
 		 *  Only ever non-empty for a near-miss in the "almost there" group. */
 		unusedNames?: string[];
 		t: (key: string) => string;
 	}
 
-	let { missing, names = [], unusedNames = [], t }: Props = $props();
+	let { missing, names = [], keys = [], onAdd, unusedNames = [], t }: Props = $props();
+
+	// Defensive on the length check even though the two lists are produced in
+	// lockstep server-side: a mismatch would misalign name <-> key pairs, so
+	// fall back to the plain-text chip rather than risk adding the wrong thing.
+	const tappable = $derived(Boolean(onAdd) && keys.length === names.length && keys.length > 0);
 </script>
 
 {#if missing === 0}
@@ -25,6 +38,24 @@
 		</svg>
 		{t('card.canMake')}
 	</span>
+{:else if tappable}
+	<span class="chip warn">
+		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+			<path d="M10 4v7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+			<circle cx="10" cy="15.2" r="1.35" fill="currentColor" />
+		</svg>
+		{t('card.missing')}:
+	</span>
+	{#each names as name, i (keys[i])}
+		<button
+			type="button"
+			class="chip warn add"
+			onclick={() => onAdd?.(keys[i])}
+			aria-label={t('results.addIngredient').replace('{name}', name)}
+		>
+			+ {name}
+		</button>
+	{/each}
 {:else}
 	<span class="chip warn">
 		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -84,6 +115,22 @@
 		background: color-mix(in srgb, var(--grade-d) 14%, var(--surface));
 		border-color: color-mix(in srgb, var(--grade-d) 35%, transparent);
 		color: var(--on-warn-tint);
+	}
+	/* Tappable variant of .warn: compact rather than the project's usual
+	   2.75rem minimum (that convention is for primary controls; this is an
+	   inline, secondary add-to-selection action), but still comfortably
+	   focusable and pressable. */
+	.warn.add {
+		min-height: 1.7rem;
+		cursor: pointer;
+		transition: transform var(--dur) var(--ease-spring), background var(--dur-fast) ease;
+	}
+	.warn.add:hover {
+		background: color-mix(in srgb, var(--grade-d) 24%, var(--surface));
+	}
+	.warn.add:active {
+		transform: scale(0.94);
+		transition-duration: var(--dur-fast);
 	}
 	/* `--muted` is already a contrast-verified body-text colour against
 	   `--surface` in both themes, so this needs no dedicated on-tint token the

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import NutritionPanel from '$components/NutritionPanel.svelte';
+	import RecipeHits from '$components/RecipeHits.svelte';
 	import SubstitutionTips from '$components/SubstitutionTips.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
 	import FavoriteButton from '$components/FavoriteButton.svelte';
@@ -296,6 +297,12 @@
 	<NutritionPanel recipe={data.recipe} {t} lang={data.lang} />
 
 	<SubstitutionTips tips={data.tips} {t} />
+
+	{#if data.related.length}
+		<div class="no-print">
+			<RecipeHits recipes={data.related} lang={data.lang} {t} heading={t('recipe.related')} />
+		</div>
+	{/if}
 
 	<!-- Per-image credit, separate from the recipe-text credit below. Not optional:
 	     most of these files are share-alike (CC BY-SA / CC BY), which requires

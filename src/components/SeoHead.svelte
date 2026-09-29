@@ -24,7 +24,13 @@
 		zh: 'zh_CN',
 		ja: 'ja_JP',
 		ko: 'ko_KR',
-		vi: 'vi_VN'
+		vi: 'vi_VN',
+		pt: 'pt_BR', // Brazil is the larger speaker base than pt_PT
+		it: 'it_IT',
+		bn: 'bn_BD',
+		ru: 'ru_RU',
+		pnb: 'pnb_PK',
+		jv: 'jv_ID'
 	};
 
 	// Canonical/og:url drop query params (?lang=, ?have=…): those select a

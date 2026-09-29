@@ -28,6 +28,11 @@ export interface MatchResult {
 	required_non_staple: number;
 	/** Comma-separated names of the `missing` ingredients, NULL when `missing` is 0. */
 	missing_names: string | null;
+	/** Comma-separated `canonical_key`s of the `missing` ingredients, in the same
+	 *  order as `missing_names` (both aggregate the same rows in the same pass) —
+	 *  so the UI can add a missing ingredient to the selection, since names are
+	 *  display text and can't round-trip back into `have`. NULL when `missing` is 0. */
+	missing_keys: string | null;
 	/** Names of the *selected* ingredients this recipe does not use — the
 	 *  mirror of `missing_names`. NULL when the recipe uses all of them, which
 	 *  is always the case unless the query ran with slack. */

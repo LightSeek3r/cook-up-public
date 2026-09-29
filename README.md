@@ -19,6 +19,19 @@ swap exists, a substitution tip.
   of them appear in a separate group below the exact matches, each saying which of your
   ingredients it doesn't use. The strict "you can cook this now" list stays the primary
   answer; near-misses never displace it.
+- **Tap to add missing ingredients** — tap any missing ingredient on a result card to add it
+  to your selection (e.g. once you've checked the cupboard).
+- **Quickest-first sort** — sort recipes by how fast they cook, with recipes lacking timing
+  data pushed to the end.
+- **Allergen exclusion** — exclude recipes by allergen (gluten, dairy, nut, peanut, egg, soy,
+  fish, shellfish, sesame).
+- **Must-use ingredients** — pin must-have ingredients to force recipes to include them when
+  near-misses are available.
+- **Pick one for me** — opens a random recipe you can cook right now (from the loaded exact
+  matches).
+- **Related recipes** — each recipe page shows similar recipes based on shared ingredients.
+- **Remembered fridge** — your ingredient selection is saved in browser storage (device-only,
+  no account needed).
 - **Search by dish name too** — the search bar matches recipe titles as well as ingredients,
   so you can go straight to a dish you already had in mind. (Recipe titles are deliberately
   never translated — a dish name is a proper noun — so title search is English in every
@@ -36,12 +49,12 @@ swap exists, a substitution tip.
 - **Healthy substitution tips** — structural swap suggestions (e.g. butter → olive oil,
   sugar → banana) shown only when the substitute isn't already in the recipe.
 - **Filters** — cuisine, meal type, diet (vegan/vegetarian/pescatarian/gluten-free/
-  dairy-free), sort by match quality / kcal / grade. Allergen exclusion is already
-  supported end-to-end by the matching logic and API (`excludeAllergens`) but has no
-  filter-bar control yet.
-- **10 languages** — en, es, fr, de, ar, hi, zh, ja, ko, vi, including full RTL support for
-  Arabic. Ingredient names and UI strings are bundled; recipe titles/instructions are
-  batch machine-translated offline with a live fallback for anything not yet translated.
+  dairy-free), sort by match quality / kcal / quickest-first / balance grade. Allergen
+  exclusion by any of: gluten, dairy, nut, peanut, egg, soy, fish, shellfish, sesame.
+- **16 languages** — en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it, bn, ru, pnb, jv, including
+  full RTL support for Arabic and Western Punjabi (Shahmukhi script). Ingredient names and UI
+  strings are bundled; recipe titles/instructions are batch machine-translated offline with a
+  live fallback for anything not yet translated.
 - **Recipe photos** — 711 recipes carry a Wikimedia Commons photograph, hotlinked, each credited
   to its own author and licence (all free: CC BY-SA, CC BY, CC0, public domain).
 - **Difficulty, notes and quantity equivalents** — a 1–4 difficulty meter from the source infobox,
@@ -112,6 +125,36 @@ wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql
 requires it), so `npm run dev` also wants `npx wrangler login`. For fully offline work,
 comment that block out: translation requests then return a clear 500 instead of hanging, and
 recipe pages quietly keep their source-language text. **Uncomment it again before deploying.**
+
+## Match API
+
+`GET /api/match` backs the home page, which mirrors its whole state (ingredients, filters,
+sort) into the page URL so any search is shareable:
+
+```
+GET /api/match?have=onion,garlic,egg&sort=time&noAllergen=dairy,gluten&lang=en
+```
+
+Ingredients are addressed by `canonical_key` (`onion`, `extra_virgin_olive_oil`: lowercase
+`[a-z][a-z0-9_]*`), never by numeric id, because ids are renumbered on every reseed.
+
+- `have` — comma-separated ingredient keys; required. Unknown keys are dropped.
+- `offset` — pagination offset (default `0`); pages are `MATCH_PAGE_SIZE` (50) rows.
+- `sort` — omitted = best match; `kcal` (lowest first), `grade` (best Balance Grade first) or
+  `time` (quickest first; recipes with no known total time go last).
+- `noAllergen` — comma-separated allergen keys to exclude: `gluten`, `dairy`, `nut`,
+  `peanut`, `egg`, `soy`, `fish`, `shellfish`, `sesame`. Unknown keys are ignored.
+- `must` — comma-separated ingredient keys every result must use. Only applies when 3+
+  ingredients are selected (below that there are no "almost there" results, so every
+  selected ingredient is already required), and only keys that are also in `have` count.
+- `cuisine`, `meal`, `diet` — single-value filters; allowed values are in `src/lib/config.ts`.
+- `lang` — any supported language code (`en`, `pnb`, …); anything else falls back to `en`.
+
+Response: `{ results, total, haveCount }`. `total` is the full match count (for paging);
+`haveCount` is how many `have` keys survived validation, so a stale link is detectable. Each
+result carries `matched`, `missing`, and `missing_names` / `missing_keys`: the missing
+non-staple ingredients as display names and as keys, in the same order, joined by U+001F
+rather than a comma (a comma can appear inside a translated name).
 
 ## Data pipeline
 

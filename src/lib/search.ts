@@ -37,19 +37,24 @@ export const normaliseQuery = (raw: string | null): string =>
  *
  * One thing about that index drives the whole shape of this query: **recipe
  * titles are deliberately never translated.** A dish name is a proper noun, so
- * `07_translate.mjs` writes the untranslated source title into the
- * `recipe_i18n` row for *every* language. The FTS index therefore holds the same
- * English string once per language — up to ten identical hits for one recipe.
+ * every language's `recipe_i18n` row would otherwise carry the same
+ * untranslated source title. As of migrations/0008_recipe_title_fts_source_only.sql,
+ * the index is built from source-lang rows only (`WHERE i.lang = r.source_lang`)
+ * — not "rebuild" over the whole table — specifically to avoid indexing that
+ * same string once per language (a rebuild-after-every-translation-batch habit
+ * that once burned the whole D1 free-tier daily read quota re-reading rows that
+ * never needed indexing in the first place). Never call `'rebuild'` on this
+ * table again; use the source-lang INSERT from that migration instead.
  *
- * Two consequences:
+ * Consequence: search is English-title search in every locale. A French user
+ * typing "poulet" will not find "Chicken Handi". That is a property of the
+ * data, not a bug in this query; changing it means translating titles in the
+ * pipeline, which contradicts the proper-noun decision on record.
  *
- *  - `GROUP BY r.id` is load-bearing, not tidiness. And the ingredient search's
- *    `m.lang IN (?, 'en')` idiom must NOT be copied here: over recipes it
- *    expresses no translation preference, it just returns the same row twice.
- *  - Search is English-title search in every locale. A French user typing
- *    "poulet" will not find "Chicken Handi". That is a property of the data, not
- *    a bug in this query; changing it means translating titles in the pipeline,
- *    which contradicts the proper-noun decision on record.
+ * `GROUP BY r.id` stays as a defensive measure — the FTS index now has at most
+ * one row per recipe, but both `HIT_JOINS` and the schema's PRIMARY KEY
+ * (`recipe_id, lang`) already guarantee at most one row per side, so this is
+ * belt-and-suspenders, not load-bearing the way it was pre-0008.
  *
  * The displayed title still goes through the `COALESCE(t.title, src.title)`
  * fallback that `match.ts` uses, so this stays correct on its own terms if

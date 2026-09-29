@@ -170,9 +170,17 @@
 	--dur-fast: 120ms;
 	--dur: 200ms;
 
+	/* 'Noto Sans' itself already covers Cyrillic (ru) and plain Latin (pt/it/jv)
+	   — no separate regional Noto family exists for those, unlike the
+	   complex-shaping scripts below, so ru/pt/it/jv need no addition here.
+	   'Noto Sans Bengali' (bn) follows the same pattern as the Devanagari/SC/
+	   JP/KR entries already here. pnb (Shahmukhi) gets its own :lang(pnb) rule
+	   below instead of an entry here — it shares Arabic's Unicode block but
+	   wants Nastaliq shaping, which would look wrong applied to `ar` text too. */
 	--font-body:
 		'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Arabic',
-		'Noto Sans Devanagari', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR', sans-serif;
+		'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR',
+		sans-serif;
 	--font-display: 'Fraunces', 'Iowan Old Style', Georgia, 'Noto Serif', serif;
 }
 
@@ -489,6 +497,18 @@ body {
 	font-size: 16px;
 	line-height: 1.55;
 	-webkit-text-size-adjust: 100%;
+}
+
+/* pnb (Western Punjabi, Shahmukhi) shares Arabic's Unicode block, but reads
+   properly only in Nastaliq shaping — Naskh-style fonts (the ones the plain
+   'Noto Sans Arabic' fallback above provides for `ar`) render it legibly but
+   not idiomatically. Scoped to :lang(pnb) rather than added to --font-body so
+   `ar` text is unaffected. Nastaliq's diagonal stacking needs noticeably more
+   vertical room than Naskh/Latin at the same font-size, hence the taller
+   line-height override too. */
+:lang(pnb) {
+	font-family: 'Noto Nastaliq Urdu', var(--font-body);
+	line-height: 2;
 }
 
 /* The dark ground, both ways. The doodle stroke colour is baked into the data

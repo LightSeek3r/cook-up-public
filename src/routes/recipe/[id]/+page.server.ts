@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import { requireDb } from '$lib/db';
 import { resolveLang } from '$lib/i18n';
+import { relatedRecipes } from '$lib/related';
 import { substitutionsFor } from '$lib/substitutions';
 import type { MicroNutrient, RecipeDetail, SubstitutionTip } from '$lib/types';
 import type { PageServerLoad } from './$types';
@@ -27,7 +28,7 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
 
 	if (!recipe) throw error(404, 'recipe not found');
 
-	const [ingredients, micronutrients] = await Promise.all([
+	const [ingredients, micronutrients, related] = await Promise.all([
 		db
 			.prepare(
 				`SELECT i.id, i.canonical_key, i.category,
@@ -48,7 +49,8 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
          FROM recipe_micronutrient WHERE recipe_id = ?`
 			)
 			.bind(id)
-			.all<MicroNutrient>()
+			.all<MicroNutrient>(),
+		relatedRecipes(db, { id, lang })
 	]);
 
 	// Prose in the requested language is filled lazily by /api/translate.
@@ -85,6 +87,7 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
 		lang,
 		needsTranslation,
 		tips,
+		related,
 		recipe: {
 			...recipe,
 			ingredients: recipeIngredients,

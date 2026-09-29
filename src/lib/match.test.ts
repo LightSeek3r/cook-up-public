@@ -44,8 +44,10 @@ describe('matchRecipes', () => {
 			cuisine: 'italian',
 			mealType: 'dinner',
 			diet: 'vegan',
-			excludeAllergens: [10, 20, 30],
-			sort: 'kcal'
+			excludeAllergens: ['gluten', 'dairy', 'nut'],
+			sort: 'kcal',
+			slack: 1,
+			mustUse: [1, 2]
 		});
 		const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
 		expect(placeholders).toBe(calls[0].binds.length);
@@ -56,8 +58,11 @@ describe('matchRecipes', () => {
 		{ cuisine: 'italian' },
 		{ mealType: 'dinner' },
 		{ diet: 'vegan' },
-		{ excludeAllergens: [10] },
-		{ excludeAllergens: [10, 20, 30] }
+		{ excludeAllergens: ['gluten'] },
+		{ excludeAllergens: ['gluten', 'dairy', 'nut'] },
+		{ slack: 1, mustUse: [1] },
+		{ slack: 1, mustUse: [1, 2] },
+		{ slack: 1, mustUse: [1, 2], excludeAllergens: ['gluten', 'nut'] }
 	])('placeholder count matches binds for filter combination %j', async (extra) => {
 		const { db, calls } = spyDb();
 		await matchRecipes(db, { ...base, ...extra });
@@ -106,7 +111,7 @@ describe('matchRecipes', () => {
 		expect(manyCalls[0].binds.length).toBeLessThan(20);
 	});
 
-	it.each([base, { ...base, have: [1, 2, 3, 4, 5] }, { ...base, cuisine: 'italian', excludeAllergens: [1, 2] }])(
+	it.each([base, { ...base, have: [1, 2, 3, 4, 5] }, { ...base, cuisine: 'italian', excludeAllergens: ['gluten', 'dairy'] }])(
 		'generated SQL has balanced parentheses (mock verification can\'t catch a mismatched paren the way a real DB would)',
 		async (params) => {
 			const { db, calls } = spyDb();
@@ -124,12 +129,13 @@ describe('matchRecipes', () => {
 		expect(calls[0].sql).not.toContain('WHERE\n');
 	});
 
-	it('sort is never bound as a value — it only selects one of three fixed ORDER BY clauses', async () => {
+	it('sort is never bound as a value — it only selects one of four fixed ORDER BY clauses', async () => {
 		const { db: dbDefault, calls: defaultCalls } = spyDb();
 		await matchRecipes(dbDefault, base);
 		expect(defaultCalls[0].sql).toContain('ORDER BY missing ASC');
 		expect(defaultCalls[0].binds).not.toContain('kcal');
 		expect(defaultCalls[0].binds).not.toContain('grade');
+		expect(defaultCalls[0].binds).not.toContain('time');
 
 		const { db: dbKcal, calls: kcalCalls } = spyDb();
 		await matchRecipes(dbKcal, { ...base, sort: 'kcal' });
@@ -138,6 +144,10 @@ describe('matchRecipes', () => {
 		const { db: dbGrade, calls: gradeCalls } = spyDb();
 		await matchRecipes(dbGrade, { ...base, sort: 'grade' });
 		expect(gradeCalls[0].sql).toContain('r.balance_grade ASC');
+
+		const { db: dbTime, calls: timeCalls } = spyDb();
+		await matchRecipes(dbTime, { ...base, sort: 'time' });
+		expect(timeCalls[0].sql).toContain('(r.total_minutes IS NULL) ASC, r.total_minutes ASC');
 	});
 
 	it('defaults limit to MATCH_PAGE_SIZE and offset to 0', async () => {
@@ -282,9 +292,104 @@ describe('matchRecipes — slack', () => {
 		'placeholder count still equals bind length with %o',
 		async (extra) => {
 			const { db, calls } = spyDb();
-			await matchRecipes(db, { ...base, ...extra, cuisine: 'italian', excludeAllergens: [7, 8] });
+			await matchRecipes(db, {
+				...base,
+				...extra,
+				cuisine: 'italian',
+				excludeAllergens: ['gluten', 'dairy']
+			});
 			const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
 			expect(placeholders).toBe(calls[0].binds.length);
 		}
 	);
+});
+
+describe('matchRecipes — missing_keys', () => {
+	it('selects missing_keys positioned right after missing_names, aggregating canonical_key instead of the display name', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, base);
+		expect(calls[0].sql).toContain('AS missing_names');
+		expect(calls[0].sql).toContain('AS missing_keys');
+		expect(calls[0].sql.indexOf('AS missing_names')).toBeLessThan(calls[0].sql.indexOf('AS missing_keys'));
+		// missing_keys reuses the same `notSatisfied` CASE condition as
+		// missing_names, so it needs the have-set bound twice more, the same as
+		// every other use of that condition.
+		expect(calls[0].sql).toContain('THEN i.canonical_key END');
+	});
+
+	it('binds the have-set for missing_keys the same way as missing_names, keeping placeholder count in sync', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, base);
+		const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
+		expect(placeholders).toBe(calls[0].binds.length);
+	});
+});
+
+describe('matchRecipes — excludeAllergens by key', () => {
+	it('filters on allergens.key, not allergens.id, binding the keys themselves', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, excludeAllergens: ['gluten', 'shellfish'] });
+		expect(calls[0].sql).toContain('JOIN allergens a ON a.id = ia.allergen_id');
+		expect(calls[0].sql).toContain('a.key IN (?,?)');
+		expect(calls[0].binds).toContain('gluten');
+		expect(calls[0].binds).toContain('shellfish');
+	});
+
+	it('omits the allergen join entirely when no allergens are excluded', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, base);
+		expect(calls[0].sql).not.toContain('ingredient_allergens');
+	});
+});
+
+describe('matchRecipes — mustUse', () => {
+	it('adds no clause and no bind when mustUse is absent', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1 });
+		expect(calls[0].sql).not.toContain('json_each(?) m');
+	});
+
+	it('adds no clause and no bind when mustUse is an empty array', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, mustUse: [] });
+		expect(calls[0].sql).not.toContain('json_each(?) m');
+	});
+
+	it('dedupes mustUse before binding', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, mustUse: [1, 1, 2] });
+		expect(calls[0].sql).toContain('json_each(?) m');
+		expect(calls[0].binds).toContain(JSON.stringify([1, 2]));
+	});
+
+	it('drops mustUse ids that are not in have, rather than trusting the caller', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, mustUse: [1, 999] });
+		expect(calls[0].binds).toContain(JSON.stringify([1]));
+		expect(calls[0].binds).not.toContain(JSON.stringify([1, 999]));
+	});
+
+	it('omits the clause entirely once every id is filtered out as not in have', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, mustUse: [999] });
+		expect(calls[0].sql).not.toContain('json_each(?) m');
+	});
+
+	it('binds mustUse before the HAVING bind', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, mustUse: [1, 2] });
+		// binds: ... mustUse JSON, HAVING floor, limit, offset — the last three
+		// are HAVING/limit/offset, so mustUse's bind sits right before them.
+		const havingBind = calls[0].binds.at(-3);
+		expect(havingBind).toBe(2); // have.length(3) - slack(1)
+		const mustUseBind = calls[0].binds.at(-4);
+		expect(mustUseBind).toBe(JSON.stringify([1, 2]));
+	});
+
+	it('placeholder count matches binds with mustUse present', async () => {
+		const { db, calls } = spyDb();
+		await matchRecipes(db, { ...base, slack: 1, mustUse: [1, 2] });
+		const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
+		expect(placeholders).toBe(calls[0].binds.length);
+	});
 });

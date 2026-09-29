@@ -11,8 +11,16 @@ import zh from './zh.json';
 import ja from './ja.json';
 import ko from './ko.json';
 import vi from './vi.json';
+import pt from './pt.json';
+import itBundle from './it.json'; // `it` collides with vitest's own `it`
+import bn from './bn.json';
+import ru from './ru.json';
+import pnb from './pnb.json';
+import jv from './jv.json';
 
-const BUNDLES: Record<string, Record<string, string>> = { en, es, fr, de, ar, hi, zh, ja, ko, vi };
+const BUNDLES: Record<string, Record<string, string>> = {
+	en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it: itBundle, bn, ru, pnb, jv
+};
 
 // One test guarding all 10 locale files: every key added to en.json (or any
 // other bundle) must exist in every bundle. Nothing else in the project
@@ -41,6 +49,21 @@ describe('i18n bundle key parity', () => {
 		}
 	});
 
+	// The layout/components split or replace on these tokens; a translated or dropped
+	// placeholder breaks the UI (lost link, or a button/toggle label that never gets
+	// the ingredient name substituted in).
+	const PLACEHOLDER_KEYS: [string, string][] = [
+		['footer.createdBy', '{link}'],
+		['results.addIngredient', '{name}'],
+		['mosaic.mustUse', '{name}']
+	];
+
+	for (const [key, placeholder] of PLACEHOLDER_KEYS) {
+		it.each(Object.keys(BUNDLES))(`%s ${key} has exactly one ${placeholder}`, (lang) => {
+			expect(BUNDLES[lang][key].split(placeholder)).toHaveLength(2);
+		});
+	}
+
 	it('SUPPORTED_LANGS and the bundle set agree exactly', () => {
 		expect(new Set(Object.keys(BUNDLES))).toEqual(new Set(SUPPORTED_LANGS));
 	});
@@ -60,9 +83,10 @@ describe('resolveLang', () => {
 });
 
 describe('dirFor', () => {
-	it('is rtl only for Arabic', () => {
+	it('is rtl only for Arabic and Western Punjabi (Shahmukhi)', () => {
 		expect(dirFor('ar')).toBe('rtl');
-		for (const lang of SUPPORTED_LANGS.filter((l) => l !== 'ar')) {
+		expect(dirFor('pnb')).toBe('rtl');
+		for (const lang of SUPPORTED_LANGS.filter((l) => l !== 'ar' && l !== 'pnb')) {
 			expect(dirFor(lang)).toBe('ltr');
 		}
 	});

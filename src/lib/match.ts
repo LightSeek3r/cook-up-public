@@ -9,14 +9,24 @@ export interface MatchParams {
 	cuisine?: string;
 	mealType?: string;
 	diet?: string;
-	excludeAllergens?: number[];
+	/** Allergen `key`s (from `ALLERGENS` in config.ts) to exclude, not
+	 *  `allergens.id` — ids are positional and renumbered on reseed, the same
+	 *  reason ingredient selections travel as `canonical_key` rather than id. */
+	excludeAllergens?: string[];
 	/** Default: fewest missing first. `kcal`/`grade` push recipes with no
-	 *  nutrition data to the end rather than mixing them in arbitrarily. */
-	sort?: 'kcal' | 'grade';
+	 *  nutrition data to the end rather than mixing them in arbitrarily;
+	 *  `time` does the same for recipes with no `total_minutes`. */
+	sort?: 'kcal' | 'grade' | 'time';
 	/** How many selected ingredients a recipe may leave unused and still be
 	 *  returned. 0 (the default) is the strict "uses everything you picked"
 	 *  rule; see `slackFor`. */
 	slack?: number;
+	/** Ingredient ids (a subset of `have`) the recipe must actually use, not
+	 *  merely leave available — only meaningful with `slack > 0`, where a
+	 *  recipe can otherwise ignore any selection up to the slack count. Ids
+	 *  outside `have` are dropped rather than trusted, since a requirement on
+	 *  something the user never selected could never be satisfied. */
+	mustUse?: number[];
 	limit?: number;
 	offset?: number;
 }
@@ -105,7 +115,7 @@ export async function matchRecipes(
 	if (have.length === 0) return { results: [], total: 0 };
 
 	const binds: (string | number)[] = [];
-	const list = (values: number[]) => values.map(() => '?').join(',');
+	const list = <T>(values: T[]) => values.map(() => '?').join(',');
 
 	// `have` is passed as one bound JSON string and unpacked in SQL via
 	// `json_each`, not as `have.length` positional placeholders — D1 caps
@@ -164,15 +174,16 @@ export async function matchRecipes(
   )`;
 	binds.push(haveJson, p.lang);
 
-	// 2. `missing` / `missing_names` — a per-row check, safe to expand as a
-	// plain OR: a row is satisfied if its own id is selected, or its curated
-	// generic parent is selected. Used twice (count + names), each occurrence
-	// needs `haveJson` bound twice (the direct check, then the generic-parent
-	// check).
+	// 2. `missing` / `missing_names` / `missing_keys` — a per-row check, safe to
+	// expand as a plain OR: a row is satisfied if its own id is selected, or its
+	// curated generic parent is selected. Used three times (count + names +
+	// keys), each occurrence needs `haveJson` bound twice (the direct check,
+	// then the generic-parent check).
 	const notSatisfied = `ri.ingredient_id NOT IN (${haveIds})
        AND ri.ingredient_id NOT IN (SELECT specific_id FROM ingredient_generic_of WHERE generic_id IN (${haveIds}))`;
 	binds.push(haveJson, haveJson); // missing count
 	binds.push(haveJson, haveJson); // missing_names
+	binds.push(haveJson, haveJson); // missing_keys
 
 	// 3. Title + missing-ingredient-name joins: requested language, falling
 	// back to the source language / English respectively.
@@ -193,11 +204,38 @@ export async function matchRecipes(
 		binds.push(p.diet);
 	}
 	if (p.excludeAllergens?.length) {
+		// Filtered by `allergens.key`, not `allergens.id` — see the MatchParams
+		// comment; ids renumber on reseed the same way ingredient ids do, so a
+		// shared/bookmarked URL has to carry the stable key instead.
 		where.push(`NOT EXISTS (
         SELECT 1 FROM recipe_ingredients x
         JOIN ingredient_allergens ia ON ia.ingredient_id = x.ingredient_id
-        WHERE x.recipe_id = r.id AND ia.allergen_id IN (${list(p.excludeAllergens)}))`);
+        JOIN allergens a ON a.id = ia.allergen_id
+        WHERE x.recipe_id = r.id AND a.key IN (${list(p.excludeAllergens)}))`);
 		binds.push(...p.excludeAllergens);
+	}
+
+	// 4b. `mustUse` — forces a subset of `have` to be actually used by the
+	// recipe, not merely available to it. Only bites when `slack` has already
+	// let `HAVING matched >= ?` (below) admit recipes that skip some of the
+	// selection; deduped and filtered to `have` here rather than trusted from
+	// the caller, since an id outside `have` could never be satisfied and
+	// would zero out the results instead of being a no-op. Mirrors
+	// `unusedNamesExpr`'s "is this selection used" logic (direct row, or via a
+	// curated generic parent) but as a subset requirement rather than a name
+	// list, so it needs its own JSON-bound `json_each` rather than reusing
+	// `haveJson`.
+	const mustUse = p.mustUse?.length
+		? [...new Set(p.mustUse)].filter((id) => have.includes(id))
+		: [];
+	if (mustUse.length) {
+		where.push(`NOT EXISTS (
+        SELECT 1 FROM json_each(?) m
+        WHERE m.value NOT IN (SELECT ri5.ingredient_id FROM recipe_ingredients ri5 WHERE ri5.recipe_id = r.id)
+          AND m.value NOT IN (SELECT igo.generic_id FROM recipe_ingredients ri6
+                                 JOIN ingredient_generic_of igo ON igo.specific_id = ri6.ingredient_id
+                                WHERE ri6.recipe_id = r.id))`);
+		binds.push(JSON.stringify(mustUse));
 	}
 	const whereSql = where.length ? `WHERE ${where.join('\n      AND ')}` : '';
 
@@ -220,6 +258,10 @@ export async function matchRecipes(
 		orderBy = '(r.nutrition_coverage < 0.7 OR r.kcal IS NULL) ASC, r.kcal ASC, missing ASC, r.id ASC';
 	} else if (p.sort === 'grade') {
 		orderBy = '(r.balance_grade IS NULL) ASC, r.balance_grade ASC, missing ASC, r.id ASC';
+	} else if (p.sort === 'time') {
+		// 65% of recipes have no total_minutes (measured 2026-09-29: 2,248 of
+		// 3,478), so unknown times go last rather than being filtered out.
+		orderBy = '(r.total_minutes IS NULL) ASC, r.total_minutes ASC, missing ASC, r.id ASC';
 	}
 	// With slack, coverage outranks everything else: a full match is a different
 	// kind of answer from a near-miss, not merely a better-scoring one, and the
@@ -249,6 +291,15 @@ export async function matchRecipes(
       GROUP_CONCAT(CASE WHEN i.is_staple = 0 AND ${notSatisfied}
                         THEN COALESCE(mt.name, men.name, i.canonical_key) END,
                    '${MISSING_NAMES_SEP}') AS missing_names,
+      -- Positionally aligned with missing_names above: SQLite steps every
+      -- aggregate of a group on the same row in the same pass, so the
+      -- identical CASE condition here walks the same rows in the same order,
+      -- just projecting canonical_key instead of the display name. Exists so
+      -- the UI can add a missing ingredient straight into the selection --
+      -- missing_names is display text and cannot round-trip back into have.
+      GROUP_CONCAT(CASE WHEN i.is_staple = 0 AND ${notSatisfied}
+                        THEN i.canonical_key END,
+                   '${MISSING_NAMES_SEP}') AS missing_keys,
       -- How many recipes match in total, ignoring LIMIT/OFFSET. A window
       -- function rather than a second COUNT query: SQLite evaluates windows
       -- after GROUP BY and HAVING but before LIMIT, so this counts the matching

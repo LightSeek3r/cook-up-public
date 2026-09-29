@@ -51,6 +51,16 @@
 		fetch(`/api/track?${params}`, { method: 'POST' }).catch(() => {});
 	});
 
+	// Template, not a "Created by" prefix: hi/ja/ko/bn/pnb put the name first.
+	const [createdByPre, createdByPost] = $derived(t('footer.createdBy').split('{link}'));
+
+	// The page URL rides along so a report arrives pointing at the recipe/search it's about.
+	const reportHref = $derived(
+		`mailto:n.opal@unit42.fr?subject=${encodeURIComponent(
+			`${t('app.title')} — ${t('footer.reportIssue')}`
+		)}&body=${encodeURIComponent(`${$page.url.href}\n\n`)}`
+	);
+
 	function switchLang(event: Event) {
 		const next = (event.currentTarget as HTMLSelectElement).value;
 		const url = new URL($page.url);
@@ -126,7 +136,13 @@
 		     database names stay untranslated; only the framing is localised. -->
 		<p>{t('footer.recipeData')}: Wikibooks Cookbook (CC BY-SA 3.0) — {t('footer.andPublicDomain')}</p>
 		<p>{t('footer.nutritionRef')}: USDA FoodData Central ({t('footer.publicDomain')})</p>
-		<p>{t('footer.app')}: <a href="https://unit42.fr" target="_blank" rel="noopener noreferrer">unit42.fr</a></p>
+		<div class="credits">
+			<p>
+				{createdByPre}<a href="https://unit42.fr" target="_blank" rel="noopener noreferrer">unit42.fr</a
+				>{createdByPost}
+			</p>
+			<a class="report no-print" href={reportHref}>{t('footer.reportIssue')}</a>
+		</div>
 	</footer>
 </div>
 
@@ -231,5 +247,29 @@
 	}
 	footer p {
 		margin: 0.15rem 0;
+	}
+	.credits {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		margin-top: var(--space-2);
+	}
+	.report {
+		display: inline-flex;
+		align-items: center;
+		min-height: 2.75rem;
+		padding: 0 0.9rem;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius);
+		background: var(--surface);
+		color: var(--ink);
+		font-weight: 600;
+		text-decoration: none;
+	}
+	.report:hover {
+		color: var(--primary);
+		border-color: var(--primary);
 	}
 </style>

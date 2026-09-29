@@ -25,11 +25,20 @@ export const DEFAULT_SERVINGS = 4;
 export const NRV_SOURCE_PCT = 15;
 export const NRV_HIGH_PCT = 30;
 
-export const SUPPORTED_LANGS = ['en', 'es', 'fr', 'de', 'ar', 'hi', 'zh', 'ja', 'ko', 'vi'] as const;
+// Six added 2026-09-25 (2018 top-first-languages estimates): Portuguese,
+// Italian, Bengali, Russian, Western Punjabi, Javanese. `pnb` is Western
+// Punjabi/Lahnda in the Shahmukhi (Perso-Arabic) script — the user's explicit
+// choice over Eastern/Gurmukhi `pa` — and is RTL like `ar`. `jv` is Javanese
+// written in Latin script, not the Javanese script, which has poor font
+// support and little everyday use.
+export const SUPPORTED_LANGS = [
+	'en', 'es', 'fr', 'de', 'ar', 'hi', 'zh', 'ja', 'ko', 'vi',
+	'pt', 'it', 'bn', 'ru', 'pnb', 'jv'
+] as const;
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 
 export const DEFAULT_LANG: Lang = 'en';
-export const RTL_LANGS = new Set<Lang>(['ar']);
+export const RTL_LANGS = new Set<Lang>(['ar', 'pnb']);
 
 /**
  * Each language's name **in that language** — for the UI language switcher.
@@ -47,7 +56,13 @@ export const LANG_ENDONYMS: Record<Lang, string> = {
 	zh: '简体中文',
 	ja: '日本語',
 	ko: '한국어',
-	vi: 'Tiếng Việt'
+	vi: 'Tiếng Việt',
+	pt: 'Português',
+	it: 'Italiano',
+	bn: 'বাংলা',
+	ru: 'Русский',
+	pnb: 'پنجابی',
+	jv: 'Basa Jawa'
 };
 
 /** English exonyms, used to address the translation model in its own prompt. */
@@ -61,7 +76,16 @@ export const LANG_NAMES: Record<Lang, string> = {
 	zh: 'Simplified Chinese',
 	ja: 'Japanese',
 	ko: 'Korean',
-	vi: 'Vietnamese'
+	vi: 'Vietnamese',
+	pt: 'Portuguese',
+	it: 'Italian',
+	bn: 'Bengali',
+	ru: 'Russian',
+	// Disambiguates script for the translation model's prompt: plain "Punjabi"
+	// is ambiguous between Shahmukhi (this one) and Gurmukhi.
+	pnb: 'Western Punjabi (Shahmukhi script)',
+	// Disambiguates against the separate, little-used Javanese script.
+	jv: 'Javanese (Latin script)'
 };
 
 /**
@@ -128,3 +152,23 @@ export const DIFFICULTY_MAX = 4;
  * that pulls in @cloudflare/workers-types.
  */
 export const MISSING_NAMES_SEP = String.fromCharCode(31);
+
+/** Recipe-page "related recipes" list length. */
+export const RELATED_LIMIT = 6;
+
+/**
+ * Only ingredients used by at most this many recipes count toward "related" —
+ * ubiquitous ones (onion is in 911 recipes) would otherwise make almost every
+ * recipe "related" and dominate the D1 read. Measured on local D1 2026-09-29:
+ * capped, the query scans avg ~290 rows per recipe page (max ~1.7k); uncapped,
+ * avg ~1.5k (max 6.4k). Raise or lower this if the corpus grows a lot.
+ */
+export const RELATED_MAX_INGREDIENT_RECIPES = 200;
+
+/**
+ * Minimum distinctive ingredients a recipe must share to count as related. At 1,
+ * a recipe whose only distinctive ingredient is cornstarch lists apple pies and
+ * empanadas. Measured on local D1 2026-09-29: at 2, 2,790 of 3,478 recipes still
+ * get a related list (3,374 at 1); the rest hide the section.
+ */
+export const RELATED_MIN_SHARED = 2;
