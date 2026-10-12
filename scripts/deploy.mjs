@@ -140,12 +140,22 @@ if (!url || flag('skip-browser')) {
 } else {
 	/** @type {{ ok: boolean, errors: string[] } | null} */
 	let hydrated = null;
-	try {
-		hydrated = await hydrationCheck(url, { log });
-	} catch (err) {
-		log(`could not run the browser check: ${err instanceof Error ? err.message.split('\n')[0] : err}`);
-		log('install it once with `npx playwright install chromium`, or pass --skip-browser');
-		stop(`hydration of ${url} is unverified.${rollback}`);
+	// A browser can still reach a colo serving the previous version's assets for
+	// a minute after step 5 passed (seen on 2026-10-12: two 404 chunks, gone 30 s
+	// later), so only a failure that persists across retries means a broken build.
+	for (const wait of [0, 30, 60]) {
+		if (wait) {
+			log(`hydration not clean yet, retrying in ${wait} s`);
+			await new Promise((resolve) => setTimeout(resolve, wait * 1000));
+		}
+		try {
+			hydrated = await hydrationCheck(url, { log });
+		} catch (err) {
+			log(`could not run the browser check: ${err instanceof Error ? err.message.split('\n')[0] : err}`);
+			log('install it once with `npx playwright install chromium`, or pass --skip-browser');
+			stop(`hydration of ${url} is unverified.${rollback}`);
+		}
+		if (hydrated.ok) break;
 	}
 	if (!hydrated.ok) stop(`${url} does not hydrate.${rollback}`);
 }
