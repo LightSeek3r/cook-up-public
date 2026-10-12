@@ -2,10 +2,12 @@ import { describe, it, expect } from 'vitest';
 import {
 	OTP_MAX_ATTEMPTS,
 	generateOtp,
+	hashClientIp,
 	isAllowed,
 	issueOtp,
 	normaliseEmail,
 	parseAllowlist,
+	readSession,
 	sha256Hex,
 	timingSafeEqual,
 	verifyOtp
@@ -91,61 +93,86 @@ describe('allowlist', () => {
 	});
 });
 
+// Budgets, binding and single use are exercised against real SQLite in
+// auth.sqlite.test.mjs; these only pin what reaches D1.
 describe('issueOtp', () => {
-	it('burns any earlier live code before inserting the new one', async () => {
-		const { db, calls } = spyDb();
-		await issueOtp(db, 'Admin@Example.com', '123456');
+	it('stores digests only, never the code, nonce or IP', async () => {
+		const { db, calls } = spyDb([{ id: 1 }]);
+		const issued = await issueOtp(db, 'Admin@Example.com', '123456', {
+			bindingHash: await sha256Hex('nonce'),
+			ipHash: await hashClientIp('203.0.113.7', 'secret')
+		});
 
-		expect(calls).toHaveLength(2);
-		expect(calls[0].sql).toContain('UPDATE admin_otp SET consumed_at');
-		expect(calls[0].binds).toEqual(['admin@example.com']);
-		expect(calls[1].sql).toContain('INSERT INTO admin_otp');
-		// The code is hashed, never stored.
-		expect(calls[1].binds[1]).toBe(await sha256Hex('123456'));
-		expect(calls[1].binds).not.toContain('123456');
+		expect(issued).toBe(true);
+		expect(calls).toHaveLength(1);
+		expect(calls[0].sql).toContain('INSERT INTO admin_otp');
+		expect(calls[0].binds[0]).toBe('admin@example.com');
+		expect(calls[0].binds[1]).toBe(await sha256Hex('123456'));
+		for (const raw of ['123456', 'nonce', '203.0.113.7', 'secret']) {
+			expect(calls[0].binds).not.toContain(raw);
+		}
+	});
+
+	it('reports a refused insert so no email goes out for it', async () => {
+		const { db } = spyDb([null]);
+		const binding = { bindingHash: 'b', ipHash: 'i' };
+		expect(await issueOtp(db, 'a@b.co', '123456', binding)).toBe(false);
 	});
 });
 
 describe('verifyOtp', () => {
-	const row = async (over: Partial<{ id: number; code_hash: string; attempts: number }> = {}) => ({
-		id: 1,
-		code_hash: await sha256Hex('123456'),
-		attempts: 0,
-		...over
-	});
+	const claimed = async () => ({ id: 1, code_hash: await sha256Hex('123456') });
 
 	it('accepts the right code and consumes it so it cannot be replayed', async () => {
-		const { db, calls } = spyDb([await row()]);
-		expect(await verifyOtp(db, 'a@b.co', '123456')).toBe('ok');
-		expect(calls.at(-1)!.sql).toContain('UPDATE admin_otp SET consumed_at');
+		const { db, calls } = spyDb([await claimed(), { id: 1 }]);
+		expect(await verifyOtp(db, 'a@b.co', '123456', 'binding')).toBe(true);
+		expect(calls).toHaveLength(2);
+		expect(calls[1].sql).toContain("consumed_at = datetime('now')");
+		expect(calls[1].sql).toContain('consumed_at IS NULL');
 	});
 
-	it('reports expired when no live code exists, revealing nothing about the allowlist', async () => {
-		const { db } = spyDb([null]);
-		expect(await verifyOtp(db, 'stranger@example.com', '123456')).toBe('expired');
+	it('rejects a wrong code with one statement and no second write', async () => {
+		const { db, calls } = spyDb([await claimed()]);
+		expect(await verifyOtp(db, 'a@b.co', '000000', 'binding')).toBe(false);
+		expect(calls).toHaveLength(1);
 	});
 
-	it('counts a wrong code as an attempt', async () => {
-		const { db, calls } = spyDb([await row()]);
-		expect(await verifyOtp(db, 'a@b.co', '000000')).toBe('invalid');
-		expect(calls.at(-1)!.binds[0]).toBe(1);
-	});
-
-	it('locks out on the final attempt rather than allowing unlimited guesses', async () => {
-		const { db } = spyDb([await row({ attempts: OTP_MAX_ATTEMPTS - 1 })]);
-		expect(await verifyOtp(db, 'a@b.co', '000000')).toBe('locked');
-	});
-
-	it('refuses a code that is already at the attempt ceiling', async () => {
-		const { db, calls } = spyDb([await row({ attempts: OTP_MAX_ATTEMPTS })]);
-		expect(await verifyOtp(db, 'a@b.co', '123456')).toBe('locked');
-		expect(calls.at(-1)!.sql).toContain('consumed_at');
-	});
-
-	it('only ever looks at unconsumed, unexpired rows', async () => {
+	it('takes the same single round trip when there is nothing to claim', async () => {
 		const { db, calls } = spyDb([null]);
-		await verifyOtp(db, 'a@b.co', '123456');
+		expect(await verifyOtp(db, 'stranger@example.com', '123456', 'binding')).toBe(false);
+		expect(calls).toHaveLength(1);
+		expect(calls[0].sql).toContain('binding_hash = ?');
 		expect(calls[0].sql).toContain('consumed_at IS NULL');
 		expect(calls[0].sql).toContain("expires_at > datetime('now')");
+		expect(calls[0].binds).toContain(OTP_MAX_ATTEMPTS);
+	});
+
+	it('loses a race for the same code rather than consuming it twice', async () => {
+		const { db } = spyDb([await claimed(), null]);
+		expect(await verifyOtp(db, 'a@b.co', '123456', 'binding')).toBe(false);
+	});
+});
+
+describe('readSession', () => {
+	it('skips the query when there is no token or no allowlist', async () => {
+		const { db, calls } = spyDb();
+		expect(await readSession(db, undefined, ['a@b.co'])).toBeNull();
+		expect(await readSession(db, 'token', [])).toBeNull();
+		expect(calls).toHaveLength(0);
+	});
+
+	it('drops a live session whose address left the allowlist', async () => {
+		const { db } = spyDb([{ email: 'gone@example.com' }, { email: 'kept@example.com' }]);
+		expect(await readSession(db, 'token', ['kept@example.com'])).toBeNull();
+		expect(await readSession(db, 'token', ['kept@example.com'])).toBe('kept@example.com');
+	});
+});
+
+describe('hashClientIp', () => {
+	it('depends on the secret, so the IPv4 space cannot be enumerated against it', async () => {
+		const a = await hashClientIp('203.0.113.7', 'one');
+		expect(a).toMatch(/^[0-9a-f]{64}$/);
+		expect(a).not.toBe(await hashClientIp('203.0.113.7', 'two'));
+		expect(a).not.toBe(await sha256Hex('203.0.113.7'));
 	});
 });

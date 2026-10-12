@@ -1,7 +1,7 @@
 import type { Lang } from '$lib/config';
 import terms from './terms.json';
 import diagrams from './diagrams.json';
-import type { DiagramInfo, GlossaryEntry, TermMeta, TermText } from './types';
+import type { DiagramInfo, GlossaryEntry, GlossarySummary, TermMeta, TermText } from './types';
 
 type Content = Record<string, TermText>;
 
@@ -56,6 +56,14 @@ export function loadGlossary(lang: Lang): Promise<GlossaryEntry[]> {
 		hit.catch(() => cache.delete(lang));
 	}
 	return hit;
+}
+
+/** Only the fields the list page shows and searches; `diagram` stays as the badge's flag. */
+export function toSummary({ id, en, category, aliases, diagram, text }: GlossaryEntry): GlossarySummary {
+	const summary: GlossarySummary = { id, en, category, aliases, text: { name: text.name, short: text.short } };
+	if (diagram) summary.diagram = diagram;
+	if (text.aliases?.length) summary.text.aliases = text.aliases;
+	return summary;
 }
 
 export async function getEntry(lang: Lang, id: string): Promise<GlossaryEntry | undefined> {

@@ -6,6 +6,13 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
+    "build:checked": "node scripts/build.mjs",
+    "deploy": "node scripts/deploy.mjs",
+    "verify:deploy": "node scripts/verify-deploy.mjs",
+    "check:migrations": "node scripts/check-migrations.mjs",
+    "check:eol": "node scripts/check-line-endings.mjs",
+    "check:bundle": "node scripts/check-bundle-size.mjs",
+    "test:e2e": "playwright test",
     "preview": "wrangler dev",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run",
@@ -26,6 +33,7 @@
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^5.20260817.1",
+    "@playwright/test": "^1.64.0",
     "@sveltejs/adapter-cloudflare": "^7.2.9",
     "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
@@ -34,10 +42,10 @@
     "typescript": "^6.0.3",
     "vite": "^8.2.1",
     "vitest": "^4.1.11",
-    "wrangler": "^4.123.0"
+    "wrangler": "^4.149.0"
   },
   "allowScripts": {
-    "esbuild@0.28.1": true,
-    "workerd@1.20260811.1": true
+    "esbuild@0.28.2": true,
+    "workerd@1.20261006.1": true
   }
 }

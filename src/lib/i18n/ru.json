@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "Модернистская кухня",
   "glossary.cat.preservation": "Консервирование",
   "glossary.cat.fermentation": "Ферментация",
-  "glossary.cat.meat-fish": "Мясо и рыба"
+  "glossary.cat.meat-fish": "Мясо и рыба",
+  "error.loadFailed": "Сейчас не удалось загрузить данные. Попробуйте ещё раз чуть позже.",
+  "error.retry": "Повторить",
+  "error.unavailableHeading": "Временно недоступно",
+  "mosaic.limit": "Не больше {n} ингредиентов. Уберите один, чтобы добавить другой."
 }

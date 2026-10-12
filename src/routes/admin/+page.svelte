@@ -15,9 +15,8 @@
 	const ERRORS: Record<string, string> = {
 		invalidEmail: 'That does not look like an email address.',
 		invalidCode: 'The code is six digits.',
-		invalid: 'That code is not right.',
-		expired: 'That code has expired or was already used — request a new one.',
-		locked: 'Too many attempts. Request a new code.'
+		// One message for every verify failure: distinct ones revealed which addresses are allowlisted.
+		invalid: 'That code is not valid. It may be wrong, expired or already used — request a new one if needed.'
 	};
 	const errorText = $derived(
 		form && 'error' in form && form.error ? (ERRORS[form.error] ?? 'Something went wrong.') : ''

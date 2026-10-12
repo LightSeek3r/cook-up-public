@@ -15,3 +15,12 @@ debug.log
 # Scratch screenshot captures; the published ones live in the web repo.
 .shots
 /top*.txt
+# Agent scratch copies and unreviewed glossary drafts; a full source copy
+# plus its own wrangler config lives in .m0-tmp.
+.m0-tmp/
+src/lib/glossary/_draft/
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

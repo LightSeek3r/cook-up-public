@@ -184,12 +184,28 @@ export async function breakdown(
  * the pipeline writes for every recipe too, which is why English reads as
  * complete: the translation tooling stores the untranslated title in every
  * language, so `machine` is the honest measure of translated rows.
+ *
+ * Read from `recipe_i18n_stats` (migrations/0011), which the seeds recount: 16
+ * rows instead of every recipe_i18n row (~55k). Counted live while that table
+ * is empty or not migrated yet, so the figures are never missing, only dearer.
  */
 export async function translationRows(db: D1Database): Promise<LangRow[]> {
+	const stored = await db
+		.prepare(`SELECT lang, translated, machine FROM recipe_i18n_stats ORDER BY translated DESC, lang`)
+		.all<LangRow>()
+		.catch((err: unknown) => {
+			if (/no such table: recipe_i18n_stats/.test(String(err))) return null;
+			throw err;
+		});
+	if (stored?.results?.length) return stored.results;
+	return liveTranslationRows(db);
+}
+
+export async function liveTranslationRows(db: D1Database): Promise<LangRow[]> {
 	const { results } = await db
 		.prepare(
 			`SELECT lang, COUNT(*) AS translated, COALESCE(SUM(is_machine), 0) AS machine
-       FROM recipe_i18n GROUP BY lang ORDER BY translated DESC`
+       FROM recipe_i18n GROUP BY lang ORDER BY translated DESC, lang`
 		)
 		.all<LangRow>();
 	return results ?? [];
@@ -295,9 +311,9 @@ let memo: { at: number; value: Promise<Dashboard> } | null = null;
 /**
  * `loadDashboard`, reused for DASHBOARD_TTL_MS within an isolate.
  *
- * One load reads every page_view row several times over plus all of
- * recipe_i18n (~80k rows on the 16-language corpus before any traffic, ~250k
- * at 30k views), and every reload or form action on /admin runs the load
+ * One load reads every page_view row several times over plus the corpus
+ * figures (~27k rows on the 16-language corpus before any traffic, ~200k at
+ * 30k views), and every reload or form action on /admin runs the load
  * again. The figures are the same for every admin, so sharing them between
  * requests leaks nothing; they are at most five minutes old. A failed load is
  * not kept.

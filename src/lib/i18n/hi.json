@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "आधुनिक (मॉडर्निस्ट) पाककला",
   "glossary.cat.preservation": "खाद्य संरक्षण",
   "glossary.cat.fermentation": "किण्वन (फर्मेंटेशन)",
-  "glossary.cat.meat-fish": "मांस और मछली"
+  "glossary.cat.meat-fish": "मांस और मछली",
+  "error.loadFailed": "अभी लोड नहीं हो सका। कृपया थोड़ी देर बाद फिर से प्रयास करें।",
+  "error.retry": "फिर से प्रयास करें",
+  "error.unavailableHeading": "अस्थायी रूप से उपलब्ध नहीं",
+  "mosaic.limit": "अधिकतम {n} सामग्री। दूसरी जोड़ने के लिए कोई एक हटाएँ।"
 }

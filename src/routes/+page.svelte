@@ -7,11 +7,13 @@
 	import ResultCard from '$components/ResultCard.svelte';
 	import RecipeHits from '$components/RecipeHits.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
+	import LoadError from '$components/LoadError.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { MIN_FTS_LENGTH } from '$lib/search';
 	import { ALLERGENS } from '$lib/config';
 	import { slackFor } from '$lib/match';
 	import { matchRequest } from '$lib/matchRequest';
+	import { MAX_HAVE } from '$lib/apiParams';
 	import { cachedJson } from '$lib/responseCache';
 	import { apiUrl } from '$lib/httpCache';
 	import { filterTiles } from '$lib/tileSearch';
@@ -19,6 +21,13 @@
 	import type { IngredientTile, MatchResult, RecipeHit } from '$lib/types';
 
 	type MatchResponse = { results?: MatchResult[]; total?: number; haveCount?: number };
+
+	// A non-2xx already rejects in cachedJson; a 2xx carrying {error} must not
+	// read as an empty result either.
+	function unlessError<T extends { error?: unknown }>(data: T): T {
+		if (data.error) throw new Error(String(data.error));
+		return data;
+	}
 
 	let tiles = $state<IngredientTile[]>([]);
 	let results = $state<MatchResult[]>([]);
@@ -32,9 +41,21 @@
 	let total = $state(0);
 	let loading = $state(false);
 	let loadingMore = $state(false);
+	let loadMoreFailed = $state(false);
 	/** Identifies the selection a response belongs to; see `loadMore`. */
 	let requestToken = $state('');
 	let recipeHits = $state<RecipeHit[]>([]);
+	// Failures are their own state, never folded into "nothing found": an outage
+	// that reads as "no recipes match" sends the user off changing a correct
+	// selection. Each attempt counter is read by its effect, so bumping it re-runs
+	// the request (cachedJson does not keep failed responses).
+	let tilesLoaded = $state(false);
+	let tilesFailed = $state(false);
+	let tilesAttempt = $state(0);
+	let matchFailed = $state(false);
+	let matchAttempt = $state(0);
+	let searchFailed = $state(false);
+	let searchAttempt = $state(0);
 	let debouncedQuery = $state($page.url.searchParams.get('q') ?? '');
 
 	// The URL is the single source of truth: selection is shareable and the app
@@ -54,12 +75,20 @@
 	// food. Mirrors `parseKeys` in $lib/db, which validates the same shape
 	// server-side. A stale numeric link now selects nothing, deliberately — see
 	// that function's comment.
+	// Capped like the API, which answers 400 past MAX_HAVE: an over-long shared
+	// link selects its first MAX_HAVE rather than showing an error.
 	const selected = $derived(
-		(params.get('have') ?? '')
-			.split(',')
-			.map((key) => key.trim().toLowerCase())
-			.filter((key) => /^[a-z][a-z0-9_]*$/.test(key))
+		[
+			...new Set(
+				(params.get('have') ?? '')
+					.split(',')
+					.map((key) => key.trim().toLowerCase())
+					.filter((key) => /^[a-z][a-z0-9_]*$/.test(key))
+			)
+		].slice(0, MAX_HAVE)
 	);
+	/** Set when a tap was refused at the cap; cleared by the next change that fits. */
+	let atLimit = $state(false);
 	const cuisine = $derived(params.get('cuisine') ?? '');
 	const meal = $derived(params.get('meal') ?? '');
 	const diet = $derived(params.get('diet') ?? '');
@@ -110,9 +139,11 @@
 				: ''
 			: loading
 				? t('results.loading')
-				: results.length === 0
-					? t('results.empty')
-					: `${total} ${t('results.found')}`
+				: matchFailed
+					? t('error.loadFailed')
+					: results.length === 0
+						? t('results.empty')
+						: `${total} ${t('results.found')}`
 	);
 
 	function updateUrl(mutate: (url: URL) => void) {
@@ -133,9 +164,12 @@
 	}
 
 	function toggle(canonicalKey: string) {
-		const next = selected.includes(canonicalKey)
-			? selected.filter((value) => value !== canonicalKey)
-			: [...selected, canonicalKey];
+		const adding = !selected.includes(canonicalKey);
+		atLimit = adding && selected.length >= MAX_HAVE;
+		if (atLimit) return;
+		const next = adding
+			? [...selected, canonicalKey]
+			: selected.filter((value) => value !== canonicalKey);
 		handOffFocusIfTrayCloses(next.length);
 		updateUrl((url) => {
 			if (next.length) url.searchParams.set('have', next.join(','));
@@ -242,37 +276,48 @@
 	// landing on top of a newer one.
 	$effect(() => {
 		const value = debouncedQuery.trim();
+		void searchAttempt;
+		searchFailed = false;
 		if (value.length < MIN_FTS_LENGTH) {
 			recipeHits = [];
 			return;
 		}
 		let stale = false;
-		cachedJson<{ recipes?: RecipeHit[] }>(apiUrl('/api/search', { q: value, lang }))
+		cachedJson<{ recipes?: RecipeHit[]; error?: unknown }>(apiUrl('/api/search', { q: value, lang }))
+			.then(unlessError)
 			.then((data) => {
 				if (!stale) recipeHits = data.recipes ?? [];
 			})
 			.catch(() => {
-				if (!stale) recipeHits = [];
+				if (stale) return;
+				recipeHits = [];
+				searchFailed = true;
 			});
 		return () => (stale = true);
 	});
 
-	// Short queries filter the full mosaic here rather than asking the route,
-	// whose LIKE fallback scans the whole ingredient table for 1-2 characters.
+	// Short queries filter the full mosaic here: the route answers them empty,
+	// since its trigram index cannot match fewer than 3 characters.
 	$effect(() => {
 		const value = debouncedQuery.trim();
 		const fromServer = value.length >= MIN_FTS_LENGTH;
 		const search = new URLSearchParams({ lang });
 		if (fromServer) search.set('q', value);
+		void tilesAttempt;
+		tilesFailed = false;
 		let stale = false;
-		cachedJson<{ results?: IngredientTile[] }>(apiUrl('/api/ingredients', search))
+		cachedJson<{ results?: IngredientTile[]; error?: unknown }>(apiUrl('/api/ingredients', search))
+			.then(unlessError)
 			.then((data) => {
 				if (stale) return;
 				const found = data.results ?? [];
 				tiles = fromServer ? found : filterTiles(found, value);
+				tilesLoaded = true;
 			})
 			.catch(() => {
-				if (!stale) tiles = [];
+				if (stale) return;
+				tiles = [];
+				tilesFailed = true;
 			});
 		return () => (stale = true);
 	});
@@ -288,6 +333,9 @@
 
 	$effect(() => {
 		const query = matchKey;
+		void matchAttempt;
+		matchFailed = false;
+		loadMoreFailed = false;
 		if (!query) {
 			results = [];
 			total = 0;
@@ -299,7 +347,8 @@
 		requestToken = query;
 
 		loading = true;
-		cachedJson<MatchResponse>(apiUrl('/api/match', query))
+		cachedJson<MatchResponse & { error?: unknown }>(apiUrl('/api/match', query))
+			.then(unlessError)
 			.then((data) => {
 				if (requestToken !== query) return;
 				results = data.results ?? [];
@@ -311,6 +360,7 @@
 				results = [];
 				total = 0;
 				haveCount = 0;
+				matchFailed = true;
 			})
 			.finally(() => {
 				if (requestToken === query) loading = false;
@@ -330,13 +380,17 @@
 		const query = matchRequest(matchInput(), results.length);
 		const token = requestToken;
 		loadingMore = true;
+		loadMoreFailed = false;
 		try {
-			const data = await cachedJson<MatchResponse>(apiUrl('/api/match', query));
+			const data = unlessError(
+				await cachedJson<MatchResponse & { error?: unknown }>(apiUrl('/api/match', query))
+			);
 			if (requestToken !== token) return;
 			results = [...results, ...(data.results ?? [])];
 			total = data.total ?? total;
 		} catch {
-			// Leave what's already loaded in place; the button stays available.
+			// Leave what's already loaded in place; the retry below replaces the button.
+			if (requestToken === token) loadMoreFailed = true;
 		} finally {
 			if (requestToken === token) loadingMore = false;
 		}
@@ -370,10 +424,24 @@
 		     (aria-expanded / aria-activedescendant / arrow-key handling) that
 		     doesn't exist here. Recipe hits navigate; ingredient tiles below still
 		     toggle the selection — two behaviours, two visibly separate regions. -->
-		{#if recipeHits.length}
+		{#if searchFailed}
+			<LoadError
+				message={t('error.loadFailed')}
+				retryLabel={t('error.retry')}
+				onRetry={() => searchAttempt++}
+			/>
+		{:else if recipeHits.length}
 			<RecipeHits recipes={recipeHits} {lang} {t} />
 		{/if}
-		<Mosaic {tiles} {selected} {t} onToggle={toggle} />
+		{#if tilesFailed}
+			<LoadError
+				message={t('error.loadFailed')}
+				retryLabel={t('error.retry')}
+				onRetry={() => tilesAttempt++}
+			/>
+		{:else}
+			<Mosaic {tiles} {selected} {t} onToggle={toggle} loading={!tilesLoaded} />
+		{/if}
 	</div>
 
 	<section class="results" id="results" tabindex="-1" aria-labelledby="results-heading">
@@ -381,7 +449,7 @@
 			<div class="results-head">
 				<h2 id="results-heading">{t('results.heading')}</h2>
 				<div class="results-head-actions">
-					{#if selected.length > 0 && !loading}
+					{#if selected.length > 0 && !loading && !matchFailed}
 						<!-- The true total, not how many rows this page happened to carry. -->
 						<span class="pill">{total} {t('results.found')}</span>
 					{/if}
@@ -406,6 +474,14 @@
 				{#each [0, 1, 2] as row (row)}
 					<div class="skeleton card" aria-hidden="true"></div>
 				{/each}
+			{:else if matchFailed}
+				<!-- Announced through the live region above, hence announce={false}. -->
+				<LoadError
+					message={t('error.loadFailed')}
+					retryLabel={t('error.retry')}
+					onRetry={() => matchAttempt++}
+					announce={false}
+				/>
 			{:else if results.length === 0}
 				<p class="state"><strong>{t('results.empty')}</strong></p>
 				<p class="muted state">{t('results.emptyHint')}</p>
@@ -441,7 +517,9 @@
 				</div>
 			{/if}
 
-			{#if !loading && results.length > 0 && results.length < total}
+			{#if loadMoreFailed}
+				<LoadError message={t('error.loadFailed')} retryLabel={t('error.retry')} onRetry={loadMore} />
+			{:else if !loading && results.length > 0 && results.length < total}
 				<!-- Full matches always sort before near-misses (see matchRecipes), so
 				     appending a page can only extend the groups in order, never
 				     interleave — the partition above stays correct as the list grows. -->
@@ -456,6 +534,10 @@
 
 {#if selected.length}
 	<div class="tray" role="region" aria-label={t('mosaic.selected')}>
+		<!-- Mounted with the tray, so the refusal is announced when it appears. -->
+		<p class="limit" role="status">
+			{atLimit ? t('mosaic.limit').replace('{n}', String(MAX_HAVE)) : ''}
+		</p>
 		<div class="tray-inner">
 			<div class="chips">
 				{#each selectedTiles as tile (tile.id)}
@@ -503,7 +585,7 @@
 				<button type="button" class="ghost" onclick={clearAll}>{t('mosaic.clear')}</button>
 				<a class="cta" href="#results">
 					{t('results.see')}
-					{#if !loading}<span class="badge">{total}</span>{/if}
+					{#if !loading && !matchFailed}<span class="badge">{total}</span>{/if}
 				</a>
 			</div>
 		</div>
@@ -646,6 +728,13 @@
 			background: var(--surface);
 			backdrop-filter: none;
 		}
+	}
+	.limit {
+		max-inline-size: 78rem;
+		margin: 0 auto;
+		font-size: 0.8rem;
+		font-weight: 600;
+		color: var(--primary);
 	}
 	.tray-inner {
 		max-width: 78rem;

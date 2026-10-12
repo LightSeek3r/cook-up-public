@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "Masakan modernis",
   "glossary.cat.preservation": "Pangawetan",
   "glossary.cat.fermentation": "Fermentasi",
-  "glossary.cat.meat-fish": "Daging lan iwak"
+  "glossary.cat.meat-fish": "Daging lan iwak",
+  "error.loadFailed": "Saiki durung bisa dimuat. Coba maneh sedhela engkas.",
+  "error.retry": "Coba maneh",
+  "error.unavailableHeading": "Kanggo sawetara wektu ora kasedhiya",
+  "mosaic.limit": "Paling akèh {n} bahan. Busak siji kanggo nambahi liyané."
 }

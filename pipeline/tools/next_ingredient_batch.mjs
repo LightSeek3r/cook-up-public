@@ -12,11 +12,13 @@
  * classic lost-update race (confirmed happening: the cache undercounted true
  * DB state by 90-150 rows for several languages). One agent even got fully
  * stuck in a retry loop after a permission wall blocked its own attempt to
- * patch the shared file. Querying `ingredient_i18n WHERE lang = ?` directly
- * is cheap (indexed via idx_ingredient_i18n_lang, confirmed cost matches the
- * row count almost exactly — unlike a correlated-join query) and has no
- * shared mutable state to race on, so this replaces the file-cache approach
- * entirely rather than trying to synchronize it harder.
+ * patch the shared file. Querying ingredient_i18n directly has no shared
+ * mutable state to race on, so this replaces the file-cache approach entirely
+ * rather than trying to synchronize it harder. It walks `ingredients` and
+ * probes the (ingredient_id, lang) primary key, ~2 rows read per ingredient:
+ * migrations/0011 dropped idx_ingredient_i18n_lang, and a plain
+ * `WHERE lang = ?` now scans every language's rows (16,624 read vs 2,078 on
+ * a full local copy). CROSS JOIN pins that join order.
  *
  * Writes { canonical_key, en_name }[] to --out — the source name for an
  * agent to translate into a natural ingredient-name term in its own
@@ -62,7 +64,10 @@ function main() {
 	const rows = readFileSync(INGREDIENTS_PATH, 'utf8').trim().split('\n').map((l) => JSON.parse(l));
 	const idByKey = new Map(Object.entries(JSON.parse(readFileSync(IDS_CACHE_PATH, 'utf8'))));
 
-	const done = d1(`SELECT ingredient_id FROM ingredient_i18n WHERE lang = '${lang}'`, { local });
+	const done = d1(
+		`SELECT t.ingredient_id FROM ingredients i CROSS JOIN ingredient_i18n t ON t.ingredient_id = i.id AND t.lang = '${lang}'`,
+		{ local }
+	);
 	const doneIds = new Set(done.map((r) => r.ingredient_id));
 
 	const gapAll = rows.filter((r) => r.names.en && !doneIds.has(idByKey.get(r.canonical_key)));

@@ -46,6 +46,11 @@ export interface TermText {
 
 export type GlossaryEntry = TermMeta & { text: TermText };
 
+/** What the list page renders and searches; the long text, steps and tips stay on the server. */
+export type GlossarySummary = Pick<TermMeta, 'id' | 'en' | 'category' | 'aliases' | 'diagram'> & {
+	text: Pick<TermText, 'name' | 'short' | 'aliases'>;
+};
+
 export interface DiagramInfo {
 	id: string;
 	/** number of numbered marks drawn, equals steps.length of every term using it */

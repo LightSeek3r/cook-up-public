@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Lang } from '$lib/config';
+	import { DEFAULT_LANG, SUPPORTED_LANGS, type Lang } from '$lib/config';
 
 	interface Props {
 		title: string;
@@ -7,9 +7,11 @@
 		url: URL;
 		lang: Lang;
 		type?: 'website' | 'article';
+		/** Pages with no crawlable content of their own (favorites live in localStorage, errors). */
+		noindex?: boolean;
 	}
 
-	let { title, description, url, lang, type = 'website' }: Props = $props();
+	let { title, description, url, lang, type = 'website', noindex = false }: Props = $props();
 
 	// og:locale wants underscore-joined IETF-ish tags, not our bare ISO codes;
 	// only en/fr/ar have a real regional convention worth being specific about,
@@ -33,18 +35,33 @@
 		jv: 'jv_ID'
 	};
 
-	// Canonical/og:url drop query params (?lang=, ?have=…): those select a
-	// *variant* of the page, not a distinct resource, and a canonical URL that
-	// changes with every filter would tell crawlers every combination is a
-	// separate page.
-	const canonical = $derived(`${url.origin}${url.pathname}`);
+	// Only `lang` survives into the canonical: it selects a different document
+	// (translated text), while ?have, ?q, ?cat and the rest only filter one, and a
+	// canonical per filter combination would tell crawlers each is its own page.
+	// English keeps the bare URL, which is also the x-default.
+	const hrefFor = (code: Lang) =>
+		`${url.origin}${url.pathname}${code === DEFAULT_LANG ? '' : `?lang=${code}`}`;
+
+	// hreflang wants ISO 639-1 where one exists: `pnb` has none, so it goes out as
+	// Punjabi in Arabic script; `zh` names the script it is actually written in.
+	const HREFLANG: Partial<Record<Lang, string>> = { zh: 'zh-Hans', pnb: 'pa-Arab' };
+
+	const canonical = $derived(hrefFor(lang));
 	const image = $derived(`${url.origin}/og-image.png`);
 </script>
 
 <svelte:head>
 	<title>{title}</title>
 	<meta name="description" content={description} />
-	<link rel="canonical" href={canonical} />
+	{#if noindex}
+		<meta name="robots" content="noindex" />
+	{:else}
+		<link rel="canonical" href={canonical} />
+		{#each SUPPORTED_LANGS as code (code)}
+			<link rel="alternate" hreflang={HREFLANG[code] ?? code} href={hrefFor(code)} />
+		{/each}
+		<link rel="alternate" hreflang="x-default" href={hrefFor(DEFAULT_LANG)} />
+	{/if}
 
 	<meta property="og:type" content={type} />
 	<meta property="og:site_name" content="Cook Up" />

@@ -130,7 +130,7 @@
 							data-cat={CATEGORY_DATA_CAT[other.category]}
 							href="/glossary/{other.id}?lang={lang}"
 						>
-							{other.text.name}
+							{other.name}
 						</a>
 					</li>
 				{/each}

@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "আধুনিক (মডার্নিস্ট) রন্ধনশৈলী",
   "glossary.cat.preservation": "সংরক্ষণ",
   "glossary.cat.fermentation": "গাঁজন (ফারমেন্টেশন)",
-  "glossary.cat.meat-fish": "মাংস ও মাছ"
+  "glossary.cat.meat-fish": "মাংস ও মাছ",
+  "error.loadFailed": "এই মুহূর্তে লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।",
+  "error.retry": "আবার চেষ্টা করুন",
+  "error.unavailableHeading": "সাময়িকভাবে অনুপলব্ধ",
+  "mosaic.limit": "সর্বোচ্চ {n}টি উপকরণ। আরেকটি যোগ করতে একটি সরান।"
 }

@@ -7,6 +7,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { readdirSync, readFileSync } from 'node:fs';
 import { matchRecipes, resolveIngredientIds, slackFor } from './match';
+import { sqliteD1 } from './test/d1';
 
 const SEP = String.fromCharCode(31);
 const MIGRATIONS = new URL('../../migrations/', import.meta.url);
@@ -83,11 +84,7 @@ beforeAll(() => {
 	sqlite.exec(update[0]);
 	sqlite.prepare('UPDATE recipes SET non_staple_count = NULL WHERE id = ?').run(NULL_COUNT_RECIPE);
 
-	db = {
-		prepare: (sql) => ({
-			bind: (...binds) => ({ all: async () => ({ results: sqlite.prepare(sql).all(...binds) }) })
-		})
-	};
+	db = sqliteD1(sqlite);
 });
 
 // ---- brute-force reference of the documented rules ----------------------------------------

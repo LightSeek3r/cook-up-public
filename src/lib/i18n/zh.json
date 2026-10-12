@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "现代主义烹饪",
   "glossary.cat.preservation": "保存",
   "glossary.cat.fermentation": "发酵",
-  "glossary.cat.meat-fish": "肉类与鱼类"
+  "glossary.cat.meat-fish": "肉类与鱼类",
+  "error.loadFailed": "暂时无法加载，请稍后再试。",
+  "error.retry": "重试",
+  "error.unavailableHeading": "暂时无法使用",
+  "mosaic.limit": "最多可选 {n} 种食材。请先移除一种再添加。"
 }

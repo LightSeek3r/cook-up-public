@@ -2,9 +2,11 @@ import { describe, it, expect } from 'vitest';
 import {
 	MAX_PATH,
 	deviceFrom,
+	isSameOriginRequest,
 	isTrackablePath,
 	normaliseLang,
 	normalisePath,
+	parseTrackQuery,
 	recipeIdFromPath,
 	recordPageView,
 	referrerHost,
@@ -181,5 +183,69 @@ describe('recordPageView', () => {
 		});
 
 		expect(calls[0].binds).toEqual(['/', null, null, null, null, 'desktop', 0]);
+	});
+});
+
+describe('isSameOriginRequest', () => {
+	const self = 'https://cook.test';
+	const h = (init: Record<string, string>) => new Headers(init);
+
+	it('trusts Sec-Fetch-Site when the browser sends it', () => {
+		expect(isSameOriginRequest(h({ 'sec-fetch-site': 'same-origin' }), self)).toBe(true);
+		for (const site of ['cross-site', 'same-site', 'none']) {
+			// An Origin header cannot talk its way past a browser's own verdict.
+			expect(isSameOriginRequest(h({ 'sec-fetch-site': site, origin: self }), self)).toBe(false);
+		}
+	});
+
+	it('falls back to Origin for browsers without fetch metadata', () => {
+		expect(isSameOriginRequest(h({ origin: self }), self)).toBe(true);
+		expect(isSameOriginRequest(h({ origin: 'https://evil.test' }), self)).toBe(false);
+		expect(isSameOriginRequest(h({ origin: 'null' }), self)).toBe(false);
+	});
+
+	it('rejects a request carrying neither, which is what curl sends', () => {
+		expect(isSameOriginRequest(h({}), self)).toBe(false);
+	});
+});
+
+describe('parseTrackQuery', () => {
+	const q = (s: string) => parseTrackQuery(new URLSearchParams(s), 'cook.test');
+
+	it('accepts exactly what the layout sends', () => {
+		expect(q('path=/recipe/42&lang=fr')).toEqual({
+			path: '/recipe/42',
+			recipeId: 42,
+			lang: 'fr',
+			referrerHost: null,
+			isNewVisit: false
+		});
+		expect(
+			q(`path=/&lang=en&new=1&ref=${encodeURIComponent('https://news.example/a?b=c')}`)
+		).toEqual({ path: '/', recipeId: null, lang: 'en', referrerHost: 'news.example', isNewVisit: true });
+		expect(q('path=/favorites&lang=ja&new=1')?.isNewVisit).toBe(true);
+	});
+
+	it('rejects unknown, repeated or missing parameters', () => {
+		expect(q('path=/&lang=en&x=1')).toBeNull();
+		expect(q('path=/&path=/favorites&lang=en')).toBeNull();
+		expect(q('path=/')).toBeNull();
+		expect(q('lang=en')).toBeNull();
+	});
+
+	it('rejects values the client never produces', () => {
+		expect(q('path=/&lang=xx')).toBeNull();
+		expect(q('path=/&lang=en&new=0')).toBeNull();
+		expect(q('path=/&lang=en&ref=https://a.example')).toBeNull();
+		expect(q(`path=${encodeURIComponent('/?have=1')}&lang=en`)).toBeNull();
+		expect(q('path=/admin&lang=en')).toBeNull();
+		expect(q('path=/glossary&lang=en')).toBeNull();
+	});
+
+	it('keeps the view but drops a referrer too long to be one', () => {
+		const ref = `https://news.example/${'a'.repeat(3000)}`;
+		const view = q(`path=/&lang=en&new=1&ref=${encodeURIComponent(ref)}`);
+		expect(view?.referrerHost).toBeNull();
+		expect(view?.isNewVisit).toBe(true);
 	});
 });

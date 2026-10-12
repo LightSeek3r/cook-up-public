@@ -198,35 +198,47 @@ resolved mass to show nutrition.
 ### Seeding the *remote* database
 
 `pipeline/out/seed.sql` is for local use only. Applying it to `--remote` would delete content
-that exists nowhere else — see **Deployment** below. Use the dedicated generator instead:
+that exists nowhere else — see **Deployment** below. Use the dedicated generator, then the
+chunk applier:
 
 ```bash
-npm run pipeline:gen-remote-seed          # writes pipeline/out/remote-chunks/*.sql
-for f in pipeline/out/remote-chunks/*.sql; do
-  node node_modules/wrangler/bin/wrangler.js d1 execute cook-up-db --remote \
-    --command "$(cat "$f")" || { echo "FAILED at $f"; break; }
-done
+npm run pipeline:gen-remote-seed          # writes pipeline/out/remote-chunks/*.sql + plan.json
+node pipeline/tools/apply_remote_chunks.mjs --dir=pipeline/out/remote-chunks
 ```
 
-The chunking and the direct `node .../wrangler.js` invocation are both deliberate: a remote
-`--file=` import fails regardless of size, and `npx wrangler --command=` is capped by the
-shell's argv limit. Each chunk is atomic, so a failure at chunk N leaves 1..N-1 committed —
-fix and resume from N. That script's own header comment explains the details.
+**A full reseed does not fit the Free plan.** It writes about 270k rows, and D1 Free stops
+accepting writes at 100k/day, so it would halt partway and leave the site without ingredients
+until 00:00 UTC. The generator therefore refuses when its estimate exceeds the write budget
+(80% of the cap, 80,000 rows) unless `--paid-plan` is passed.
 
-The recipe page's related-recipes lists (`recipe_related`, migration 0010) are part of that
-reseed. To fill only that table (about 3,500 rows written, no full reseed), as long as remote's
-ingredients came from the same `pipeline/out`:
+`apply_remote_chunks.mjs` goes through `pipeline/lib/d1.mjs`: every chunk is checked against
+today's write budget and logged in the daily ledger, it stops before a chunk that would cross
+the budget, retries Cloudflare's transient 7403 error once, and records each committed chunk in
+`applied.json`, so a rerun resumes at the first uncommitted chunk (re-sending a committed one is
+not safe). `--dry-run` shows the plan. Both scripts' header comments have the details.
+
+Smaller refreshes that do fit the Free plan, applied with the same tool and their own `--dir`:
 
 ```bash
-node pipeline/gen_remote_seed.mjs --only=related   # writes pipeline/out/remote-chunks-related/*.sql
+node pipeline/gen_remote_seed.mjs --only=related  # recipe_related (0010), ~7k rows written
+node pipeline/gen_remote_seed.mjs --only=stats    # admin translation counts (0011), after a translation session
+node pipeline/gen_remote_seed.mjs --only=fts      # rebuild recipe_title_fts, ~3.5k rows written
 ```
 
-and apply those chunks with the same loop. Until the table is filled, the page ranks related
+`--only=related` ranks from `pipeline/out`, so it matches remote only while remote's ingredients
+came from that same `pipeline/out`. Until `recipe_related` is filled, the page ranks related
 recipes live (correct, ~30x more D1 reads).
 
-After any reseed, redeploy: public API responses are cached per build version (next section),
-so the redeploy is what makes browsers and the edge stop serving the old data at once; otherwise
-it ages out within a day.
+**Translation backup.** Remote `recipe_i18n` / `ingredient_i18n` are backed up into
+`pipeline/data/i18n-backup/` by `node pipeline/tools/export_remote_i18n.mjs` (read-only, ~150k
+rows read, resumable). Refresh it with `--fresh` after every translation session. The local seed
+(`06_seed_d1.mjs`) loads translations from that backup, so a local database is no longer
+English-only once a backup exists.
+
+After any reseed or translation batch, redeploy with fresh cache keys:
+`npm run deploy -- --fresh-cache`. Public API responses are cached under the build version (see
+**HTTP caching**), and the version is now the commit, so a plain redeploy of the same commit
+would keep serving the old data for up to a day.
 
 ## Testing
 
@@ -235,6 +247,23 @@ npm test          # vitest run — unit tests over the pure logic (matching, nut
 npm run test:watch
 npm run check     # svelte-kit sync + svelte-check — 0 errors is the bar
 ```
+
+End-to-end smoke tests (Playwright) run against the real Worker bundle under
+`wrangler dev --local`, on a throwaway D1 in `.wrangler/e2e-state` that gets all migrations plus
+the small fixture `tests/e2e/fixtures/seed.sql` (6 recipes, 10 ingredients). Your own local D1 is
+never touched. They cover hydration and the mosaic, selecting an ingredient, a recipe page and its
+stored translation, the glossary list and an Arabic (RTL) term, 404s, security headers on static
+files, and that every `/_app/immutable` chunk the pages reference is served by the same build.
+Every test also fails on any page error or console error (a broken CSP hash shows up there).
+
+```bash
+npx playwright install chromium   # once
+npm run build:checked             # the suite serves this build
+npm run test:e2e                  # starts and stops wrangler dev itself, port 8799
+```
+
+The same steps CI runs, locally: `npm run check:eol`, `npm run check:migrations`, `npm run check`,
+`npm test`, `npm run build:checked`, `npm run check:bundle`, `npm run test:e2e`.
 
 ## Deployment
 
@@ -260,7 +289,8 @@ rather than the UI when a code fails to arrive.
 (`recipe_i18n`, every language) — rows that exist *only* there and that the pipeline cannot
 reproduce, because they never flow back into its inputs.
 
-`pipeline/out/seed.sql` unconditionally deletes and English-only-reinserts `recipe_i18n`.
+`pipeline/out/seed.sql` unconditionally deletes and reinserts `recipe_i18n` from whatever the
+local translation backup holds (source language only without one).
 **Never apply it to `--remote`.** Use `npm run pipeline:gen-remote-seed` (above), which never
 touches `recipe_i18n` and updates `recipes` in place rather than replacing it. Cheap way to
 confirm you're on the safe path before running anything:
@@ -270,21 +300,123 @@ grep -l "DELETE FROM recipe_i18n" pipeline/out/remote-chunks/*.sql   # must prin
 ```
 
 **HTTP caching.** `/api/ingredients`, `/api/search`, `/api/match`, `/api/recipes` and
-`/sitemap.xml` send `Cache-Control: public, max-age=3600, s-maxage=86400`
-(`src/lib/httpCache.ts`); `/admin` and `/api/track` send `private, no-store`. The client adds
-`v=<build version>` to its API URLs, so every deploy starts on fresh cache keys. Browser caching
-works on any host. The edge cache is the adapter's own `caches.default` use, which Cloudflare
-documents for custom domains and which may do nothing on `*.workers.dev`. To check, request the
-same URL twice:
+`/sitemap.xml` send a public `Cache-Control` (browser 1 h, edge 1 day; exact values in
+`src/lib/httpCache.ts`); `/admin` and `/api/track` send `private, no-store`. The client adds
+`v=<build version>` to its API URLs. The build version is the git commit (`kit.version.name`,
+`scripts/lib/version.mjs`), so a deploy of a new commit starts on fresh cache keys, while
+redeploying the same commit keeps them; `npm run deploy -- --fresh-cache` forces new keys (after
+a reseed or translation batch). The edge cache works on `*.workers.dev` too (verified
+2026-10-12: the first request has no `cf-cache-status`, a repeat in the same colo shows `HIT`
+and `Age`); it is per colo and has no global purge.
+
+### Deploying
+
+One command, from a clean, committed tree:
 
 ```bash
-curl -sI "https://cook-up.asakura-account.workers.dev/api/ingredients?lang=en" | grep -iE "cf-cache-status|^age|cache-control"
-curl -sI "https://cook-up.asakura-account.workers.dev/api/ingredients?lang=en" | grep -iE "cf-cache-status|^age|cache-control"
+npm run deploy                     # options: --fresh-cache, --allow-dirty, --dry-run, --skip-browser
 ```
 
-`cf-cache-status: HIT` (or an `age:` header) on the second response means the edge cache works
-on this host; no `cf-cache-status`, or `MISS` every time, means only browsers cache, and moving
-to a custom domain is what turns the edge cache on.
+`scripts/deploy.mjs` stops at the first failed step and never deploys a partial build:
+
+1. **No dev servers.** It refuses while any `workerd`, `wrangler dev` or `vite dev` process runs
+   (Windows and Linux). They lock `.svelte-kit/cloudflare`; on 2026-10-12 that made the adapter
+   step fail after `vite build` had already rewritten the server output, and the deploy shipped
+   new server code with old client assets: 9 chunk 404s, the site non-interactive for ~4 h.
+   Stop them first (`Get-Process workerd | Stop-Process` / `pkill workerd`).
+2. **Clean tree.** The version names the commit; uncommitted changes need `--allow-dirty` and
+   get a `-dirty.<hash>` version.
+3. **Migrations first.** `wrangler d1 migrations list cook-up-db --remote` (read-only) must say
+   "No migrations to apply!". Otherwise it stops: new code can depend on a new column (0009's
+   `non_staple_count`, 0012 for the admin code). Applying stays manual, because migrations
+   spend daily D1 quota: check the cost comment at the top of each pending file against
+   today's usage, run `npm run db:migrate:remote`, then deploy again.
+4. **Checked build** (`npm run build:checked`, full log in `.wrangler/deploy/build.log`): fails
+   unless `vite build` exits 0, adapter-cloudflare prints `✔ done`, no EPERM/EBUSY appears, the
+   server build, the client build and `.svelte-kit/cloudflare/_app/version.json` carry the same
+   version, every built chunk is in `.svelte-kit/cloudflare`, and the project-root `_headers`
+   was copied. `node scripts/build.mjs --check` runs the same checks on an existing build.
+5. **`wrangler deploy`**, retried up to 3 times on Cloudflare 5xx/network errors (or the
+   transient 7403) with the same build, never rebuilding in between.
+6. **Live check** (`npm run verify:deploy -- <url>`): waits until `/_app/version.json` is the new
+   version, then requires 200 for `/`, `/glossary`, `/api/ingredients`, every
+   `/_app/immutable` file those pages reference and everything those files import, one
+   `__sveltekit_<hash>` global across HTML and chunks (two values = Worker and assets from
+   different builds), and the `_headers` security headers on `/favicon.svg` and a chunk.
+7. **Browser check** (`node scripts/hydration-check.mjs <url>`, Playwright Chromium, needs
+   `npx playwright install chromium` once): no page errors, no failed requests, `/api/ingredients`
+   answered and mosaic tiles rendered. `/api/track` is blocked, so no page view is recorded.
+
+Builds are reproducible: two builds of one commit produce byte-identical `.svelte-kit/cloudflare`
+and `.svelte-kit/output/server`, so a rebuild can never mix chunk names.
+
+**Release order:** remote migrations, then deploy, then any data chunks (reseed, `--only=…`),
+then `npm run deploy -- --fresh-cache` if data changed.
+
+**Rollback.** `npx wrangler rollback` returns to the previous version (`npx wrangler deployments
+list` shows the history; pass a version id to pick another). It rolls back code and static
+assets together, but **not D1**: if the bad release came with a migration, the old code must
+still work on the new schema (append-only migrations keep that true), and data changes are
+undone only through D1 Time Travel (`npx wrangler d1 time-travel restore cook-up-db
+--timestamp=<before>`, 7 days on Free). Run `npm run verify:deploy -- <url>` after a rollback.
+
+If the dashboard still shows a Workers Builds Git connection for this Worker (it was once created
+that way, `tasks/lessons.md`), disconnect it: it would deploy every push to `main` without the
+migration gate or these checks.
+
+### CI and secrets
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request: `npm ci`, LF
+check, migration check (files numbered 0001.. without gaps or duplicates, and no existing
+migration modified, renamed or deleted compared with the base branch), `npm run check`,
+`npm test`, the checked build, the bundle budget and the Playwright smoke suite.
+
+Bundle budget: `wrangler deploy --dry-run` must report at most 16 MiB raw and 2.5 MiB gzip
+(2026-10-12: 11.54 MiB raw, 1.87 MiB gzip). Cloudflare's actual limit is 64 MiB uncompressed on
+Free and Paid, with no compressed limit ("Only the uncompressed bundle size counts",
+[Workers limits](https://developers.cloudflare.com/workers/platform/limits/), checked
+2026-10-12); the old 3 MiB-gzip Free limit is gone. The budgets are an early warning for
+startup time (1 s limit) and for unintended growth.
+
+`.github/workflows/deploy.yml` deploys: run it from Actions on `main` (option: fresh cache keys)
+or push a `v*` tag. It runs the whole CI workflow first, then waits for approval on the
+`production` environment, then runs `scripts/deploy.mjs` (all the checks above, migration gate
+included; it never applies migrations).
+
+One-time GitHub setup (Settings):
+
+1. **Environments → New environment `production`**: add yourself under *Required reviewers*;
+   under *Deployment branches and tags* allow `main` and tags `v*`.
+2. In that environment, **environment secrets**:
+   - `CLOUDFLARE_ACCOUNT_ID`: the account id (dashboard, Workers & Pages, right sidebar).
+   - `CLOUDFLARE_API_TOKEN`: dashboard → My Profile → API Tokens → Create Token → Custom token,
+     *Account resources: Include → this account* only, permissions **Account · Workers Scripts ·
+     Edit** and **Account · D1 · Edit**. D1 Edit rather than Read because `migrations list`
+     first runs `CREATE TABLE IF NOT EXISTS d1_migrations`. (The "Edit Cloudflare Workers"
+     template also works but grants more.)
+3. For monitoring (below), **repository** secrets, since environment secrets are invisible to
+   other workflows: `CF_ANALYTICS_TOKEN` (a separate token with only **Account · Account
+   Analytics · Read**) and `CLOUDFLARE_ACCOUNT_ID` (secret or repository variable). Optional
+   repository variable `COOKUP_URL` if the site moves to another host.
+
+### Monitoring
+
+- **Workers Logs** (`[observability]` in `wrangler.toml`): every request's invocation log plus
+  `console` output, in the dashboard under Workers → cook-up → Logs. Free plan: 200,000 events
+  a day, 3 days retention, nothing written to D1. `npx wrangler tail` streams live.
+- **`.github/workflows/monitor.yml`**, read-only and scheduled:
+  - *d1-usage*, hourly: today's account-wide D1 rows read/written (UTC day, the window the Free
+    caps of 5M reads / 100k writes count) from the GraphQL Analytics API, with a linear
+    projection to midnight. At 70% of either cap it opens or comments on an issue
+    `D1 quota alert YYYY-MM-DD`; at 90% the run also fails, which emails you. Without
+    `CF_ANALYTICS_TOKEN` it is skipped with a notice, not failed. Locally:
+    `CF_ANALYTICS_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/d1-usage.mjs`.
+  - *uptime*, every 30 min: `/`, `/glossary` and `/api/ingredients` answer 200 and their whole
+    chunk graph loads. Failures open or comment on an issue `Site check failing YYYY-MM-DD`. It
+    needs no secret and runs no JavaScript, so it never records page views; `/api/ingredients`
+    reads D1 only on an edge-cache miss.
+  - GitHub can delay scheduled runs, and disables schedules after 60 days without repository
+    activity; failure emails go to whoever last edited the schedule.
 
 ## Data sources & attribution
 

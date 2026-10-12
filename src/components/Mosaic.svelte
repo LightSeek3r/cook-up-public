@@ -9,9 +9,11 @@
 		selected: string[];
 		t: (key: string) => string;
 		onToggle: (canonicalKey: string) => void;
+		/** First load still in flight: nothing to show yet, but not "no match" either. */
+		loading?: boolean;
 	}
 
-	let { tiles, selected, t, onToggle }: Props = $props();
+	let { tiles, selected, t, onToggle, loading = false }: Props = $props();
 
 	/**
 	 * The full mosaic is ~900 tiles. Rendering it flat is an undifferentiated wall
@@ -41,6 +43,24 @@
 		}).filter((group) => group.all.length > 0)
 	);
 </script>
+
+{#if loading}
+	<!-- Two collapsed groups' worth of placeholders: taller than any phone
+	     viewport, so the results and footer below already sit off-screen and do
+	     not jump when the real tiles replace these. -->
+	<div class="placeholder" aria-hidden="true">
+		{#each [0, 1] as group (group)}
+			<section class="group">
+				<div class="head"><span class="skeleton bar"></span></div>
+				<div class="mosaic">
+					{#each Array(COLLAPSED) as _, i (i)}
+						<span class="skeleton cell"></span>
+					{/each}
+				</div>
+			</section>
+		{/each}
+	</div>
+{/if}
 
 {#each groups as group (group.category)}
 	<section class="group" data-cat={group.category}>
@@ -78,7 +98,7 @@
 	</section>
 {/each}
 
-{#if groups.length === 0}
+{#if groups.length === 0 && !loading}
 	<p class="muted empty">{t('mosaic.noMatch')}</p>
 {/if}
 
@@ -147,5 +167,22 @@
 	}
 	.empty {
 		margin: var(--space-5) 0;
+	}
+
+	.placeholder .head {
+		border-block-end-color: var(--line);
+	}
+	.skeleton {
+		display: block;
+		border-radius: var(--radius);
+		background: var(--surface-sunken);
+	}
+	.bar {
+		inline-size: 9rem;
+		block-size: 2rem;
+	}
+	/* Same floor as IngredientTile, so the reserved height matches the real grid. */
+	.cell {
+		min-block-size: 5.5rem;
 	}
 </style>

@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "Cozinha modernista",
   "glossary.cat.preservation": "Conservação",
   "glossary.cat.fermentation": "Fermentação",
-  "glossary.cat.meat-fish": "Carnes e peixes"
+  "glossary.cat.meat-fish": "Carnes e peixes",
+  "error.loadFailed": "Não foi possível carregar agora. Tente novamente daqui a pouco.",
+  "error.retry": "Tentar novamente",
+  "error.unavailableHeading": "Temporariamente indisponível",
+  "mosaic.limit": "No máximo {n} ingredientes. Remova um para adicionar outro."
 }

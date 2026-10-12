@@ -15,6 +15,7 @@ import * as sitemap from '../routes/sitemap.xml/+server';
 import * as robots from '../routes/robots.txt/+server';
 import * as manifest from '../routes/manifest.webmanifest/+server';
 import * as admin from '../routes/admin/+page.server';
+import { sqliteD1 } from './test/d1';
 
 const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 let platform;
@@ -30,18 +31,7 @@ beforeAll(() => {
 		INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (7, 1);
 		INSERT INTO recipe_title_fts(rowid, title) SELECT rowid, title FROM recipe_i18n;
 		INSERT INTO ingredient_fts(rowid, name) SELECT rowid, name FROM ingredient_i18n;`);
-	const DB = {
-		prepare: (sql) => {
-			const make = (b) => ({
-				bind: (...x) => make(x),
-				all: async () => ({ results: sqlite.prepare(sql).all(...b) }),
-				first: async () => sqlite.prepare(sql).get(...b) ?? null,
-				run: async () => (sqlite.prepare(sql).run(...b), { meta: {} })
-			});
-			return make([]);
-		}
-	};
-	platform = { env: { DB }, ctx: { waitUntil: () => {} } };
+	platform = { env: { DB: sqliteD1(sqlite) }, ctx: { waitUntil: () => {} } };
 });
 
 const get = (route, path) => route.GET({ url: new URL(`https://cook.test${path}`), platform });

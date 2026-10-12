@@ -10,6 +10,7 @@ import {
 	RECIPE_HIT_LIMIT
 } from './search';
 import type { D1Database } from '@cloudflare/workers-types';
+import { assertD1Binds } from './test/d1';
 
 /** Same shape as match.test.ts's harness: records the SQL text and binds without
  *  a real D1. `searchRecipeTitles` touches `db` at most once. */
@@ -20,7 +21,12 @@ function spyDb(results: unknown[] = []) {
 			return {
 				bind(...binds: unknown[]) {
 					calls.push({ sql, binds });
-					return { all: async () => ({ results }) };
+					return {
+						all: async () => {
+							assertD1Binds(binds);
+							return { results };
+						}
+					};
 				}
 			};
 		}
@@ -138,13 +144,20 @@ describe('getRecipesByIds', () => {
 		expect(calls).toHaveLength(0);
 	});
 
-	it('builds one placeholder per id, matching bind length', async () => {
+	it('binds the ids as one JSON array, so the bind count does not grow with the list', async () => {
+		const ids = Array.from({ length: 500 }, (_, k) => k + 1);
 		const { db, calls } = spyDb();
-		await getRecipesByIds(db, { ids: [3, 1, 2], lang: 'en' });
-		expect(calls[0].sql).toContain('WHERE r.id IN (?,?,?)');
+		await getRecipesByIds(db, { ids, lang: 'en' });
+		expect(calls[0].sql).toContain('WHERE r.id IN (SELECT value FROM json_each(?))');
 		const placeholders = (calls[0].sql.match(/\?/g) ?? []).length;
 		expect(placeholders).toBe(calls[0].binds.length);
-		expect(calls[0].binds).toEqual(['en', 3, 1, 2]);
+		expect(calls[0].binds).toEqual(['en', JSON.stringify(ids)]);
+	});
+
+	it('orders rows by id, so a permutation of the list is the same response', async () => {
+		const { db, calls } = spyDb();
+		await getRecipesByIds(db, { ids: [3, 1, 2], lang: 'en' });
+		expect(calls[0].sql).toMatch(/ORDER BY r\.id\s*$/);
 	});
 
 	it('collapses one recipe to one row', async () => {

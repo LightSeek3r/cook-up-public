@@ -1,5 +1,5 @@
 import { normaliseQuery } from '$lib/search';
-import type { CategoryId, GlossaryEntry } from './types';
+import type { CategoryId, GlossarySummary } from './types';
 
 // Only these combining ranges are stripped, never all of \p{M}: Devanagari and
 // Bengali vowel signs are marks too, and removing them would make every word
@@ -83,7 +83,7 @@ export interface Hit {
 	score: number;
 }
 
-export function buildIndex(entries: GlossaryEntry[]): GlossaryIndex {
+export function buildIndex(entries: GlossarySummary[]): GlossaryIndex {
 	return {
 		docs: entries.map((e) => {
 			const name = foldText(e.text.name);

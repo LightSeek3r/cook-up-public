@@ -126,24 +126,29 @@ export async function searchRecipeTitles(
  * Recipes by id — the summary-row fetch behind the client-only favorites
  * page, which already knows its own id list from localStorage and only needs
  * display data. Same RecipeHit projection and i18n-title fallback as
- * searchRecipeTitles. `WHERE id IN (...)` makes no ordering promise; the
- * favorites page re-sorts client-side by its own stored order.
+ * searchRecipeTitles. Rows come back in id order whatever order `ids` is in,
+ * so every permutation of one list is the same response; the favorites page
+ * re-sorts client-side by its own stored order.
+ *
+ * The ids are bound as one JSON array, not one placeholder each: D1 caps a
+ * statement at 100 bound parameters, and a placeholder per id 500'd at 100
+ * favorites.
  */
 export async function getRecipesByIds(
 	db: D1Database,
 	p: { ids: number[]; lang: Lang }
 ): Promise<{ recipes: RecipeHit[] }> {
 	if (p.ids.length === 0) return { recipes: [] };
-	const placeholders = p.ids.map(() => '?').join(',');
 	const { results } = await db
 		.prepare(
 			`SELECT ${HIT_COLS}
        FROM recipes r
        ${HIT_JOINS}
-       WHERE r.id IN (${placeholders})
-       GROUP BY r.id`
+       WHERE r.id IN (SELECT value FROM json_each(?))
+       GROUP BY r.id
+       ORDER BY r.id`
 		)
-		.bind(p.lang, ...p.ids)
+		.bind(p.lang, JSON.stringify(p.ids))
 		.all<RecipeHit>();
 	return { recipes: results ?? [] };
 }

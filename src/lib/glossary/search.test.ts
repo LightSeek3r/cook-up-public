@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { foldText, buildIndex, search } from './search';
-import { loadGlossary, getEntry, getTermIds, getDiagramInfo, mergeEntries } from './load';
+import { loadGlossary, getEntry, getTermIds, getDiagramInfo, mergeEntries, toSummary } from './load';
 import { MAX_QUERY } from '$lib/search';
 import type { CategoryId, GlossaryEntry, TermMeta, TermText } from './types';
 
@@ -453,6 +453,26 @@ describe('loader (sample data)', () => {
 			for (const e of entries) {
 				expect(search(index, e.text.name)[0]?.id, `${lang}/${e.id} by name`).toBe(e.id);
 				expect(search(index, e.en).map((h) => h.id), `${lang}/${e.id} by en`).toContain(e.id);
+			}
+		}
+	});
+});
+
+describe('toSummary', () => {
+	it('drops everything the list page does not render, and searches exactly like the full entry', async () => {
+		for (const lang of ['en', 'fr', 'pnb'] as const) {
+			const entries = await loadGlossary(lang);
+			const summaries = entries.map(toSummary);
+			for (const s of summaries) {
+				expect(Object.keys(s).sort(), s.id).toEqual(
+					['aliases', 'category', 'en', 'id', 'text', ...(s.diagram ? ['diagram'] : [])].sort()
+				);
+				expect(Object.keys(s.text).every((k) => ['name', 'short', 'aliases'].includes(k))).toBe(true);
+			}
+			const full = buildIndex(entries);
+			const slim = buildIndex(summaries);
+			for (const q of ['', 'sous', 'julienne', entries[3].text.name, entries[7].en]) {
+				expect(search(slim, q), `${lang}:${q}`).toEqual(search(full, q));
 			}
 		}
 	});

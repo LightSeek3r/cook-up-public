@@ -1,18 +1,18 @@
 import { json } from '@sveltejs/kit';
 import { requireDb } from '$lib/db';
-import { resolveLang } from '$lib/i18n';
 import { PUBLIC_DATA } from '$lib/httpCache';
+import { parseIngredientsQuery } from '$lib/apiParams';
 import type { IngredientTile } from '$lib/types';
 import type { RequestHandler } from './$types';
 // One copy of the query hardening and the length thresholds, shared with the
 // recipe-title search — these are the same trust boundary, and two divergent
 // copies of an FTS escape is exactly the bug you don't find by reading.
-import { ftsPhrase, likeTerm, normaliseQuery, MIN_FTS_LENGTH } from '$lib/search';
+import { ftsPhrase, MIN_FTS_LENGTH } from '$lib/search';
 
 /**
  * Ingredient names fall back to English, then to the canonical key: a newly
  * ingested ingredient must still appear in the mosaic before its translations
- * land, rather than silently disappearing for nine of the ten languages.
+ * land, rather than silently disappearing for every language but English.
  */
 const NAME = `COALESCE(t.name, en.name, i.canonical_key)`;
 const COLS = `i.id, i.canonical_key, i.category, i.recipe_count, ${NAME} AS name`;
@@ -23,13 +23,17 @@ const respond = (results: IngredientTile[] | undefined) =>
 	json({ results: results ?? [] }, { headers: { 'cache-control': PUBLIC_DATA } });
 
 export const GET: RequestHandler = async ({ url, platform }) => {
-	const db = requireDb(platform);
-	const lang = resolveLang(url.searchParams.get('lang'));
-	const q = normaliseQuery(url.searchParams.get('q'));
+	const { lang, q } = parseIngredientsQuery(url.searchParams);
 
-	// The trigram tokenizer cannot index terms shorter than 3 characters, so
-	// short queries (common in CJK) fall back to a LIKE scan.
-	if (q.length >= MIN_FTS_LENGTH) {
+	// The trigram tokenizer cannot index terms shorter than 3 characters. The
+	// page filters those (common in CJK) over the mosaic it already holds
+	// (tileSearch.ts) and never sends them; answering one here would be a LIKE
+	// scan of every ingredient name, so it is answered empty without D1.
+	if (q.length > 0 && q.length < MIN_FTS_LENGTH) return respond([]);
+
+	const db = requireDb(platform);
+
+	if (q) {
 		const { results } = await db
 			.prepare(
 				`SELECT ${COLS}
@@ -43,21 +47,6 @@ export const GET: RequestHandler = async ({ url, platform }) => {
          LIMIT 60`
 			)
 			.bind(lang, ftsPhrase(q), lang)
-			.all<IngredientTile>();
-		return respond(results);
-	}
-
-	if (q.length > 0) {
-		const { results } = await db
-			.prepare(
-				`SELECT ${COLS}
-         FROM ingredients i
-         ${FALLBACK_JOINS}
-         WHERE i.is_staple = 0 AND ${NAME} LIKE ? ESCAPE '\\'
-         ORDER BY i.recipe_count DESC
-         LIMIT 60`
-			)
-			.bind(lang, `%${likeTerm(q)}%`)
 			.all<IngredientTile>();
 		return respond(results);
 	}

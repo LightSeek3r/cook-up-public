@@ -7,6 +7,16 @@ compatibility_flags = ["nodejs_compat", "nodejs_als"]
 binding = "ASSETS"
 directory = ".svelte-kit/cloudflare"
 
+# Workers Logs: console output and one invocation log per request, queryable
+# in the dashboard (Workers > cook-up > Logs). Included in the Free plan:
+# 200,000 log events/day, 3 days retention; nothing is billed or written to D1
+# (developers.cloudflare.com/workers/observability/logs/workers-logs, checked
+# 2026-10-12). Sampling 1 = every request, fine while traffic is far below the
+# 100k requests/day the Free plan allows anyway; lower it if logs hit the cap.
+[observability]
+enabled = true
+head_sampling_rate = 1
+
 # Only D1 and static assets are bound, both emulated locally by wrangler/vite,
 # so `vite dev` and `wrangler dev --local` need no Cloudflare login. Recipe and
 # glossary translations are complete and stored; nothing translates at runtime.

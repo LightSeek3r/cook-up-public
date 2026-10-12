@@ -1,11 +1,15 @@
 import adapter from '@sveltejs/adapter-cloudflare';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import { buildVersion } from './scripts/lib/version.mjs';
 
 /** @type {import('@sveltejs/kit').Config} */
 export default {
 	preprocess: vitePreprocess(),
 	kit: {
 		adapter: adapter(),
+		// The git commit, so rebuilding one commit reproduces its chunk names
+		// exactly (see scripts/lib/version.mjs).
+		version: { name: buildVersion() },
 		alias: {
 			$components: 'src/components'
 		},

@@ -3,71 +3,51 @@
  *
  * Input:  pipeline/out/{recipes,ingredients,recipe_ingredients,recipe_diets,
  *          recipes.nutrition,ingredient_nutrition,ingredient_micronutrient,
- *          recipe_micronutrient}.jsonl
+ *          recipe_micronutrient}.jsonl, and the translation backup in
+ *          pipeline/data/i18n-backup (pipeline/tools/export_remote_i18n.mjs)
  * Output: pipeline/out/seed.sql, applied with:
  *   wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql
+ *
+ * recipe_i18n and ingredient_i18n come from the backup, so a local database
+ * serves the same translated text as remote; the pipeline's own rows fill
+ * only what the backup lacks (a recipe or name remote has never had). Without
+ * a backup the seed is English-only, as it was before the backup existed.
+ * Needs every migration applied locally first (recipe_i18n_stats is 0011's).
  */
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { GENERIC_PAIRS_CLOSED } from './lib/generic_ingredients.mjs';
-import { nonStapleCounts } from './lib/non_staple_count.mjs';
-import { relatedRows } from './lib/related_recipes.mjs';
+import { pathToFileURL } from 'node:url';
+import { readBackup } from './lib/i18n_backup.mjs';
+import {
+	COLUMNS,
+	batchInsert,
+	i18nStatsRefresh,
+	ingredientFtsRefresh,
+	mergeIngredientNames,
+	mergeRecipeI18n,
+	readSeedInputs,
+	recipeCountRefresh,
+	seedRows,
+	titleFtsRefresh,
+	writeCost
+} from './lib/seed_sql.mjs';
 
 const OUT_DIR = path.resolve('pipeline/out');
-const ALLERGENS = ['gluten', 'dairy', 'nut', 'peanut', 'egg', 'soy', 'fish', 'shellfish', 'sesame'];
 
-function esc(v) {
-	if (v === null || v === undefined) return 'NULL';
-	if (typeof v === 'number') return String(v);
-	return `'${String(v).replace(/'/g, "''")}'`;
-}
+// 50 for recipes: a row carries a Commons image URL, a file-page URL, an author
+// and the notes text, and 200 of those exceeded SQLite's statement-length cap
+// (SQLITE_TOOBIG). recipe_i18n rows are capped by bytes instead (up to ~14 KB).
+const BATCH = { recipes: 50 };
 
-function batchInsert(sql, table, columns, rows, batchSize = 200) {
-	for (let i = 0; i < rows.length; i += batchSize) {
-		const batch = rows.slice(i, i + batchSize);
-		const values = batch.map((row) => `(${columns.map((c) => esc(row[c])).join(',')})`).join(',\n');
-		sql.push(`INSERT INTO ${table} (${columns.join(',')}) VALUES\n${values};`);
-	}
-}
-
-async function readJsonl(name) {
-	const raw = await readFile(path.join(OUT_DIR, name), 'utf8');
-	return raw
-		.split('\n')
-		.map((l) => l.trim())
-		.filter(Boolean)
-		.map((l) => JSON.parse(l));
-}
-
-async function main() {
-	const [recipes, ingredients, recipeIngredients, recipeGrams, recipeDiets, recipeNutrition, ingredientNutrition, ingredientMicros, recipeMicros, recipeImages] =
-		await Promise.all([
-			readJsonl('recipes.jsonl'),
-			readJsonl('ingredients.jsonl'),
-			readJsonl('recipe_ingredients.jsonl'),
-			readJsonl('recipe_ingredients.grams.jsonl'),
-			readJsonl('recipe_diets.jsonl'),
-			readJsonl('recipes.nutrition.jsonl'),
-			readJsonl('ingredient_nutrition.jsonl'),
-			readJsonl('ingredient_micronutrient.jsonl'),
-			readJsonl('recipe_micronutrient.jsonl'),
-			readJsonl('recipe_images.jsonl')
-		]);
-
-	const keptRecipeIds = new Set(recipeIngredients.map((r) => r.recipe_id));
-	const keptRecipes = recipes.filter((r) => keptRecipeIds.has(r.id));
-	const nutritionById = new Map(recipeNutrition.map((n) => [n.id, n]));
-	const imageById = new Map(recipeImages.map((i) => [i.recipe_id, i]));
-	const nonStaple = nonStapleCounts(ingredients, recipeIngredients);
-
-	const ingredientId = new Map(ingredients.map((ing, i) => [ing.canonical_key, i + 1]));
-
-	// (recipe_id, canonical_key) is unique per row after stage 03's dedup, so it
-	// keys the grams file back onto the ingredient rows.
-	const gramsByRow = new Map(
-		recipeGrams.map((g) => [`${g.recipe_id}|${g.canonical_key}`, g.grams])
-	);
+/** seed.sql's statements, in order. `backup` is `{ recipe_i18n, ingredient_i18n }` rows or nulls. */
+export function buildLocalSeed(data, backup = {}) {
+	const rows = seedRows(data);
+	const names = mergeIngredientNames(data.ingredients, backup.ingredient_i18n);
+	const i18n = mergeRecipeI18n(rows.keptRecipes, backup.recipe_i18n);
+	const insert = (table, list) =>
+		batchInsert(table, COLUMNS[table], list, { batchSize: BATCH[table] ?? 200, sep: ',\n' }).map((s) => s.sql);
+	const noCost = writeCost({});
 
 	const sql = [
 		'DELETE FROM recipe_related;',
@@ -82,206 +62,51 @@ async function main() {
 		'DELETE FROM ingredient_nutrition;',
 		'DELETE FROM ingredient_i18n;',
 		'DELETE FROM ingredients;',
-		'DELETE FROM allergens;'
+		'DELETE FROM allergens;',
+		...insert('allergens', rows.allergens),
+		...insert('ingredients', rows.ingredients),
+		...insert(
+			'ingredient_i18n',
+			names.rows.map((r) => ({ ingredient_id: rows.ingredientId.get(r.canonical_key), lang: r.lang, name: r.name }))
+		),
+		...insert('ingredient_allergens', rows.ingredientAllergens),
+		...insert('ingredient_generic_of', rows.genericOf),
+		...insert('recipes', rows.recipes),
+		...insert('recipe_i18n', i18n.rows),
+		...insert('recipe_ingredients', rows.recipeIngredients),
+		...insert('recipe_diets', rows.recipeDiets),
+		...insert('recipe_related', rows.recipeRelated),
+		...insert('ingredient_nutrition', rows.ingredientNutrition),
+		...insert('ingredient_micronutrient', rows.ingredientMicros),
+		...insert('recipe_micronutrient', rows.recipeMicros),
+		...[
+			recipeCountRefresh(noCost, 0),
+			...ingredientFtsRefresh(),
+			...titleFtsRefresh(0),
+			...i18nStatsRefresh()
+		].map((s) => s.sql)
 	];
+	return { sql, rows, names: names.stats, i18n: i18n.stats };
+}
 
-	batchInsert(
-		sql,
-		'allergens',
-		['id', 'key'],
-		ALLERGENS.map((key, i) => ({ id: i + 1, key }))
-	);
+async function main() {
+	const data = await readSeedInputs(OUT_DIR);
+	const recipeBackup = readBackup('recipe_i18n');
+	const nameBackup = readBackup('ingredient_i18n');
+	if (!recipeBackup) console.warn('06_seed_d1: no translation backup in pipeline/data/i18n-backup; seeding source-language rows only');
+	const seed = buildLocalSeed(data, { recipe_i18n: recipeBackup?.rows ?? null, ingredient_i18n: nameBackup?.rows ?? null });
 
-	batchInsert(
-		sql,
-		'ingredients',
-		['id', 'canonical_key', 'category', 'is_staple', 'beneficial', 'recipe_count'],
-		ingredients.map((ing) => ({
-			id: ingredientId.get(ing.canonical_key),
-			canonical_key: ing.canonical_key,
-			category: ing.category,
-			is_staple: ing.is_staple,
-			beneficial: ing.beneficial,
-			recipe_count: 0 // refreshed below once recipe_ingredients is loaded
-		}))
-	);
-
-	const i18nRows = [];
-	for (const ing of ingredients) {
-		for (const [lang, name] of Object.entries(ing.names)) {
-			i18nRows.push({ ingredient_id: ingredientId.get(ing.canonical_key), lang, name });
-		}
-	}
-	batchInsert(sql, 'ingredient_i18n', ['ingredient_id', 'lang', 'name'], i18nRows);
-
-	const allergenId = new Map(ALLERGENS.map((a, i) => [a, i + 1]));
-	const allergenRows = [];
-	for (const ing of ingredients) {
-		for (const a of ing.allergens) {
-			allergenRows.push({ ingredient_id: ingredientId.get(ing.canonical_key), allergen_id: allergenId.get(a) });
-		}
-	}
-	batchInsert(sql, 'ingredient_allergens', ['ingredient_id', 'allergen_id'], allergenRows);
-
-	// Both endpoints of a curated pair must actually be in THIS corpus — the pair
-	// list is fixed and hand-reviewed, but which canonical_keys exist varies run
-	// to run with the source data.
-	//
-	// Seeded from the CLOSED set, not the curated one: match.ts joins
-	// ingredient_generic_of a single time, so multi-hop chains only work if the
-	// table is transitively closed. See that export's comment.
-	const genericRows = GENERIC_PAIRS_CLOSED.filter(
-		([generic, specific]) => ingredientId.has(generic) && ingredientId.has(specific)
-	).map(([generic, specific]) => ({
-		specific_id: ingredientId.get(specific),
-		generic_id: ingredientId.get(generic)
-	}));
-	batchInsert(sql, 'ingredient_generic_of', ['specific_id', 'generic_id'], genericRows);
-
-	batchInsert(
-		sql,
-		'recipes',
-		[
-			'id', 'source_url', 'source_lang', 'license', 'attribution', 'cuisine', 'meal_type',
-			'difficulty', 'notes',
-			'image_url', 'image_width', 'image_height', 'image_page', 'image_author', 'image_licence',
-			'prep_minutes', 'total_minutes', 'servings', 'servings_assumed',
-			'kcal', 'protein_g', 'fat_g', 'sat_fat_g', 'carb_g', 'sugar_g', 'fiber_g', 'sodium_mg',
-			'balance_grade', 'balance_score', 'nutrition_coverage', 'non_staple_count'
-		],
-		keptRecipes.map((r) => {
-			const n = nutritionById.get(r.id);
-			const img = imageById.get(r.id);
-			return {
-				id: r.id,
-				source_url: r.source_url,
-				source_lang: r.source_lang,
-				license: r.license,
-				attribution: r.attribution,
-				cuisine: r.cuisine,
-				meal_type: r.meal_type,
-				difficulty: r.difficulty ?? null,
-				image_url: img?.url ?? null,
-					image_width: img?.width ?? null,
-					image_height: img?.height ?? null,
-					image_page: img?.page ?? null,
-					image_author: img?.author ?? null,
-					image_licence: img?.licence ?? null,
-				// Bullets joined with newlines, same convention as `instructions`.
-				// NULL rather than '' when a recipe has none, so the UI branches on
-				// presence instead of on an empty string.
-				notes: r.notes?.length ? r.notes.join('\n') : null,
-				prep_minutes: r.prep_minutes,
-				total_minutes: r.total_minutes,
-				servings: r.servings,
-				servings_assumed: r.servings ? 0 : 1,
-				kcal: n?.kcal ?? null,
-				protein_g: n?.protein_g ?? null,
-				fat_g: n?.fat_g ?? null,
-				sat_fat_g: n?.sat_fat_g ?? null,
-				carb_g: n?.carb_g ?? null,
-				sugar_g: n?.sugar_g ?? null,
-				fiber_g: n?.fiber_g ?? null,
-				sodium_mg: n?.sodium_mg ?? null,
-				balance_grade: n?.balance_grade ?? null,
-				balance_score: n?.balance_score ?? null,
-				nutrition_coverage: n?.nutrition_coverage ?? 0,
-				non_staple_count: nonStaple.get(r.id) ?? 0
-			};
-		}),
-		// 50, not the default 200: a recipes row now carries a Commons image URL, a
-		// file-page URL, an author and the notes text, and 200 of those in one
-		// statement exceeded SQLite's statement-length cap (SQLITE_TOOBIG). Same
-		// reason recipe_i18n below uses 20.
-		50
-	);
-
-	batchInsert(
-		sql,
-		'recipe_i18n',
-		['recipe_id', 'lang', 'title', 'instructions', 'is_machine'],
-		keptRecipes.map((r) => ({
-			recipe_id: r.id,
-			lang: r.source_lang,
-			title: r.title,
-			instructions: r.instructions,
-			is_machine: 0
-		})),
-		20 // full instruction text per row — long enough to hit D1's per-statement size cap at the default batch size
-	);
-
-	batchInsert(
-		sql,
-		'recipe_ingredients',
-		['recipe_id', 'ingredient_id', 'raw_text', 'quantity', 'unit', 'grams'],
-		recipeIngredients.map((ri) => ({
-			recipe_id: ri.recipe_id,
-			ingredient_id: ingredientId.get(ri.canonical_key),
-			raw_text: ri.raw_text,
-			quantity: ri.quantity,
-			unit: ri.unit,
-			grams: gramsByRow.get(`${ri.recipe_id}|${ri.canonical_key}`) ?? null
-		}))
-	);
-
-	batchInsert(sql, 'recipe_diets', ['recipe_id', 'diet'], recipeDiets);
-
-	// migrations/0010: the recipe page's related list, ranked here so D1 never
-	// has to (see pipeline/lib/related_recipes.mjs).
-	batchInsert(
-		sql,
-		'recipe_related',
-		['recipe_id', 'related_ids'],
-		relatedRows(ingredients, recipeIngredients, keptRecipes.map((r) => r.id))
-	);
-
-	batchInsert(
-		sql,
-		'ingredient_nutrition',
-		['ingredient_id', 'fdc_id', 'kcal', 'protein_g', 'fat_g', 'sat_fat_g', 'carb_g', 'sugar_g', 'fiber_g', 'sodium_mg'],
-		ingredientNutrition.map((n) => ({
-			ingredient_id: ingredientId.get(n.canonical_key),
-			fdc_id: n.fdc_id,
-			kcal: n.kcal, protein_g: n.protein_g, fat_g: n.fat_g, sat_fat_g: n.sat_fat_g,
-			carb_g: n.carb_g, sugar_g: n.sugar_g, fiber_g: n.fiber_g, sodium_mg: n.sodium_mg
-		}))
-	);
-
-	batchInsert(
-		sql,
-		'ingredient_micronutrient',
-		['ingredient_id', 'nutrient_key', 'amount', 'unit'],
-		ingredientMicros.map((m) => ({
-			ingredient_id: ingredientId.get(m.canonical_key),
-			nutrient_key: m.nutrient_key,
-			amount: m.amount,
-			unit: m.unit
-		}))
-	);
-
-	batchInsert(
-		sql,
-		'recipe_micronutrient',
-		['recipe_id', 'nutrient_key', 'amount', 'unit', 'pct_nrv'],
-		recipeMicros
-	);
-
-	sql.push(
-		"UPDATE ingredients SET recipe_count = (SELECT COUNT(*) FROM recipe_ingredients ri WHERE ri.ingredient_id = ingredients.id);",
-		"INSERT INTO ingredient_fts(ingredient_fts) VALUES('rebuild');",
-		// Source-lang rows only — see migrations/0008_recipe_title_fts_source_only.sql.
-		// A blanket 'rebuild' would index every language's copy of the same
-		// untranslated title once translations exist.
-		`INSERT INTO recipe_title_fts(rowid, title)
-		 SELECT i.rowid, i.title FROM recipe_i18n i
-		 JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang;`
-	);
-
-	await writeFile(path.join(OUT_DIR, 'seed.sql'), sql.join('\n\n') + '\n');
+	await writeFile(path.join(OUT_DIR, 'seed.sql'), seed.sql.join('\n\n') + '\n');
 	console.log(
-		`06_seed_d1: wrote pipeline/out/seed.sql — ${keptRecipes.length} recipes, ${ingredients.length} ingredients, ` +
-			`${recipeIngredients.length} recipe_ingredients rows, ${genericRows.length}/${GENERIC_PAIRS_CLOSED.length} generic-ingredient pairs`
+		`06_seed_d1: wrote pipeline/out/seed.sql — ${seed.rows.keptRecipes.length} recipes, ${seed.rows.ingredients.length} ingredients, ` +
+			`${seed.rows.recipeIngredients.length} recipe_ingredients rows, ${seed.rows.genericOf.length} generic-ingredient pairs`
+	);
+	console.log(
+		`06_seed_d1: recipe_i18n ${seed.i18n.fromBackup} rows from the backup (${recipeBackup?.exported_at ?? 'none'}), ` +
+			`${seed.i18n.fromPipeline} source rows from recipes.jsonl, ${seed.i18n.notKept} backup rows of recipes not kept, ` +
+			`${seed.i18n.sourceDiffers} source rows where recipes.jsonl differs from the backup (backup kept); ` +
+			`ingredient_i18n ${seed.names.fromBackup} from the backup, ${seed.names.fromPipeline} from ingredients.jsonl`
 	);
 }
 
-await main();
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) await main();

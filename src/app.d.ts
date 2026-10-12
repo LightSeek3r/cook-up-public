@@ -3,6 +3,12 @@ import type { D1Database } from '@cloudflare/workers-types';
 
 declare global {
 	namespace App {
+		interface Error {
+			message: string;
+			/** Set by hooks.server.ts `handleError`; absent on errors thrown with
+			 *  `error(status, …)`, which carry only their status and message. */
+			code?: import('$lib/apiError').ApiErrorCode;
+		}
 		interface Platform {
 			env: {
 				DB: D1Database;

@@ -10,6 +10,7 @@
 	import { t as translator } from '$lib/i18n';
 	import { splitSteps } from '$lib/steps';
 	import { equivalentOf } from '$lib/measure';
+	import { commonsSrcset } from '$lib/photo';
 	import type { RecipeDetail } from '$lib/types';
 	import type { PageData } from './$types';
 
@@ -32,6 +33,9 @@
 	);
 
 	const title = $derived(data.recipe.title);
+	const srcset = $derived(
+		data.recipe.image_url ? commonsSrcset(data.recipe.image_url, data.recipe.image_width) : undefined
+	);
 	const machine = $derived(Boolean(data.recipe.is_machine));
 
 	const steps = $derived(splitSteps(data.recipe.instructions));
@@ -60,6 +64,14 @@
 	lang={data.lang}
 	type="article"
 />
+
+<svelte:head>
+	{#if data.recipe.image_url}
+		<!-- The hero photo is the page's LCP element and the one third-party host:
+		     open that connection while the HTML is still arriving. -->
+		<link rel="preconnect" href="https://upload.wikimedia.org" />
+	{/if}
+</svelte:head>
 
 <article>
 	<div class="toolbar no-print">
@@ -97,17 +109,22 @@
 	<header class="hero">
 		{#if data.recipe.image_url}
 			<!-- width/height come from the API so the box is reserved before the image
-			     arrives (no layout shift). `loading="eager"` because this is the page's
-			     lead image and above the fold — lazy-loading it would only delay it.
-			     `no-referrer` keeps the visitor's page out of Wikimedia's logs, which
-			     is the privacy cost of hotlinking rather than mirroring. -->
+			     arrives (no layout shift). Eager with high priority because this is the
+			     page's lead image and LCP element, above the fold. `sizes` follows the
+			     full-bleed hero: the viewport on phones, the 78rem page column minus its
+			     padding on wide screens. `no-referrer` keeps the visitor's page out of
+			     Wikimedia's logs, which is the privacy cost of hotlinking rather than
+			     mirroring. -->
 			<img
 				class="photo"
 				src={data.recipe.image_url}
+				{srcset}
+				sizes={srcset ? '(min-width: 78rem) 75rem, 100vw' : undefined}
 				width={data.recipe.image_width}
 				height={data.recipe.image_height}
 				alt={title}
 				loading="eager"
+				fetchpriority="high"
 				decoding="async"
 				referrerpolicy="no-referrer"
 			/>

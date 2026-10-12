@@ -1,0 +1,121 @@
+name: monitor
+
+# Read-only scheduled checks, approved as part of phase 2 (no translation, no
+# D1 writes):
+#   d1-usage  hourly: today's account-wide D1 rows read/written via the GraphQL
+#             Analytics API; opens an issue at 70 % of a Free cap, fails at 90 %.
+#   uptime    every 30 min: home, glossary and one API answer 200 and every
+#             chunk the pages reference loads (no browser, no /api/track).
+# d1-usage needs CF_ANALYTICS_TOKEN + CLOUDFLARE_ACCOUNT_ID (README,
+# Monitoring); without them it is skipped, not failed. uptime needs nothing.
+# GitHub may delay scheduled runs, and disables them after 60 days without
+# repository activity.
+on:
+  schedule:
+    - cron: '7 * * * *'
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: monitor-${{ github.event.schedule || 'manual' }}
+  cancel-in-progress: false
+
+env:
+  SITE_URL: ${{ vars.COOKUP_URL || 'https://cook-up.asakura-account.workers.dev' }}
+
+jobs:
+  d1-usage:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '7 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID || vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - id: gate
+        name: Skip unless the analytics secrets are set
+        run: |
+          if [ -z "$CF_ANALYTICS_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::notice::D1 usage check skipped: add the CF_ANALYTICS_TOKEN secret and CLOUDFLARE_ACCOUNT_ID (README, Monitoring)."
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - if: steps.gate.outputs.enabled == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts
+
+      - if: steps.gate.outputs.enabled == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - id: usage
+        if: steps.gate.outputs.enabled == 'true'
+        run: node scripts/d1-usage.mjs
+
+      - name: Open or update today's quota issue
+        if: steps.usage.outputs.level == 'warn' || steps.usage.outputs.level == 'crit'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LEVEL: ${{ steps.usage.outputs.level }}
+          SUMMARY: ${{ steps.usage.outputs.summary }}
+          DAY: ${{ steps.usage.outputs.date }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="D1 quota alert $DAY"
+          body="$LEVEL: $SUMMARY. At the cap D1 rejects every query until 00:00 UTC. Details: $RUN_URL"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$body"
+          else
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "$body"
+          fi
+
+      - name: Fail at the critical threshold
+        if: steps.usage.outputs.level == 'crit'
+        env:
+          SUMMARY: ${{ steps.usage.outputs.summary }}
+        run: |
+          echo "::error::$SUMMARY"
+          exit 1
+
+  uptime:
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '*/30 * * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: scripts
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      # /api/ingredients is edge-cached per colo, so this costs D1 rows only on
+      # a cache miss. --no-headers: main may be ahead of what is deployed.
+      - name: Pages, API and chunk graph
+        run: node scripts/verify-deploy.mjs "$SITE_URL" --page=/ --page=/glossary --api=/api/ingredients?lang=en --no-headers
+
+      - name: Open or update the outage issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          title="Site check failing $(date -u +%F)"
+          number=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "\"$title\" in:title" --json number --jq '.[0].number // empty')
+          if [ -z "$number" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --body "$SITE_URL failed the uptime check: $RUN_URL"
+          else
+            gh issue comment "$number" --repo "$GITHUB_REPOSITORY" --body "Still failing: $RUN_URL"
+          fi

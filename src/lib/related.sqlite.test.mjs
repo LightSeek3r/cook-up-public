@@ -8,6 +8,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { relatedRecipes, liveRelatedRecipes, storedRelatedRecipes } from './related';
 import { RELATED_LIMIT, RELATED_MAX_INGREDIENT_RECIPES, RELATED_MIN_SHARED } from './config';
 import * as pipeline from '../../pipeline/lib/related_recipes.mjs';
+import { sqliteD1 as d1 } from './test/d1';
 
 const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 
@@ -28,14 +29,6 @@ const DELETED = RECIPES[5].id;
 
 let sqlite;
 let db;
-
-function d1(lite) {
-	return {
-		prepare: (sql) => ({
-			bind: (...binds) => ({ all: async () => ({ results: lite.prepare(sql).all(...binds) }) })
-		})
-	};
-}
 
 beforeAll(() => {
 	sqlite = new DatabaseSync(':memory:');

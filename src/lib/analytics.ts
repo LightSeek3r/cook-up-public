@@ -107,6 +107,54 @@ export function deviceFrom(chMobile: string | null, userAgent: string | null): D
 	return /Mobi|Android|iPhone|iPad|iPod/i.test(userAgent ?? '') ? 'mobile' : 'desktop';
 }
 
+/**
+ * True only for a request the site's own pages sent. `Sec-Fetch-Site` is set by
+ * the browser and cannot be forged from page script; browsers too old to send
+ * it still send `Origin` on a POST. A request with neither is a script, not a
+ * page view.
+ */
+export function isSameOriginRequest(headers: Headers, selfOrigin: string): boolean {
+	const site = headers.get('sec-fetch-site');
+	if (site !== null) return site === 'same-origin';
+	return headers.get('origin') === selfOrigin;
+}
+
+const TRACK_PARAMS = new Set(['path', 'lang', 'new', 'ref']);
+/** A referrer is only ever reduced to its host, so a longer one is dropped rather than parsed. */
+const MAX_REFERRER = 2048;
+
+export type TrackedView = Omit<PageView, 'country' | 'device'>;
+
+/**
+ * The exact query `+layout.svelte` sends, and nothing else: one each of a
+ * trackable `path` (no query or fragment), a supported `lang`, an optional
+ * `new=1`, and a `ref` only alongside it. Anything else is not our client.
+ */
+export function parseTrackQuery(params: URLSearchParams, selfHost: string): TrackedView | null {
+	const keys = [...params.keys()];
+	if (keys.some((k) => !TRACK_PARAMS.has(k)) || new Set(keys).size !== keys.length) return null;
+
+	const raw = params.get('path');
+	const path = normalisePath(raw);
+	if (!path || path !== raw || !isTrackablePath(path)) return null;
+
+	const lang = normaliseLang(params.get('lang'));
+	if (!lang) return null;
+
+	const flag = params.get('new');
+	if (flag !== null && flag !== '1') return null;
+	const ref = params.get('ref');
+	if (ref !== null && flag === null) return null;
+
+	return {
+		path,
+		recipeId: recipeIdFromPath(path),
+		lang,
+		referrerHost: ref && ref.length <= MAX_REFERRER ? referrerHost(ref, selfHost) : null,
+		isNewVisit: flag === '1'
+	};
+}
+
 export function recordPageView(db: D1Database, view: PageView) {
 	return db
 		.prepare(

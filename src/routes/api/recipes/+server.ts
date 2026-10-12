@@ -1,25 +1,16 @@
 import { json } from '@sveltejs/kit';
-import { requireDb, parseIds } from '$lib/db';
-import { resolveLang } from '$lib/i18n';
+import { requireDb } from '$lib/db';
 import { PUBLIC_DATA } from '$lib/httpCache';
 import { getRecipesByIds } from '$lib/search';
+import { parseRecipesQuery } from '$lib/apiParams';
 import type { RequestHandler } from './$types';
-
-/** SQLite's bound-parameter ceiling makes an unbounded IN-list a real risk for
- *  a hand-crafted ?ids= query string; a real favorites list is nowhere near
- *  this. */
-const MAX_IDS = 200;
 
 const headers = { 'cache-control': PUBLIC_DATA };
 
 export const GET: RequestHandler = async ({ url, platform }) => {
-	const db = requireDb(platform);
-	const ids = parseIds(url.searchParams.get('ids')).slice(0, MAX_IDS);
+	const { ids, lang } = parseRecipesQuery(url.searchParams);
 	if (ids.length === 0) return json({ recipes: [] }, { headers });
 
-	const data = await getRecipesByIds(db, {
-		ids,
-		lang: resolveLang(url.searchParams.get('lang'))
-	});
+	const data = await getRecipesByIds(requireDb(platform), { ids, lang });
 	return json(data, { headers });
 };

@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "فنون الطهي الحديثة",
   "glossary.cat.preservation": "حفظ الأطعمة",
   "glossary.cat.fermentation": "التخمير",
-  "glossary.cat.meat-fish": "اللحوم والأسماك"
+  "glossary.cat.meat-fish": "اللحوم والأسماك",
+  "error.loadFailed": "تعذّر التحميل حاليًا. يُرجى المحاولة مرة أخرى بعد قليل.",
+  "error.retry": "إعادة المحاولة",
+  "error.unavailableHeading": "غير متاح مؤقتًا",
+  "mosaic.limit": "الحد الأقصى {n} مكوّنًا. أزل مكوّنًا لإضافة آخر."
 }

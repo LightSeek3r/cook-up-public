@@ -1,27 +1,12 @@
 import { describe, it, expect } from 'vitest';
-import { resolveLang, dirFor, t } from './index';
+import { resolveLang, dirFor, t, registerMessages } from './index';
+import { BUNDLES as BY_LANG, messagesFor } from './messages.server';
 import { SUPPORTED_LANGS, DEFAULT_LANG } from '$lib/config';
 import { CATEGORY_IDS } from '$lib/glossary/types';
-import en from './en.json';
-import es from './es.json';
-import fr from './fr.json';
-import de from './de.json';
-import ar from './ar.json';
-import hi from './hi.json';
-import zh from './zh.json';
-import ja from './ja.json';
-import ko from './ko.json';
-import vi from './vi.json';
-import pt from './pt.json';
-import itBundle from './it.json'; // `it` collides with vitest's own `it`
-import bn from './bn.json';
-import ru from './ru.json';
-import pnb from './pnb.json';
-import jv from './jv.json';
 
-const BUNDLES: Record<string, Record<string, string>> = {
-	en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it: itBundle, bn, ru, pnb, jv
-};
+const BUNDLES: Record<string, Record<string, string>> = BY_LANG;
+const en = BY_LANG.en;
+const fr = BY_LANG.fr;
 
 // One test guarding all 10 locale files: every key added to en.json (or any
 // other bundle) must exist in every bundle. Nothing else in the project
@@ -57,7 +42,8 @@ describe('i18n bundle key parity', () => {
 		['footer.createdBy', '{link}'],
 		['results.addIngredient', '{name}'],
 		['mosaic.mustUse', '{name}'],
-		['glossary.count', '{n}']
+		['glossary.count', '{n}'],
+		['mosaic.limit', '{n}']
 	];
 
 	for (const [key, placeholder] of PLACEHOLDER_KEYS) {
@@ -102,11 +88,39 @@ describe('dirFor', () => {
 });
 
 describe('t()', () => {
-	it('returns the bundle value for the requested language', () => {
+	it('returns the registered value for the requested language', () => {
+		registerMessages('fr', messagesFor('fr'));
 		expect(t('fr')('app.title')).toBe(fr['app.title']);
 	});
 
+	it('resolves a translator created before its language was registered', () => {
+		const translate = t('ja');
+		expect(translate('app.title')).toBe('app.title');
+		registerMessages('ja', messagesFor('ja'));
+		expect(translate('app.title')).toBe(BY_LANG.ja['app.title']);
+	});
+
 	it('falls back to English, then to the key itself, for an unknown key', () => {
+		registerMessages('en', messagesFor('en'));
+		expect(t('ko')('app.title')).toBe(en['app.title']);
 		expect(t('en')('this.key.does.not.exist')).toBe('this.key.does.not.exist');
+	});
+});
+
+describe('messagesFor', () => {
+	it('is the English bundle itself for en', () => {
+		expect(messagesFor('en')).toBe(en);
+	});
+
+	it('carries every English key in every language, local value winning', () => {
+		for (const lang of SUPPORTED_LANGS) {
+			const merged = messagesFor(lang);
+			expect(Object.keys(merged).sort(), lang).toEqual(Object.keys(en).sort());
+			for (const [key, value] of Object.entries(BY_LANG[lang])) expect(merged[key]).toBe(value);
+		}
+	});
+
+	it('is cached per language', () => {
+		expect(messagesFor('fr')).toBe(messagesFor('fr'));
 	});
 });

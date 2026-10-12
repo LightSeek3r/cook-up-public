@@ -6,9 +6,9 @@ import type { RequestHandler } from './$types';
 const escapeXml = (value: string) => value.replace(/&/g, '&amp;');
 
 /**
- * Bare recipe URLs only, no ?lang= variants: a sitemap entry per language
- * would tell crawlers ten pages exist where hreflang alternates (not
- * attempted here) or a single canonical URL is the correct signal instead.
+ * Bare URLs only: every page already declares its ?lang= variants as hreflang
+ * alternates in its <head> (SeoHead). Repeating them here would mean ~58k
+ * <url> entries (over the 50k-per-sitemap limit) or ~62k xhtml:link lines.
  *
  * Reads every recipe id (3,478 rows) per uncached fetch. Only crawlers ask for
  * it, a few times a day, so it is cached like the API data (edge and browser)

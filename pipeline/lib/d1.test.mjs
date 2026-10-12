@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { esc, checkBudget, addUsage, D1BudgetExceeded, D1_READ_BUDGET, D1_WRITE_BUDGET } from './d1.mjs';
+import { esc, checkBudget, addUsage, commandUsage, D1BudgetExceeded, D1_READ_BUDGET, D1_WRITE_BUDGET } from './d1.mjs';
 
 describe('esc', () => {
 	it('quotes strings and doubles embedded single quotes', () => {
@@ -13,6 +13,17 @@ describe('esc', () => {
 	it('maps null/undefined to SQL NULL', () => {
 		expect(esc(null)).toBe('NULL');
 		expect(esc(undefined)).toBe('NULL');
+	});
+});
+
+describe('commandUsage', () => {
+	it('sums every statement of a multi-statement command, not just the first', () => {
+		const parsed = [
+			{ results: [], meta: { rows_read: 3, rows_written: 0 } },
+			{ results: [], meta: { rows_read: 10, rows_written: 400 } },
+			{ results: [], meta: {} }
+		];
+		expect(commandUsage(parsed)).toEqual({ rows_read: 13, rows_written: 400 });
 	});
 });
 

@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "جدید (ماڈرنسٹ) کھانا پکانا",
   "glossary.cat.preservation": "محفوظ کرنا",
   "glossary.cat.fermentation": "خمیر اٹھانا",
-  "glossary.cat.meat-fish": "گوشت تے مچھی"
+  "glossary.cat.meat-fish": "گوشت تے مچھی",
+  "error.loadFailed": "ایس ویلے لوڈ نئیں ہو سکیا۔ تھوڑی دیر بعد دوبارہ کوشش کرو۔",
+  "error.retry": "دوبارہ کوشش کرو",
+  "error.unavailableHeading": "عارضی طور تے دستیاب نئیں",
+  "mosaic.limit": "ودھ توں ودھ {n} اجزاء۔ ہور شامل کرن لئی اک کڈو۔"
 }

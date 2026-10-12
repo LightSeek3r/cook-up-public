@@ -2,6 +2,7 @@
 	import { page } from '$app/stores';
 	import RecipeHits from '$components/RecipeHits.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
+	import LoadError from '$components/LoadError.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 	import { apiUrl } from '$lib/httpCache';
@@ -12,6 +13,15 @@
 
 	let hits = $state<RecipeHit[]>([]);
 	let loaded = $state(false);
+	// Separate from an empty list: "no favorites yet" over a failed request
+	// would tell the user their saved recipes are gone.
+	let failed = $state(false);
+	let attempt = $state(0);
+
+	function retry() {
+		loaded = false;
+		attempt++;
+	}
 
 	$effect(() => {
 		hydrateFavorites();
@@ -27,16 +37,32 @@
 
 	$effect(() => {
 		const ids = favoriteIds;
+		void attempt;
+		failed = false;
 		if (ids.length === 0) {
 			hits = [];
 			loaded = true;
 			return;
 		}
-		fetch(apiUrl('/api/recipes', { ids: ids.join(','), lang }))
-			.then((response) => response.json())
-			.then((data) => (hits = data.recipes ?? []))
-			.catch(() => (hits = []))
-			.finally(() => (loaded = true));
+		let stale = false;
+		// Ascending, like the API's own canonical form, so the request hits its cache key.
+		const sorted = [...ids].sort((a, b) => a - b);
+		fetch(apiUrl('/api/recipes', { ids: sorted.join(','), lang }))
+			.then(async (response) => {
+				const data = await response.json().catch(() => ({}));
+				if (!response.ok || data.error) throw new Error(String(response.status));
+				return data;
+			})
+			.then((data) => {
+				if (!stale) hits = data.recipes ?? [];
+			})
+			.catch(() => {
+				if (!stale) failed = true;
+			})
+			.finally(() => {
+				if (!stale) loaded = true;
+			});
+		return () => (stale = true);
 	});
 </script>
 
@@ -45,11 +71,14 @@
 	description={t('favorites.heading')}
 	url={$page.url}
 	{lang}
+	noindex
 />
 
 <h1 class="sr-only">{t('favorites.heading')}</h1>
 
-{#if !loaded}
+{#if failed}
+	<LoadError message={t('error.loadFailed')} retryLabel={t('error.retry')} onRetry={retry} />
+{:else if !loaded}
 	<p class="muted state">{t('results.loading')}</p>
 {:else if ordered.length === 0}
 	<p class="muted state">{t('favorites.empty')}</p>

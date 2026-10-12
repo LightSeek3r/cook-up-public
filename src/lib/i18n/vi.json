@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "Ẩm thực hiện đại",
   "glossary.cat.preservation": "Bảo quản",
   "glossary.cat.fermentation": "Lên men",
-  "glossary.cat.meat-fish": "Thịt và cá"
+  "glossary.cat.meat-fish": "Thịt và cá",
+  "error.loadFailed": "Hiện chưa tải được nội dung. Vui lòng thử lại sau giây lát.",
+  "error.retry": "Thử lại",
+  "error.unavailableHeading": "Tạm thời không khả dụng",
+  "mosaic.limit": "Tối đa {n} nguyên liệu. Hãy bỏ bớt một nguyên liệu để thêm nguyên liệu khác."
 }

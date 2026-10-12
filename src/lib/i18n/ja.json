@@ -217,5 +217,9 @@
   "glossary.cat.modernist": "モダニスト・キュイジーヌ",
   "glossary.cat.preservation": "保存",
   "glossary.cat.fermentation": "発酵",
-  "glossary.cat.meat-fish": "肉・魚"
+  "glossary.cat.meat-fish": "肉・魚",
+  "error.loadFailed": "現在読み込めません。しばらくしてからもう一度お試しください。",
+  "error.retry": "再試行",
+  "error.unavailableHeading": "一時的にご利用いただけません",
+  "mosaic.limit": "食材は最大{n}個までです。追加するには1つ外してください。"
 }

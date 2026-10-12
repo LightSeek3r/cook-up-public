@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { relatedRecipes } from './related';
 import type { D1Database } from '@cloudflare/workers-types';
+import { assertD1Binds } from './test/d1';
 
 /** Records every prepare().bind() call and returns queued result sets in call
  *  order — `relatedRecipes` makes at most three db round trips (stored list,
@@ -18,6 +19,7 @@ function spyDb(resultQueue: (unknown[] | Error)[] = []) {
 					const results = resultQueue[i++] ?? [];
 					return {
 						all: async () => {
+							assertD1Binds(binds);
 							if (results instanceof Error) throw results;
 							return { results };
 						}

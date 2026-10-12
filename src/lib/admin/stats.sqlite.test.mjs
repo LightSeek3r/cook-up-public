@@ -1,10 +1,11 @@
 // /admin queries against SQLite (every migration applied): topRecipes against
-// the single-level query it replaced, and the dashboard memo. `.mjs` for
-// node:sqlite.
+// the single-level query it replaced, the precomputed translation counts, and
+// the dashboard memo. `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { readdirSync, readFileSync } from 'node:fs';
-import { topRecipes, cachedDashboard, resetDashboardCache, loadDashboard, DASHBOARD_TTL_MS } from './stats';
+import { topRecipes, cachedDashboard, resetDashboardCache, loadDashboard, DASHBOARD_TTL_MS, translationRows, liveTranslationRows } from './stats';
+import { i18nStatsRefresh } from '../../../pipeline/lib/seed_sql.mjs';
 
 const MIGRATIONS = new URL('../../../migrations/', import.meta.url);
 const REPLACED = (where) => `SELECT pv.recipe_id AS id,
@@ -27,7 +28,12 @@ function d1(lite) {
 			failNext = false;
 			return Promise.reject(new Error('D1_ERROR: boom'));
 		}
-		return Promise.resolve(fn());
+		// D1 reports SQL errors as a rejected promise, never a synchronous throw.
+		try {
+			return Promise.resolve(fn());
+		} catch (err) {
+			return Promise.reject(err);
+		}
 	};
 	return {
 		prepare: (sql) => {
@@ -86,6 +92,55 @@ describe('topRecipes', () => {
 		const ids = (await topRecipes(d1(sqlite), null, 1000)).map((r) => r.id);
 		expect(ids).not.toContain(1);
 		expect(ids.length).toBe(sqlite.prepare('SELECT COUNT(DISTINCT pv.recipe_id) n FROM page_view pv JOIN recipes r ON r.id = pv.recipe_id').get().n);
+	});
+});
+
+describe('translationRows', () => {
+	// The seeds' own refresh statements, so this pins the table they write.
+	const refresh = () => sqlite.exec(i18nStatsRefresh().map((s) => s.sql).join('\n'));
+	const empty = () => sqlite.exec('DELETE FROM recipe_i18n_stats');
+
+	beforeAll(() => {
+		const row = sqlite.prepare(`INSERT INTO recipe_i18n (recipe_id, lang, title, instructions, is_machine) VALUES (?, ?, ?, '', 1)`);
+		for (let id = 10; id < 70; id++) for (const lang of id % 3 ? ['de', 'ja'] : ['de']) row.run(id, lang, `Recipe ${id}`);
+	});
+
+	it('reads the precomputed table, one statement, same rows as the live count', async () => {
+		refresh();
+		const live = await liveTranslationRows(d1(sqlite));
+		expect(live.map((r) => r.lang)).toEqual(['de', 'en', 'ja', 'fr']);
+		statements = 0;
+		expect(await translationRows(d1(sqlite))).toEqual(live);
+		expect(statements).toBe(1);
+	});
+
+	it('counts live while the table is empty, and before 0011 is applied', async () => {
+		empty();
+		const live = await liveTranslationRows(d1(sqlite));
+		statements = 0;
+		expect(await translationRows(d1(sqlite))).toEqual(live);
+		expect(statements).toBe(2);
+
+		const premigration = new DatabaseSync(':memory:');
+		for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f < '0011').sort())
+			premigration.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+		premigration.exec(`INSERT INTO recipes (id, source_url, source_lang, license) VALUES (1, 'u', 'en', 'PD'); INSERT INTO recipe_i18n (recipe_id, lang, title, instructions) VALUES (1, 'en', 't', '')`);
+		expect(await translationRows(d1(premigration))).toEqual([{ lang: 'en', translated: 1, machine: 0 }]);
+	});
+
+	it('does not hide other errors behind the fallback', async () => {
+		failNext = true;
+		await expect(translationRows(d1(sqlite))).rejects.toThrow('boom');
+	});
+
+	it('gives an identical dashboard whether the figures are stored or counted live', async () => {
+		empty();
+		const live = await loadDashboard(d1(sqlite));
+		refresh();
+		statements = 0;
+		const stored = await loadDashboard(d1(sqlite));
+		expect(stored).toEqual(live);
+		expect(stored.translations.length).toBe(4);
 	});
 });
 

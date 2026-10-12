@@ -5,7 +5,8 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { readdirSync, readFileSync } from 'node:fs';
-import { searchRecipeTitles, ftsPhrase, RECIPE_HIT_LIMIT } from './search';
+import { searchRecipeTitles, getRecipesByIds, ftsPhrase, RECIPE_HIT_LIMIT } from './search';
+import { sqliteD1, D1_MAX_BOUND_PARAMS } from './test/d1';
 
 const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 const ORDER = 'ORDER BY (r.balance_grade IS NULL) ASC, r.total_minutes IS NULL, r.total_minutes ASC, r.id ASC';
@@ -40,7 +41,7 @@ beforeAll(() => {
 	sqlite.exec(`INSERT INTO recipe_title_fts(rowid, title)
 		SELECT i.rowid, i.title FROM recipe_i18n i JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang`);
 	sqlite.exec(`INSERT INTO recipe_title_fts(rowid, title) SELECT rowid, title FROM recipe_i18n WHERE lang = 'fr'`);
-	db = { prepare: (sql) => ({ bind: (...b) => ({ all: async () => ({ results: sqlite.prepare(sql).all(...b) }) }) }) };
+	db = sqliteD1(sqlite);
 });
 
 describe('searchRecipeTitles on a real index', () => {
@@ -60,5 +61,29 @@ describe('searchRecipeTitles on a real index', () => {
 				expect(await searchRecipeTitles(db, { q, lang, limit }), `${q} ${limit}`).toEqual({ recipes: expected });
 			}
 		}
+	});
+});
+
+describe('getRecipesByIds on SQLite', () => {
+	const ids = Array.from({ length: 200 }, (_, k) => 1000 - k * 3);
+
+	it('fetches more ids than D1 allows bound parameters, as a long favorites list does', async () => {
+		expect(ids.length).toBeGreaterThan(D1_MAX_BOUND_PARAMS);
+		const { recipes } = await getRecipesByIds(db, { ids, lang: 'en' });
+		expect(recipes.map((r) => r.id)).toEqual([...ids].sort((a, b) => a - b));
+	});
+
+	it('returns the same rows in the same order for any permutation of the ids', async () => {
+		const some = ids.slice(0, 120);
+		const forward = await getRecipesByIds(db, { ids: some, lang: 'fr' });
+		const backward = await getRecipesByIds(db, { ids: [...some].reverse(), lang: 'fr' });
+		expect(backward).toEqual(forward);
+		expect(forward.recipes.find((r) => r.id === 1000).title).toMatch(/^Poulet /);
+		expect(forward.recipes.find((r) => r.id === 997).title).not.toMatch(/^Poulet /);
+	});
+
+	it('drops ids with no recipe', async () => {
+		const { recipes } = await getRecipesByIds(db, { ids: [1000, 1, 2], lang: 'en' });
+		expect(recipes.map((r) => r.id)).toEqual([1000]);
 	});
 });

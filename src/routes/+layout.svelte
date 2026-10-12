@@ -1,5 +1,7 @@
 <script lang="ts">
 	import '../app.css';
+	import archivoLatin from '../fonts/archivo-latin.woff2?url';
+	import frauncesLatin from '../fonts/fraunces-latin.woff2?url';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
@@ -74,6 +76,15 @@
 	}
 </script>
 
+<svelte:head>
+	<!-- The latin subsets cover digits and punctuation, so every language renders
+	     some text in them. Same hashed URLs app.css's @font-face rules resolve to;
+	     crossorigin because fonts are always fetched in CORS mode, and a preload
+	     without it would be a second, wasted request. -->
+	<link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin="anonymous" />
+	<link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin="anonymous" />
+</svelte:head>
+
 <a class="skip no-print" href="#main">{t('app.skipToContent')}</a>
 
 <div class="page">
@@ -142,7 +153,7 @@
 				<select aria-label={t('app.language')} value={lang} onchange={switchLang}>
 					{#each SUPPORTED_LANGS as code (code)}
 						<!-- Endonyms, not ISO codes: a Hindi speaker scans for "हिन्दी", not "HI". -->
-						<option value={code}>{LANG_ENDONYMS[code]}</option>
+						<option value={code} lang={code}>{LANG_ENDONYMS[code]}</option>
 					{/each}
 				</select>
 			</div>
@@ -229,6 +240,13 @@
 	}
 	.skip:focus-visible {
 		transform: translateY(0);
+	}
+	/* System font for the endonyms: in Archivo, "Tiếng Việt" alone made every
+	   page download the Vietnamese subset. The select itself too, not only its
+	   options: Chrome resolves the option list's fonts from the select. */
+	.bar select,
+	.bar option {
+		font-family: var(--font-system);
 	}
 	.bar select {
 		min-height: 2.75rem;

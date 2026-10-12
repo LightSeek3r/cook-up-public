@@ -32,6 +32,12 @@ describe('header values', () => {
 		expect(adapterWouldStore(PUBLIC_STATIC)).toBe(true);
 	});
 
+	it('public data keeps its TTLs and lets the browser revalidate in the background', () => {
+		expect(PUBLIC_DATA).toMatch(/\bmax-age=3600\b/);
+		expect(PUBLIC_DATA).toMatch(/\bs-maxage=86400\b/);
+		expect(PUBLIC_DATA).toMatch(/\bstale-while-revalidate=86400\b/);
+	});
+
 	it('NEVER_CACHE is never stored', () => {
 		expect(adapterWouldStore(NEVER_CACHE)).toBe(false);
 	});

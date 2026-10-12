@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { matchRecipes, resolveIngredientIds, slackFor, type MatchParams } from './match';
 import type { D1Database } from '@cloudflare/workers-types';
+import { assertD1Binds } from './test/d1';
 
 /** Records the exact SQL text and bind array passed to db.prepare().bind(),
  *  without needing a real D1 — matchRecipes touches `db` exactly once, via
@@ -13,7 +14,12 @@ function spyDb(results: unknown[] = []) {
 			return {
 				bind(...binds: unknown[]) {
 					calls.push({ sql, binds });
-					return { all: async () => ({ results }) };
+					return {
+						all: async () => {
+							assertD1Binds(binds);
+							return { results };
+						}
+					};
 				}
 			};
 		}

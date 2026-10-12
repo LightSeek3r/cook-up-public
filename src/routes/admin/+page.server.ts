@@ -4,19 +4,22 @@ import { requireDb } from '$lib/db';
 import { cachedDashboard } from '$lib/admin/stats';
 import { NEVER_CACHE } from '$lib/httpCache';
 import {
+	OTP_TTL_MINUTES,
+	PENDING_COOKIE,
 	SESSION_COOKIE,
 	SESSION_TTL_DAYS,
-	checkRate,
 	createSession,
 	destroySession,
 	generateOtp,
 	generateSessionToken,
+	hashClientIp,
 	isAllowed,
 	issueOtp,
 	normaliseEmail,
 	parseAllowlist,
 	pruneExpired,
 	readSession,
+	sha256Hex,
 	verifyOtp
 } from '$lib/admin/auth';
 import { mailConfig, sendOtpEmail } from '$lib/admin/email';
@@ -32,12 +35,31 @@ const cookieOptions = {
 	maxAge: SESSION_TTL_DAYS * 24 * 60 * 60
 };
 
+const pendingCookieOptions = {
+	...cookieOptions,
+	path: '/admin',
+	maxAge: OTP_TTL_MINUTES * 60
+};
+
+/** `getClientAddress` throws where the adapter cannot tell; the budget then falls back to one shared bucket. */
+function clientAddress(getClientAddress: () => string): string {
+	try {
+		return getClientAddress() || 'unknown';
+	} catch {
+		return 'unknown';
+	}
+}
+
 export const load: PageServerLoad = async ({ cookies, platform, setHeaders }) => {
 	// Per-user, cookie-gated: never let the adapter's edge cache or a shared
 	// cache store it, whatever header a future change adds elsewhere.
 	setHeaders({ 'cache-control': NEVER_CACHE });
 	const db = requireDb(platform);
-	const email = await readSession(db, cookies.get(SESSION_COOKIE));
+	const email = await readSession(
+		db,
+		cookies.get(SESSION_COOKIE),
+		parseAllowlist(platform?.env?.ADMIN_EMAILS)
+	);
 
 	if (!email) return { authed: false as const };
 	return { authed: true as const, email, dashboard: await cachedDashboard(db) };
@@ -49,8 +71,12 @@ export const actions: Actions = {
 	 * allowlist, whether or not the mail was accepted, and whether or not the
 	 * request was throttled. Any difference here would turn this endpoint into
 	 * an oracle for "is this the admin's address".
+	 *
+	 * That includes timing: the D1 writes and the call to Resend happen only
+	 * for an allowlisted address, so they run after the response, never before
+	 * it.
 	 */
-	requestCode: async ({ request, platform }) => {
+	requestCode: async ({ request, cookies, platform, getClientAddress }) => {
 		const db = requireDb(platform);
 		const form = await request.formData();
 		const email = normaliseEmail(String(form.get('email') ?? ''));
@@ -59,16 +85,28 @@ export const actions: Actions = {
 			return fail(400, { stage: 'email', error: 'invalidEmail' });
 		}
 
-		await pruneExpired(db).catch(() => {});
+		const nonce = generateSessionToken();
+		cookies.set(PENDING_COOKIE, nonce, pendingCookieOptions);
 
 		const allowed = isAllowed(email, parseAllowlist(platform?.env?.ADMIN_EMAILS));
 		const mail = mailConfig(platform?.env);
+		const ip = clientAddress(getClientAddress);
 
-		if (allowed && mail && (await checkRate(db, email)) === 'ok') {
+		const work = (async () => {
+			await pruneExpired(db).catch(() => {});
+			if (!allowed || !mail) return;
 			const code = generateOtp();
-			await issueOtp(db, email, code);
-			await sendOtpEmail(mail, email, code);
-		}
+			const issued = await issueOtp(db, email, code, {
+				bindingHash: await sha256Hex(nonce),
+				// The Resend key is the one secret guaranteed present whenever a
+				// code can be issued at all, so it doubles as the IP-hash key.
+				ipHash: await hashClientIp(ip, mail.apiKey)
+			});
+			if (issued) await sendOtpEmail(mail, email, code);
+		})().catch(() => {});
+
+		if (platform?.ctx?.waitUntil) platform.ctx.waitUntil(work);
+		else await work;
 
 		return { stage: 'code', email };
 	},
@@ -83,13 +121,19 @@ export const actions: Actions = {
 			return fail(400, { stage: 'code', email, error: 'invalidCode' });
 		}
 
-		const result = await verifyOtp(db, email, code);
-		if (result !== 'ok') {
-			return fail(400, { stage: 'code', email, error: result });
+		// verifyOtp runs even without a nonce or for an address off the
+		// allowlist, so neither case is distinguishable by response time.
+		const nonce = cookies.get(PENDING_COOKIE) ?? '';
+		const verified = await verifyOtp(db, email, code, await sha256Hex(nonce));
+		const allowed = isAllowed(email, parseAllowlist(platform?.env?.ADMIN_EMAILS));
+
+		if (!verified || !nonce || !allowed) {
+			return fail(400, { stage: 'code', email, error: 'invalid' });
 		}
 
 		const token = generateSessionToken();
 		await createSession(db, email, token);
+		cookies.delete(PENDING_COOKIE, { path: pendingCookieOptions.path });
 		cookies.set(SESSION_COOKIE, token, cookieOptions);
 
 		return { stage: 'done' };

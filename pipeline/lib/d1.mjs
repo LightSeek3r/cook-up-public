@@ -79,6 +79,12 @@ export function addUsage(ledger, usage) {
 	};
 }
 
+/** Pure: usage of one `--command` call. A multi-statement command (a seed
+ *  chunk) returns one result per statement, each with its own meta. */
+export function commandUsage(parsed) {
+	return parsed.reduce((sum, r) => addUsage(sum, { rows_read: r?.meta?.rows_read, rows_written: r?.meta?.rows_written }), { ...EMPTY_LEDGER });
+}
+
 const LEDGER_DIR = path.resolve('pipeline/out/d1_usage');
 const todayUtc = () => new Date().toISOString().slice(0, 10);
 const ledgerPath = (date) => path.join(LEDGER_DIR, `${date}.json`);
@@ -87,6 +93,11 @@ function readLedger(date) {
 	const p = ledgerPath(date);
 	if (!existsSync(p)) return { ...EMPTY_LEDGER };
 	return JSON.parse(readFileSync(p, 'utf8'));
+}
+
+/** Today's (UTC) usage so far, as logged by every remote call through d1(). */
+export function ledgerToday() {
+	return readLedger(todayUtc());
 }
 
 function writeLedger(date, ledger) {
@@ -119,9 +130,8 @@ export function d1(sql, { local, json = true } = {}) {
 	const parsed = JSON.parse(out);
 
 	if (!local) {
-		const meta = parsed[0]?.meta ?? {};
 		const date = todayUtc();
-		writeLedger(date, addUsage(readLedger(date), { rows_read: meta.rows_read, rows_written: meta.rows_written }));
+		writeLedger(date, addUsage(readLedger(date), commandUsage(parsed)));
 	}
 
 	return json ? parsed[0]?.results ?? [] : out;
