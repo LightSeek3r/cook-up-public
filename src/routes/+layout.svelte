@@ -7,11 +7,13 @@
 	import { afterNavigate, goto } from '$app/navigation';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
+	import { shouldTrack } from '$lib/analytics';
 
 	let { children } = $props();
 
 	const lang = $derived(resolveLang($page.url.searchParams.get('lang')));
 	const t = $derived(translator(lang));
+	const inGlossary = $derived($page.url.pathname.startsWith('/glossary'));
 
 	// SSR sets <html lang/dir> via hooks.server.ts; keep it correct on client nav.
 	$effect(() => {
@@ -21,7 +23,8 @@
 
 	// `afterNavigate` fires on first load *and* on every client-side navigation,
 	// which is what turns this into a page-view counter rather than the
-	// once-per-session ping it replaced. sessionStorage (not a cookie) is what
+	// once-per-session ping it replaced; `shouldTrack` drops the URL-only
+	// navigations that are not views. sessionStorage (not a cookie) is what
 	// still separates a "visit" from a "view": it clears when the tab closes, so
 	// only the first view of a session carries `new=1`. Everything is written to
 	// our own D1 by /api/track — no third party is contacted, by the browser or
@@ -30,8 +33,10 @@
 
 	onMount(hydrateFavorites);
 
-	afterNavigate(({ to }) => {
-		const path = to?.url.pathname ?? location.pathname;
+	afterNavigate(({ from, to }) => {
+		const target = to?.url ?? new URL(location.href);
+		if (!shouldTrack(from?.url ?? null, target)) return;
+		const path = target.pathname;
 
 		let isNewVisit = false;
 		try {
@@ -96,6 +101,24 @@
 			<!-- Wrapper, not two more flex children: .bar is space-between with the
 			     brand at one end, so a third direct child would spread them apart. -->
 			<div class="controls no-print">
+				<a
+					class="nav-link"
+					href="/glossary?lang={lang}"
+					aria-label={t('nav.glossary')}
+					title={t('nav.glossary')}
+					aria-current={inGlossary ? 'page' : undefined}
+				>
+					<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+						<path
+							d="M10 5.2C8.6 4 6.4 3.6 3.5 3.8v10.9c2.9-.2 5.1.2 6.5 1.4 1.4-1.2 3.6-1.6 6.5-1.4V3.8c-2.9-.2-5.1.2-6.5 1.4ZM10 5.2v10.9"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="1.7"
+							stroke-linejoin="round"
+							stroke-linecap="round"
+						/>
+					</svg>
+				</a>
 				<a class="favorites-link" href="/favorites?lang={lang}" aria-label={t('favorites.heading')}>
 					<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
 						<path
@@ -215,6 +238,7 @@
 		background: var(--surface);
 		box-shadow: var(--shadow-1);
 	}
+	.nav-link,
 	.favorites-link {
 		display: inline-flex;
 		align-items: center;
@@ -223,9 +247,12 @@
 		padding: 0 0.5rem;
 		color: var(--muted);
 	}
+	.nav-link:hover,
+	.nav-link[aria-current='page'],
 	.favorites-link:hover {
 		color: var(--primary);
 	}
+	.nav-link svg,
 	.favorites-link svg {
 		width: 1.2rem;
 		height: 1.2rem;

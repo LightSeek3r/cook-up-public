@@ -1,5 +1,5 @@
 /**
- * Shared D1 shell-out helper (extracted from pipeline/07_translate.mjs).
+ * Shared D1 shell-out helper for the pipeline tools.
  *
  * Invokes wrangler's own JS entry point directly via `node`, with the SQL as
  * one argv element — no shell involved at all, so none of its quoting rules

@@ -53,18 +53,31 @@
  * statements — confirmed atomic per chunk (a mid-chunk failure rolls the
  * whole chunk back, verified via row counts), so a failure at chunk N leaves
  * chunks 1..N-1 committed and N..last untouched; fix and resume from N.
+ *
+ * `node pipeline/gen_remote_seed.mjs --only=related` writes chunks for
+ * `recipe_related` (migrations/0010) alone, into
+ * pipeline/out/remote-chunks-related/ (apply them with the same loop): ~3,500
+ * rows written and no remote read, where a full reseed rewrites every pipeline
+ * table. It ranks from pipeline/out, so it matches remote only while remote's
+ * recipe_ingredients and ingredients came from that same pipeline/out (the
+ * last full reseed was generated from it); otherwise run the full reseed,
+ * which includes the table.
  */
 
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { GENERIC_PAIRS_CLOSED } from './lib/generic_ingredients.mjs';
+import { nonStapleCounts } from './lib/non_staple_count.mjs';
+import { relatedRows } from './lib/related_recipes.mjs';
 
 const OUT_DIR = path.resolve('pipeline/out');
 const CHUNK_DIR = path.resolve('pipeline/out/remote-chunks');
+const RELATED_CHUNK_DIR = path.resolve('pipeline/out/remote-chunks-related');
 const WRANGLER = path.resolve('node_modules/wrangler/bin/wrangler.js');
 const ALLERGENS = ['gluten', 'dairy', 'nut', 'peanut', 'egg', 'soy', 'fish', 'shellfish', 'sesame'];
 const MAX_CHUNK_BYTES = 20_000;
+const ONLY_RELATED = process.argv.includes('--only=related');
 
 /** Live read of remote's current recipe ids — argv, not a shell string, so
  *  no quoting/escaping concerns. Read-only; never mutates anything. */
@@ -122,9 +135,30 @@ async function main() {
 
 	const keptRecipeIds = new Set(recipeIngredients.map((r) => r.recipe_id));
 	const keptRecipes = recipes.filter((r) => keptRecipeIds.has(r.id));
+	const relatedSql = [];
+	batchInsert(
+		relatedSql,
+		'recipe_related',
+		['recipe_id', 'related_ids'],
+		relatedRows(ingredients, recipeIngredients, keptRecipes.map((r) => r.id)),
+		400
+	);
+
+	if (ONLY_RELATED) {
+		const fileCount = await writeChunks(RELATED_CHUNK_DIR, [
+			'DELETE FROM recipe_related;',
+			...relatedSql
+		]);
+		console.log(
+			`gen_remote_seed --only=related: ${keptRecipes.length} recipe_related rows -> ${fileCount} chunk files in pipeline/out/remote-chunks-related/`
+		);
+		return;
+	}
+
 	const nutritionById = new Map(recipeNutrition.map((n) => [n.id, n]));
 	const imageById = new Map(recipeImages.map((i) => [i.recipe_id, i]));
 	const ingredientId = new Map(ingredients.map((ing, i) => [ing.canonical_key, i + 1]));
+	const nonStaple = nonStapleCounts(ingredients, recipeIngredients);
 	// Resolved gram weights, keyed the same way 06_seed_d1.mjs keys them.
 	const gramsByRow = new Map(
 		recipeGrams.map((g) => [`${g.recipe_id}|${g.canonical_key}`, g.grams])
@@ -144,6 +178,7 @@ async function main() {
 	const sql = [];
 
 	sql.push(
+		'DELETE FROM recipe_related;',
 		'DELETE FROM recipe_micronutrient;',
 		'DELETE FROM recipe_diets;',
 		'DELETE FROM recipe_ingredients;',
@@ -223,6 +258,12 @@ async function main() {
 	// holds NULL and would keep holding it forever. The distinction that matters
 	// is "can this column's value differ from remote's?", not "does a later stage
 	// compute it".
+	//
+	// `non_staple_count` (migrations/0009) is derived from recipe_ingredients and
+	// ingredients.is_staple, both rewritten by this seed, so it is set here on
+	// every run — computed in JS rather than by a trailing SQL UPDATE, which on
+	// remote would cost ~64k rows read and 3.5k written per reseed for a value
+	// this loop can write for free.
 	for (const r of existingRecipes) {
 		const n = nutritionById.get(r.id);
 		const set = [
@@ -245,7 +286,8 @@ async function main() {
 			`sodium_mg=${esc(n?.sodium_mg ?? null)}`,
 			`balance_grade=${esc(n?.balance_grade ?? null)}`,
 			`balance_score=${esc(n?.balance_score ?? null)}`,
-			`nutrition_coverage=${esc(n?.nutrition_coverage ?? 0)}`
+			`nutrition_coverage=${esc(n?.nutrition_coverage ?? 0)}`,
+			`non_staple_count=${esc(nonStaple.get(r.id) ?? 0)}`
 		].join(',');
 		sql.push(`UPDATE recipes SET ${set} WHERE id=${r.id};`);
 	}
@@ -263,7 +305,7 @@ async function main() {
 			'image_url', 'image_width', 'image_height', 'image_page', 'image_author', 'image_licence',
 			'prep_minutes', 'total_minutes', 'servings', 'servings_assumed',
 			'kcal', 'protein_g', 'fat_g', 'sat_fat_g', 'carb_g', 'sugar_g', 'fiber_g', 'sodium_mg',
-			'balance_grade', 'balance_score', 'nutrition_coverage'
+			'balance_grade', 'balance_score', 'nutrition_coverage', 'non_staple_count'
 		],
 		newRecipes.map((r) => {
 			const n = nutritionById.get(r.id);
@@ -297,7 +339,8 @@ async function main() {
 				sodium_mg: n?.sodium_mg ?? null,
 				balance_grade: n?.balance_grade ?? null,
 				balance_score: n?.balance_score ?? null,
-				nutrition_coverage: n?.nutrition_coverage ?? 0
+				nutrition_coverage: n?.nutrition_coverage ?? 0,
+				non_staple_count: nonStaple.get(r.id) ?? 0
 			};
 		}),
 		60
@@ -333,6 +376,10 @@ async function main() {
 	);
 
 	batchInsert(sql, 'recipe_diets', ['recipe_id', 'diet'], recipeDiets, 400);
+
+	// migrations/0010. Remote-only orphan recipes (see file header) get no row
+	// and rank live on their page, to an empty list: they have no ingredients.
+	sql.push(...relatedSql);
 
 	batchInsert(
 		sql,
@@ -381,10 +428,20 @@ async function main() {
 		 JOIN recipes r ON r.id = i.recipe_id AND i.lang = r.source_lang;`
 	);
 
-	// Pack consecutive statements into ~MAX_CHUNK_BYTES files, never splitting
-	// a single statement across two files.
-	await rm(CHUNK_DIR, { recursive: true, force: true });
-	await mkdir(CHUNK_DIR, { recursive: true });
+	const fileCount = await writeChunks(CHUNK_DIR, sql);
+
+	console.log(`gen_remote_seed: ${sql.length} statements -> ${fileCount} chunk files (~${MAX_CHUNK_BYTES}B each) in pipeline/out/remote-chunks/`);
+	console.log(
+		`gen_remote_seed: ${keptRecipes.length} recipes (${existingRecipes.length} updated, ${newRecipes.length} inserted), ` +
+			`${ingredients.length} ingredients, ${recipeIngredients.length} recipe_ingredients rows, ${recipeMicros.length} recipe_micronutrient rows`
+	);
+}
+
+/** Packs consecutive statements into ~MAX_CHUNK_BYTES files, never splitting
+ *  a single statement across two files. Returns the file count. */
+async function writeChunks(dir, sql) {
+	await rm(dir, { recursive: true, force: true });
+	await mkdir(dir, { recursive: true });
 
 	const files = [];
 	let current = [];
@@ -403,14 +460,9 @@ async function main() {
 
 	for (let i = 0; i < files.length; i++) {
 		const name = `${String(i + 1).padStart(3, '0')}.sql`;
-		await writeFile(path.join(CHUNK_DIR, name), files[i].join(' ') + '\n');
+		await writeFile(path.join(dir, name), files[i].join(' ') + '\n');
 	}
-
-	console.log(`gen_remote_seed: ${sql.length} statements -> ${files.length} chunk files (~${MAX_CHUNK_BYTES}B each) in pipeline/out/remote-chunks/`);
-	console.log(
-		`gen_remote_seed: ${keptRecipes.length} recipes (${existingRecipes.length} updated, ${newRecipes.length} inserted), ` +
-			`${ingredients.length} ingredients, ${recipeIngredients.length} recipe_ingredients rows, ${recipeMicros.length} recipe_micronutrient rows`
-	);
+	return files.length;
 }
 
 await main();

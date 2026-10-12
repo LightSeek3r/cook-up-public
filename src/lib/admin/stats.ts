@@ -64,13 +64,6 @@ export interface IngredientHealth {
 	orphans: number;
 }
 
-export interface TranslateNext {
-	id: number;
-	title: string;
-	lang: string;
-	views: number;
-}
-
 const zeroKpi = (): Kpi => ({ today: 0, last7: 0, prev7: 0, last30: 0, prev30: 0, total: 0 });
 
 const KPI_WINDOWS: [keyof Kpi, string][] = [
@@ -137,18 +130,24 @@ export async function topRecipes(
 	limit = 25
 ): Promise<TopRecipe[]> {
 	const where = days === null ? '' : `AND pv.viewed_at >= datetime('now', ?)`;
+	// Counted per recipe first (idx_page_view_recipe), then joined to recipes
+	// once per viewed recipe and to the titles only for the `limit` rows kept:
+	// joining every page_view row before grouping read ~2.3 rows per view. The
+	// inner JOIN still drops views of recipes that no longer exist before the
+	// ranking, as it did then.
 	const stmt = db.prepare(
-		`SELECT pv.recipe_id AS id,
-            COALESCE(t.title, src.title, 'recipe ' || pv.recipe_id) AS title,
-            COUNT(*) AS views
-     FROM page_view pv
-     JOIN recipes r             ON r.id = pv.recipe_id
-     LEFT JOIN recipe_i18n t    ON t.recipe_id = r.id AND t.lang = 'en'
-     LEFT JOIN recipe_i18n src  ON src.recipe_id = r.id AND src.lang = r.source_lang
-     WHERE pv.recipe_id IS NOT NULL ${where}
-     GROUP BY pv.recipe_id
-     ORDER BY views DESC, id ASC
-     LIMIT ?`
+		`SELECT v.id, COALESCE(t.title, src.title, 'recipe ' || v.id) AS title, v.views
+     FROM (SELECT a.id, a.views, r.source_lang
+           FROM (SELECT pv.recipe_id AS id, COUNT(*) AS views
+                 FROM page_view pv
+                 WHERE pv.recipe_id IS NOT NULL ${where}
+                 GROUP BY pv.recipe_id) a
+           JOIN recipes r ON r.id = a.id
+           ORDER BY a.views DESC, a.id ASC
+           LIMIT ?) v
+     LEFT JOIN recipe_i18n t    ON t.recipe_id = v.id AND t.lang = 'en'
+     LEFT JOIN recipe_i18n src  ON src.recipe_id = v.id AND src.lang = v.source_lang
+     ORDER BY v.views DESC, v.id ASC`
 	);
 	const bound =
 		days === null ? stmt.bind(limit) : stmt.bind(`-${Math.trunc(days)} day`, limit);
@@ -183,8 +182,8 @@ export async function breakdown(
 /**
  * Rows in `recipe_i18n` per language. Note this counts the source-language rows
  * the pipeline writes for every recipe too, which is why English reads as
- * complete: `07_translate.mjs` stores the untranslated title in every language,
- * so `machine` is the honest measure of translation work actually done.
+ * complete: the translation tooling stores the untranslated title in every
+ * language, so `machine` is the honest measure of translated rows.
  */
 export async function translationRows(db: D1Database): Promise<LangRow[]> {
 	const { results } = await db
@@ -193,34 +192,6 @@ export async function translationRows(db: D1Database): Promise<LangRow[]> {
        FROM recipe_i18n GROUP BY lang ORDER BY translated DESC`
 		)
 		.all<LangRow>();
-	return results ?? [];
-}
-
-/**
- * Recipes with real readership in a language that has no row for them yet —
- * a demand-ranked worklist for `db:translate:daily`, which otherwise drips
- * through the corpus in id order regardless of whether anyone reads it.
- */
-export async function translateNext(db: D1Database, limit = 20): Promise<TranslateNext[]> {
-	const { results } = await db
-		.prepare(
-			`SELECT v.recipe_id AS id,
-              COALESCE(src.title, 'recipe ' || v.recipe_id) AS title,
-              v.lang, v.views
-       FROM (SELECT recipe_id, lang, COUNT(*) AS views
-             FROM page_view
-             WHERE recipe_id IS NOT NULL AND lang IS NOT NULL
-               AND viewed_at >= datetime('now','-30 day')
-             GROUP BY recipe_id, lang) v
-       JOIN recipes r            ON r.id = v.recipe_id
-       LEFT JOIN recipe_i18n t   ON t.recipe_id = v.recipe_id AND t.lang = v.lang
-       LEFT JOIN recipe_i18n src ON src.recipe_id = r.id AND src.lang = r.source_lang
-       WHERE t.recipe_id IS NULL
-       ORDER BY v.views DESC, id ASC
-       LIMIT ?`
-		)
-		.bind(limit)
-		.all<TranslateNext>();
 	return results ?? [];
 }
 
@@ -316,6 +287,36 @@ export async function unseenRecipes(db: D1Database): Promise<number> {
 
 export type Dashboard = Awaited<ReturnType<typeof loadDashboard>>;
 
+/** How long one isolate reuses a computed dashboard. */
+export const DASHBOARD_TTL_MS = 5 * 60_000;
+
+let memo: { at: number; value: Promise<Dashboard> } | null = null;
+
+/**
+ * `loadDashboard`, reused for DASHBOARD_TTL_MS within an isolate.
+ *
+ * One load reads every page_view row several times over plus all of
+ * recipe_i18n (~80k rows on the 16-language corpus before any traffic, ~250k
+ * at 30k views), and every reload or form action on /admin runs the load
+ * again. The figures are the same for every admin, so sharing them between
+ * requests leaks nothing; they are at most five minutes old. A failed load is
+ * not kept.
+ */
+export function cachedDashboard(db: D1Database, now = Date.now()): Promise<Dashboard> {
+	if (memo && now - memo.at < DASHBOARD_TTL_MS) return memo.value;
+	const entry = { at: now, value: loadDashboard(db) };
+	memo = entry;
+	entry.value.catch(() => {
+		if (memo === entry) memo = null;
+	});
+	return entry.value;
+}
+
+/** Test hook: forget the memoised dashboard. */
+export function resetDashboardCache() {
+	memo = null;
+}
+
 export async function loadDashboard(db: D1Database) {
 	const [
 		trafficTotals,
@@ -327,7 +328,6 @@ export async function loadDashboard(db: D1Database) {
 		referrers,
 		devices,
 		translations,
-		nextUp,
 		content,
 		grades,
 		coverage,
@@ -344,7 +344,6 @@ export async function loadDashboard(db: D1Database) {
 		breakdown(db, 'referrer_host'),
 		breakdown(db, 'device'),
 		translationRows(db),
-		translateNext(db),
 		contentHealth(db),
 		gradeDistribution(db),
 		coverageHistogram(db),
@@ -363,7 +362,6 @@ export async function loadDashboard(db: D1Database) {
 		referrers,
 		devices,
 		translations,
-		nextUp,
 		content,
 		grades,
 		coverage,

@@ -73,12 +73,17 @@ describe('searchRecipeTitles', () => {
 		expect(calls[0].binds).toContain('%寿司%');
 	});
 
-	it('collapses one recipe to one row — the load-bearing GROUP BY', async () => {
-		// Titles are never translated, so recipe_i18n holds the same English
-		// string once per language: up to ten identical FTS hits per recipe.
+	it('collapses one recipe to one row before ranking, and fetches titles for the page only', async () => {
+		// A pre-0008 index, or a translated row indexed by an older pipeline,
+		// gives one recipe several FTS hits; the DISTINCT subquery collapses them.
+		// search.sqlite.test.mjs checks the outcome on a real index.
 		const { db, calls } = spyDb();
 		await searchRecipeTitles(db, { q: 'goulash', lang: 'fr' });
-		expect(calls[0].sql).toContain('GROUP BY r.id');
+		const [inner, outer] = calls[0].sql.split(/\)\s*r\b/);
+		expect(inner).toContain('SELECT DISTINCT r.id');
+		expect(inner).toContain('LIMIT ?');
+		expect(inner).not.toContain('recipe_i18n t');
+		expect(outer).toContain('LEFT JOIN recipe_i18n t');
 	});
 
 	it('does not copy the ingredient search\'s lang filter, which would duplicate rows here', async () => {
@@ -93,7 +98,7 @@ describe('searchRecipeTitles', () => {
 		const { db, calls } = spyDb();
 		await searchRecipeTitles(db, { q: 'goulash', lang: 'de' });
 		expect(calls[0].sql).toContain('COALESCE(t.title, src.title)');
-		expect(calls[0].binds[0]).toBe('de');
+		expect(calls[0].binds).toEqual(['"goulash"', RECIPE_HIT_LIMIT, 'de']);
 	});
 
 	it.each([{ q: 'goulash' }, { q: '寿' }])(
@@ -109,11 +114,15 @@ describe('searchRecipeTitles', () => {
 	it('defaults the limit and passes an explicit one through', async () => {
 		const { db, calls } = spyDb();
 		await searchRecipeTitles(db, { q: 'goulash', lang: 'en' });
-		expect(calls[0].binds.at(-1)).toBe(RECIPE_HIT_LIMIT);
+		expect(calls[0].binds[1]).toBe(RECIPE_HIT_LIMIT);
 
 		const { db: db2, calls: calls2 } = spyDb();
 		await searchRecipeTitles(db2, { q: 'goulash', lang: 'en', limit: 3 });
-		expect(calls2[0].binds.at(-1)).toBe(3);
+		expect(calls2[0].binds[1]).toBe(3);
+
+		const { db: db3, calls: calls3 } = spyDb();
+		await searchRecipeTitles(db3, { q: '寿', lang: 'en', limit: 3 });
+		expect(calls3[0].binds.at(-1)).toBe(3);
 	});
 
 	it('returns [] rather than undefined when D1 reports no results', async () => {

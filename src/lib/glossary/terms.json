@@ -1,0 +1,1094 @@
+[
+  {
+    "id": "julienne",
+    "en": "Julienne",
+    "category": "knife-cuts",
+    "aliases": ["allumette", "matchstick", "matchsticks"],
+    "related": ["brunoise", "batonnet", "dice", "chiffonade"],
+    "diagram": "julienne"
+  },
+  {
+    "id": "brunoise",
+    "en": "Brunoise",
+    "category": "knife-cuts",
+    "aliases": ["fine dice"],
+    "related": ["julienne", "dice", "mince", "macedoine"],
+    "diagram": "brunoise"
+  },
+  {
+    "id": "chiffonade",
+    "en": "Chiffonade",
+    "category": "knife-cuts",
+    "aliases": ["chiffonnade", "ribbons"],
+    "related": ["julienne", "mince", "mise-en-place"],
+    "diagram": "chiffonade"
+  },
+  {
+    "id": "dice",
+    "en": "Dice",
+    "category": "knife-cuts",
+    "aliases": ["cube", "cubes", "diced"],
+    "related": ["brunoise", "macedoine", "batonnet", "paysanne", "mince"],
+    "diagram": "dice"
+  },
+  {
+    "id": "mince",
+    "en": "Mince",
+    "category": "knife-cuts",
+    "aliases": ["hacher", "finely chop", "mincing"],
+    "related": ["dice", "brunoise", "chiffonade"]
+  },
+  {
+    "id": "batonnet",
+    "en": "Bâtonnet",
+    "category": "knife-cuts",
+    "aliases": ["baton", "stick cut"],
+    "related": ["julienne", "dice", "paysanne"]
+  },
+  {
+    "id": "paysanne",
+    "en": "Paysanne",
+    "category": "knife-cuts",
+    "aliases": ["peasant cut", "country cut"],
+    "related": ["dice", "rondelle", "batonnet", "macedoine"]
+  },
+  {
+    "id": "tourne",
+    "en": "Tourné",
+    "category": "knife-cuts",
+    "aliases": ["tourner", "turned vegetables", "barrel cut"],
+    "related": ["rondelle", "paysanne", "steam", "blanch"],
+    "diagram": "tourne"
+  },
+  {
+    "id": "supreme",
+    "en": "Supreme",
+    "category": "knife-cuts",
+    "aliases": ["citrus segments", "segmenting"],
+    "related": ["zest", "macerate"],
+    "diagram": "supreme"
+  },
+  {
+    "id": "butterfly",
+    "en": "Butterfly",
+    "category": "knife-cuts",
+    "aliases": ["butterflied", "papillon"],
+    "related": ["spatchcock", "fillet", "devein", "portion"],
+    "diagram": "butterfly"
+  },
+  {
+    "id": "score",
+    "en": "Score",
+    "category": "knife-cuts",
+    "aliases": ["scoring", "crosshatch", "slash"],
+    "related": ["score-loaf", "butterfly", "marinate", "sear"]
+  },
+  {
+    "id": "bias-cut",
+    "en": "Bias cut",
+    "category": "knife-cuts",
+    "aliases": ["diagonal cut", "slanted cut", "oblique cut"],
+    "related": ["rondelle", "stir-fry", "batonnet"]
+  },
+  {
+    "id": "rondelle",
+    "en": "Rondelle",
+    "category": "knife-cuts",
+    "aliases": ["rondelles", "round slice", "coin cut"],
+    "related": ["bias-cut", "paysanne", "dice"]
+  },
+  {
+    "id": "macedoine",
+    "en": "Macédoine",
+    "category": "knife-cuts",
+    "aliases": ["macedonia", "mixed vegetable dice"],
+    "related": ["dice", "brunoise", "paysanne", "blanch"]
+  },
+  {
+    "id": "saute",
+    "en": "Sauté",
+    "category": "dry-heat",
+    "aliases": ["sauter", "saltear"],
+    "related": ["stir-fry", "pan-fry", "sear", "toss", "deglaze"]
+  },
+  {
+    "id": "sear",
+    "en": "Sear",
+    "category": "dry-heat",
+    "aliases": ["saisir"],
+    "related": ["pan-fry", "roast", "grill", "deglaze", "pan-sauce", "rest"]
+  },
+  {
+    "id": "roast",
+    "en": "Roast",
+    "category": "dry-heat",
+    "aliases": ["rotir"],
+    "related": ["bake", "sear", "truss", "rest", "broil", "char"]
+  },
+  {
+    "id": "bake",
+    "en": "Bake",
+    "category": "dry-heat",
+    "aliases": ["cuire au four", "hornear"],
+    "related": ["roast", "blind-bake", "par-bake", "bain-marie", "proof"]
+  },
+  {
+    "id": "broil",
+    "en": "Broil",
+    "category": "dry-heat",
+    "aliases": ["gratiner", "salamander"],
+    "related": ["grill", "char", "toast", "roast", "caramelize"]
+  },
+  {
+    "id": "pan-fry",
+    "en": "Pan-fry",
+    "category": "dry-heat",
+    "aliases": ["shallow-fry", "shallow fry"],
+    "related": ["saute", "sear", "deep-fry", "dredge", "pan-sauce"]
+  },
+  {
+    "id": "deep-fry",
+    "en": "Deep-fry",
+    "category": "dry-heat",
+    "aliases": ["frire", "friture"],
+    "related": ["pan-fry", "air-fry", "dredge", "season"]
+  },
+  {
+    "id": "stir-fry",
+    "en": "Stir-fry",
+    "category": "dry-heat",
+    "aliases": ["chao"],
+    "related": ["saute", "toss", "pan-fry", "sear", "mise-en-place"]
+  },
+  {
+    "id": "toast",
+    "en": "Toast",
+    "category": "dry-heat",
+    "aliases": ["torrefier", "dry-roast"],
+    "related": ["roast", "broil", "griddle", "bake"]
+  },
+  {
+    "id": "caramelize",
+    "en": "Caramelize",
+    "category": "dry-heat",
+    "aliases": [],
+    "related": ["sugar-stages", "saute", "roast", "glaze", "gastrique"]
+  },
+  {
+    "id": "flambe",
+    "en": "Flambé",
+    "category": "dry-heat",
+    "aliases": ["flamber", "flaming"],
+    "related": ["saute", "deglaze", "pan-sauce", "caramelize"]
+  },
+  {
+    "id": "smoke",
+    "en": "Smoke",
+    "category": "dry-heat",
+    "aliases": ["fumer", "ahumar"],
+    "related": ["cold-smoke", "grill", "char", "cure", "roast", "brine"]
+  },
+  {
+    "id": "grill",
+    "en": "Grill",
+    "category": "dry-heat",
+    "aliases": ["barbecue", "griller"],
+    "related": ["char", "sear", "broil", "griddle", "smoke", "marinate"]
+  },
+  {
+    "id": "griddle",
+    "en": "Griddle",
+    "category": "dry-heat",
+    "aliases": ["plancha", "teppanyaki", "flat top"],
+    "related": ["pan-fry", "sear", "grill", "toast"]
+  },
+  {
+    "id": "air-fry",
+    "en": "Air-fry",
+    "category": "dry-heat",
+    "aliases": ["air fryer"],
+    "related": ["deep-fry", "roast", "bake", "toast"]
+  },
+  {
+    "id": "char",
+    "en": "Char",
+    "category": "dry-heat",
+    "aliases": ["blacken"],
+    "related": ["grill", "broil", "sear", "smoke", "roast"]
+  },
+  {
+    "id": "boil",
+    "en": "Boil",
+    "category": "moist-heat",
+    "aliases": ["bouillir", "rolling boil"],
+    "related": ["simmer", "blanch", "parboil", "steam", "shock"]
+  },
+  {
+    "id": "simmer",
+    "en": "Simmer",
+    "category": "moist-heat",
+    "aliases": ["mijoter", "fremir", "gentle boil"],
+    "related": ["boil", "poach", "stew", "reduce"]
+  },
+  {
+    "id": "poach",
+    "en": "Poach",
+    "category": "moist-heat",
+    "aliases": ["pocher"],
+    "related": ["simmer", "sous-vide", "steam", "boil"],
+    "diagram": "poach"
+  },
+  {
+    "id": "steam",
+    "en": "Steam",
+    "category": "moist-heat",
+    "aliases": ["cuire a la vapeur", "vapeur"],
+    "related": ["boil", "blanch", "en-papillote", "pressure-cook"]
+  },
+  {
+    "id": "blanch",
+    "en": "Blanch",
+    "category": "moist-heat",
+    "aliases": ["blanchir"],
+    "related": ["shock", "parboil", "boil", "freeze"],
+    "diagram": "blanch"
+  },
+  {
+    "id": "braise",
+    "en": "Braise",
+    "category": "moist-heat",
+    "aliases": ["braiser"],
+    "related": ["stew", "sear", "deglaze", "slow-cook", "simmer"],
+    "diagram": "braise"
+  },
+  {
+    "id": "stew",
+    "en": "Stew",
+    "category": "moist-heat",
+    "aliases": ["ragout"],
+    "related": ["braise", "simmer", "slow-cook", "saute"]
+  },
+  {
+    "id": "shock",
+    "en": "Shock",
+    "category": "moist-heat",
+    "aliases": ["refresh", "ice bath"],
+    "related": ["blanch", "parboil", "boil"]
+  },
+  {
+    "id": "parboil",
+    "en": "Parboil",
+    "category": "moist-heat",
+    "aliases": ["par-boil"],
+    "related": ["blanch", "boil", "roast", "shock"]
+  },
+  {
+    "id": "reduce",
+    "en": "Reduce",
+    "category": "moist-heat",
+    "aliases": ["reduction", "reduire"],
+    "related": ["simmer", "deglaze", "pan-sauce", "jus", "braise"],
+    "diagram": "reduce"
+  },
+  {
+    "id": "deglaze",
+    "en": "Deglaze",
+    "category": "moist-heat",
+    "aliases": ["deglacer"],
+    "related": ["reduce", "pan-sauce", "sear", "saute", "braise"],
+    "diagram": "deglaze"
+  },
+  {
+    "id": "en-papillote",
+    "en": "En papillote",
+    "category": "moist-heat",
+    "aliases": ["papillote", "parchment baking"],
+    "related": ["steam", "bake", "poach"],
+    "diagram": "en-papillote"
+  },
+  {
+    "id": "pressure-cook",
+    "en": "Pressure-cook",
+    "category": "moist-heat",
+    "aliases": ["pressure cooker", "autocuiseur"],
+    "related": ["braise", "stew", "slow-cook", "boil", "can"]
+  },
+  {
+    "id": "slow-cook",
+    "en": "Slow-cook",
+    "category": "moist-heat",
+    "aliases": ["slow cooker"],
+    "related": ["braise", "stew", "simmer", "pressure-cook"]
+  },
+  {
+    "id": "fold",
+    "en": "Fold",
+    "category": "prep-mixing",
+    "aliases": ["folding", "folding in", "incorporer"],
+    "related": ["whisk", "sift", "meringue", "whip-cream", "ribbon-stage"],
+    "diagram": "fold"
+  },
+  {
+    "id": "whisk",
+    "en": "Whisk",
+    "category": "prep-mixing",
+    "aliases": ["whisking", "beat", "fouetter"],
+    "related": ["emulsify", "whip-cream", "meringue", "fold", "vinaigrette", "slurry"]
+  },
+  {
+    "id": "cream",
+    "en": "Cream",
+    "category": "prep-mixing",
+    "aliases": ["creaming", "beat butter and sugar"],
+    "related": ["buttercream", "whisk", "fold", "cut-in", "ribbon-stage"]
+  },
+  {
+    "id": "knead",
+    "en": "Knead",
+    "category": "prep-mixing",
+    "aliases": ["kneading", "petrir"],
+    "related": ["autolyse", "stretch-and-fold", "windowpane-test", "proof", "hydration"]
+  },
+  {
+    "id": "marinate",
+    "en": "Marinate",
+    "category": "prep-mixing",
+    "aliases": ["marinade", "marinading", "mariner"],
+    "related": ["brine", "season", "cure", "grill", "sear", "macerate"]
+  },
+  {
+    "id": "brine",
+    "en": "Brine",
+    "category": "prep-mixing",
+    "aliases": ["brining", "salt water soak", "saumure"],
+    "related": ["marinate", "cure", "pickle", "season", "salt-preserve", "roast"]
+  },
+  {
+    "id": "dredge",
+    "en": "Dredge",
+    "category": "prep-mixing",
+    "aliases": ["dredging", "coat in flour", "fariner"],
+    "related": ["pan-fry", "deep-fry", "saute", "sear", "braise", "season"]
+  },
+  {
+    "id": "infuse",
+    "en": "Infuse",
+    "category": "prep-mixing",
+    "aliases": ["steep", "infusion", "infuser"],
+    "related": ["strain", "simmer", "macerate", "creme-anglaise", "brew"]
+  },
+  {
+    "id": "macerate",
+    "en": "Macerate",
+    "category": "prep-mixing",
+    "aliases": ["maceration", "soak fruit", "macerer"],
+    "related": ["infuse", "marinate", "jam", "coulis", "quick-pickle"]
+  },
+  {
+    "id": "zest",
+    "en": "Zest",
+    "category": "prep-mixing",
+    "aliases": ["zesting", "citrus zest", "zeste"],
+    "related": ["infuse", "season", "supreme", "macerate"]
+  },
+  {
+    "id": "sift",
+    "en": "Sift",
+    "category": "prep-mixing",
+    "aliases": ["sieve", "sifting", "tamiser"],
+    "related": ["whisk", "strain", "fold", "cream"]
+  },
+  {
+    "id": "strain",
+    "en": "Strain",
+    "category": "prep-mixing",
+    "aliases": ["straining", "drain", "passer"],
+    "related": ["sift", "infuse", "puree", "jus", "coulis"]
+  },
+  {
+    "id": "rest",
+    "en": "Rest",
+    "category": "prep-mixing",
+    "aliases": ["resting", "standing time", "repos"],
+    "related": ["roast", "sear", "grill", "knead", "autolyse", "carve"]
+  },
+  {
+    "id": "season",
+    "en": "Season",
+    "category": "prep-mixing",
+    "aliases": ["seasoning", "assaisonner"],
+    "related": ["brine", "marinate", "infuse", "zest", "reduce"]
+  },
+  {
+    "id": "mise-en-place",
+    "en": "Mise en place",
+    "category": "prep-mixing",
+    "aliases": ["prep work", "everything in its place"],
+    "related": ["dice", "mince", "season"]
+  },
+  {
+    "id": "puree",
+    "en": "Purée",
+    "category": "prep-mixing",
+    "aliases": ["puree", "pureeing"],
+    "related": ["strain", "coulis", "steam", "simmer"]
+  },
+  {
+    "id": "cut-in",
+    "en": "Cut in",
+    "category": "prep-mixing",
+    "aliases": ["rub in", "rubbing in", "sabler"],
+    "related": ["cream", "rest", "laminate", "blind-bake", "dock"]
+  },
+  {
+    "id": "toss",
+    "en": "Toss",
+    "category": "prep-mixing",
+    "aliases": ["tossing", "dress"],
+    "related": ["vinaigrette", "season", "saute", "stir-fry", "roast"]
+  },
+  {
+    "id": "emulsify",
+    "en": "Emulsify",
+    "category": "sauces-emulsions",
+    "aliases": ["emulsion", "emulsionner"],
+    "related": ["whisk", "vinaigrette", "hollandaise", "mount-with-butter", "beurre-blanc"],
+    "diagram": "emulsify"
+  },
+  {
+    "id": "mount-with-butter",
+    "en": "Mount with butter",
+    "category": "sauces-emulsions",
+    "aliases": ["monter au beurre", "finish with butter"],
+    "related": ["pan-sauce", "beurre-blanc", "emulsify", "jus", "reduce", "whisk"]
+  },
+  {
+    "id": "roux",
+    "en": "Roux",
+    "category": "sauces-emulsions",
+    "aliases": ["roux blanc", "roux blond", "roux brun"],
+    "related": ["slurry", "liaison", "simmer", "whisk", "stew"]
+  },
+  {
+    "id": "beurre-blanc",
+    "en": "Beurre blanc",
+    "category": "sauces-emulsions",
+    "aliases": ["beurre nantais", "white butter sauce"],
+    "related": ["mount-with-butter", "emulsify", "reduce", "hollandaise", "pan-sauce", "whisk"]
+  },
+  {
+    "id": "hollandaise",
+    "en": "Hollandaise",
+    "category": "sauces-emulsions",
+    "aliases": ["sauce hollandaise"],
+    "related": ["emulsify", "whisk", "bain-marie", "beurre-blanc", "mount-with-butter"]
+  },
+  {
+    "id": "vinaigrette",
+    "en": "Vinaigrette",
+    "category": "sauces-emulsions",
+    "aliases": ["sauce vinaigrette", "oil and vinegar dressing"],
+    "related": ["emulsify", "whisk", "season", "toss", "macerate", "infuse"]
+  },
+  {
+    "id": "liaison",
+    "en": "Liaison",
+    "category": "sauces-emulsions",
+    "aliases": ["liaison au jaune", "yolk and cream liaison"],
+    "related": ["roux", "slurry", "custard", "creme-anglaise", "whisk", "hollandaise"]
+  },
+  {
+    "id": "jus",
+    "en": "Jus",
+    "category": "sauces-emulsions",
+    "aliases": ["jus de viande", "jus lie", "au jus", "pan juices"],
+    "related": ["deglaze", "reduce", "pan-sauce", "simmer", "strain", "roast"]
+  },
+  {
+    "id": "coulis",
+    "en": "Coulis",
+    "category": "sauces-emulsions",
+    "aliases": ["coulis de fruits"],
+    "related": ["puree", "strain", "reduce", "simmer", "macerate"]
+  },
+  {
+    "id": "slurry",
+    "en": "Slurry",
+    "category": "sauces-emulsions",
+    "aliases": ["cornstarch slurry", "cornflour slurry", "starch slurry"],
+    "related": ["roux", "liaison", "simmer", "whisk", "pan-sauce", "stir-fry"]
+  },
+  {
+    "id": "gastrique",
+    "en": "Gastrique",
+    "category": "sauces-emulsions",
+    "aliases": ["caramel and vinegar sauce"],
+    "related": ["caramelize", "reduce", "simmer", "pan-sauce", "jus"]
+  },
+  {
+    "id": "pan-sauce",
+    "en": "Pan sauce",
+    "category": "sauces-emulsions",
+    "aliases": ["sauce minute"],
+    "related": ["deglaze", "reduce", "mount-with-butter", "sear", "jus", "saute"]
+  },
+  {
+    "id": "proof",
+    "en": "Proof",
+    "category": "dough-bread",
+    "aliases": ["proving", "proofing", "final proof", "second rise"],
+    "related": ["bulk-fermentation", "shape-loaf", "cold-retard", "rest", "score-loaf"]
+  },
+  {
+    "id": "autolyse",
+    "en": "Autolyse",
+    "category": "dough-bread",
+    "aliases": ["autolyze", "autolyse rest"],
+    "related": ["knead", "hydration", "stretch-and-fold", "rest", "bulk-fermentation"]
+  },
+  {
+    "id": "stretch-and-fold",
+    "en": "Stretch and fold",
+    "category": "dough-bread",
+    "aliases": ["stretch and folds", "dough folding", "rabat"],
+    "related": ["knead", "autolyse", "bulk-fermentation", "windowpane-test", "hydration"],
+    "diagram": "stretch-and-fold"
+  },
+  {
+    "id": "shape-loaf",
+    "en": "Shape a loaf",
+    "category": "dough-bread",
+    "aliases": ["shaping", "faconnage", "pre-shape", "boule", "batard"],
+    "related": ["proof", "score-loaf", "bulk-fermentation", "knead"]
+  },
+  {
+    "id": "score-loaf",
+    "en": "Score a loaf",
+    "category": "dough-bread",
+    "aliases": ["scoring", "slash", "bread scoring", "grigne"],
+    "related": ["score", "shape-loaf", "proof", "bake", "cold-retard"],
+    "diagram": "score-loaf"
+  },
+  {
+    "id": "sourdough-starter",
+    "en": "Sourdough starter",
+    "category": "dough-bread",
+    "aliases": ["levain", "leaven", "mother dough", "wild yeast culture", "lievito madre"],
+    "related": ["starter-culture", "bulk-fermentation", "poolish", "lacto-ferment", "hydration"]
+  },
+  {
+    "id": "poolish",
+    "en": "Poolish",
+    "category": "dough-bread",
+    "aliases": ["pre-ferment", "preferment", "liquid pre-ferment"],
+    "related": ["sourdough-starter", "hydration", "bulk-fermentation", "starter-culture"]
+  },
+  {
+    "id": "blind-bake",
+    "en": "Blind bake",
+    "category": "dough-bread",
+    "aliases": ["blind baking", "pre-bake", "cuire a blanc"],
+    "related": ["par-bake", "egg-wash", "bake", "dock", "custard"],
+    "diagram": "blind-bake"
+  },
+  {
+    "id": "par-bake",
+    "en": "Par-bake",
+    "category": "dough-bread",
+    "aliases": ["parbake", "part-bake", "partial bake", "par-baking"],
+    "related": ["blind-bake", "bake", "freeze", "proof"]
+  },
+  {
+    "id": "egg-wash",
+    "en": "Egg wash",
+    "category": "dough-bread",
+    "aliases": ["dorure", "egg glaze"],
+    "related": ["glaze", "blind-bake", "bake", "score-loaf", "shape-loaf"]
+  },
+  {
+    "id": "windowpane-test",
+    "en": "Windowpane test",
+    "category": "dough-bread",
+    "aliases": ["window pane test", "gluten window", "membrane test"],
+    "related": ["knead", "stretch-and-fold", "autolyse", "hydration", "rest"]
+  },
+  {
+    "id": "bulk-fermentation",
+    "en": "Bulk fermentation",
+    "category": "dough-bread",
+    "aliases": ["bulk ferment", "bulk rise", "first rise", "primary fermentation", "pointage"],
+    "related": ["proof", "stretch-and-fold", "cold-retard", "sourdough-starter", "hydration"]
+  },
+  {
+    "id": "cold-retard",
+    "en": "Cold retard",
+    "category": "dough-bread",
+    "aliases": ["retard", "retarding", "cold proof", "cold ferment", "overnight proof"],
+    "related": ["proof", "bulk-fermentation", "score-loaf", "rest", "sourdough-starter"]
+  },
+  {
+    "id": "hydration",
+    "en": "Hydration",
+    "category": "dough-bread",
+    "aliases": ["dough hydration", "water percentage", "hydration percentage"],
+    "related": ["autolyse", "poolish", "sourdough-starter", "knead", "windowpane-test"]
+  },
+  {
+    "id": "laminate",
+    "en": "Laminate",
+    "category": "pastry-sweets",
+    "aliases": ["laminage", "tourage", "lamination"],
+    "related": ["rest", "proof", "egg-wash", "dock", "bake", "cut-in"],
+    "diagram": "laminate"
+  },
+  {
+    "id": "temper-chocolate",
+    "en": "Temper chocolate",
+    "category": "pastry-sweets",
+    "aliases": ["tempering", "temperer", "chocolate tempering"],
+    "related": ["ganache", "bain-marie", "glaze", "pipe"],
+    "diagram": "temper-chocolate"
+  },
+  {
+    "id": "meringue",
+    "en": "Meringue",
+    "category": "pastry-sweets",
+    "aliases": ["french meringue", "swiss meringue", "italian meringue"],
+    "related": ["whisk", "fold", "sugar-stages", "buttercream", "bain-marie", "pipe"]
+  },
+  {
+    "id": "ribbon-stage",
+    "en": "Ribbon stage",
+    "category": "pastry-sweets",
+    "aliases": ["ruban", "ribbon test"],
+    "related": ["whisk", "creme-anglaise", "fold", "bain-marie"],
+    "diagram": "ribbon-stage"
+  },
+  {
+    "id": "creme-anglaise",
+    "en": "Crème anglaise",
+    "category": "pastry-sweets",
+    "aliases": ["creme anglaise", "english cream", "vanilla custard sauce", "custard sauce"],
+    "related": ["custard", "pastry-cream", "ribbon-stage", "bain-marie", "strain", "infuse"]
+  },
+  {
+    "id": "ganache",
+    "en": "Ganache",
+    "category": "pastry-sweets",
+    "aliases": ["chocolate ganache", "truffle filling"],
+    "related": ["temper-chocolate", "emulsify", "whip-cream", "glaze", "pipe"]
+  },
+  {
+    "id": "choux",
+    "en": "Choux pastry",
+    "category": "pastry-sweets",
+    "aliases": ["pate a choux", "choux paste", "cream puff dough", "eclair dough"],
+    "related": ["pipe", "pastry-cream", "whip-cream", "bake", "egg-wash"]
+  },
+  {
+    "id": "custard",
+    "en": "Custard",
+    "category": "pastry-sweets",
+    "aliases": ["baked custard", "stirred custard", "egg custard"],
+    "related": ["creme-anglaise", "pastry-cream", "bain-marie", "ribbon-stage", "strain"]
+  },
+  {
+    "id": "bain-marie",
+    "en": "Bain-marie",
+    "category": "pastry-sweets",
+    "aliases": ["water bath", "double boiler", "bain marie", "hot water bath"],
+    "related": ["custard", "temper-chocolate", "meringue", "creme-anglaise", "steam"],
+    "diagram": "bain-marie"
+  },
+  {
+    "id": "dock",
+    "en": "Dock",
+    "category": "pastry-sweets",
+    "aliases": ["docking", "prick", "piquer", "pierce"],
+    "related": ["blind-bake", "par-bake", "laminate", "bake"]
+  },
+  {
+    "id": "sugar-stages",
+    "en": "Sugar stages",
+    "category": "pastry-sweets",
+    "aliases": ["candy stages", "cuisson du sucre", "thread stage", "soft ball stage", "hard crack stage"],
+    "related": ["caramelize", "meringue", "buttercream", "candy", "glaze", "jam"]
+  },
+  {
+    "id": "whip-cream",
+    "en": "Whip cream",
+    "category": "pastry-sweets",
+    "aliases": ["whipped cream", "chantilly", "creme chantilly", "creme fouettee"],
+    "related": ["whisk", "fold", "pipe", "ganache", "pastry-cream"]
+  },
+  {
+    "id": "buttercream",
+    "en": "Buttercream",
+    "category": "pastry-sweets",
+    "aliases": ["buttercream frosting", "creme au beurre", "american buttercream", "swiss meringue buttercream", "italian meringue buttercream"],
+    "related": ["cream", "meringue", "pipe", "sugar-stages", "glaze"]
+  },
+  {
+    "id": "pipe",
+    "en": "Pipe",
+    "category": "pastry-sweets",
+    "aliases": ["piping", "piping bag", "pastry bag", "poche a douille"],
+    "related": ["buttercream", "meringue", "choux", "whip-cream", "glaze"]
+  },
+  {
+    "id": "glaze",
+    "en": "Glaze",
+    "category": "pastry-sweets",
+    "aliases": ["glace icing", "glacage", "nappage", "mirror glaze"],
+    "related": ["ganache", "egg-wash", "temper-chocolate", "sugar-stages", "jam"]
+  },
+  {
+    "id": "pastry-cream",
+    "en": "Pastry cream",
+    "category": "pastry-sweets",
+    "aliases": ["creme patissiere", "confectioners custard", "custard filling", "pastry custard"],
+    "related": ["creme-anglaise", "custard", "choux", "whisk", "strain"]
+  },
+  {
+    "id": "spherification",
+    "en": "Spherification",
+    "category": "modernist",
+    "aliases": ["basic spherification", "direct spherification", "alginate caviar", "esferificacion"],
+    "related": ["reverse-spherification", "agar-gel", "fluid-gel", "xanthan-thickening"],
+    "diagram": "spherification"
+  },
+  {
+    "id": "reverse-spherification",
+    "en": "Reverse spherification",
+    "category": "modernist",
+    "aliases": ["inverse spherification", "esferificacion inversa"],
+    "related": ["spherification", "xanthan-thickening", "agar-gel", "yogurt"],
+    "diagram": "reverse-spherification"
+  },
+  {
+    "id": "sous-vide",
+    "en": "Sous vide",
+    "category": "modernist",
+    "aliases": ["sous-vide", "low-temperature cooking", "precision cooking", "cuisson sous vide"],
+    "related": ["poach", "vacuum-seal", "sear", "shock", "bain-marie"],
+    "diagram": "sous-vide"
+  },
+  {
+    "id": "agar-gel",
+    "en": "Agar gel",
+    "category": "modernist",
+    "aliases": ["agar", "agar-agar", "kanten"],
+    "related": ["gelatin-bloom", "fluid-gel", "spherification", "coulis"]
+  },
+  {
+    "id": "espuma",
+    "en": "Espuma",
+    "category": "modernist",
+    "aliases": ["siphon foam"],
+    "related": ["lecithin-foam", "whip-cream", "strain", "gelatin-bloom", "xanthan-thickening"]
+  },
+  {
+    "id": "lecithin-foam",
+    "en": "Lecithin foam",
+    "category": "modernist",
+    "aliases": ["aire", "culinary air"],
+    "related": ["espuma", "emulsify", "infuse", "strain"]
+  },
+  {
+    "id": "liquid-nitrogen",
+    "en": "Liquid nitrogen",
+    "category": "modernist",
+    "aliases": ["ln2", "cryogenic cooking"],
+    "related": ["freeze", "freeze-dry", "creme-anglaise", "meringue"]
+  },
+  {
+    "id": "transglutaminase",
+    "en": "Transglutaminase",
+    "category": "modernist",
+    "aliases": ["meat glue", "tg enzyme"],
+    "related": ["sous-vide", "debone", "portion", "fillet"]
+  },
+  {
+    "id": "fluid-gel",
+    "en": "Fluid gel",
+    "category": "modernist",
+    "aliases": ["sheared gel", "gel puree"],
+    "related": ["agar-gel", "coulis", "puree", "xanthan-thickening", "strain"]
+  },
+  {
+    "id": "dehydrate",
+    "en": "Dehydrate",
+    "category": "modernist",
+    "aliases": ["food drying", "dehydration"],
+    "related": ["freeze-dry", "sun-dry", "cure", "salt-preserve", "blanch"]
+  },
+  {
+    "id": "freeze-dry",
+    "en": "Freeze-dry",
+    "category": "modernist",
+    "aliases": ["lyophilize", "lyophilization", "freeze drying"],
+    "related": ["dehydrate", "freeze", "liquid-nitrogen", "vacuum-seal"]
+  },
+  {
+    "id": "xanthan-thickening",
+    "en": "Xanthan thickening",
+    "category": "modernist",
+    "aliases": ["xanthan gum", "xanthan"],
+    "related": ["slurry", "vinaigrette", "emulsify", "fluid-gel", "reverse-spherification"]
+  },
+  {
+    "id": "maltodextrin-powder",
+    "en": "Maltodextrin powder",
+    "category": "modernist",
+    "aliases": ["tapioca maltodextrin", "oil powder", "fat powder"],
+    "related": ["render", "infuse", "strain", "dehydrate"]
+  },
+  {
+    "id": "vacuum-compression",
+    "en": "Vacuum compression",
+    "category": "modernist",
+    "aliases": ["compressed fruit", "vacuum infusion"],
+    "related": ["vacuum-seal", "sous-vide", "infuse", "marinate", "quick-pickle"]
+  },
+  {
+    "id": "gelatin-bloom",
+    "en": "Bloom gelatin",
+    "category": "modernist",
+    "aliases": ["blooming gelatin", "hydrate gelatin", "soften gelatin", "gelatine"],
+    "related": ["agar-gel", "espuma", "custard", "pastry-cream"]
+  },
+  {
+    "id": "cold-smoke",
+    "en": "Cold smoke",
+    "category": "modernist",
+    "aliases": ["cold smoking", "fumage a froid"],
+    "related": ["smoke", "cure", "brine", "salt-preserve"]
+  },
+  {
+    "id": "pickle",
+    "en": "Pickle",
+    "category": "preservation",
+    "aliases": ["pickling", "vinegar pickle", "encurtido"],
+    "related": ["quick-pickle", "can", "brine", "lacto-ferment", "vinegar-making", "kimchi"]
+  },
+  {
+    "id": "quick-pickle",
+    "en": "Quick pickle",
+    "category": "preservation",
+    "aliases": ["refrigerator pickle", "fridge pickle", "quick pickling", "asazuke"],
+    "related": ["pickle", "marinate", "brine", "macerate", "lacto-ferment"]
+  },
+  {
+    "id": "cure",
+    "en": "Cure",
+    "category": "preservation",
+    "aliases": ["curing", "dry cure", "wet cure", "salaison"],
+    "related": ["brine", "salt-preserve", "smoke", "cold-smoke", "dry-age", "vacuum-seal"]
+  },
+  {
+    "id": "can",
+    "en": "Can",
+    "category": "preservation",
+    "aliases": ["canning", "home canning", "bottling", "water-bath canning", "pressure canning"],
+    "related": ["pickle", "jam", "quick-pickle", "pressure-cook", "freeze"]
+  },
+  {
+    "id": "confit",
+    "en": "Confit",
+    "category": "preservation",
+    "aliases": ["confire", "duck confit", "confit de canard"],
+    "related": ["render", "cure", "poach", "slow-cook", "salt-preserve", "sous-vide"]
+  },
+  {
+    "id": "vacuum-seal",
+    "en": "Vacuum seal",
+    "category": "preservation",
+    "aliases": ["vacuum pack", "vacuum packing", "vacuum sealing", "reduced-oxygen packaging"],
+    "related": ["freeze", "sous-vide", "vacuum-compression", "marinate", "cure"]
+  },
+  {
+    "id": "jam",
+    "en": "Make jam",
+    "category": "preservation",
+    "aliases": ["jam making", "confiture", "preserves", "marmalade", "mermelada"],
+    "related": ["can", "macerate", "sugar-stages", "coulis", "candy"]
+  },
+  {
+    "id": "render",
+    "en": "Render",
+    "category": "preservation",
+    "aliases": ["rendering", "rendered fat", "wet rendering", "dry rendering"],
+    "related": ["confit", "strain", "sear", "pan-fry"]
+  },
+  {
+    "id": "freeze",
+    "en": "Freeze",
+    "category": "preservation",
+    "aliases": ["freezing", "deep-freeze", "flash freeze", "tray freeze", "iqf"],
+    "related": ["blanch", "shock", "vacuum-seal", "freeze-dry", "portion"]
+  },
+  {
+    "id": "salt-preserve",
+    "en": "Salt-preserve",
+    "category": "preservation",
+    "aliases": ["salting", "dry salting", "salt packing", "salt preservation"],
+    "related": ["cure", "brine", "lacto-ferment", "sun-dry", "dehydrate"]
+  },
+  {
+    "id": "sun-dry",
+    "en": "Sun-dry",
+    "category": "preservation",
+    "aliases": ["sun drying", "sun-dried", "solar drying"],
+    "related": ["dehydrate", "salt-preserve", "freeze-dry", "freeze", "blanch"]
+  },
+  {
+    "id": "candy",
+    "en": "Candy",
+    "category": "preservation",
+    "aliases": ["candied fruit", "candied peel", "crystallized fruit", "glace fruit", "fruits confits"],
+    "related": ["sugar-stages", "jam", "blanch", "macerate", "glaze", "dehydrate"]
+  },
+  {
+    "id": "lacto-ferment",
+    "en": "Lacto-ferment",
+    "category": "fermentation",
+    "aliases": ["lacto-fermentation", "lactic fermentation", "lactofermentation", "fermented vegetables"],
+    "related": ["kimchi", "pickle", "brine", "quick-pickle", "salt-preserve", "starter-culture"],
+    "diagram": "lacto-ferment"
+  },
+  {
+    "id": "koji",
+    "en": "Koji",
+    "category": "fermentation",
+    "aliases": ["koji-kin", "kome koji", "rice koji", "aspergillus oryzae"],
+    "related": ["miso", "starter-culture", "steam", "tempeh", "brew", "marinate"]
+  },
+  {
+    "id": "brew",
+    "en": "Brew",
+    "category": "fermentation",
+    "aliases": ["brewing", "homebrew", "home brewing", "beer brewing"],
+    "related": ["starter-culture", "boil", "strain", "kombucha", "vinegar-making", "koji"]
+  },
+  {
+    "id": "starter-culture",
+    "en": "Starter culture",
+    "category": "fermentation",
+    "aliases": ["mother culture", "fermentation starter", "backslopping", "inoculant"],
+    "related": ["sourdough-starter", "yogurt", "kombucha", "tempeh", "koji", "lacto-ferment"]
+  },
+  {
+    "id": "kombucha",
+    "en": "Kombucha",
+    "category": "fermentation",
+    "aliases": ["scoby", "tea fungus", "kombucha tea"],
+    "related": ["starter-culture", "vinegar-making", "brew", "infuse", "strain"]
+  },
+  {
+    "id": "yogurt",
+    "en": "Yogurt",
+    "category": "fermentation",
+    "aliases": ["yoghurt", "yogourt", "dahi", "curd"],
+    "related": ["starter-culture", "strain", "lacto-ferment", "sous-vide"]
+  },
+  {
+    "id": "miso",
+    "en": "Miso",
+    "category": "fermentation",
+    "aliases": ["shiro miso", "aka miso", "hatcho miso", "soybean paste", "fermented soybean paste"],
+    "related": ["koji", "salt-preserve", "starter-culture", "lacto-ferment", "tempeh"]
+  },
+  {
+    "id": "tempeh",
+    "en": "Tempeh",
+    "category": "fermentation",
+    "aliases": ["tempe", "ragi tempe", "fermented soybean cake"],
+    "related": ["starter-culture", "koji", "miso", "steam", "marinate", "pan-fry"]
+  },
+  {
+    "id": "kimchi",
+    "en": "Kimchi",
+    "category": "fermentation",
+    "aliases": ["kimchee", "gimchi", "baechu kimchi"],
+    "related": ["lacto-ferment", "brine", "pickle", "salt-preserve"]
+  },
+  {
+    "id": "vinegar-making",
+    "en": "Vinegar making",
+    "category": "fermentation",
+    "aliases": ["mother of vinegar", "vinegar mother", "acetic fermentation", "orleans method", "homemade vinegar"],
+    "related": ["kombucha", "brew", "starter-culture", "pickle", "quick-pickle"]
+  },
+  {
+    "id": "debone",
+    "en": "Debone",
+    "category": "meat-fish",
+    "aliases": ["boning", "desosser", "bone out"],
+    "related": ["fillet", "portion", "truss", "carve", "butterfly", "spatchcock"]
+  },
+  {
+    "id": "truss",
+    "en": "Truss",
+    "category": "meat-fish",
+    "aliases": ["trussing", "brider", "bridage"],
+    "related": ["roast", "spatchcock", "carve", "debone", "rest"],
+    "diagram": "truss"
+  },
+  {
+    "id": "carve",
+    "en": "Carve",
+    "category": "meat-fish",
+    "aliases": ["carving", "trancher", "decouper"],
+    "related": ["rest", "truss", "portion", "roast", "debone", "spatchcock"]
+  },
+  {
+    "id": "dry-age",
+    "en": "Dry-age",
+    "category": "meat-fish",
+    "aliases": ["dry aging", "dry-aged beef", "maturation", "hanging"],
+    "related": ["cure", "portion", "sear", "carve", "vacuum-seal"]
+  },
+  {
+    "id": "portion",
+    "en": "Portion",
+    "category": "meat-fish",
+    "aliases": ["portioning", "portionner"],
+    "related": ["fillet", "debone", "carve", "dry-age", "freeze", "vacuum-seal"]
+  },
+  {
+    "id": "devein",
+    "en": "Devein",
+    "category": "meat-fish",
+    "aliases": ["de-vein", "deveining", "clean shrimp"],
+    "related": ["shuck", "scale", "fillet", "sear", "stir-fry"]
+  },
+  {
+    "id": "scale",
+    "en": "Scale a fish",
+    "category": "meat-fish",
+    "aliases": ["descale", "de-scale", "ecailler"],
+    "related": ["fillet", "debone", "devein", "shuck", "portion", "pan-fry"]
+  },
+  {
+    "id": "spatchcock",
+    "en": "Spatchcock",
+    "category": "meat-fish",
+    "aliases": ["spatchcocking", "butterflied chicken", "crapaudine", "flattened chicken"],
+    "related": ["truss", "butterfly", "roast", "debone", "carve", "grill"],
+    "diagram": "spatchcock"
+  },
+  {
+    "id": "fillet",
+    "en": "Fillet",
+    "category": "meat-fish",
+    "aliases": ["filet", "filetage", "lever les filets"],
+    "related": ["scale", "debone", "portion", "pan-fry", "devein"]
+  },
+  {
+    "id": "shuck",
+    "en": "Shuck",
+    "category": "meat-fish",
+    "aliases": ["shucking", "open oysters", "oyster opening"],
+    "related": ["steam", "devein", "fillet", "boil"]
+  }
+]

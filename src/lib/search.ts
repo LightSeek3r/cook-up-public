@@ -32,7 +32,7 @@ export const normaliseQuery = (raw: string | null): string =>
  * Recipes whose title matches `q`.
  *
  * Reads `recipe_title_fts`, which the pipeline has been building and rebuilding
- * all along (`06_seed_d1.mjs`, `07_translate.mjs`, `gen_remote_seed.mjs`) while
+ * all along (`06_seed_d1.mjs`, `gen_remote_seed.mjs`) while
  * no application code ever queried it.
  *
  * One thing about that index drives the whole shape of this query: **recipe
@@ -51,21 +51,26 @@ export const normaliseQuery = (raw: string | null): string =>
  * data, not a bug in this query; changing it means translating titles in the
  * pipeline, which contradicts the proper-noun decision on record.
  *
- * `GROUP BY r.id` stays as a defensive measure — the FTS index now has at most
- * one row per recipe, but both `HIT_JOINS` and the schema's PRIMARY KEY
- * (`recipe_id, lang`) already guarantee at most one row per side, so this is
- * belt-and-suspenders, not load-bearing the way it was pre-0008.
+ * Cost shape (D1 bills rows read): the FTS hits are ranked in a subquery that
+ * reads only `recipes`, and the two `recipe_i18n` title lookups run for the
+ * `limit` rows shown, not for every hit — ~4 rows per hit instead of ~7
+ * ("chicken": 1,365 -> 816). `DISTINCT` there is the dedupe `GROUP BY r.id`
+ * used to do: the index normally holds one row per recipe since 0008, but a
+ * translated row indexed by an older pipeline, or a pre-0008 index, gives one
+ * recipe several FTS rowids, and the subquery selects only `recipes` columns,
+ * so its duplicates are identical rows.
  *
  * The displayed title still goes through the `COALESCE(t.title, src.title)`
  * fallback that `match.ts` uses, so this stays correct on its own terms if
  * titles ever do become translated.
  */
-/** RecipeHit projection + the i18n title fallback, shared by every function
- *  in this file that returns RecipeHit rows. */
-const HIT_COLS = `r.id,
+/** RecipeHit projection + the i18n title fallback, shared by every query that
+ *  returns RecipeHit rows (this file and related.ts). `HIT_JOINS` binds the
+ *  language with one bare `?`. */
+export const HIT_COLS = `r.id,
        COALESCE(t.title, src.title) AS title,
        r.cuisine, r.total_minutes, r.balance_grade, r.nutrition_coverage`;
-const HIT_JOINS = `LEFT JOIN recipe_i18n t   ON t.recipe_id = r.id AND t.lang = ?
+export const HIT_JOINS = `LEFT JOIN recipe_i18n t   ON t.recipe_id = r.id AND t.lang = ?
        LEFT JOIN recipe_i18n src ON src.recipe_id = r.id AND src.lang = r.source_lang`;
 
 export async function searchRecipeTitles(
@@ -86,16 +91,18 @@ export async function searchRecipeTitles(
 		const { results } = await db
 			.prepare(
 				`SELECT ${HIT_COLS}
-         FROM recipe_title_fts f
-         JOIN recipe_i18n m ON m.rowid = f.rowid
-         JOIN recipes r     ON r.id = m.recipe_id
+         FROM (SELECT DISTINCT r.id, r.source_lang, r.cuisine, r.total_minutes,
+                      r.balance_grade, r.nutrition_coverage
+               FROM recipe_title_fts f
+               JOIN recipe_i18n m ON m.rowid = f.rowid
+               JOIN recipes r     ON r.id = m.recipe_id
+               WHERE f.title MATCH ?
+               ${order}
+               LIMIT ?) r
          ${HIT_JOINS}
-         WHERE f.title MATCH ?
-         GROUP BY r.id
-         ${order}
-         LIMIT ?`
+         ${order}`
 			)
-			.bind(p.lang, ftsPhrase(q), limit)
+			.bind(ftsPhrase(q), limit, p.lang)
 			.all<RecipeHit>();
 		return { recipes: results ?? [] };
 	}

@@ -1,7 +1,8 @@
 import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { requireDb } from '$lib/db';
-import { loadDashboard } from '$lib/admin/stats';
+import { cachedDashboard } from '$lib/admin/stats';
+import { NEVER_CACHE } from '$lib/httpCache';
 import {
 	SESSION_COOKIE,
 	SESSION_TTL_DAYS,
@@ -31,12 +32,15 @@ const cookieOptions = {
 	maxAge: SESSION_TTL_DAYS * 24 * 60 * 60
 };
 
-export const load: PageServerLoad = async ({ cookies, platform }) => {
+export const load: PageServerLoad = async ({ cookies, platform, setHeaders }) => {
+	// Per-user, cookie-gated: never let the adapter's edge cache or a shared
+	// cache store it, whatever header a future change adds elsewhere.
+	setHeaders({ 'cache-control': NEVER_CACHE });
 	const db = requireDb(platform);
 	const email = await readSession(db, cookies.get(SESSION_COOKIE));
 
 	if (!email) return { authed: false as const };
-	return { authed: true as const, email, dashboard: await loadDashboard(db) };
+	return { authed: true as const, email, dashboard: await cachedDashboard(db) };
 };
 
 export const actions: Actions = {

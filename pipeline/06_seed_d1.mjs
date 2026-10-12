@@ -11,6 +11,8 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { GENERIC_PAIRS_CLOSED } from './lib/generic_ingredients.mjs';
+import { nonStapleCounts } from './lib/non_staple_count.mjs';
+import { relatedRows } from './lib/related_recipes.mjs';
 
 const OUT_DIR = path.resolve('pipeline/out');
 const ALLERGENS = ['gluten', 'dairy', 'nut', 'peanut', 'egg', 'soy', 'fish', 'shellfish', 'sesame'];
@@ -57,6 +59,7 @@ async function main() {
 	const keptRecipes = recipes.filter((r) => keptRecipeIds.has(r.id));
 	const nutritionById = new Map(recipeNutrition.map((n) => [n.id, n]));
 	const imageById = new Map(recipeImages.map((i) => [i.recipe_id, i]));
+	const nonStaple = nonStapleCounts(ingredients, recipeIngredients);
 
 	const ingredientId = new Map(ingredients.map((ing, i) => [ing.canonical_key, i + 1]));
 
@@ -67,6 +70,7 @@ async function main() {
 	);
 
 	const sql = [
+		'DELETE FROM recipe_related;',
 		'DELETE FROM recipe_micronutrient;',
 		'DELETE FROM recipe_diets;',
 		'DELETE FROM recipe_ingredients;',
@@ -143,7 +147,7 @@ async function main() {
 			'image_url', 'image_width', 'image_height', 'image_page', 'image_author', 'image_licence',
 			'prep_minutes', 'total_minutes', 'servings', 'servings_assumed',
 			'kcal', 'protein_g', 'fat_g', 'sat_fat_g', 'carb_g', 'sugar_g', 'fiber_g', 'sodium_mg',
-			'balance_grade', 'balance_score', 'nutrition_coverage'
+			'balance_grade', 'balance_score', 'nutrition_coverage', 'non_staple_count'
 		],
 		keptRecipes.map((r) => {
 			const n = nutritionById.get(r.id);
@@ -181,7 +185,8 @@ async function main() {
 				sodium_mg: n?.sodium_mg ?? null,
 				balance_grade: n?.balance_grade ?? null,
 				balance_score: n?.balance_score ?? null,
-				nutrition_coverage: n?.nutrition_coverage ?? 0
+				nutrition_coverage: n?.nutrition_coverage ?? 0,
+				non_staple_count: nonStaple.get(r.id) ?? 0
 			};
 		}),
 		// 50, not the default 200: a recipes row now carries a Commons image URL, a
@@ -220,6 +225,15 @@ async function main() {
 	);
 
 	batchInsert(sql, 'recipe_diets', ['recipe_id', 'diet'], recipeDiets);
+
+	// migrations/0010: the recipe page's related list, ranked here so D1 never
+	// has to (see pipeline/lib/related_recipes.mjs).
+	batchInsert(
+		sql,
+		'recipe_related',
+		['recipe_id', 'related_ids'],
+		relatedRows(ingredients, recipeIngredients, keptRecipes.map((r) => r.id))
+	);
 
 	batchInsert(
 		sql,

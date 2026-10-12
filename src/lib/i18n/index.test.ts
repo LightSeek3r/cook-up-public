@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolveLang, dirFor, t } from './index';
 import { SUPPORTED_LANGS, DEFAULT_LANG } from '$lib/config';
+import { CATEGORY_IDS } from '$lib/glossary/types';
 import en from './en.json';
 import es from './es.json';
 import fr from './fr.json';
@@ -55,7 +56,8 @@ describe('i18n bundle key parity', () => {
 	const PLACEHOLDER_KEYS: [string, string][] = [
 		['footer.createdBy', '{link}'],
 		['results.addIngredient', '{name}'],
-		['mosaic.mustUse', '{name}']
+		['mosaic.mustUse', '{name}'],
+		['glossary.count', '{n}']
 	];
 
 	for (const [key, placeholder] of PLACEHOLDER_KEYS) {
@@ -63,6 +65,13 @@ describe('i18n bundle key parity', () => {
 			expect(BUNDLES[lang][key].split(placeholder)).toHaveLength(2);
 		});
 	}
+
+	// The category chips and tags look their label up by id, so a new CATEGORY_IDS
+	// entry without a string would render the raw key in every language.
+	it.each(Object.keys(BUNDLES))('%s has a glossary.cat.<id> label for every category', (lang) => {
+		const missing = CATEGORY_IDS.filter((id) => !BUNDLES[lang][`glossary.cat.${id}`]);
+		expect(missing).toEqual([]);
+	});
 
 	it('SUPPORTED_LANGS and the bundle set agree exactly', () => {
 		expect(new Set(Object.keys(BUNDLES))).toEqual(new Set(SUPPORTED_LANGS));

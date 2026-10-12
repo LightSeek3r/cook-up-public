@@ -11,8 +11,14 @@
 	import { MIN_FTS_LENGTH } from '$lib/search';
 	import { ALLERGENS } from '$lib/config';
 	import { slackFor } from '$lib/match';
+	import { matchRequest } from '$lib/matchRequest';
+	import { cachedJson } from '$lib/responseCache';
+	import { apiUrl } from '$lib/httpCache';
+	import { filterTiles } from '$lib/tileSearch';
 	import { loadFridge, saveFridge } from '$lib/fridge';
 	import type { IngredientTile, MatchResult, RecipeHit } from '$lib/types';
+
+	type MatchResponse = { results?: MatchResult[]; total?: number; haveCount?: number };
 
 	let tiles = $state<IngredientTile[]>([]);
 	let results = $state<MatchResult[]>([]);
@@ -232,59 +238,68 @@
 		});
 	});
 
+	// The cleanup's `stale` flag keeps a slow response for an earlier query from
+	// landing on top of a newer one.
 	$effect(() => {
 		const value = debouncedQuery.trim();
 		if (value.length < MIN_FTS_LENGTH) {
 			recipeHits = [];
 			return;
 		}
-		fetch(`/api/search?${new URLSearchParams({ q: value, lang })}`)
-			.then((response) => response.json())
-			.then((data) => (recipeHits = data.recipes ?? []))
-			.catch(() => (recipeHits = []));
+		let stale = false;
+		cachedJson<{ recipes?: RecipeHit[] }>(apiUrl('/api/search', { q: value, lang }))
+			.then((data) => {
+				if (!stale) recipeHits = data.recipes ?? [];
+			})
+			.catch(() => {
+				if (!stale) recipeHits = [];
+			});
+		return () => (stale = true);
 	});
 
+	// Short queries filter the full mosaic here rather than asking the route,
+	// whose LIKE fallback scans the whole ingredient table for 1-2 characters.
 	$effect(() => {
+		const value = debouncedQuery.trim();
+		const fromServer = value.length >= MIN_FTS_LENGTH;
 		const search = new URLSearchParams({ lang });
-		if (debouncedQuery.trim()) search.set('q', debouncedQuery.trim());
-		fetch(`/api/ingredients?${search}`)
-			.then((response) => response.json())
-			.then((data) => (tiles = data.results ?? []))
-			.catch(() => (tiles = []));
+		if (fromServer) search.set('q', value);
+		let stale = false;
+		cachedJson<{ results?: IngredientTile[] }>(apiUrl('/api/ingredients', search))
+			.then((data) => {
+				if (stale) return;
+				const found = data.results ?? [];
+				tiles = fromServer ? found : filterTiles(found, value);
+			})
+			.catch(() => {
+				if (!stale) tiles = [];
+			});
+		return () => (stale = true);
 	});
 
-	/** The query for one page of matches. Reading the reactive values here is what
-	 *  registers them as dependencies of the effect below. */
-	function matchQuery(offset: number) {
-		const search = new URLSearchParams({ have: selected.join(','), lang });
-		if (cuisine) search.set('cuisine', cuisine);
-		if (meal) search.set('meal', meal);
-		if (diet) search.set('diet', diet);
-		if (sort) search.set('sort', sort);
-		if (noAllergen.length) search.set('noAllergen', noAllergen.join(','));
-		// Only meaningful once `slack` lets a recipe skip part of the
-		// selection — see MatchParams.mustUse — so there's nothing to send
-		// when slack is 0, matching the API route's own guard.
-		if (must.length && slack > 0) search.set('must', must.join(','));
-		if (offset) search.set('offset', String(offset));
-		return search.toString();
+	function matchInput() {
+		return { selected, lang, cuisine, meal, diet, sort, noAllergen, must, slack };
 	}
 
+	// Keyed on a string so the effect below re-runs only when the request would
+	// change: `selected`, `must` and `noAllergen` are fresh arrays after every URL
+	// write, the debounced `?q=` included.
+	const matchKey = $derived(matchRequest(matchInput()));
+
 	$effect(() => {
-		if (selected.length === 0) {
+		const query = matchKey;
+		if (!query) {
 			results = [];
 			total = 0;
 			loading = false;
 			return;
 		}
-		const query = matchQuery(0);
 		// Anything already in flight for a previous selection must not land on top
 		// of this one — see `loadMore`.
 		requestToken = query;
 
 		loading = true;
-		fetch(`/api/match?${query}`)
-			.then((response) => response.json())
+		cachedJson<MatchResponse>(apiUrl('/api/match', query))
 			.then((data) => {
 				if (requestToken !== query) return;
 				results = data.results ?? [];
@@ -312,11 +327,11 @@
 	 * one — the list would silently contain recipes that don't match.
 	 */
 	async function loadMore() {
-		const query = matchQuery(results.length);
+		const query = matchRequest(matchInput(), results.length);
 		const token = requestToken;
 		loadingMore = true;
 		try {
-			const data = await (await fetch(`/api/match?${query}`)).json();
+			const data = await cachedJson<MatchResponse>(apiUrl('/api/match', query));
 			if (requestToken !== token) return;
 			results = [...results, ...(data.results ?? [])];
 			total = data.total ?? total;

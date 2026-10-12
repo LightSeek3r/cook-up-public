@@ -1,11 +1,67 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { RELATED_LIMIT, RELATED_MAX_INGREDIENT_RECIPES, RELATED_MIN_SHARED, type Lang } from '$lib/config';
-import { getRecipesByIds } from '$lib/search';
+import { getRecipesByIds, HIT_COLS, HIT_JOINS } from '$lib/search';
 import type { RecipeHit } from '$lib/types';
 
 /**
  * Recipes sharing the most distinctive non-staple ingredients with `id`,
  * ranked by shared-ingredient count.
+ *
+ * Read from `recipe_related` (migrations/0010), which the seeds fill with the
+ * same ranking computed offline: one statement, ~20 rows read, against ~640 on
+ * average (up to ~3,800) for ranking live. A recipe without a stored row — the
+ * table not seeded yet, or a recipe written by a path that skips it — gets the
+ * live ranking instead, so the page is never wrong, only slower.
+ */
+export async function relatedRecipes(
+	db: D1Database,
+	p: { id: number; lang: Lang }
+): Promise<RecipeHit[]> {
+	const stored = await storedRelatedRecipes(db, p).catch((err: unknown) => {
+		// Deployed before migrations/0010 was applied: rank live until it is.
+		// Anything else is a real failure and must not hide behind the fallback.
+		if (/no such table: recipe_related/.test(String(err))) return null;
+		throw err;
+	});
+	return stored ?? liveRelatedRecipes(db, p);
+}
+
+type StoredRow = { [K in keyof RecipeHit]: RecipeHit[K] | null };
+
+/**
+ * The stored list, or `null` when the recipe has no `recipe_related` row.
+ *
+ * The LEFT JOINs make a stored row always come back as at least one result
+ * row: all-NULL for an empty list (and for an id whose recipe no longer
+ * exists, which is dropped like `getRecipesByIds` drops it). Zero rows can
+ * therefore only mean "no stored row", which is what lets one statement both
+ * answer and detect the fallback case.
+ */
+export async function storedRelatedRecipes(
+	db: D1Database,
+	p: { id: number; lang: Lang }
+): Promise<RecipeHit[] | null> {
+	const { results } = await db
+		.prepare(
+			`SELECT ${HIT_COLS}
+       FROM recipe_related rr
+       LEFT JOIN json_each(rr.related_ids) j
+       LEFT JOIN recipes r ON r.id = j.value
+       ${HIT_JOINS}
+       WHERE rr.recipe_id = ?
+       ORDER BY j.key`
+		)
+		.bind(p.lang, p.id)
+		.all<StoredRow>();
+
+	const rows = results ?? [];
+	if (rows.length === 0) return null;
+	return rows.filter((row): row is RecipeHit => row.id !== null);
+}
+
+/**
+ * The ranking itself, run in D1. pipeline/lib/related_recipes.mjs is the
+ * offline copy that fills `recipe_related`; the two must stay equivalent.
  *
  * Two queries, not a join into the RecipeHit projection directly: the first
  * ranks candidate ids by shared ingredients alone, the second (`getRecipesByIds`,
@@ -14,7 +70,7 @@ import type { RecipeHit } from '$lib/types';
  * re-sorted back into rank order here rather than trusted from the second
  * query.
  */
-export async function relatedRecipes(
+export async function liveRelatedRecipes(
 	db: D1Database,
 	p: { id: number; lang: Lang }
 ): Promise<RecipeHit[]> {

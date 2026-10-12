@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseIds, parseKeys, requireDb, requireKv, requireAi } from './db';
+import { parseIds, parseKeys, requireDb } from './db';
 
 // parseIds is the input-validation boundary for /api/match's `have`/
 // `noAllergen` params, and its dedupe behaviour is load-bearing for
@@ -63,20 +63,14 @@ describe('parseKeys', () => {
 	});
 });
 
-describe('requireDb / requireKv / requireAi', () => {
+describe('requireDb', () => {
 	it('return the binding when present', () => {
 		const db = {} as never;
 		expect(requireDb({ env: { DB: db } } as never)).toBe(db);
-		const kv = {} as never;
-		expect(requireKv({ env: { TRANSLATIONS: kv } } as never)).toBe(kv);
-		const ai = {} as never;
-		expect(requireAi({ env: { AI: ai } } as never)).toBe(ai);
 	});
 
 	it('throw a 500 when the platform or binding is missing', () => {
 		expect(() => requireDb(undefined)).toThrow();
 		expect(() => requireDb({ env: {} } as never)).toThrow();
-		expect(() => requireKv({ env: {} } as never)).toThrow();
-		expect(() => requireAi({ env: {} } as never)).toThrow();
 	});
 });

@@ -31,21 +31,10 @@
 			.join(' · ') || t('app.tagline')
 	);
 
-	interface Translated {
-		title: string;
-		instructions: string;
-		machine: boolean;
-	}
+	const title = $derived(data.recipe.title);
+	const machine = $derived(Boolean(data.recipe.is_machine));
 
-	// The server always returns the recipe in its source language; a successful
-	// lazy translation overrides it, so the page never blocks on Workers AI.
-	let translated = $state<Translated | null>(null);
-
-	const title = $derived(translated?.title ?? data.recipe.title);
-	const instructions = $derived(translated?.instructions ?? data.recipe.instructions);
-	const machine = $derived(translated ? translated.machine : Boolean(data.recipe.is_machine));
-
-	const steps = $derived(splitSteps(instructions));
+	const steps = $derived(splitSteps(data.recipe.instructions));
 	const notes = $derived(data.recipe.notes?.split('\n').filter(Boolean) ?? []);
 
 	/** The parenthesised metric/imperial equivalent for one ingredient line, or ''
@@ -62,27 +51,6 @@
 			data.recipe.meal_type ? t(`meal.${data.recipe.meal_type}`) : null
 		].filter((tag): tag is string => Boolean(tag))
 	);
-
-	// Layer-2 i18n: fetch the machine translation only when the page is actually
-	// viewed in a language the recipe has not been translated into yet.
-	$effect(() => {
-		translated = null;
-		if (!data.needsTranslation) return;
-		fetch(`/api/translate?id=${data.recipe.id}&lang=${data.lang}`)
-			.then((response) => response.json())
-			.then((result) => {
-				if (result?.title) {
-					translated = {
-						title: result.title,
-						instructions: result.instructions,
-						machine: Boolean(result.machine)
-					};
-				}
-			})
-			.catch(() => {
-				/* keep the original-language text */
-			});
-	});
 </script>
 
 <SeoHead
@@ -279,9 +247,8 @@
 	</div>
 
 	<!-- Source-language only, and deliberately so. These bullets are untranslated
-	     free text; showing English tips inside an Arabic page would be worse than
-	     omitting them, and translating them would add ~24% to a machine-translation
-	     backlog that still has seven languages at zero. Same rule already applied
+	     free text that recipe_i18n does not carry; showing English tips inside an
+	     Arabic page would be worse than omitting them. Same rule already applied
 	     to ingredient `raw_text` above. -->
 	{#if notes.length && data.lang === data.recipe.source_lang}
 		<section class="card notes">

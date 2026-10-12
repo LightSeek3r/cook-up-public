@@ -7,7 +7,8 @@ import {
 	normalisePath,
 	recipeIdFromPath,
 	recordPageView,
-	referrerHost
+	referrerHost,
+	shouldTrack
 } from './analytics';
 import type { D1Database } from '@cloudflare/workers-types';
 
@@ -75,6 +76,39 @@ describe('isTrackablePath', () => {
 		expect(isTrackablePath('/wp-login.php')).toBe(false);
 		expect(isTrackablePath('/api/track')).toBe(false);
 		expect(isTrackablePath('/recipe/')).toBe(false);
+	});
+});
+
+describe('shouldTrack', () => {
+	const url = (path: string) => new URL(path, 'https://cook-up.example');
+
+	it('tracks the first load', () => {
+		expect(shouldTrack(null, url('/?lang=fr'))).toBe(true);
+		expect(shouldTrack(null, url('/recipe/12'))).toBe(true);
+	});
+
+	it('tracks a move to another path', () => {
+		expect(shouldTrack(url('/?have=onion&lang=fr'), url('/recipe/12?lang=fr'))).toBe(true);
+		expect(shouldTrack(url('/recipe/12?lang=fr'), url('/?have=onion&lang=fr'))).toBe(true);
+		expect(shouldTrack(url('/recipe/12'), url('/recipe/13'))).toBe(true);
+		expect(shouldTrack(url('/glossary?lang=fr'), url('/favorites?lang=fr'))).toBe(true);
+	});
+
+	it('skips the home page rewriting its own query string', () => {
+		expect(shouldTrack(url('/?lang=fr'), url('/?have=onion&lang=fr'))).toBe(false);
+		expect(shouldTrack(url('/?have=onion&lang=fr'), url('/?have=onion&lang=fr&q=chi'))).toBe(false);
+		expect(shouldTrack(url('/?have=onion'), url('/?have=onion&cuisine=indian'))).toBe(false);
+	});
+
+	it('tracks the same page switched to another language', () => {
+		expect(shouldTrack(url('/recipe/12?lang=en'), url('/recipe/12?lang=fr'))).toBe(true);
+		expect(shouldTrack(url('/?have=onion'), url('/?have=onion&lang=ja'))).toBe(true);
+	});
+
+	it('never sends a path the endpoint would discard', () => {
+		expect(shouldTrack(null, url('/glossary'))).toBe(false);
+		expect(shouldTrack(url('/'), url('/glossary/sous-vide?lang=fr'))).toBe(false);
+		expect(shouldTrack(url('/'), url('/admin'))).toBe(false);
 	});
 });
 

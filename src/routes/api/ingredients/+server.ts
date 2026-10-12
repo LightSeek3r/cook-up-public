@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { requireDb } from '$lib/db';
 import { resolveLang } from '$lib/i18n';
+import { PUBLIC_DATA } from '$lib/httpCache';
 import type { IngredientTile } from '$lib/types';
 import type { RequestHandler } from './$types';
 // One copy of the query hardening and the length thresholds, shared with the
@@ -17,6 +18,9 @@ const NAME = `COALESCE(t.name, en.name, i.canonical_key)`;
 const COLS = `i.id, i.canonical_key, i.category, i.recipe_count, ${NAME} AS name`;
 const FALLBACK_JOINS = `LEFT JOIN ingredient_i18n t  ON t.ingredient_id = i.id AND t.lang = ?
        LEFT JOIN ingredient_i18n en ON en.ingredient_id = i.id AND en.lang = 'en'`;
+
+const respond = (results: IngredientTile[] | undefined) =>
+	json({ results: results ?? [] }, { headers: { 'cache-control': PUBLIC_DATA } });
 
 export const GET: RequestHandler = async ({ url, platform }) => {
 	const db = requireDb(platform);
@@ -40,7 +44,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			)
 			.bind(lang, ftsPhrase(q), lang)
 			.all<IngredientTile>();
-		return json({ results: results ?? [] });
+		return respond(results);
 	}
 
 	if (q.length > 0) {
@@ -55,7 +59,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 			)
 			.bind(lang, `%${likeTerm(q)}%`)
 			.all<IngredientTile>();
-		return json({ results: results ?? [] });
+		return respond(results);
 	}
 
 	// Full mosaic; the client groups by category and sizes tiles by recipe_count.
@@ -70,5 +74,5 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		.bind(lang)
 		.all<IngredientTile>();
 
-	return json({ results: results ?? [] });
+	return respond(results);
 };

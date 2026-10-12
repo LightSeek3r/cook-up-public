@@ -57,6 +57,24 @@ export function isTrackablePath(path: string): boolean {
 	return path === '/' || path === '/favorites' || /^\/recipe\/\d{1,9}$/.test(path);
 }
 
+/**
+ * Whether a client navigation is a page view worth a `/api/track` POST.
+ *
+ * `afterNavigate` also fires for the home page's `goto(..., { replaceState })`
+ * on every ingredient toggle, filter change and settled search, which would
+ * record each of them as another view of `/` (4 rows written apiece). A view
+ * is the first load, a new path, or the same path in another language. Paths
+ * the endpoint would discard anyway are not sent at all.
+ */
+export function shouldTrack(from: URL | null, to: URL): boolean {
+	const path = normalisePath(to.pathname);
+	if (!path || !isTrackablePath(path)) return false;
+	if (!from) return true;
+	return (
+		from.pathname !== to.pathname || from.searchParams.get('lang') !== to.searchParams.get('lang')
+	);
+}
+
 export function normaliseLang(raw: string | null): Lang | null {
 	return SUPPORTED_LANGS.includes(raw as Lang) ? (raw as Lang) : null;
 }

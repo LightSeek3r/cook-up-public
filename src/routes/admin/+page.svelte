@@ -39,9 +39,9 @@
 	});
 
 	// Translation completeness is measured against the recipe count, and the
-	// machine column is the honest one: `07_translate.mjs` writes a row for every
-	// language including the source, so `translated` alone reads as complete for
-	// English no matter how much work is outstanding.
+	// machine column is the honest one: the translation tooling writes a row for
+	// every language including the source, so `translated` alone reads as
+	// complete for English regardless.
 	const translationRows = $derived.by(() => {
 		if (!data.authed) return [];
 		const total = data.dashboard.content.recipes;
@@ -216,27 +216,6 @@
 					{/each}
 				</tbody>
 			</table>
-		</div>
-
-		<div class="panel">
-			<h3>Translate these next</h3>
-			<p class="muted">
-				Recipes with readers in a language that has no row for them yet, ranked by demand over
-				the last 30 days — a worklist for <code>db:translate:daily</code>, which otherwise
-				drips through the corpus in id order.
-			</p>
-			{#if d.nextUp.length}
-				<ol class="ranked">
-					{#each d.nextUp as r (`${r.id}-${r.lang}`)}
-						<li>
-							<a href="/recipe/{r.id}?lang={r.lang}">{r.title}</a>
-							<span>{LANG_NAMES[r.lang as keyof typeof LANG_NAMES] ?? r.lang} · {r.views}</span>
-						</li>
-					{/each}
-				</ol>
-			{:else}
-				<p class="muted">Nothing outstanding — every viewed recipe has a row in the language it was read in.</p>
-			{/if}
 		</div>
 
 		<h2>Content</h2>

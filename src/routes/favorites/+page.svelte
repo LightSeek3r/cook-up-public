@@ -4,6 +4,7 @@
 	import SeoHead from '$components/SeoHead.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
+	import { apiUrl } from '$lib/httpCache';
 	import type { RecipeHit } from '$lib/types';
 
 	const lang = $derived(resolveLang($page.url.searchParams.get('lang')));
@@ -31,7 +32,7 @@
 			loaded = true;
 			return;
 		}
-		fetch(`/api/recipes?${new URLSearchParams({ ids: ids.join(','), lang })}`)
+		fetch(apiUrl('/api/recipes', { ids: ids.join(','), lang }))
 			.then((response) => response.json())
 			.then((data) => (hits = data.recipes ?? []))
 			.catch(() => (hits = []))

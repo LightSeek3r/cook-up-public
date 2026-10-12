@@ -1,6 +1,7 @@
 import { json } from '@sveltejs/kit';
 import { requireDb, parseIds } from '$lib/db';
 import { resolveLang } from '$lib/i18n';
+import { PUBLIC_DATA } from '$lib/httpCache';
 import { getRecipesByIds } from '$lib/search';
 import type { RequestHandler } from './$types';
 
@@ -9,14 +10,16 @@ import type { RequestHandler } from './$types';
  *  this. */
 const MAX_IDS = 200;
 
+const headers = { 'cache-control': PUBLIC_DATA };
+
 export const GET: RequestHandler = async ({ url, platform }) => {
 	const db = requireDb(platform);
 	const ids = parseIds(url.searchParams.get('ids')).slice(0, MAX_IDS);
-	if (ids.length === 0) return json({ recipes: [] });
+	if (ids.length === 0) return json({ recipes: [] }, { headers });
 
 	const data = await getRecipesByIds(db, {
 		ids,
 		lang: resolveLang(url.searchParams.get('lang'))
 	});
-	return json(data);
+	return json(data, { headers });
 };

@@ -53,8 +53,6 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
 		relatedRecipes(db, { id, lang })
 	]);
 
-	// Prose in the requested language is filled lazily by /api/translate.
-	const needsTranslation = lang !== recipe.source_lang;
 	const recipeIngredients = ingredients.results ?? [];
 
 	const matches = substitutionsFor(recipeIngredients.map((i) => i.canonical_key));
@@ -85,7 +83,6 @@ export const load: PageServerLoad = async ({ params, url, platform }) => {
 
 	return {
 		lang,
-		needsTranslation,
 		tips,
 		related,
 		recipe: {

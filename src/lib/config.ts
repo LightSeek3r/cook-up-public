@@ -42,8 +42,8 @@ export const RTL_LANGS = new Set<Lang>(['ar', 'pnb']);
 
 /**
  * Each language's name **in that language** — for the UI language switcher.
- * Distinct from LANG_NAMES below, which is deliberately English and exists only
- * to address the translation model in its own prompt. Showing "HI" or
+ * Distinct from LANG_NAMES below, which is deliberately English and only labels
+ * languages on the English-only admin dashboard. Showing "HI" or
  * "Simplified Chinese" in the picker is useless to the person looking for it.
  */
 export const LANG_ENDONYMS: Record<Lang, string> = {
@@ -65,7 +65,7 @@ export const LANG_ENDONYMS: Record<Lang, string> = {
 	jv: 'Basa Jawa'
 };
 
-/** English exonyms, used to address the translation model in its own prompt. */
+/** English exonyms, for the English-only admin dashboard. */
 export const LANG_NAMES: Record<Lang, string> = {
 	en: 'English',
 	es: 'Spanish',
@@ -81,8 +81,7 @@ export const LANG_NAMES: Record<Lang, string> = {
 	it: 'Italian',
 	bn: 'Bengali',
 	ru: 'Russian',
-	// Disambiguates script for the translation model's prompt: plain "Punjabi"
-	// is ambiguous between Shahmukhi (this one) and Gurmukhi.
+	// Plain "Punjabi" is ambiguous between Shahmukhi (this one) and Gurmukhi.
 	pnb: 'Western Punjabi (Shahmukhi script)',
 	// Disambiguates against the separate, little-used Javanese script.
 	jv: 'Javanese (Latin script)'

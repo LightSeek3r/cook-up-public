@@ -1,4 +1,5 @@
 import { json } from '@sveltejs/kit';
+import { PUBLIC_STATIC } from '$lib/httpCache';
 import type { RequestHandler } from './$types';
 
 /**
@@ -24,6 +25,6 @@ export const GET: RequestHandler = () => {
 				{ src: '/favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }
 			]
 		},
-		{ headers: { 'content-type': 'application/manifest+json' } }
+		{ headers: { 'content-type': 'application/manifest+json', 'cache-control': PUBLIC_STATIC } }
 	);
 };

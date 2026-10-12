@@ -7,6 +7,7 @@ import {
 	recordPageView,
 	referrerHost
 } from '$lib/analytics';
+import { NEVER_CACHE } from '$lib/httpCache';
 import type { RequestHandler } from './$types';
 
 /**
@@ -22,7 +23,7 @@ import type { RequestHandler } from './$types';
  * Cloudflare can cancel it the instant this handler returns.
  */
 export const POST: RequestHandler = async ({ url, request, platform }) => {
-	const noContent = new Response(null, { status: 204 });
+	const noContent = new Response(null, { status: 204, headers: { 'cache-control': NEVER_CACHE } });
 
 	const path = normalisePath(url.searchParams.get('path'));
 	if (!path || !isTrackablePath(path)) return noContent;

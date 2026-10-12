@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import { parseKeys, requireDb } from '$lib/db';
 import { matchRecipes, resolveIngredientIds, slackFor } from '$lib/match';
 import { resolveLang } from '$lib/i18n';
+import { PUBLIC_DATA } from '$lib/httpCache';
 import { ALLERGENS, CUISINES, DIETS, MEAL_TYPES } from '$lib/config';
 import type { RequestHandler } from './$types';
 
@@ -25,6 +26,8 @@ const parseAllergenKeys = (value: string | null): string[] => {
 	return [...new Set(keys)];
 };
 
+const headers = { 'cache-control': PUBLIC_DATA };
+
 export const GET: RequestHandler = async ({ url, platform }) => {
 	const db = requireDb(platform);
 
@@ -32,10 +35,10 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	// that don't exist are dropped by the lookup rather than erroring, so a stale
 	// or hand-edited link degrades to a smaller selection instead of a 500.
 	const keys = parseKeys(url.searchParams.get('have'));
-	if (keys.length === 0) return json({ results: [], total: 0, haveCount: 0 });
+	if (keys.length === 0) return json({ results: [], total: 0, haveCount: 0 }, { headers });
 
 	const have = await resolveIngredientIds(db, keys);
-	if (have.length === 0) return json({ results: [], total: 0, haveCount: 0 });
+	if (have.length === 0) return json({ results: [], total: 0, haveCount: 0 }, { headers });
 
 	const offset = Math.max(0, Number(url.searchParams.get('offset') ?? 0) || 0);
 	const slack = slackFor(have.length);
@@ -71,5 +74,5 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	// (`matched === haveCount`) from a near-miss without re-deriving it from the
 	// URL — this side of the boundary is where keys are validated, resolved and
 	// deduped, so it is the only place that knows how many actually count.
-	return json({ ...data, haveCount: have.length });
+	return json({ ...data, haveCount: have.length }, { headers });
 };

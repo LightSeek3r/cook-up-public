@@ -53,8 +53,10 @@ swap exists, a substitution tip.
   exclusion by any of: gluten, dairy, nut, peanut, egg, soy, fish, shellfish, sesame.
 - **16 languages** — en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it, bn, ru, pnb, jv, including
   full RTL support for Arabic and Western Punjabi (Shahmukhi script). Ingredient names and UI
-  strings are bundled; recipe titles/instructions are batch machine-translated offline with a
-  live fallback for anything not yet translated.
+  strings are bundled; recipe instructions are pre-translated and stored in D1 (`recipe_i18n`)
+  for every language. Translation is complete: no translation job, cron or runtime translation
+  endpoint exists, and a recipe page shows the stored text for its language (source language
+  if a row is missing).
 - **Recipe photos** — 711 recipes carry a Wikimedia Commons photograph, hotlinked, each credited
   to its own author and licence (all free: CC BY-SA, CC BY, CC0, public domain).
 - **Difficulty, notes and quantity equivalents** — a 1–4 difficulty meter from the source infobox,
@@ -66,15 +68,14 @@ swap exists, a substitution tip.
   No IP address, no cookie, no session id, no user-agent string, and never the query string,
   which on this site *is* the visitor's ingredient selection.
 - **Admin dashboard** — `/admin`, behind a six-digit code emailed on request, showing traffic,
-  translation completeness and corpus health. Its most useful panel is "translate these next":
-  recipes that have readers in a language they have no translation for.
+  translation completeness and corpus health.
 
 ## Tech stack
 
 - [SvelteKit](https://svelte.dev) 2 (Svelte 5 runes) + TypeScript, deployed as a Cloudflare
   Worker with static assets (`@sveltejs/adapter-cloudflare`).
-- **Cloudflare D1** (SQLite) for all recipe/ingredient/nutrition data, **KV** as a
-  translation cache, **Workers AI** for on-demand machine translation.
+- **Cloudflare D1** (SQLite) for all recipe/ingredient/nutrition data, including the stored
+  translations. No KV or Workers AI binding.
 - **Vitest** for unit tests; a plain Node ESM pipeline (no framework) for the offline data
   build.
 
@@ -83,7 +84,7 @@ swap exists, a substitution tip.
 ```
 src/                    SvelteKit app
   routes/                 pages + API endpoints (/api/match, /api/ingredients, /api/search,
-                          /api/translate, /api/track) plus /admin, the OTP-gated dashboard
+                          /api/recipes, /api/track) plus /admin, the OTP-gated dashboard
   components/             Mosaic, ResultCard, NutritionPanel, SubstitutionTips, RecipeHits, ...
   lib/                     matching/search/nutrition/i18n logic, config, types — the pure,
                            testable core. SQL lives here, not inline in routes, so it can be
@@ -105,7 +106,7 @@ tasks/                  working notes: todo.md (build log per phase), lessons.md
 ```bash
 npm install
 npm run db:migrate          # apply the D1 schema to your local database
-npm run dev                 # vite dev, with D1/KV emulated locally
+npm run dev                 # vite dev, with D1 emulated locally (no Cloudflare login needed)
 ```
 
 All configuration is via `wrangler.toml` bindings — there's no `.env` file in this project.
@@ -119,12 +120,6 @@ build a real dataset, or ask whoever set up the project for a `seed.sql` to load
 ```bash
 wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql
 ```
-
-`/api/translate` needs Workers AI, which has **no local emulation** — the `[ai]` binding in
-`wrangler.toml` is always proxied to the real account. It ships uncommented (a deploy
-requires it), so `npm run dev` also wants `npx wrangler login`. For fully offline work,
-comment that block out: translation requests then return a clear 500 instead of hanging, and
-recipe pages quietly keep their source-language text. **Uncomment it again before deploying.**
 
 ## Match API
 
@@ -170,7 +165,7 @@ request time.
 | 04 | `node pipeline/04_map_fdc.mjs` | Matches ingredients to USDA FoodData Central entries; resolves recipe quantities to grams |
 | 05 | `node pipeline/05_compute_nutrition.mjs` | Aggregates per-recipe macros/micros and computes the Balance Grade |
 | 06 | `pipeline:seed` | Writes `pipeline/out/seed.sql` for D1 |
-| 07 | `db:translate:daily` / `db:translate:all` | Batch machine-translates recipe titles/instructions into every non-English language |
+| 07 | (removed) | The batch machine-translation stage is gone: all 3,484 recipes are translated into all 15 non-English languages and stored. Corrections go through `db:translate:manual` (validated writer, not a job) |
 | 08 | `node pipeline/08_fetch_images.mjs` | Resolves each recipe's Wikimedia Commons photo to a URL plus its author and licence (the only networked stage besides 01; disk-cached) |
 
 Stage 04 needs the USDA FoodData Central **Foundation Foods** and **SR Legacy** CSV bulk
@@ -218,6 +213,21 @@ The chunking and the direct `node .../wrangler.js` invocation are both deliberat
 shell's argv limit. Each chunk is atomic, so a failure at chunk N leaves 1..N-1 committed —
 fix and resume from N. That script's own header comment explains the details.
 
+The recipe page's related-recipes lists (`recipe_related`, migration 0010) are part of that
+reseed. To fill only that table (about 3,500 rows written, no full reseed), as long as remote's
+ingredients came from the same `pipeline/out`:
+
+```bash
+node pipeline/gen_remote_seed.mjs --only=related   # writes pipeline/out/remote-chunks-related/*.sql
+```
+
+and apply those chunks with the same loop. Until the table is filled, the page ranks related
+recipes live (correct, ~30x more D1 reads).
+
+After any reseed, redeploy: public API responses are cached per build version (next section),
+so the redeploy is what makes browsers and the edge stop serving the old data at once; otherwise
+it ages out within a day.
+
 ## Testing
 
 ```bash
@@ -232,8 +242,6 @@ Deploys as a single Cloudflare Worker (`wrangler deploy`), serving the built Sve
 as static assets plus its own API routes. Bindings live in `wrangler.toml`:
 
 - `DB` — D1 (`cook-up-db`)
-- `TRANSLATIONS` — KV, caches on-demand translations
-- `AI` — Workers AI, always remote-proxied; required for a deploy (see **Getting started**)
 
 Three secrets are set with `wrangler secret put` instead, because they must not be in the repo:
 
@@ -248,10 +256,9 @@ sends anything. That is deliberate: the form answers identically whether or not 
 allowlisted, so it cannot be used to discover who the admin is. Check `wrangler secret list`
 rather than the UI when a code fails to arrive.
 
-**Local and remote D1 are not interchangeable.** Remote accumulates machine-translated recipe
-content over time, via a daily job (`npm run db:translate:daily`) hitting the live
-`/api/translate` endpoint — thousands of rows that exist *only* there and that the pipeline
-cannot reproduce, because they never flow back into its inputs.
+**Local and remote D1 are not interchangeable.** Remote holds the translated recipe content
+(`recipe_i18n`, every language) — rows that exist *only* there and that the pipeline cannot
+reproduce, because they never flow back into its inputs.
 
 `pipeline/out/seed.sql` unconditionally deletes and English-only-reinserts `recipe_i18n`.
 **Never apply it to `--remote`.** Use `npm run pipeline:gen-remote-seed` (above), which never
@@ -261,6 +268,23 @@ confirm you're on the safe path before running anything:
 ```bash
 grep -l "DELETE FROM recipe_i18n" pipeline/out/remote-chunks/*.sql   # must print nothing
 ```
+
+**HTTP caching.** `/api/ingredients`, `/api/search`, `/api/match`, `/api/recipes` and
+`/sitemap.xml` send `Cache-Control: public, max-age=3600, s-maxage=86400`
+(`src/lib/httpCache.ts`); `/admin` and `/api/track` send `private, no-store`. The client adds
+`v=<build version>` to its API URLs, so every deploy starts on fresh cache keys. Browser caching
+works on any host. The edge cache is the adapter's own `caches.default` use, which Cloudflare
+documents for custom domains and which may do nothing on `*.workers.dev`. To check, request the
+same URL twice:
+
+```bash
+curl -sI "https://cook-up.asakura-account.workers.dev/api/ingredients?lang=en" | grep -iE "cf-cache-status|^age|cache-control"
+curl -sI "https://cook-up.asakura-account.workers.dev/api/ingredients?lang=en" | grep -iE "cf-cache-status|^age|cache-control"
+```
+
+`cf-cache-status: HIT` (or an `age:` header) on the second response means the edge cache works
+on this host; no `cf-cache-status`, or `MISS` every time, means only browsers cache, and moving
+to a custom domain is what turns the edge cache on.
 
 ## Data sources & attribution
 
