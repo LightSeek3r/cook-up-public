@@ -1,7 +1,6 @@
-// The public API routes over the data artefacts built from a small SQLite
-// corpus (every migration applied), the sitemap over that SQLite through the
-// shared D1 adapter and its 100-bind cap: input validation, the answers that
-// must load no data at all, and the property the edge-cache key normalisation
+// The public API routes and the sitemap over the data artefacts built from a
+// small SQLite corpus (every migration applied): input validation, the
+// answers that must load no data at all, and the property the edge-cache key normalisation
 // in hooks.server.ts rests on — a raw URL and its canonical URL get the same
 // response. `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';

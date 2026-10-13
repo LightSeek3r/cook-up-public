@@ -6,10 +6,10 @@
 // tests/e2e/fixtures/seed.sql. The developer's own local D1 (.wrangler/state)
 // is never touched. Needs a prior `npm run build:checked`.
 //
-// The public APIs read the data artefacts from the static assets, not D1, so
-// the build's assets are served from a copy in .wrangler/e2e-assets whose
-// data/ is built from the same seed: pages (D1) and APIs (artefacts) then
-// show one corpus. The build output itself is never modified.
+// The pages and public APIs read the data artefacts from the static assets,
+// not D1 (only /api/track and /admin use it), so the build's assets are
+// served from a copy in .wrangler/e2e-assets whose data/ is built from the
+// same seed. The build output itself is never modified.
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';

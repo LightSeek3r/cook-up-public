@@ -1,4 +1,4 @@
-import { loadCorpus } from '$lib/data';
+import { loadCorpus, type recipePage } from '$lib/data';
 import { DataUnavailableError } from '$lib/apiError';
 
 /**
@@ -6,7 +6,8 @@ import { DataUnavailableError } from '$lib/apiError';
  * deployed with the Worker as one version) on first use, then kept in module
  * scope for the isolate's lifetime. A cold isolate pays one subrequest per
  * file and no parsing beyond core.bin's header; each language's two small
- * files are fetched the first time a request asks for that language.
+ * files are fetched the first time a request asks for that language. The
+ * per-recipe files and the sitemap list are read per request instead.
  *
  * Anything that goes wrong while loading (a missing file, a corrupt one,
  * files from different data builds) is a DataUnavailableError, which the
@@ -121,4 +122,34 @@ export async function mosaicBody(platform: App.Platform | undefined, lang: strin
 		}
 		return `{${file.slice(head.length)}`;
 	});
+}
+
+type RecipeDetailFile = Parameters<typeof recipePage>[1];
+
+async function readJson<T>(assets: Assets, path: string): Promise<T> {
+	const text = await readText(assets, path);
+	try {
+		return JSON.parse(text) as T;
+	} catch (error) {
+		throw unavailable(error);
+	}
+}
+
+/**
+ * r/<id>.json, for an id the corpus has (`corpus.recipeIndex(id) >= 0`): a
+ * missing file is then a broken deployment, not an unknown recipe.
+ */
+export async function recipeFile(platform: App.Platform | undefined, id: number): Promise<RecipeDetailFile> {
+	const detail = await readJson<RecipeDetailFile | null>(assetsOf(platform), `r/${id}.json`);
+	if (detail?.recipe?.id !== id) throw new DataUnavailableError(`data/r/${id}.json is not recipe ${id}`);
+	return detail;
+}
+
+/** Every recipe id, ascending (sitemap.json). */
+export async function sitemapIds(platform: App.Platform | undefined): Promise<number[]> {
+	const ids = (await readJson<{ ids?: unknown } | null>(assetsOf(platform), 'sitemap.json'))?.ids;
+	if (!Array.isArray(ids) || !ids.every(Number.isInteger)) {
+		throw new DataUnavailableError('data/sitemap.json has no id list');
+	}
+	return ids;
 }

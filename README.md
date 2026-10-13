@@ -227,8 +227,8 @@ node pipeline/gen_remote_seed.mjs --only=fts      # rebuild recipe_title_fts, ~3
 ```
 
 `--only=related` ranks from `pipeline/out`, so it matches remote only while remote's ingredients
-came from that same `pipeline/out`. Until `recipe_related` is filled, the page ranks related
-recipes live (correct, ~30x more D1 reads).
+came from that same `pipeline/out`. The site no longer reads remote `recipe_related`: recipe
+pages take their related lists from the data artefacts (below), ranked the same way.
 
 **Translation backup.** Remote `recipe_i18n` / `ingredient_i18n` are backed up into
 `pipeline/data/i18n-backup/` by `node pipeline/tools/export_remote_i18n.mjs` (read-only, ~150k
@@ -255,23 +255,27 @@ through the same statements `06_seed_d1.mjs` writes, so every value is exactly w
 imports) and reproduces the SQL exactly: `matchCore`, `searchTitles`, `searchIngredients`,
 `recipesByIds`, `recipePage`.
 
-`/api/match`, `/api/search`, `/api/ingredients` and `/api/recipes` serve from them and never
-touch D1: `src/lib/server/data.ts` fetches `core.bin` and English from `env.ASSETS` on an
-isolate's first data request, each other language's two small files on its first use, keeps
-them for the isolate's lifetime, and answers a missing, corrupt or mixed-version file with
-`503 {"error":"unavailable"}` (logged by `handleError`, retried on the next request). The
-mosaic is the file itself, sliced, not re-serialised. The `init` hook warms the query code up
-on a tiny embedded corpus (`src/lib/server/warmup.ts`) at isolate startup, which is not billed
-to any request. D1 still serves the recipe page, the sitemap, `/api/track` and admin.
+`/api/match`, `/api/search`, `/api/ingredients`, `/api/recipes`, the recipe pages and
+`/sitemap.xml` serve from them and never touch D1, which now only serves `/api/track`
+(`page_view`) and `/admin`. `src/lib/server/data.ts` fetches `core.bin` and English from
+`env.ASSETS` on an isolate's first data request, each other language's two small files on its
+first use, and keeps them for the isolate's lifetime; a recipe page also fetches its own
+`r/<id>.json` (alongside the corpus on a cold isolate), the sitemap `sitemap.json`, on every
+uncached request. A missing, corrupt or mixed-version file is `503 {"error":"unavailable"}` on
+the APIs and the "try again" error page on pages (logged by `handleError`, retried on the next
+request); an id the corpus does not have is a 404 without D1. The mosaic is the file itself,
+sliced, not re-serialised. The `init` hook warms the query code up on a tiny embedded corpus
+(`src/lib/server/warmup.ts`) at isolate startup, which is not billed to any request.
 
-`src/lib/data/parity.sqlite.test.mjs` compares the real route handlers (with a D1 stub that
-throws if touched) against the D1 implementations they replaced (`src/lib/test/sqlRoutes.ts`):
-status, headers and body byte for byte, over the D1 match harness matrix, generated URLs and
-search, ingredient and favorites queries. It runs on a real slice of the corpus in
-`pipeline/fixtures/artefact-corpus.sql` (regenerate with `node pipeline/tools/make_artefact_fixture.mjs`);
-`DATA_PARITY_DB=<file>` adds the full corpus saved by `--save-db`. The e2e server
-(`scripts/e2e-server.mjs`) serves artefacts built from its own seed, so pages and APIs show
-one corpus there.
+`src/lib/data/parity.sqlite.test.mjs` compares the real route handlers and the real recipe
+page load (with a D1 stub that throws if touched) against the D1 implementations they replaced
+(`src/lib/test/sqlRoutes.ts`): status, headers and body byte for byte, over the D1 match
+harness matrix, generated URLs and search, ingredient, favorites and sitemap queries, and the
+page data as JSON (or the 400/404 thrown) for every recipe in every language plus an unknown
+one. It runs on a real slice of the corpus in `pipeline/fixtures/artefact-corpus.sql`
+(regenerate with `node pipeline/tools/make_artefact_fixture.mjs`); `DATA_PARITY_DB=<file>`
+adds the full corpus saved by `--save-db`. The e2e server (`scripts/e2e-server.mjs`) serves
+artefacts built from its own seed.
 
 **Delivery: a pinned release asset, not committed files.** The per-recipe files alone are ~58
 MB, regenerated whenever a translation changes, and `pipeline/out` is not in git anyway, so

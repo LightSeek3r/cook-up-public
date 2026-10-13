@@ -12,6 +12,10 @@ import type { RecipeHit } from '$lib/types';
  * average (up to ~3,800) for ranking live. A recipe without a stored row — the
  * table not seeded yet, or a recipe written by a path that skips it — gets the
  * live ranking instead, so the page is never wrong, only slower.
+ *
+ * The page now reads the stored list from r/<id>.json; this stays as the D1
+ * reference of the parity suite (src/lib/test/sqlRoutes.ts) until the corpus
+ * tables are dropped.
  */
 export async function relatedRecipes(
 	db: D1Database,

@@ -1,10 +1,10 @@
 // Artefacts vs the SQL they replace, on one database: the real API route
-// handlers (reading the artefacts through a fake ASSETS binding, with a D1
-// that throws if touched) against the D1 implementations they replaced
-// (test/sqlRoutes.ts) and the SQL query functions, on SQLite with every
-// migration applied, through the shared D1 adapter. Byte-identical responses
-// are the bar: status, headers, body, key order and ties. The recipe page is
-// still D1-backed, so its data is compared against src/lib/data directly.
+// handlers, sitemap and recipe page load (reading the artefacts through a
+// fake ASSETS binding, with a D1 that throws if touched) against the D1
+// implementations they replaced (test/sqlRoutes.ts) and the SQL query
+// functions, on SQLite with every migration applied, through the shared D1
+// adapter. Byte-identical responses are the bar: status, headers, body, key
+// order and ties; for the page, its data as JSON or the error it throws.
 //
 // Runs on pipeline/fixtures/artefact-corpus.sql (a real slice of the corpus)
 // always; with DATA_PARITY_DB=<sqlite file> (09_build_artefacts.mjs --save-db)
@@ -14,16 +14,16 @@ import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';
 import { sqliteD1 } from '../test/d1';
 import { artefactAssets, throwingDb } from '../test/assets';
-import { SQL_ROUTES } from '../test/sqlRoutes';
+import { SQL_ROUTES, sqlRecipePageLoad } from '../test/sqlRoutes';
 import { matchRecipes } from '../match';
 import { searchRecipeTitles, getRecipesByIds } from '../search';
-import { substitutionsFor } from '../substitutions';
 import { buildArtefacts, fixtureDb } from '../../../pipeline/lib/artefacts.mjs';
-import { loadCorpus, matchCore, nameForKey, recipePage, recipesByIds, searchTitles, slackFor } from './index.js';
+import { loadCorpus, matchCore, recipesByIds, searchTitles, slackFor } from './index.js';
 import * as ingredientsRoute from '../../routes/api/ingredients/+server';
 import * as searchRoute from '../../routes/api/search/+server';
 import * as matchRoute from '../../routes/api/match/+server';
 import * as recipesRoute from '../../routes/api/recipes/+server';
+import * as sitemapRoute from '../../routes/sitemap.xml/+server';
 import * as recipePageServer from '../../routes/recipe/[id]/+page.server';
 
 const FIXTURE = new URL('../../../pipeline/fixtures/artefact-corpus.sql', import.meta.url);
@@ -51,7 +51,8 @@ const ROUTES = {
 	'/api/match': matchRoute,
 	'/api/search': searchRoute,
 	'/api/ingredients': ingredientsRoute,
-	'/api/recipes': recipesRoute
+	'/api/recipes': recipesRoute,
+	'/sitemap.xml': sitemapRoute
 };
 
 /** Everything a client can observe of a response. */
@@ -250,18 +251,18 @@ function ingredientQueries(sqlite, n) {
 	return [...out];
 }
 
-/** The recipe page's data from the artefacts, tips included, as +page.server.ts returns it. */
-function pageFromArtefacts({ corpus, json }, id, lang) {
-	const { recipe, related } = recipePage(corpus, json(`r/${id}.json`), lang);
-	const nameByKey = new Map(recipe.ingredients.map((i) => [i.canonical_key, i.name]));
-	const tips = substitutionsFor(recipe.ingredients.map((i) => i.canonical_key)).map((m) => ({
-		from: m.from,
-		to: m.to,
-		fromName: nameByKey.get(m.from) ?? m.from,
-		toName: nameForKey(corpus, m.to, lang) ?? m.to,
-		benefit: m.benefit
-	}));
-	return { lang, tips, related, recipe };
+/**
+ * Everything a page load's caller observes: the data as JSON (key order
+ * included), or the error thrown, by kind, status and body.
+ */
+async function pageOutcome(load, path, platform) {
+	const url = new URL(path, ORIGIN);
+	const id = decodeURIComponent(url.pathname.slice('/recipe/'.length));
+	try {
+		return { data: JSON.stringify(await load({ params: { id }, url, platform })) };
+	} catch (error) {
+		return { thrown: error?.constructor?.name, status: error?.status, body: error?.body };
+	}
 }
 
 function paritySuite(name, open, size) {
@@ -273,6 +274,7 @@ function paritySuite(name, open, size) {
 		let artefactPlatform;
 		let art;
 		let compared = 0;
+		let pages = 0;
 		let harnessSize = 0;
 		const sqlGet = async (path) => {
 			const url = new URL(path, ORIGIN);
@@ -298,7 +300,7 @@ function paritySuite(name, open, size) {
 		}, 120_000);
 
 		afterAll(() => {
-			console.log(`artefact parity (${name}): harness matrix ${harnessSize} cases; ${compared} responses identical through the real route handlers`);
+			console.log(`artefact parity (${name}): harness matrix ${harnessSize} cases; ${compared} responses identical through the real route handlers; ${pages} recipe page loads identical through the real load`);
 		});
 
 		it('matchRecipes == matchCore over generated inputs (rows, totals, ties)', async () => {
@@ -392,27 +394,58 @@ function paritySuite(name, open, size) {
 			await same('/api/recipes?ids=x,-1,0&lang=en');
 		});
 
-		it('recipe page data (recipe, ingredients, nutrition, related, tips) for every recipe', async () => {
+		/** The real load's outcome is the D1 load's. */
+		const samePage = async (path) => {
+			const real = await pageOutcome(recipePageServer.load, path, artefactPlatform);
+			const sql = await pageOutcome(sqlRecipePageLoad, path, platform);
+			expect(real, path).toEqual(sql);
+			pages++;
+			return sql;
+		};
+
+		it('recipe page load (recipe, translation or source fallback, is_machine, ingredients, nutrition, related, tips): every recipe, every language and an unknown one', async () => {
 			const ids = sqlite.prepare('SELECT id FROM recipes ORDER BY id').all().map((r) => Number(r.id));
-			const langs = size.pageLangs;
-			for (const [k, id] of ids.entries()) {
-				for (const lang of langs === 'all' ? [...LANGS, 'xx'] : [LANGS[k % LANGS.length], 'en']) {
-					const url = new URL(`/recipe/${id}?lang=${lang}`, ORIGIN);
-					const sql = await recipePageServer.load({ params: { id: String(id) }, url, platform });
-					const resolved = sql.lang;
-					expect(JSON.stringify(pageFromArtefacts(art, id, resolved)), `${id} ${lang}`).toBe(JSON.stringify(sql));
+			let machine = 0;
+			let fallback = 0;
+			for (const id of ids) {
+				for (const lang of [...LANGS, 'xx']) {
+					const { data } = await samePage(`/recipe/${id}?lang=${lang}`);
+					expect(data, `${id} ${lang}`).toBeDefined();
+					const { recipe, lang: shown } = JSON.parse(data);
+					if (recipe.is_machine) machine++;
+					if (shown !== recipe.source_lang && !sqlite.prepare('SELECT 1 FROM recipe_i18n WHERE recipe_id = ? AND lang = ?').get(id, shown)) fallback++;
 				}
 			}
-		}, 600_000);
+			// Guards the corpus, not the parity: both branches must be exercised.
+			expect(machine).toBeGreaterThan(0);
+			expect(fallback).toBeGreaterThan(0);
+		}, 1_800_000);
 
-		it('sitemap ids: every recipe, ascending', () => {
+		it('recipe page load: invalid and unknown ids throw the same errors (400, 404)', async () => {
+			const { max } = sqlite.prepare('SELECT MAX(id) AS max FROM recipes').get();
+			const gap = sqlite.prepare('SELECT r.id + 1 AS id FROM recipes r WHERE NOT EXISTS (SELECT 1 FROM recipes s WHERE s.id = r.id + 1) ORDER BY r.id LIMIT 1').get().id;
+			const first = sqlite.prepare('SELECT MIN(id) AS id FROM recipes').get().id;
+			const outcomes = [];
+			for (const id of ['0', '-1', 'abc', '1.5', '%20', 'Infinity', String(Number(max) + 1), String(gap), '999999999', '5869', '479561']) {
+				outcomes.push((await samePage(`/recipe/${encodeURIComponent(id)}?lang=fr`)).status);
+			}
+			// Number()'s own forms of a known id resolve to it, as before.
+			for (const id of [`${first}.0`, `0${first}`, ` ${first}`]) {
+				expect((await samePage(`/recipe/${encodeURIComponent(id)}?lang=ja`)).data).toBeDefined();
+			}
+			expect(outcomes).toEqual([400, 400, 400, 400, 400, 400, 404, 404, 404, 404, 404]);
+		});
+
+		it('/sitemap.xml: the real route == the D1 route', async () => {
+			const { body } = await same('/sitemap.xml');
 			const ids = sqlite.prepare('SELECT id FROM recipes ORDER BY id').all().map((r) => Number(r.id));
+			expect(body.match(/\/recipe\/\d+</g)).toHaveLength(ids.length);
 			expect(art.json('sitemap.json').ids).toEqual(ids);
 		});
 	});
 }
 
-paritySuite('fixture', () => fixtureDb(readFileSync(FIXTURE, 'utf8')), { match: 400, search: 150, ingredients: 120, pageLangs: 'all' });
+paritySuite('fixture', () => fixtureDb(readFileSync(FIXTURE, 'utf8')), { match: 400, search: 150, ingredients: 120 });
 
 const FULL = process.env.DATA_PARITY_DB;
-if (FULL) paritySuite(`full corpus (${FULL})`, () => new DatabaseSync(FULL, { readOnly: true }), { match: 1500, search: 600, ingredients: 500, pageLangs: 'some' });
+if (FULL) paritySuite(`full corpus (${FULL})`, () => new DatabaseSync(FULL, { readOnly: true }), { match: 1500, search: 600, ingredients: 500 });

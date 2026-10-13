@@ -1,6 +1,6 @@
-import { requireDb } from '$lib/db';
 import { getTermIds } from '$lib/glossary/load';
 import { PUBLIC_DATA } from '$lib/httpCache';
+import { sitemapIds } from '$lib/server/data';
 import type { RequestHandler } from './$types';
 
 const escapeXml = (value: string) => value.replace(/&/g, '&amp;');
@@ -10,20 +10,18 @@ const escapeXml = (value: string) => value.replace(/&/g, '&amp;');
  * alternates in its <head> (SeoHead). Repeating them here would mean ~58k
  * <url> entries (over the 50k-per-sitemap limit) or ~62k xhtml:link lines.
  *
- * Reads every recipe id (3,478 rows) per uncached fetch. Only crawlers ask for
- * it, a few times a day, so it is cached like the API data (edge and browser)
- * rather than built from a deploy-time artefact that a reseed would have to
- * regenerate.
+ * Recipe ids from the data artefacts' sitemap.json, deployed with this
+ * Worker version, so the list always names exactly the recipes it serves.
+ * Cached like the API data (edge and browser).
  */
 export const GET: RequestHandler = async ({ url, platform }) => {
-	const db = requireDb(platform);
-	const { results } = await db.prepare(`SELECT id FROM recipes ORDER BY id`).all<{ id: number }>();
+	const ids = await sitemapIds(platform);
 
 	const urls = [
 		`${url.origin}/`,
 		`${url.origin}/glossary`,
 		...getTermIds().map((id) => `${url.origin}/glossary/${id}`),
-		...(results ?? []).map((row) => `${url.origin}/recipe/${row.id}`)
+		...ids.map((id) => `${url.origin}/recipe/${id}`)
 	];
 
 	const body = `<?xml version="1.0" encoding="UTF-8"?>
