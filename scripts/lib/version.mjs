@@ -34,8 +34,13 @@ function computeVersion() {
 		const git = (/** @type {string[]} */ ...args) =>
 			execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
 		const sha = git('rev-parse', '--short=12', 'HEAD').trim();
-		const diff = git('diff', 'HEAD', '--binary');
-		const untracked = git('ls-files', '--others', '--exclude-standard', '-z').split('\0').filter(Boolean);
+		// .claude/ holds plans, rules and skills for the coding assistant; it is never
+		// a build input, so editing it must not mark a build dirty or block a deploy.
+		const notTooling = ['--', '.', ':(exclude).claude'];
+		const diff = git('diff', 'HEAD', '--binary', ...notTooling);
+		const untracked = git('ls-files', '--others', '--exclude-standard', '-z', ...notTooling)
+			.split('\0')
+			.filter(Boolean);
 		if (!diff && untracked.length === 0) return `${sha}${suffix}`;
 		const hash = createHash('sha256').update(diff);
 		for (const file of untracked) hash.update(file).update(readFileSync(file));
