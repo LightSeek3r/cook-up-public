@@ -55,6 +55,12 @@ jobs:
 
       - run: npm ci
 
+      # The pinned data release (src/lib/data/lock.json); the checked build refuses without it.
+      - name: Data artefacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run data:fetch
+
       - name: Install Chromium for the post-deploy hydration check
         run: npx playwright install --with-deps chromium
 

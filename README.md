@@ -106,6 +106,7 @@ tasks/                  working notes: todo.md (build log per phase), lessons.md
 ```bash
 npm install
 npm run db:migrate          # apply the D1 schema to your local database
+npm run data:fetch          # data artefacts pinned by src/lib/data/lock.json (needs gh or GITHUB_TOKEN)
 npm run dev                 # vite dev, with D1 emulated locally (no Cloudflare login needed)
 ```
 
@@ -235,6 +236,67 @@ rows read, resumable). Refresh it with `--fresh` after every translation session
 (`06_seed_d1.mjs`) loads translations from that backup, so a local database is no longer
 English-only once a backup exists.
 
+### Data artefacts
+
+The read-only corpus is moving out of D1 into versioned files that ship with the build
+(`.claude/plans/phase3-static-data.md`). Stage 09 builds them from the pipeline snapshot,
+through the same statements `06_seed_d1.mjs` writes, so every value is exactly what D1 holds:
+
+| File | Holds | Size (gzip) |
+|---|---|---|
+| `core.bin` | everything `/api/match` and title search need, in a typed-array layout (`src/lib/data/core.js`) | 186 KB |
+| `titles/<lang>.json` | the titles that differ from the source title, per language | 0.1-2 KB |
+| `names/<lang>.json` | ingredient display names, and which are the language's own | 5-7 KB |
+| `mosaic/<lang>.json` | the `/api/ingredients` mosaic, as the API returns it | 17-20 KB |
+| `r/<id>.json` | one recipe page, every language (3,478 files) | median 7 KB, max 44 KB |
+| `sitemap.json`, `manifest.json` | every recipe id; data version, counts and sha256 of every file | |
+
+`src/lib/data/` reads them in the Worker and in the browser alike (plain JS, no `$lib`
+imports) and reproduces the SQL exactly: `matchCore`, `searchTitles`, `searchIngredients`,
+`recipesByIds`, `recipePage`.
+
+`/api/match`, `/api/search`, `/api/ingredients` and `/api/recipes` serve from them and never
+touch D1: `src/lib/server/data.ts` fetches `core.bin` and English from `env.ASSETS` on an
+isolate's first data request, each other language's two small files on its first use, keeps
+them for the isolate's lifetime, and answers a missing, corrupt or mixed-version file with
+`503 {"error":"unavailable"}` (logged by `handleError`, retried on the next request). The
+mosaic is the file itself, sliced, not re-serialised. The `init` hook warms the query code up
+on a tiny embedded corpus (`src/lib/server/warmup.ts`) at isolate startup, which is not billed
+to any request. D1 still serves the recipe page, the sitemap, `/api/track` and admin.
+
+`src/lib/data/parity.sqlite.test.mjs` compares the real route handlers (with a D1 stub that
+throws if touched) against the D1 implementations they replaced (`src/lib/test/sqlRoutes.ts`):
+status, headers and body byte for byte, over the D1 match harness matrix, generated URLs and
+search, ingredient and favorites queries. It runs on a real slice of the corpus in
+`pipeline/fixtures/artefact-corpus.sql` (regenerate with `node pipeline/tools/make_artefact_fixture.mjs`);
+`DATA_PARITY_DB=<file>` adds the full corpus saved by `--save-db`. The e2e server
+(`scripts/e2e-server.mjs`) serves artefacts built from its own seed, so pages and APIs show
+one corpus there.
+
+**Delivery: a pinned release asset, not committed files.** The per-recipe files alone are ~58
+MB, regenerated whenever a translation changes, and `pipeline/out` is not in git anyway, so
+committing them would bloat the history with every data version while CI still could not
+rebuild them. Instead the files are one data pack (`scripts/lib/datapack.mjs`) on a GitHub
+release `data-<version>` of this private repository (never a `v*` tag: those deploy), pinned
+by `src/lib/data/lock.json` (tag, asset sha256, manifest sha256). `npm run data:fetch`
+installs it into `static/data/` (served as static assets) and the files the Worker may
+bundle into `src/lib/data/generated/`; both are git-ignored. `scripts/build.mjs` refuses to
+build unless the installed files match the lock, file by file. Code and data then deploy as
+one Worker version, and a rollback rolls both back.
+
+```bash
+npm run data:fetch                        # once per clone and after the lock changes (CI does it)
+npm run data:build -- --save-db=pipeline/out/snapshot.sqlite   # rebuild from the snapshot
+DATA_PARITY_DB=pipeline/out/snapshot.sqlite npx vitest run src/lib/data   # full-corpus parity
+GH_TOKEN=$(cat ../pat.txt) npm run data:publish   # release data-<version>, update the lock, install
+npm run data:parity:remote -- --only=sample       # read-only snapshot == remote D1 check
+```
+
+`data:fetch` uses the `gh` CLI when installed (`GH_TOKEN` or `gh auth login`), else the
+GitHub API with `GITHUB_TOKEN`/`GH_TOKEN`. Commit `src/lib/data/lock.json` after publishing.
+The full remote parity check (`data:parity:remote` without `--only`) reads ~265k rows, D1
+billing about two rows per row scanned; `--only=sample` reads ~6k.
+
 After any reseed or translation batch, redeploy with fresh cache keys:
 `npm run deploy -- --fresh-cache`. Public API responses are cached under the build version (see
 **HTTP caching**), and the version is now the commit, so a plain redeploy of the same commit
@@ -262,8 +324,9 @@ npm run build:checked             # the suite serves this build
 npm run test:e2e                  # starts and stops wrangler dev itself, port 8799
 ```
 
-The same steps CI runs, locally: `npm run check:eol`, `npm run check:migrations`, `npm run check`,
-`npm test`, `npm run build:checked`, `npm run check:bundle`, `npm run test:e2e`.
+The same steps CI runs, locally: `npm run data:fetch`, `npm run check:eol`,
+`npm run check:migrations`, `npm run check`, `npm test`, `npm run build:checked`,
+`npm run check:bundle`, `npm run test:e2e`.
 
 ## Deployment
 

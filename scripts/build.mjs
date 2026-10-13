@@ -3,12 +3,15 @@
 //        node scripts/build.mjs --check   check the existing .svelte-kit output only
 //
 // `vite build` plus proof that the adapter step finished and that the server
-// build and the deployable assets come from this one build. Exits non-zero
-// otherwise. The full, unfiltered log is kept in .wrangler/deploy/build.log.
+// build and the deployable assets come from this one build, after checking
+// that the data artefacts pinned by src/lib/data/lock.json are installed
+// (`npm run data:fetch`). Exits non-zero otherwise. The full, unfiltered log
+// is kept in .wrangler/deploy/build.log.
 import { spawn } from 'node:child_process';
 import { createWriteStream, existsSync, mkdirSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { checkInstalled, readLock } from './lib/datapack.mjs';
 import { buildVersion } from './lib/version.mjs';
 
 export const LOG_PATH = '.wrangler/deploy/build.log';
@@ -97,6 +100,14 @@ export function checkArtefacts(expected, startedAt) {
 export async function verifiedBuild(opts = {}) {
 	const log = opts.log ?? console.log;
 	const version = buildVersion();
+	// A build without the pinned data would ship static/data from whatever
+	// was last installed, or none at all.
+	const dataProblems = checkInstalled(readLock());
+	if (dataProblems.length) {
+		for (const p of dataProblems) log(`BUILD PROBLEM: ${p}`);
+		log('BUILD FAILED');
+		return { ok: false, version, problems: dataProblems };
+	}
 	const startedAt = Date.now();
 	mkdirSync('.wrangler/deploy', { recursive: true });
 	const file = createWriteStream(LOG_PATH);
@@ -142,6 +153,7 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
 		// Checks an existing build (e.g. from a plain `vite build`) without rebuilding.
 		const version = readVersion(join(CLIENT, '_app/version.json'));
 		const problems = version ? checkArtefacts(version, 0) : [`no ${CLIENT}/_app/version.json`];
+		problems.push(...checkInstalled(readLock()));
 		for (const p of problems) console.log(`BUILD PROBLEM: ${p}`);
 		console.log(problems.length ? 'BUILD INCONSISTENT' : `BUILD CONSISTENT ${version}`);
 		process.exit(problems.length ? 1 : 0);

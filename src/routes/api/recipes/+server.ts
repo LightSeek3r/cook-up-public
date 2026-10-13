@@ -1,7 +1,7 @@
 import { json } from '@sveltejs/kit';
-import { requireDb } from '$lib/db';
+import { recipesByIds } from '$lib/data';
+import { corpusFor } from '$lib/server/data';
 import { PUBLIC_DATA } from '$lib/httpCache';
-import { getRecipesByIds } from '$lib/search';
 import { parseRecipesQuery } from '$lib/apiParams';
 import type { RequestHandler } from './$types';
 
@@ -11,6 +11,5 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	const { ids, lang } = parseRecipesQuery(url.searchParams);
 	if (ids.length === 0) return json({ recipes: [] }, { headers });
 
-	const data = await getRecipesByIds(requireDb(platform), { ids, lang });
-	return json(data, { headers });
+	return json(recipesByIds(await corpusFor(platform, lang), { ids, lang }), { headers });
 };

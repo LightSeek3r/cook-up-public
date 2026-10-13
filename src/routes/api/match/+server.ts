@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
-import { requireDb } from '$lib/db';
-import { matchRecipes, resolveIngredientIds, slackFor } from '$lib/match';
+import { matchCore, resolveKeys, slackFor } from '$lib/data';
+import { corpusFor } from '$lib/server/data';
 import { PUBLIC_DATA } from '$lib/httpCache';
 import { parseMatchQuery } from '$lib/apiParams';
 import { badRequest } from '$lib/apiError';
@@ -9,8 +9,8 @@ import type { RequestHandler } from './$types';
 const headers = { 'cache-control': PUBLIC_DATA };
 
 export const GET: RequestHandler = async ({ url, platform }) => {
-	// Validated before anything reaches D1: an over-cap selection or a
-	// malformed offset is a 400 that costs no rows read (see apiParams).
+	// Validated before any data is loaded: an over-cap selection or a malformed
+	// offset is a 400 (see apiParams).
 	const query = parseMatchQuery(url.searchParams);
 	if (!query) return badRequest();
 
@@ -19,24 +19,23 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	// or hand-edited link degrades to a smaller selection instead of a 500.
 	if (query.have.length === 0) return json({ results: [], total: 0, haveCount: 0 }, { headers });
 
-	const db = requireDb(platform);
-	const have = await resolveIngredientIds(db, query.have);
+	const corpus = await corpusFor(platform, query.lang);
+	const have = resolveKeys(corpus, query.have);
 	if (have.length === 0) return json({ results: [], total: 0, haveCount: 0 }, { headers });
 
 	const slack = slackFor(have.length);
 
 	// `must` (canonical keys, same shape as `have`) only matters once `slack`
 	// lets a recipe skip some of the selection — with no slack every selection
-	// is already required, so resolving it would spend a DB round trip on a
-	// value the query couldn't use anyway. Resolved with the same lookup `have`
-	// uses, then intersected with `have`: a `must` id outside the selection
-	// could never be satisfied.
+	// is already required. Resolved with the same lookup `have` uses, then
+	// intersected with `have`: a `must` id outside the selection could never be
+	// satisfied.
 	const mustUse =
 		slack > 0 && query.must.length
-			? (await resolveIngredientIds(db, query.must)).filter((id) => have.includes(id))
+			? resolveKeys(corpus, query.must).filter((id) => have.includes(id))
 			: [];
 
-	const data = await matchRecipes(db, {
+	const data = matchCore(corpus, {
 		have,
 		lang: query.lang,
 		cuisine: query.cuisine,

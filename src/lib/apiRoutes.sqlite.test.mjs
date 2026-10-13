@@ -1,7 +1,8 @@
-// The public API routes on SQLite (every migration applied, through the shared
-// D1 adapter and its 100-bind cap): input validation, the answers that must
-// cost no D1 at all, and the property the edge-cache key normalisation in
-// hooks.server.ts rests on — a raw URL and its canonical URL get the same
+// The public API routes over the data artefacts built from a small SQLite
+// corpus (every migration applied), the sitemap over that SQLite through the
+// shared D1 adapter and its 100-bind cap: input validation, the answers that
+// must load no data at all, and the property the edge-cache key normalisation
+// in hooks.server.ts rests on — a raw URL and its canonical URL get the same
 // response. `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
@@ -9,6 +10,8 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { version } from '$app/environment';
 import { canonicalUrl, MAX_HAVE, MAX_IDS } from './apiParams';
 import { sqliteD1 } from './test/d1';
+import { artefactAssets } from './test/assets';
+import { buildArtefacts } from '../../pipeline/lib/artefacts.mjs';
 import * as ingredients from '../routes/api/ingredients/+server';
 import * as search from '../routes/api/search/+server';
 import * as match from '../routes/api/match/+server';
@@ -21,7 +24,7 @@ const KEYS = ['egg', 'onion', 'garlic', 'tomato', 'milk', 'flour', 'butter', 'le
 const RECIPES = 160;
 let platform;
 
-/** A platform whose D1 fails the test if anything reaches it. */
+/** A platform with no data artefacts, whose D1 fails the test if anything reaches it. */
 const noDb = {
 	env: {
 		DB: {
@@ -59,7 +62,10 @@ beforeAll(() => {
 		UPDATE recipes SET non_staple_count = (SELECT COUNT(*) FROM recipe_ingredients ri WHERE ri.recipe_id = recipes.id);
 		INSERT INTO recipe_title_fts(rowid, title) SELECT rowid, title FROM recipe_i18n WHERE lang = 'en';
 		INSERT INTO ingredient_fts(rowid, name) SELECT rowid, name FROM ingredient_i18n;`);
-	platform = { env: { DB: sqliteD1(sqlite) }, ctx: { waitUntil: () => {} } };
+	platform = {
+		env: { DB: sqliteD1(sqlite), ASSETS: artefactAssets(buildArtefacts(sqlite).files) },
+		ctx: { waitUntil: () => {} }
+	};
 });
 
 const ROUTES = {
@@ -75,7 +81,7 @@ const get = (pathAndQuery, on = platform) => {
 };
 
 describe('/api/match input validation', () => {
-	it.each(['2.5', '1e999', '-1', 'abc', '10001'])('offset=%s is a 400 that never reaches D1', async (offset) => {
+	it.each(['2.5', '1e999', '-1', 'abc', '10001'])('offset=%s is a 400 that loads no data', async (offset) => {
 		const response = await get(`/api/match?have=egg&lang=en&offset=${offset}`, noDb);
 		expect(response.status).toBe(400);
 		expect(await response.json()).toEqual({ error: 'bad_request' });
@@ -90,7 +96,7 @@ describe('/api/match input validation', () => {
 		expect(second.results[0].id).not.toBe(first.results[0].id);
 	});
 
-	it(`a selection over MAX_HAVE (${MAX_HAVE}) is a 400 that never reaches D1`, async () => {
+	it(`a selection over MAX_HAVE (${MAX_HAVE}) is a 400 that loads no data`, async () => {
 		const many = Array.from({ length: MAX_HAVE + 1 }, (_, k) => `ing_${k}`).join(',');
 		const response = await get(`/api/match?have=${many}&lang=en`, noDb);
 		expect(response.status).toBe(400);
@@ -104,7 +110,7 @@ describe('/api/match input validation', () => {
 	});
 });
 
-describe('answers that cost no D1', () => {
+describe('answers that load no data', () => {
 	it.each(['e', 'eg', '卵', '鸡肉'])('/api/ingredients?q=%s (the page filters short queries itself)', async (q) => {
 		const response = await get(`/api/ingredients?lang=en&q=${encodeURIComponent(q)}`, noDb);
 		expect(response.status).toBe(200);
@@ -129,7 +135,7 @@ describe('answers that cost no D1', () => {
 	});
 });
 
-describe('/api/recipes past D1\'s 100 bound parameters', () => {
+describe('/api/recipes for long favorites lists', () => {
 	it('answers 150 favorites, as a long favorites list sends them', async () => {
 		const ids = Array.from({ length: 150 }, (_, k) => 10 + k * 3).reverse();
 		const response = await get(`/api/recipes?ids=${ids.join(',')}&lang=fr`);

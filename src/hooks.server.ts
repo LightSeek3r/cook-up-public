@@ -1,9 +1,13 @@
-import type { Handle, HandleServerError, RequestEvent } from '@sveltejs/kit';
+import type { Handle, HandleServerError, RequestEvent, ServerInit } from '@sveltejs/kit';
 import { version } from '$app/environment';
 import { resolveLang, dirFor } from '$lib/i18n';
 import { canonicalUrl } from '$lib/apiParams';
 import { apiError, d1Outage, retryAfterSeconds, type D1Outage } from '$lib/apiError';
 import { HSTS, SECURITY_HEADERS } from '$lib/securityHeaders';
+import { warmUp } from '$lib/server/warmup';
+
+/** At isolate startup on Cloudflare, outside any request's CPU budget (see warmUp). */
+export const init: ServerInit = warmUp;
 
 /** Outages seen by `handleError`, read back by `handle` once `resolve` returns.
  *  `handleError` cannot set a status, and an unexpected error is always 500. */

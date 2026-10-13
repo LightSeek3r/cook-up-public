@@ -10,6 +10,10 @@ dist
 .dev.vars
 pipeline/data
 pipeline/out
+# Data artefacts, installed by `npm run data:fetch` from the release pinned in
+# src/lib/data/lock.json.
+/static/data/
+/src/lib/data/generated/
 *.local
 debug.log
 # Scratch screenshot captures; the published ones live in the web repo.

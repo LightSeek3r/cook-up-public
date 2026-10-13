@@ -1,6 +1,7 @@
 // Calls the real route handlers on SQLite (every migration applied, a tiny
-// fixture) and checks the Cache-Control of every response branch: public data
-// must be edge-cacheable, anything per-user or with side effects never.
+// fixture, and the data artefacts built from it) and checks the Cache-Control
+// of every response branch: public data must be edge-cacheable, anything
+// per-user or with side effects never.
 // `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
@@ -16,6 +17,8 @@ import * as robots from '../routes/robots.txt/+server';
 import * as manifest from '../routes/manifest.webmanifest/+server';
 import * as admin from '../routes/admin/+page.server';
 import { sqliteD1 } from './test/d1';
+import { artefactAssets } from './test/assets';
+import { buildArtefacts } from '../../pipeline/lib/artefacts.mjs';
 
 const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 let platform;
@@ -31,7 +34,10 @@ beforeAll(() => {
 		INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (7, 1);
 		INSERT INTO recipe_title_fts(rowid, title) SELECT rowid, title FROM recipe_i18n;
 		INSERT INTO ingredient_fts(rowid, name) SELECT rowid, name FROM ingredient_i18n;`);
-	platform = { env: { DB: sqliteD1(sqlite) }, ctx: { waitUntil: () => {} } };
+	platform = {
+		env: { DB: sqliteD1(sqlite), ASSETS: artefactAssets(buildArtefacts(sqlite).files) },
+		ctx: { waitUntil: () => {} }
+	};
 });
 
 const get = (route, path) => route.GET({ url: new URL(`https://cook.test${path}`), platform });

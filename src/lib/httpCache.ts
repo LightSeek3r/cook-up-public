@@ -3,7 +3,7 @@ import { version } from '$app/environment';
 /**
  * HTTP caching for the public, user-independent GET endpoints.
  *
- * Every D1-backed public response is a pure function of its URL (whitelisted,
+ * Every data-backed public response is a pure function of its URL (whitelisted,
  * normalised parameters) and of data that only changes on reseed, so it can be
  * cached by the browser and by the edge. The installed adapter-cloudflare
  * worker does the edge part on its own: it answers from `caches.default` before
@@ -25,7 +25,7 @@ import { version } from '$app/environment';
  */
 
 /**
- * D1-backed data: an hour in the browser, a day at the edge. After the hour
+ * Corpus data: an hour in the browser, a day at the edge. After the hour
  * the browser may answer from its stale copy for another day while it
  * refetches in the background; the edge Cache API ignores the directive. Safe
  * for the same reason as the TTLs: a deploy changes `v=` and with it the URL.

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import '../app.css';
 	import archivoLatin from '../fonts/archivo-latin.woff2?url';
+	import archivoVietnamese from '../fonts/archivo-vietnamese.woff2?url';
 	import frauncesLatin from '../fonts/fraunces-latin.woff2?url';
+	import frauncesVietnamese from '../fonts/fraunces-vietnamese.woff2?url';
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
 	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
-	import { afterNavigate, goto } from '$app/navigation';
+	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 	import { shouldTrack } from '$lib/analytics';
@@ -34,6 +36,17 @@
 	const VISIT_KEY = 'cookup_visited';
 
 	onMount(hydrateFavorites);
+
+	// A page view that gave up on the fonts (static/font-init.js) keeps the
+	// system ones; once they have arrived they switch in on the next click, where
+	// the re-flow falls inside the input window layout-shift scoring ignores.
+	// Not on popstate: browser back/forward is not an input to the page.
+	beforeNavigate(({ type, willUnload }) => {
+		const root = document.documentElement;
+		if (root.dataset.fonts === 'late' && !willUnload && type !== 'popstate') {
+			root.dataset.fonts = 'ready';
+		}
+	});
 
 	afterNavigate(({ from, to }) => {
 		const target = to?.url ?? new URL(location.href);
@@ -77,12 +90,20 @@
 </script>
 
 <svelte:head>
-	<!-- The latin subsets cover digits and punctuation, so every language renders
-	     some text in them. Same hashed URLs app.css's @font-face rules resolve to;
-	     crossorigin because fonts are always fetched in CORS mode, and a preload
-	     without it would be a second, wasted request. -->
-	<link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin="anonymous" />
-	<link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin="anonymous" />
+	<!-- Exactly the faces static/font-init.js waits for: the latin subsets, which
+	     every language renders digits and punctuation in, and vietnamese for vi.
+	     Same hashed URLs app.css's @font-face rules resolve to; crossorigin
+	     because fonts are always fetched in CORS mode, and a preload without it
+	     would be a second, wasted request. fetchpriority low: at the default
+	     priority these 100 KB took the slow-4G bandwidth from the stylesheets
+	     and the two init scripts, which hold first paint, and pushed it back
+	     ~0.5 s; low starts them early and still lets those go first. -->
+	<link rel="preload" href={archivoLatin} as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low" />
+	<link rel="preload" href={frauncesLatin} as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low" />
+	{#if lang === 'vi'}
+		<link rel="preload" href={archivoVietnamese} as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low" />
+		<link rel="preload" href={frauncesVietnamese} as="font" type="font/woff2" crossorigin="anonymous" fetchpriority="low" />
+	{/if}
 </svelte:head>
 
 <a class="skip no-print" href="#main">{t('app.skipToContent')}</a>

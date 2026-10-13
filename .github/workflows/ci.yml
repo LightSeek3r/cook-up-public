@@ -31,6 +31,14 @@ jobs:
 
       - run: npm ci
 
+      # The data artefacts are a release asset of this private repository,
+      # pinned by src/lib/data/lock.json; the build refuses to run without
+      # them and the tests check them against their manifest and budgets.
+      - name: Data artefacts
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run data:fetch
+
       - name: Line endings are LF in the index
         run: node scripts/check-line-endings.mjs
 

@@ -6,14 +6,14 @@ import { slackFor } from '$lib/match';
 import { normaliseQuery } from '$lib/search';
 
 /**
- * Query parameters of the public D1-backed GET routes: one parser per route,
+ * Query parameters of the public data GET routes: one parser per route,
  * used by the route itself, and one serialiser that writes the parsed value
  * back as the route's canonical query string.
  *
  * The canonical string is the edge-cache key (`canonicalUrl`, used by
  * hooks.server.ts): the adapter keys `caches.default` on the raw URL, so
  * without it an unknown parameter, a reordered list or a different `v` is a
- * fresh D1 query. Every serialiser writes parameters in the order the page's
+ * fresh computation. Every serialiser writes parameters in the order the page's
  * own fetches do (`apiUrl` + `matchRequest`, pinned by apiParams.test.ts), so a
  * real client's URL is already canonical and costs nothing extra.
  */

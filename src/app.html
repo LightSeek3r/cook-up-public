@@ -40,6 +40,10 @@
 		<script src="/theme-init.js"></script>
 
 		%sveltekit.head%
+
+		<!-- After the stylesheets on purpose (see static/font-init.js); same
+		     external-file reasoning as theme-init.js. -->
+		<script src="/font-init.js"></script>
 	</head>
 	<body data-sveltekit-preload-data="tap">
 		<div style="display: contents">%sveltekit.body%</div>

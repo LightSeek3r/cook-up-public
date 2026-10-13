@@ -1,5 +1,5 @@
 /// <reference types="@sveltejs/adapter-cloudflare" />
-import type { D1Database } from '@cloudflare/workers-types';
+import type { D1Database, Fetcher } from '@cloudflare/workers-types';
 
 declare global {
 	namespace App {
@@ -12,6 +12,8 @@ declare global {
 		interface Platform {
 			env: {
 				DB: D1Database;
+				/** Static assets, the data artefacts under /data/ included (src/lib/server/data.ts). */
+				ASSETS: Fetcher;
 				// Set with `wrangler secret put`, so absent in local dev unless a
 				// .dev.vars supplies them. Optional here on purpose: /admin degrades
 				// to a clear error instead of a type lie.

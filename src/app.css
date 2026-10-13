@@ -17,23 +17,25 @@
  *
  * Relative url()s, so Vite emits them as hashed /_app/immutable assets with a
  * one-year cache; under static/ they revalidated on every page load.
- * `optional`, not `swap`: a face that arrives after first render no longer
- * re-flows the page (swap measured CLS 0.20 on the glossary list as headings
- * and chips re-wrapped). The two latin faces are preloaded by +layout.svelte,
- * which lets Chrome hold first render for them briefly, so they usually make
- * it; when they don't, the page keeps the fallback and the next load has them
- * from cache.
+ *
+ * Where ranges overlap, the face declared LAST is tried first, hence latin-ext,
+ * vietnamese, latin. In the reverse order the œ on every French page (U+0153,
+ * in both latin and latin-ext) pulled in both latin-ext files, 92 KB of glyphs
+ * the latin files already have.
+ *
+ * With JavaScript, static/font-init.js keeps both families out of the stacks
+ * and shows a text skeleton until the faces this language needs (latin, plus
+ * vietnamese for vi) have loaded, then switches them in behind an opacity-0
+ * frame (see the html[data-fonts] rules). So for those faces font-display only
+ * decides what a script-less visitor gets: `swap`, readable text at once. Not
+ * `optional`, which Chrome may hold first render for when preloaded, and which
+ * left every cold visit of the slow-4G lab runs in the fallback for the whole
+ * page even though the files had arrived by first paint.
+ * latin-ext is never awaited — no UI or glossary string needs it — and only
+ * appears for a stray character in a recipe title, so it stays `optional`:
+ * that character keeps the fallback rather than re-flowing the page whenever
+ * the file lands.
  */
-@font-face {
-	font-family: 'Archivo';
-	font-style: normal;
-	font-weight: 100 900;
-	font-display: optional;
-	src: url('./fonts/archivo-latin.woff2') format('woff2');
-	unicode-range:
-		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
-		U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 @font-face {
 	font-family: 'Archivo';
 	font-style: normal;
@@ -49,18 +51,18 @@
 	font-family: 'Archivo';
 	font-style: normal;
 	font-weight: 100 900;
-	font-display: optional;
+	font-display: swap;
 	src: url('./fonts/archivo-vietnamese.woff2') format('woff2');
 	unicode-range:
 		U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301,
 		U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
 }
 @font-face {
-	font-family: 'Fraunces';
+	font-family: 'Archivo';
 	font-style: normal;
 	font-weight: 100 900;
-	font-display: optional;
-	src: url('./fonts/fraunces-latin.woff2') format('woff2');
+	font-display: swap;
+	src: url('./fonts/archivo-latin.woff2') format('woff2');
 	unicode-range:
 		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
 		U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
@@ -80,11 +82,21 @@
 	font-family: 'Fraunces';
 	font-style: normal;
 	font-weight: 100 900;
-	font-display: optional;
+	font-display: swap;
 	src: url('./fonts/fraunces-vietnamese.woff2') format('woff2');
 	unicode-range:
 		U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301,
 		U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+	font-family: 'Fraunces';
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url('./fonts/fraunces-latin.woff2') format('woff2');
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+		U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 :root {
@@ -186,17 +198,16 @@
 	   JP/KR entries already here. pnb (Shahmukhi) gets its own :lang(pnb) rule
 	   below instead of an entry here — it shares Arabic's Unicode block but
 	   wants Nastaliq shaping, which would look wrong applied to `ar` text too. */
-	--font-body:
-		'Archivo', system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Arabic',
-		'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR',
-		sans-serif;
-	--font-display: 'Fraunces', 'Iowan Old Style', Georgia, 'Noto Serif', serif;
-	/* --font-body without Archivo: for text that must not pull in a web-font
-	   subset of its own (the language picker's endonyms). */
+	--font-body: 'Archivo', var(--font-system);
+	--font-display: 'Fraunces', var(--font-display-system);
+	/* The two stacks without their web font: for text that must not pull in a
+	   web-font subset of its own (the language picker's endonyms), and what the
+	   page is laid out in while the font skeleton waits. */
 	--font-system:
 		system-ui, -apple-system, 'Segoe UI', Roboto, 'Noto Sans', 'Noto Sans Arabic',
 		'Noto Sans Devanagari', 'Noto Sans Bengali', 'Noto Sans SC', 'Noto Sans JP', 'Noto Sans KR',
 		sans-serif;
+	--font-display-system: 'Iowan Old Style', Georgia, 'Noto Serif', serif;
 }
 
 /*
@@ -550,6 +561,88 @@ body {
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
 		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
 		var(--bg);
+}
+
+/*
+ * Font loading, driven by static/font-init.js through html[data-fonts]. No rule
+ * here matches without that attribute, so a page without JavaScript is plainly
+ * visible.
+ *   loading   brand faces downloading: text skeleton
+ *   swap      done after a skeleton was seen: the brand faces replaced the
+ *             fallback as body faded in from 0
+ *   ready     done before anything was painted
+ *   fallback  stopped waiting (timeout, keyboard focus, failed load)
+ *   late      fallback whose faces have since arrived; +layout.svelte switches
+ *             them in on the next link navigation
+ * Swapping the stacks rather than leaving the brand names in them means no
+ * face can land halfway through the skeleton and re-flow it.
+ */
+html:is([data-fonts='loading'], [data-fonts='fallback'], [data-fonts='late']) {
+	--font-body: var(--font-system);
+	--font-display: var(--font-display-system);
+}
+
+/* The skeleton is the page itself, text unpainted: -webkit-text-fill-color,
+   not color, so currentColor icons keep theirs, and a line-through as thick as
+   the text draws one bar per line of text, exactly where that text sits.
+   !important because component rules set their own text-decoration. Forced
+   colours would repaint the bars over the text, so there it is skipped. */
+@property --skeleton-tone {
+	syntax: '<color>';
+	inherits: true;
+	initial-value: transparent;
+}
+@media screen and (forced-colors: none) {
+	html[data-fonts='loading'] {
+		--skeleton-tone: var(--line-strong);
+	}
+	html[data-fonts='loading'] body * {
+		-webkit-text-fill-color: transparent !important;
+		text-decoration: line-through 0.7em var(--skeleton-tone) !important;
+		text-shadow: none !important;
+	}
+	html[data-fonts='loading'] body svg text {
+		fill-opacity: 0 !important;
+	}
+}
+/* Animated on <html> alone, through the inherited property, so components
+   keep their own animation declarations. */
+@media screen and (forced-colors: none) and (prefers-reduced-motion: no-preference) {
+	html[data-fonts='loading'] {
+		animation: skeleton-pulse 0.9s ease-in-out infinite alternate;
+	}
+}
+@keyframes skeleton-pulse {
+	to {
+		--skeleton-tone: var(--line);
+	}
+}
+
+/* Chromium leaves elements at opacity 0 out of layout-shift accounting (text
+   that is merely transparent still counts), so the re-flow from fallback to
+   brand metrics lands in a frame painted at opacity 0. An animation rather
+   than a class toggled back by script: the compositor runs it, so a long task
+   right after (hydration) cannot hold the page blank. `backwards`, not `both`:
+   while a forwards fill holds, Chrome leaves everything inside out of LCP, and
+   the recipe photo's LCP slipped 0.37 s to whenever script removed the state.
+   !important to survive the reduced-motion reset below, which would end it
+   before its first frame; reduced motion gets a cut instead of the fade. */
+html[data-fonts='swap'] body {
+	animation: font-reveal 160ms ease-out backwards !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	html[data-fonts='swap'] body {
+		animation-duration: 50ms !important;
+		animation-timing-function: steps(1, end) !important;
+	}
+}
+@keyframes font-reveal {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
 }
 
 .page {

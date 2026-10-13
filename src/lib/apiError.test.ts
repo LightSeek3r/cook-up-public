@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { apiError, badRequest, d1Outage, retryAfterSeconds } from './apiError';
+import { apiError, badRequest, d1Outage, DataUnavailableError, retryAfterSeconds } from './apiError';
 import { NEVER_CACHE } from './httpCache';
 
 describe('apiError', () => {
@@ -49,6 +49,11 @@ describe('d1Outage', () => {
 		"Cannot read properties of undefined (reading 'id')"
 	])('a bug is not an outage: %s', (message) => {
 		expect(d1Outage(new Error(message))).toBeNull();
+	});
+
+	it('unreadable data artefacts are transient, whatever the message', () => {
+		expect(d1Outage(new DataUnavailableError('data/core.bin: HTTP 404'))).toBe('transient');
+		expect(d1Outage(new Error('data/core.bin: HTTP 404'))).toBeNull();
 	});
 
 	it('reads non-Error throwables too', () => {

@@ -186,6 +186,41 @@ describe('app.html links the external bootstrap script', () => {
 	it('references /theme-init.js', () => {
 		expect(html).toContain('<script src="/theme-init.js">');
 	});
+
+	// Before the stylesheets document.fonts knows no @font-face rule, so the
+	// script would find every face "loaded" and never show the skeleton; in the
+	// body it would run after first paint.
+	it('links /font-init.js after the stylesheets and still inside <head>', () => {
+		const at = html.indexOf('<script src="/font-init.js">');
+		expect(at).toBeGreaterThan(html.indexOf('%sveltekit.head%'));
+		expect(at).toBeLessThan(html.indexOf('</head>'));
+	});
+});
+
+describe('font loading states', () => {
+	const withDecl = (prop) => rules.filter((r) => r.decls.has(prop));
+
+	it('hides text only under html[data-fonts=loading], so a script-less page stays visible', () => {
+		const hiding = withDecl('-webkit-text-fill-color');
+		expect(hiding.length).toBeGreaterThan(0);
+		for (const r of hiding) expect(r.selector).toContain("html[data-fonts='loading']");
+	});
+
+	it('keeps the brand faces out of the stacks while loading, after giving up, and until a late switch', () => {
+		const off = rules.filter((r) => r.decls.get('--font-body') === 'var(--font-system)');
+		expect(off.map((r) => r.selector)).toEqual([
+			"html:is([data-fonts='loading'], [data-fonts='fallback'], [data-fonts='late'])"
+		]);
+		expect(off[0].decls.get('--font-display')).toBe('var(--font-display-system)');
+	});
+
+	it('the swap state reveals body from opacity 0 with an animation', () => {
+		const swap = rule("html[data-fonts='swap'] body");
+		const name = /^font-reveal\b/.exec(swap.decls.get('animation'));
+		expect(name, 'animation font-reveal').toBeTruthy();
+		const from = rules.find((r) => r.media === '@keyframes font-reveal' && r.selector === 'from');
+		expect(from?.decls.get('opacity')).toBe('0');
+	});
 });
 
 describe('theme-init.js bootstrap script', () => {
