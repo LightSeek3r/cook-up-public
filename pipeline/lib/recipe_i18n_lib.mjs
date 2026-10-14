@@ -138,19 +138,65 @@ export function coverage(corpus, kind, lang) {
 	return out;
 }
 
+export const ORIGINS = ['any', 'batch', 'backup'];
+
+/** Deterministic PRNG (mulberry32), so a sample can be drawn again from its seed. */
+function seeded(seed) {
+	let a = seed >>> 0;
+	return () => {
+		a = (a + 0x6d2b79f5) >>> 0;
+		let t = Math.imul(a ^ (a >>> 15), 1 | a);
+		t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+		return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+	};
+}
+
 /**
  * What a translator (or, with `review`, a reviewer) is handed next: pending
  * recipes (missing first, then invalid or stale ones), or for a review the
- * valid entries no reviewer has passed yet. `ids` restricts the choice.
+ * valid entries no reviewer has passed yet, of one `origin` ("batch": applied
+ * through the gate, "backup": imported, "any"). `ids` restricts the choice.
+ * A review with `ids` hands those out even when reviewed already: that is
+ * how a reviewed entry is re-opened. `sample` (review only) hands out instead `sample` of those entries drawn at
+ * random from `seed`, in id order: the same store and seed give the same rows.
  */
-export function nextBatch({ corpus, kind, lang, n, review = false, ids = null }) {
+export function nextBatch({ corpus, kind, lang, n, review = false, ids = null, origin = 'any', sample = null, seed = 0 }) {
+	if (!ORIGINS.includes(origin)) throw new Error(`origin must be one of ${ORIGINS.join(', ')}`);
+	if ((origin !== 'any' || sample !== null) && !review) throw new Error('origin and sample choose entries to review: they need review');
 	const wanted = ids ? new Set(ids) : null;
 	const states = coverage(corpus, kind, lang).filter((s) => !wanted || wanted.has(s.id));
-	const pick = review
-		? states.filter((s) => !s.missing && !s.blocking.length && !s.entry.reviewed)
+	let pick = review
+		? states.filter((s) => !s.missing && !s.blocking.length && (wanted || !s.entry.reviewed) && (origin === 'any' || s.entry.origin === origin))
 		: [...states.filter((s) => s.missing), ...states.filter((s) => !s.missing && s.blocking.length)];
 	const pending = states.filter((s) => s.missing || s.blocking.length).length;
-	return { rows: pick.slice(0, n).map((s) => batchRow(corpus, kind, s)), remaining: pick.length, pending };
+	const remaining = pick.length;
+	let size = n;
+	if (sample !== null) {
+		const rnd = seeded(seed);
+		const pool = [...pick];
+		for (let i = 0; i < Math.min(sample, pool.length); i++) {
+			const j = i + Math.floor(rnd() * (pool.length - i));
+			[pool[i], pool[j]] = [pool[j], pool[i]];
+		}
+		pick = pool.slice(0, sample).sort((a, b) => a.id - b.id);
+		size = sample;
+	}
+	return { rows: pick.slice(0, size).map((s) => batchRow(corpus, kind, s)), remaining, pending };
+}
+
+/**
+ * Per-origin review counts of one language's valid entries: applied through
+ * the gate and awaiting review, applied and reviewed, imported and accepted
+ * as they are (a review turns an imported entry into a batch one).
+ * @param {ReturnType<typeof coverage>} states
+ */
+export function reviewCounts(states) {
+	const valid = states.filter((s) => !s.missing && !s.blocking.length);
+	return {
+		batchAwaiting: valid.filter((s) => s.entry.origin === 'batch' && !s.entry.reviewed).length,
+		batchReviewed: valid.filter((s) => s.entry.origin === 'batch' && s.entry.reviewed).length,
+		backup: valid.filter((s) => s.entry.origin === 'backup' && !s.entry.reviewed).length
+	};
 }
 
 function firstStep(instructions) {

@@ -4,21 +4,27 @@
  * or stale, how many a reviewer has passed, and (titles) how many a reviewer
  * kept as in English. For instructions imported from the backup, `advisory`
  * counts the rows that pass the rules they were accepted under but not the
- * full gate a new batch must pass; they are not handed out again.
+ * full gate a new batch must pass; they are not handed out again. Three more
+ * instructions columns split the valid rows by origin: `batch-wait` applied
+ * through the gate and awaiting review, `batch-rev` applied and reviewed,
+ * `backup` imported and accepted as they are (out of the review's scope:
+ * recipe_i18n_next_batch.mjs --review --origin=batch).
  *
  * Exits 1 when a store file is damaged, or with --strict when anything is
  * pending.
  *
  * Usage:
  *   node pipeline/tools/recipe_i18n_status.mjs [--kind=titles|instructions] [--lang=xx]
- *     [--verbose] [--strict] [--store=pipeline/data/recipe-i18n] [--pipeline-out=pipeline/out]
+ *     [--verbose] [--rule=<gate rule>] [--strict] [--store=pipeline/data/recipe-i18n] [--pipeline-out=pipeline/out]
+ * --rule lists only the issues of that rule (e.g. --rule=mixed-script-word --verbose);
+ * the matrix is unchanged.
  */
 
 import path from 'node:path';
 import { parseFlags } from '../lib/glossary_apply_lib.mjs';
 import { TARGET_LANGS } from '../lib/langs.mjs';
 import { formatIssue } from '../lib/recipe_i18n_gate.mjs';
-import { coverage, loadCorpus } from '../lib/recipe_i18n_lib.mjs';
+import { coverage, loadCorpus, reviewCounts } from '../lib/recipe_i18n_lib.mjs';
 import { KINDS, STORE_DIR } from '../lib/recipe_i18n_store.mjs';
 
 const MAX_LINES = 30;
@@ -28,13 +34,14 @@ async function main() {
 	const kinds = str('kind') ? [str('kind')] : KINDS;
 	for (const k of kinds) if (!KINDS.includes(k)) throw new Error(`--kind must be ${KINDS.join(' or ')}`);
 	const langs = str('lang') ? [str('lang')] : TARGET_LANGS;
+	const rule = str('rule');
 	const corpus = await loadCorpus({ outDir: path.resolve(str('pipeline-out') ?? 'pipeline/out'), storeDir: path.resolve(str('store') ?? STORE_DIR) });
 	const total = corpus.recipes.size;
 	let pendingAll = 0;
 	const details = [];
 	for (const kind of kinds) {
 		console.log(`\n${kind} (${total} served recipes)`);
-		console.log(`lang  ${'done'.padStart(5)} ${'missing'.padStart(7)} ${'invalid'.padStart(7)} ${'stale'.padStart(5)} ${'reviewed'.padStart(8)} ${(kind === 'titles' ? 'kept-en' : 'advisory').padStart(8)}`);
+		console.log(`lang  ${'done'.padStart(5)} ${'missing'.padStart(7)} ${'invalid'.padStart(7)} ${'stale'.padStart(5)} ${'reviewed'.padStart(8)} ${(kind === 'titles' ? 'kept-en' : 'advisory').padStart(8)}${kind === 'instructions' ? ` ${'batch-wait'.padStart(10)} ${'batch-rev'.padStart(9)} ${'backup'.padStart(6)}` : ''}`);
 		for (const lang of langs) {
 			const states = coverage(corpus, kind, lang);
 			const missing = states.filter((s) => s.missing).length;
@@ -43,14 +50,19 @@ async function main() {
 			const pending = states.filter((s) => s.missing || s.blocking.length).length;
 			const reviewed = states.filter((s) => s.entry?.reviewed && !s.blocking.length).length;
 			const last = kind === 'titles' ? states.filter((s) => s.entry?.keep).length : states.filter((s) => s.advisory.length).length;
+			const origins = reviewCounts(states);
+			const byOrigin =
+				kind === 'instructions'
+					? ` ${String(origins.batchAwaiting).padStart(10)} ${String(origins.batchReviewed).padStart(9)} ${String(origins.backup).padStart(6)}`
+					: '';
 			pendingAll += pending;
 			console.log(
 				`${lang.padEnd(5)} ${String(total - pending).padStart(5)} ${String(missing).padStart(7)} ${String(invalid).padStart(7)} ` +
-					`${String(stale).padStart(5)} ${String(reviewed).padStart(8)} ${String(last).padStart(8)}`
+					`${String(stale).padStart(5)} ${String(reviewed).padStart(8)} ${String(last).padStart(8)}${byOrigin}`
 			);
 			for (const s of states) {
-				for (const i of s.blocking) details.push(`${kind} ${formatIssue({ ...i, lang, id: s.id })}`);
-				if (has('verbose')) for (const i of s.advisory) details.push(`${kind} advisory ${formatIssue({ ...i, lang, id: s.id })}`);
+				for (const i of s.blocking) if (!rule || i.rule === rule) details.push(`${kind} ${formatIssue({ ...i, lang, id: s.id })}`);
+				if (has('verbose')) for (const i of s.advisory) if (!rule || i.rule === rule) details.push(`${kind} advisory ${formatIssue({ ...i, lang, id: s.id })}`);
 			}
 		}
 	}

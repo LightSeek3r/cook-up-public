@@ -1,15 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { commonEnglishWords, englishLeftovers, LEGACY_INSTRUCTION_RULES, validateInstructions, validateTitle } from './recipe_i18n_gate.mjs';
+import { commonEnglishWords, englishLeftovers, LEGACY_INSTRUCTION_RULES, mixedScriptWord, validateInstructions, validateTitle } from './recipe_i18n_gate.mjs';
 
 const rules = (issues) => issues.map((i) => i.rule);
 
 // Document frequencies as vocabFor builds them: English recipes, and the
 // target language's translated instructions.
 const EN = new Map(
-	Object.entries({ chicken: 300, soup: 120, with: 900, and: 1200, pie: 60, mushroom: 45, sauce: 600, garlic: 500, rhubarb: 8, tiramisu: 2, goulash: 1, lassi: 6, test: 25, recipe: 30, in: 3000 })
+	Object.entries({ chicken: 300, soup: 120, with: 900, and: 1200, pie: 60, mushroom: 45, sauce: 600, garlic: 500, rhubarb: 8, tiramisu: 2, goulash: 1, lassi: 6, test: 25, recipe: 30, in: 3000, olive: 390, cake: 200, sauté: 150, de: 49, pan: 1172, cola: 30, barbecue: 45, marshmallow: 25, pot: 200, fit: 30, kibbeh: 6, dosa: 5, kunun: 5, pad: 25, thai: 30, muerto: 2, lemon: 390, bread: 300, rice: 400, marinate: 300 })
 );
 const TARGET = {
 	fr: new Map(Object.entries({ poulet: 280, soupe: 110, sauce: 590, ail: 480, avec: 800 })),
+	es: new Map(Object.entries({ de: 3250, con: 900, arroz: 380, pollo: 290 })),
 	de: new Map(Object.entries({ hähnchen: 250, suppe: 100, sauce: 300, knoblauch: 470, in: 3100, mit: 900 })),
 	vi: new Map(Object.entries({ gà: 280, chicken: 90, súp: 90 }))
 };
@@ -72,7 +73,16 @@ describe('validateTitle: script and English', () => {
 		expect(rules(title('hi', 'Chicken Soup', 'মুরগির স্যুপ'))).toEqual(['target-script']);
 		expect(rules(title('bn', 'Chicken Soup', 'चिकन सूप'))).toEqual(['target-script']);
 		expect(rules(title('ar', 'Chicken Karahi', 'چکن کڑاہی'))).toEqual(['target-script']);
-		expect(rules(title('pnb', 'Chicken Soup with Garlic and Onions', 'حساء الدجاج مع الثوم والبصل'))).toEqual(['target-script']);
+		// Shahmukhi against Arabic and Urdu: Arabic letters, Urdu function words; short Punjabi titles pass.
+		expect(rules(title('pnb', 'Chicken Soup with Garlic', 'شوربة الدجاج بالثوم'))).toEqual(['target-script']);
+		expect(rules(title('pnb', 'Chicken Curry', 'مرغی کا سالن'))).toEqual(['target-script']);
+		expect(title('pnb', 'Breaded Fried Oysters', 'چورا لا کے تلے ہوئے اویسٹر')).toEqual([]);
+		expect(title('pnb', 'Key Lime Meringue Pie', 'کی لائم (ہرے نمبو) دی میرنگ پائی')).toEqual([]);
+		expect(title('pnb', 'Barbecue Sauce I', 'باربی کیو ساس I')).toEqual([]);
+		expect(title('pnb', 'Paella Valenciana', 'ویلنسیا دا پائیا')).toEqual([]);
+		expect(title('ja', 'Zhoug III', 'ズーグ III')).toEqual([]);
+		expect(title('ko', 'Cola III', '콜라 III')).toEqual([]);
+		expect(rules(title('ja', 'Zhoug III', 'Zhoug III ズ'))).toEqual(['target-script']);
 		expect(title('zh', 'BLT Sandwich', 'BLT三明治')).toEqual([]);
 	});
 
@@ -115,6 +125,128 @@ describe('validateTitle: script and English', () => {
 		expect(rules(title('pnb', 'Chicken Soup', 'حساء الدجاج', { others: { ar: 'حساء الدجاج' } }))).toEqual(
 			expect.arrayContaining(['copied-from-language'])
 		);
+	});
+});
+
+describe('mixed-script-word', () => {
+	// Escapes, not typed glyphs: a look-alike letter is invisible in a test string too.
+	const BANANA = 'Бананов\u006F-грушевый кекс';
+
+	it('rejects a word whose letters come from two scripts, naming the word and the stray letter', () => {
+		expect(mixedScriptWord('title', BANANA)).toBe('title word "Банановo" mixes Latin and Cyrillic letters ("o" U+006F)');
+		expect(title('ru', 'Banana Pear Cake', BANANA).find((i) => i.rule === 'mixed-script-word')?.message).toMatch(/"o" U\+006F/);
+		expect(rules(title('pt', 'Chicken Soup', 'Sop\u0430 de frango'))).toContain('mixed-script-word');
+		expect(mixedScriptWord('title', 'ডিমDNA')).toMatch(/mixes Bengali and Latin letters/);
+		expect(mixedScriptWord('title', 'حساءchicken')).toMatch(/mixes Arabic and Latin letters/);
+		expect(mixedScriptWord('title', 'ΣalatΑ')).toMatch(/Greek and Latin|Latin and Greek/);
+	});
+
+	it('lets brands, units and acronyms stand as their own words, and Latin next to Han or kana', () => {
+		for (const ok of ['Coca-Cola Cake', 'iPhone pH PSI 180 °C', 'Pâté en croûte', 'DNA পরীক্ষা', 'BBQ সস', 'pH मान', '닭고기 수프 BBQ', '2cmの角切り', 'BBQソース', 'pHを測る', 'BBQ酱', 'कॉफ़ी', 'پنجابی دا ساگ']) {
+			expect(mixedScriptWord('title', ok), ok).toBeNull();
+		}
+		// Korean particles attach to units and abbreviations, not to English words.
+		for (const ok of ['350°F로 예열', '5cm의 두께', '200g을 넣는다', 'PSI에서', 'X자로 자른다']) expect(mixedScriptWord('instructions', ok), ok).toBeNull();
+		for (const bad of ['juicer에서 짠다', '번dt']) expect(mixedScriptWord('instructions', bad), bad).toMatch(/Latin and Hangul|Hangul and Latin/);
+		expect(title('ja', 'BBQ Sauce', 'BBQソース')).toEqual([]);
+		expect(title('bn', 'BBQ Chicken', 'BBQ মুরগি')).toEqual([]);
+	});
+
+	it('applies to instructions, and makes an imported row pending', () => {
+		const en = '1. Mix the flour and the sugar.';
+		expect(rules(validateInstructions({ lang: 'ru', source: en, text: '1. Смешайте муку и сахар.' }))).toEqual([]);
+		expect(rules(validateInstructions({ lang: 'ru', source: en, text: '1. Смешайте муку и с\u0061хар.' }))).toContain('mixed-script-word');
+		expect(LEGACY_INSTRUCTION_RULES.has('mixed-script-word')).toBe(true);
+	});
+});
+
+describe('loanwords (recipe_i18n_loanwords.json) and short sources', () => {
+	it('lets the words a language writes like English through, alone or as a listed phrase', () => {
+		expect(title('it', 'Olive Bread', 'Pane alle olive')).toEqual([]);
+		expect(title('it', 'Marinated Green Olives', 'Olive verdi marinate')).toEqual([]);
+		expect(title('fr', 'Sautéed Mushrooms', 'Champignons sautés')).toEqual([]);
+		expect(title('fr', 'Lemon Cake', 'Cake au citron')).toEqual([]);
+		expect(title('fr', 'Pot-au-feu', 'Pot-au-feu')).toEqual([]);
+		expect(title('pt', 'Barbecue Chicken Wings', 'Asas de frango barbecue')).toEqual([]);
+		expect(title('pt', 'Marshmallow Squares', 'Quadradinhos de marshmallow')).toEqual([]);
+		expect(title('pt', 'Coq au Vin', 'Coq au Vin')).toEqual([]);
+		expect(title('pt', 'Pico de Gallo', 'Pico de gallo')).toEqual([]);
+		expect(title('pt', 'Pad Thai', 'Pad Thai')).toEqual([]);
+		expect(title('es', 'Pan de Muerto', 'Pan de Muerto')).toEqual([]);
+		expect(title('es', 'Kibbeh', 'Kibbeh')).toEqual([]);
+		expect(title('es', 'Masala Dosa', 'Masala dosa')).toEqual([]);
+		expect(title('es', 'Kunun', 'Kunun')).toEqual([]);
+		expect(title('es', 'Cola Cake', 'Pastel de cola')).toEqual([]);
+	});
+
+	it('a word the language uses about as often as English does never counts as English', () => {
+		expect(title('fr', 'Sauce Béarnaise', 'Sauce Béarnaise')).toEqual([]);
+		expect(title('es', 'Chicken with Rice', 'Pollo con arroz')).toEqual([]);
+	});
+
+	it('stays strict for untranslated English, and a phrase exempts its words only together', () => {
+		expect(rules(title('es', 'Chicken with Rice', 'Chicken con arroz'))).toEqual(['english-leftover']);
+		expect(rules(title('it', 'Lemon Cake', 'Cake al limone'))).toEqual(['english-leftover']);
+		expect(rules(title('it', 'Lemon Cake', 'Lemon Cake'))).toEqual(['identical-to-source']);
+		expect(rules(title('pt', 'Pot Roast', 'Pot assado'))).toEqual(['english-leftover']);
+		expect(rules(title('fr', 'Chicken and Rice', 'Chicken and Rice'))).toEqual(['identical-to-source']);
+	});
+
+	it('allows a bracketed gloss after a very short English title', () => {
+		expect(title('ja', 'Pho', 'フォー（ベトナムの牛肉麺スープ）')).toEqual([]);
+		expect(title('fr', 'Dosa', 'Dosa (crêpe indienne au riz et lentilles)')).toEqual([]);
+		expect(rules(title('fr', 'Dosa', `Dosa (${'crêpe '.repeat(8).trim()})`))).toContain('length');
+		expect(rules(title('ja', 'Chicken Soup with Rice', `チキンスープ（${'とても美味しい'.repeat(6)}）`))).toContain('length');
+	});
+});
+
+describe('reviewers\' reports (2026-10-14): genuine words and kept names pass, even when every word is common English', () => {
+	// The worst case: every word common in English recipes, none in the language's own.
+	const COMMON = new Map(
+		`do in alla all pan double fit pad thai chipotle chiles has bit purée yoghurt long island sticky toffee pudding dip vegan non than
+		soda cream wrap steak tartar tartare fairy cakes bubble and squeak space cake south side white russian cocktail iced tea fizz
+		chicken with the olive pasta cola`
+			.split(/\s+/)
+			.map((w) => [w, 100])
+	);
+	const strict = (lang, source, t, extra = {}) => validateTitle({ lang, source, title: t, vocab: { en: COMMON, target: new Map() }, ...extra });
+
+	it('words of a foreign name the source quotes', () => {
+		expect(strict('pt', 'Salt Cod and Potato Casserole (Bacalhau à Zé do Pipo)', 'Bacalhau à Zé do Pipo')).toEqual([]);
+		expect(strict('it', 'Agnolotti Pasta Soup (Agnolotti in Brodo)', 'Agnolotti in brodo')).toEqual([]);
+		expect(strict('es', 'Tomato Paste and Ham Sandwiches (Pan Tomaca)', 'Bocadillos de tomate y jamón (Pan Tomaca)')).toEqual([]);
+		expect(strict('fr', 'Hyderabadi Fried Bread with Syrup and Nuts (Double ka meetha)', 'Pain frit d’Hyderabad au sirop (Double ka meetha)')).toEqual([]);
+		expect(strict('it', "Fresh Egg Pasta (Pasta Fresca All'uovo)", "Pasta fresca all'uovo")).toEqual([]);
+	});
+
+	it('listed words and phrases, per language or shared', () => {
+		expect(strict('es', 'Pad Thai', 'Pad Thai')).toEqual([]);
+		expect(strict('fr', 'Fit-fit (Ethiopian Bread Salad)', 'Fit-fit (salade de pain éthiopienne)')).toEqual([]);
+		expect(strict('de', 'Guacamole Dip', 'Guacamole-Dip')).toEqual([]);
+		expect(strict('de', 'Macaroni and Cheese (Vegan)', 'Makkaroni mit Käse (vegan)')).toEqual([]);
+		expect(strict('jv', 'Pork Tenderloin with Asparagus and Prosciutto', 'Daging Has Babi karo Asparagus lan Prosciutto')).toEqual([]);
+		expect(strict('vi', 'Placenta Stew', 'Nhau thai hầm')).toEqual([]);
+		expect(strict('vi', 'Charcoal Steak', 'Bít tết nướng than')).toEqual([]);
+		expect(strict('pt', 'Egg Soda', 'Soda de ovo')).toEqual([]);
+		expect(strict('es', 'Turkey Wrap', 'Wrap de pavo')).toEqual([]);
+		expect(strict('es', 'Steak Tartare', 'Steak tartar')).toEqual([]);
+		expect(strict('de', 'Bubble and Squeak', 'Bubble and Squeak')).toEqual([]);
+		expect(strict('fr', 'Space Cake', 'Space Cake')).toEqual([]);
+		expect(strict('es', 'White Russian Cocktail', 'White Russian Cocktail')).toEqual([]);
+		expect(strict('es', 'Sticky Toffee Pudding (with dates)', 'Sticky toffee pudding (con dátiles)')).toEqual([]);
+	});
+
+	it('a reviewer\'s keep_source covers an exact English copy in Vietnamese too', () => {
+		expect(rules(strict('vi', 'Long Island Iced Tea Cocktail', 'Long Island Iced Tea Cocktail'))).toEqual([]);
+		expect(rules(strict('vi', 'White Russian Cream Cocktail', 'White Russian Cream Cocktail'))).toEqual(['identical-to-source']);
+		expect(strict('vi', 'White Russian Cream Cocktail', 'White Russian Cream Cocktail', { keep: 'cocktail name, written so in Vietnam' })).toEqual([]);
+	});
+
+	it('still refuses plain untranslated English', () => {
+		expect(rules(strict('es', 'Chicken with Olive', 'Chicken with olive'))).toEqual(['english-leftover']);
+		expect(rules(strict('it', 'Cream Cake', 'Cream cake'))).toEqual(['english-leftover']);
+		expect(rules(strict('fr', 'Chicken Tikka', 'Chicken tikka'))).toEqual(['english-leftover']);
+		expect(rules(strict('de', 'Long Cake', 'Long Cake'))).toEqual(['identical-to-source']);
 	});
 });
 
@@ -163,7 +295,7 @@ describe('validateInstructions', () => {
 
 	it('holds imported rows to the rules they were accepted under, plus foreign letters', () => {
 		expect([...LEGACY_INSTRUCTION_RULES].sort()).toEqual(
-			['copied-from-english', 'empty', 'foreign-script', 'length-ratio', 'line-count', 'literal-backslash-n', 'target-script'].sort()
+			['copied-from-english', 'empty', 'foreign-script', 'length-ratio', 'line-count', 'literal-backslash-n', 'mixed-script-word', 'target-script'].sort()
 		);
 	});
 });

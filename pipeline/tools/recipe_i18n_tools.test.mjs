@@ -146,7 +146,25 @@ describe('recipe translation tools, end to end', () => {
 		const status = tool('recipe_i18n_status.mjs', ...withOut('--lang=zh'));
 		expect(status.status, status.out).toBe(0);
 		expect(status.out).toMatch(/titles \(3 served recipes\)\nlang +done missing invalid stale reviewed +kept-en\nzh +3 +0 +0 +0 +0 +0/);
-		expect(status.out).toMatch(/instructions \(3 served recipes\)\nlang .*\nzh +3 +0 +0 +0 +0 +\d/);
+		expect(status.out).toMatch(/instructions \(3 served recipes\)\nlang .* batch-wait batch-rev backup\nzh +3 +0 +0 +0 +0 +\d+ +1 +0 +2\n/);
+	}, 60_000);
+
+	it('reviews only this session\'s instructions with --origin=batch, and samples the imported ones reproducibly', () => {
+		const review = path.join(dirs.batches, 'in_review_instructions_zh_1.json');
+		expect(tool('recipe_i18n_next_batch.mjs', ...withOut('--kind=instructions', '--lang=zh', '--review', '--origin=batch', `--out=${review}`)).out).toMatch(
+			/wrote 1 instructions to review \(origin batch\)/
+		);
+		expect(JSON.parse(readFileSync(review, 'utf8')).map((r) => r.id)).toEqual([900003]);
+		const draw = (n) => {
+			const out = path.join(dirs.batches, `sample_zh_${n}.json`);
+			const r = tool('recipe_i18n_next_batch.mjs', ...withOut('--kind=instructions', '--lang=zh', '--review', '--origin=backup', '--sample=1', '--seed=3', `--out=${out}`));
+			expect(r.out).toMatch(/wrote a sample of 1 of 2 instructions to review \(origin backup\) \(seed 3\)/);
+			return readFileSync(out, 'utf8');
+		};
+		const first = draw(1);
+		expect(draw(2)).toBe(first);
+		expect([900001, 900002]).toContain(JSON.parse(first)[0].id);
+		expect(tool('recipe_i18n_next_batch.mjs', ...withOut('--kind=instructions', '--lang=zh', '--origin=batch', `--out=${review}`)).status).toBe(1);
 	}, 60_000);
 
 	it('builds artefacts from the store whose search finds the translated titles', async () => {

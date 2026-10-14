@@ -6,7 +6,11 @@
  * fails the gate (pipeline/lib/recipe_i18n_gate.mjs) or is stale (its English
  * text changed). Missing ones come first, then pending ones with their
  * `previous_issues`. With --review it hands out instead the valid entries no
- * reviewer has passed yet, each with its `current` text.
+ * reviewer has passed yet, each with its `current` text; --origin=batch keeps
+ * to entries applied through the gate (this translation session's), --origin=backup
+ * to those imported from the backup (default any). --sample=N --seed=S (review
+ * only) writes a seeded random sample of N such entries instead of the next ones,
+ * for auditing a language's quality: the same store and seed give the same rows.
  *
  * Rows written to --out (the translator's INPUT; what comes back is the
  * shape in recipe_i18n_apply.mjs's header):
@@ -16,15 +20,19 @@
  * Usage:
  *   node pipeline/tools/recipe_i18n_next_batch.mjs --kind=titles --lang=fr [--n=100] --out=pipeline/out/recipe_i18n_batches/in_titles_fr_1.json
  *   node pipeline/tools/recipe_i18n_next_batch.mjs --kind=instructions --lang=bn [--n=15] --out=...
- *   [--review] [--ids=1,2,3] [--store=pipeline/data/recipe-i18n] [--pipeline-out=pipeline/out]
+ *   [--review [--origin=batch|backup|any] [--sample=N --seed=S]] [--ids=1,2,3] (with --review: re-opens those, reviewed or not)
+ *   [--store=pipeline/data/recipe-i18n] [--pipeline-out=pipeline/out]
  */
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { parseFlags } from '../lib/glossary_apply_lib.mjs';
 import { TARGET_LANGS } from '../lib/langs.mjs';
-import { DEFAULT_N, MAX_BATCH, loadCorpus, nextBatch } from '../lib/recipe_i18n_lib.mjs';
+import { DEFAULT_N, MAX_BATCH, ORIGINS, loadCorpus, nextBatch } from '../lib/recipe_i18n_lib.mjs';
 import { KINDS, STORE_DIR } from '../lib/recipe_i18n_store.mjs';
+
+// An audit sample is read, not applied as one batch, so it may be larger than a batch.
+const MAX_SAMPLE = 1000;
 
 async function main() {
 	const { str, has } = parseFlags(process.argv.slice(2));
@@ -39,13 +47,22 @@ async function main() {
 	const ids = str('ids')?.split(',').map(Number) ?? null;
 	if (ids?.some((id) => !Number.isInteger(id))) throw new Error('--ids must be comma-separated recipe ids');
 	const review = has('review');
+	const origin = str('origin') ?? 'any';
+	if (!ORIGINS.includes(origin)) throw new Error(`--origin must be one of ${ORIGINS.join('|')}`);
+	const sample = str('sample') === undefined ? null : Number(str('sample'));
+	const seed = Number(str('seed') ?? '1');
+	if (sample !== null && (!Number.isInteger(sample) || sample <= 0 || sample > MAX_SAMPLE)) throw new Error(`--sample must be an integer from 1 to ${MAX_SAMPLE}`);
+	if (!Number.isInteger(seed)) throw new Error('--seed must be an integer');
+	if ((origin !== 'any' || sample !== null) && !review) throw new Error('--origin and --sample choose entries to review: add --review');
 
 	const corpus = await loadCorpus({ outDir: path.resolve(str('pipeline-out') ?? 'pipeline/out'), storeDir: path.resolve(str('store') ?? STORE_DIR) });
-	const { rows, remaining, pending } = nextBatch({ corpus, kind, lang, n, review, ids });
+	const { rows, remaining, pending } = nextBatch({ corpus, kind, lang, n, review, ids, origin, sample, seed });
 	mkdirSync(path.dirname(path.resolve(out)), { recursive: true });
 	writeFileSync(out, JSON.stringify(rows, null, 2) + '\n');
-	const what = review ? `${kind} to review` : kind;
-	if (!remaining) {
+	const what = review ? `${kind} to review${origin === 'any' ? '' : ` (origin ${origin})`}` : kind;
+	if (sample !== null) {
+		console.log(`recipe_i18n_next_batch: kind=${kind} lang=${lang} wrote a sample of ${rows.length} of ${remaining} ${what} (seed ${seed}) to ${out}`);
+	} else if (!remaining) {
 		console.log(`recipe_i18n_next_batch: kind=${kind} lang=${lang} ALL DONE - no ${what} left${review ? ` (${pending} still pending translation)` : ''}`);
 	} else {
 		console.log(`recipe_i18n_next_batch: kind=${kind} lang=${lang} wrote ${rows.length} ${what} to ${out} (${remaining} remaining before this batch)`);

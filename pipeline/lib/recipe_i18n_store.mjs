@@ -142,11 +142,12 @@ export function readFile(kind, lang, dir = STORE_DIR) {
  */
 export function writeFile(kind, lang, rows, { dir = STORE_DIR, expectSha } = {}) {
 	const file = path.join(dir, storeFile(kindOf(kind), lang));
+	// Serialised (gzip is slow) before the compare, so the window between the check and the rename stays tiny when several agents apply to one language at once.
+	const bytes = serializeFile(kind, lang, rows);
 	const current = existsSync(file) ? readFileSync(file) : null;
 	if (expectSha !== undefined && (current ? sha256(current) : null) !== expectSha) {
 		throw new Error(`${file} changed while this batch was being checked; run the command again`);
 	}
-	const bytes = serializeFile(kind, lang, rows);
 	if (current && sha256(current) === sha256(bytes)) return false;
 	writeAtomic(file, bytes);
 	return true;

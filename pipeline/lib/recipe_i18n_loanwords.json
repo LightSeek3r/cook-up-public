@@ -1,0 +1,29 @@
+{
+	"about": "Words and phrases a translated recipe title may keep from English, read by pipeline/lib/recipe_i18n_gate.mjs (english-leftover, identical-to-source). shared: dish names used internationally as they are; lang: words the language writes like English (olive in Italian, de in Spanish). Lower case; a phrase (several words, spaces or hyphens) exempts its words only where they appear together. Reviewed in code review: add a word when a translator reports a genuine one the gate refused.",
+	"shared": [
+		"pizza", "pasta", "risotto", "pesto", "tiramisu", "lasagna", "lasagne", "spaghetti", "gnocchi", "focaccia", "bruschetta", "minestrone", "carbonara", "tortilla",
+		"tortillas", "taco", "tacos", "burrito", "burritos", "enchilada", "enchiladas", "quesadilla", "quesadillas", "salsa", "guacamole", "nachos", "chili", "chilli",
+		"curry", "masala", "tikka", "korma", "biryani", "dal", "dhal", "naan", "chapati", "chapatis", "chutney", "samosa", "samosas", "pakora",
+		"pakoras", "raita", "hummus", "falafel", "tahini", "tabbouleh", "kebab", "kebabs", "couscous", "tagine", "shakshuka", "sushi", "tofu", "miso",
+		"ramen", "teriyaki", "tempura", "wasabi", "kimchi", "bulgogi", "bibimbap", "pho", "wok", "goulash", "strudel", "schnitzel", "muesli", "quiche",
+		"croissant", "croissants", "brioche", "baguette", "crêpe", "crêpes", "crepe", "crepes", "soufflé", "souffle", "mousse", "ratatouille", "gratin", "praline",
+		"meringue", "meringues", "fondue", "omelette", "omelet", "cocktail", "smoothie", "muffin", "muffins", "brownie", "brownies", "cookie", "cookies", "cupcake",
+		"cupcakes", "cheesecake", "crumble", "toast", "sandwich", "burger", "burgers", "hamburger", "ketchup", "mayonnaise", "vinaigrette", "paella", "gazpacho", "sangria",
+		"churros", "empanada", "empanadas", "ceviche", "mojito", "margarita", "chai", "matcha", "kombucha", "latte", "espresso", "cappuccino", "granola", "popcorn",
+		"pancake", "pancakes", "bagel", "bagels", "donut", "donuts", "scone", "scones", "pudding", "punch", "chips", "ganache", "fudge", "caramel",
+		"panna cotta", "sorbet", "tapenade", "aioli", "pita", "pitta", "rum", "ghee", "injera", "mozzarella", "parmesan", "ricotta", "pad thai", "pot-au-feu",
+		"coq au vin", "pico de gallo", "kibbeh", "dosa", "dosas", "idli", "kunun", "chipotle", "chiles", "soda", "wrap", "wraps", "dip", "barbecue",
+		"bbq", "purée", "yoghurt", "yogurt", "fizz", "double ka meetha", "pan de jamón","fit-fit", "fitfit","cream soda", "ginger ale", "milk shake", "milkshake", "cream cheese", "banana split", "steak tartare", "steak tartar", "fairy cake",
+		"fairy cakes", "bubble and squeak", "space cake", "south side", "white russian", "black russian", "hot cross buns", "puff puff", "long island", "iced tea", "sticky toffee", "gin fizz",
+		"fish and chips", "christmas pudding", "eton mess", "banana bread", "frozen yogurt", "coronation chicken", "paneer butter masala", "fast food", "porridge"
+	],
+	"lang": {
+		"de": ["thai", "vegan", "pie", "in"],
+		"es": ["de", "pan", "cola", "tartar"],
+		"fr": ["de", "olive", "olives", "sauté", "sautés", "sautée", "sautées", "cake", "cakes", "fit", "barbecue", "vegan"],
+		"it": ["olive", "marinate", "marinato", "marinata", "marinati", "alla", "all", "in", "pan dorato", "pan di spagna", "pan di zenzero", "pan brioche", "more"],
+		"jv": ["has", "bit", "vegan", "pie"],
+		"pt": ["de", "barbecue", "marshmallow", "marshmallows", "do", "da"],
+		"vi": ["salad", "bbq", "non", "than", "thai", "to", "an", "me", "la", "mi", "ca", "ba", "pie"]
+	}
+}

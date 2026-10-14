@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { checkBatch, coverage, docFrequency, MAX_BATCH, mergeEntries, nextBatch, recurringTerms } from './recipe_i18n_lib.mjs';
+import { checkBatch, coverage, docFrequency, MAX_BATCH, mergeEntries, nextBatch, recurringTerms, reviewCounts } from './recipe_i18n_lib.mjs';
 import { srcHash } from './recipe_i18n_store.mjs';
 
 const RECIPES = [
@@ -54,6 +54,47 @@ describe('nextBatch', () => {
 		]);
 		expect(texts.remaining).toBe(3);
 		expect(nextBatch({ corpus: c, kind: 'instructions', lang: 'bn', n: 5, ids: [3] }).rows.map((r) => r.id)).toEqual([3]);
+	});
+});
+
+describe('review by origin', () => {
+	const mixed = () => {
+		const texts = frTexts();
+		texts[1] = { ...texts[1], origin: 'batch' };
+		texts[2] = { ...texts[2], origin: 'batch', reviewed: true };
+		return corpus({ instructions: { fr: texts } });
+	};
+
+	it('keeps a review to this session\'s rows (batch) or to the imported ones (backup)', () => {
+		const ids = (origin) => nextBatch({ corpus: mixed(), kind: 'instructions', lang: 'fr', n: 10, review: true, origin }).rows.map((r) => r.id);
+		expect(ids('any')).toEqual([1, 2]);
+		expect(ids('batch')).toEqual([2]);
+		expect(ids('backup')).toEqual([1]);
+		expect(nextBatch({ corpus: mixed(), kind: 'instructions', lang: 'fr', n: 10, review: true, ids: [3] }).rows.map((r) => r.id)).toEqual([3]);
+		expect(() => nextBatch({ corpus: mixed(), kind: 'instructions', lang: 'fr', n: 10, origin: 'batch' })).toThrow(/need review/);
+		expect(() => nextBatch({ corpus: mixed(), kind: 'instructions', lang: 'fr', n: 10, review: true, origin: 'new' })).toThrow(/origin must be/);
+	});
+
+	it('counts valid rows by origin and review', () => {
+		expect(reviewCounts(coverage(mixed(), 'instructions', 'fr'))).toEqual({ batchAwaiting: 1, batchReviewed: 1, backup: 1 });
+	});
+
+	it('draws a seeded sample, in id order, the same rows for the same seed', () => {
+		const many = { recipes: new Map(), store: { titles: {}, instructions: { fr: new Map() } } };
+		for (let id = 1; id <= 40; id++) {
+			const en = `1. Step ${id}.`;
+			many.recipes.set(id, { id, title: `Dish ${id}`, instructions: en, cuisine: null, meal: null, ingredients: [] });
+			many.store.instructions.fr.set(id, { recipe_id: id, instructions: `1. Étape ${id}.`, is_machine: 1, src: srcHash(en), origin: 'backup', reviewed: false });
+		}
+		const draw = (seed, sample = 6) => nextBatch({ corpus: many, kind: 'instructions', lang: 'fr', n: 15, review: true, origin: 'backup', sample, seed });
+		const a = draw(7);
+		expect(a.rows).toHaveLength(6);
+		expect(a.remaining).toBe(40);
+		expect(a.rows.map((r) => r.id)).toEqual([...a.rows.map((r) => r.id)].sort((x, y) => x - y));
+		expect(draw(7).rows).toEqual(a.rows);
+		expect(draw(8).rows.map((r) => r.id)).not.toEqual(a.rows.map((r) => r.id));
+		expect(draw(7, 100).rows).toHaveLength(40);
+		expect(a.rows[0].current).toMatch(/^1\. Étape/);
 	});
 });
 
