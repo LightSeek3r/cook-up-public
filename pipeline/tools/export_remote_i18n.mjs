@@ -20,6 +20,13 @@
  * remote again (apart from the verification sample). `--fresh` discards the
  * staged pages of the selected tables and takes a new snapshot.
  *
+ * Reads remote D1, so it works only until migrations/0013_retire_recipe_corpus.sql
+ * drops recipe_i18n and ingredient_i18n there; a final `--fresh` run, uploaded
+ * as a private release, is one of 0013's preconditions. After 0013 the
+ * backup in pipeline/data/i18n-backup (and its releases) is the frozen record
+ * of what D1 served: recipe translations live on in the recipe translation
+ * store, and the artefact build still reads ingredient names from here.
+ *
  * Usage:
  *   node pipeline/tools/export_remote_i18n.mjs [--fresh] [--table=recipe_i18n] [--sample=50] [--no-verify]
  */

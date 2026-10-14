@@ -145,6 +145,20 @@ export async function recipeFile(platform: App.Platform | undefined, id: number)
 	return detail;
 }
 
+/**
+ * manifest.json's `counts` (the /admin corpus figures), from the same data
+ * build as the loaded core.bin. Read per call, not kept: only /admin asks,
+ * and it memoises its whole dashboard.
+ */
+export async function manifestCounts(platform: App.Platform | undefined): Promise<unknown> {
+	const { assets, data } = await base(platform);
+	const manifest = await readJson<{ version?: unknown; counts?: unknown } | null>(assets, 'manifest.json');
+	if (manifest?.version !== data.corpus.version) {
+		throw new DataUnavailableError(`data/manifest.json is not the manifest of data version ${data.corpus.version}`);
+	}
+	return manifest.counts ?? null;
+}
+
 /** Every recipe id, ascending (sitemap.json). */
 export async function sitemapIds(platform: App.Platform | undefined): Promise<number[]> {
 	const ids = (await readJson<{ ids?: unknown } | null>(assetsOf(platform), 'sitemap.json'))?.ids;

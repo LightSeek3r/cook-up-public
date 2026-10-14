@@ -15,6 +15,11 @@
  * ledger, 80% budget). The plan's estimated reads are printed first and the
  * run refuses above --max-reads (default 250,000).
  *
+ * Works only until migrations/0013_retire_recipe_corpus.sql is applied: it
+ * reads the corpus tables 0013 drops (pipeline/lib/d1.mjs then says so). Its
+ * last run is one of 0013's preconditions. recipe_i18n rows the translation
+ * store has changed since the last D1 export differ by design.
+ *
  * Usage: node pipeline/tools/artefact_remote_parity.mjs [--max-reads=N] [--sample=N] [--seed=N] [--only=fingerprint|sample|remote-only]
  * Report: pipeline/out/remote-parity/<UTC date>.json
  */

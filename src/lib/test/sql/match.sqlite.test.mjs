@@ -1,16 +1,18 @@
-// Runs the real matchRecipes SQL against SQLite (every migration applied, then a
-// small fixture) and compares it with a brute-force reference of the documented
+// Runs the real matchRecipes SQL against SQLite (the corpus schema: migrations
+// up to CORPUS_SCHEMA_LAST, then a small fixture) and compares it with a brute-force reference of the documented
 // rules. match.test.ts only sees SQL text through a spy, which cannot catch a
 // query that is invalid or merely wrong. `.mjs` for node:sqlite / node:fs
 // without @types/node (see tasks/lessons.md).
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
-import { matchRecipes, resolveIngredientIds, slackFor } from './match';
-import { sqliteD1 } from './test/d1';
+import { readFileSync } from 'node:fs';
+import path from 'node:path';
+import { matchRecipes, resolveIngredientIds } from './match';
+import { slackFor } from '$lib/match';
+import { sqliteD1 } from '../d1';
+import { applyMigrations, CORPUS_SCHEMA_LAST, MIGRATIONS_DIR } from '../../../../pipeline/lib/migrations.mjs';
 
 const SEP = String.fromCharCode(31);
-const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 
 // [id, canonical_key, is_staple]
 const INGREDIENTS = [
@@ -60,8 +62,7 @@ let sqlite;
 
 beforeAll(() => {
 	sqlite = new DatabaseSync(':memory:');
-	const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort();
-	for (const f of files) sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	applyMigrations(sqlite, { upTo: CORPUS_SCHEMA_LAST });
 
 	const run = (sql, rows) => { const st = sqlite.prepare(sql); for (const r of rows) st.run(...r); };
 	run('INSERT INTO ingredients (id, canonical_key, category, is_staple) VALUES (?, ?, \'other\', ?)', INGREDIENTS);
@@ -80,7 +81,7 @@ beforeAll(() => {
 
 	// Fill non_staple_count with the migration's own statement, so the stored
 	// value under test is the one remote D1 gets.
-	const update = readFileSync(new URL('0009_recipe_non_staple_count.sql', MIGRATIONS), 'utf8').match(/UPDATE recipes[\s\S]*?;/);
+	const update = readFileSync(path.join(MIGRATIONS_DIR, '0009_recipe_non_staple_count.sql'), 'utf8').match(/UPDATE recipes[\s\S]*?;/);
 	sqlite.exec(update[0]);
 	sqlite.prepare('UPDATE recipes SET non_staple_count = NULL WHERE id = ?').run(NULL_COUNT_RECIPE);
 

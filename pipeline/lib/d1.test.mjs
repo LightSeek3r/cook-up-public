@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { esc, checkBudget, addUsage, commandUsage, D1BudgetExceeded, D1_READ_BUDGET, D1_WRITE_BUDGET } from './d1.mjs';
+import { esc, checkBudget, addUsage, commandUsage, retiredCorpusError, D1BudgetExceeded, D1_READ_BUDGET, D1_WRITE_BUDGET } from './d1.mjs';
 
 describe('esc', () => {
 	it('quotes strings and doubles embedded single quotes', () => {
@@ -69,5 +69,27 @@ describe('checkBudget', () => {
 	it('never lets the budget reach the real 100% cap', () => {
 		expect(D1_READ_BUDGET).toBeLessThan(5_000_000);
 		expect(D1_WRITE_BUDGET).toBeLessThan(100_000);
+	});
+});
+
+describe('retiredCorpusError', () => {
+	// What wrangler's d1 execute prints for a statement on a dropped table.
+	const failed = (table) => Object.assign(new Error('Command failed: node wrangler.js d1 execute'), {
+		stdout: '',
+		stderr: `✘ [ERROR] no such table: ${table}: SQLITE_ERROR [code: 7500]`
+	});
+
+	it('says the corpus was retired, and what publishes data now, for a corpus table', () => {
+		const err = retiredCorpusError(failed('recipe_i18n'));
+		expect(err?.message).toMatch(/0013_retire_recipe_corpus.sql retired the recipe corpus/);
+		expect(err?.message).toMatch(/data:build/);
+		expect(err?.cause).toBeInstanceOf(Error);
+		expect(retiredCorpusError(failed('main.recipes'))?.message).toMatch(/^D1 has no recipes:/);
+	});
+
+	it('leaves every other error alone', () => {
+		expect(retiredCorpusError(failed('page_view'))).toBeNull();
+		expect(retiredCorpusError(new Error('D1_ERROR: 7403 account not valid'))).toBeNull();
+		expect(retiredCorpusError(undefined)).toBeNull();
 	});
 });

@@ -1,15 +1,20 @@
-// /admin actions end to end against SQLite with every migration applied, with
-// Resend replaced by a stub that captures the code. `.mjs` for node:sqlite.
+// /admin actions end to end against SQLite with every migration applied (the
+// runtime schema: no recipe corpus in D1), the dashboard's corpus figures from
+// data artefacts, and Resend replaced by a stub that captures the code. `.mjs`
+// for node:sqlite.
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
 import { actions, load } from './+page.server';
 import { PENDING_COOKIE, SESSION_COOKIE } from '$lib/admin/auth';
+import { resetDashboardCache } from '$lib/admin/stats';
+import { artefactAssets } from '$lib/test/assets';
+import { buildArtefacts } from '../../../pipeline/lib/artefacts.mjs';
+import { applyMigrations, CORPUS_SCHEMA_LAST } from '../../../pipeline/lib/migrations.mjs';
 
-const MIGRATIONS = new URL('../../../migrations/', import.meta.url);
 const ADMIN = 'admin@example.com';
 
 let sqlite;
+let assets;
 
 function d1(lite) {
 	const statement = (sql, binds = []) => ({
@@ -73,14 +78,21 @@ async function requestCode(who, email = ADMIN) {
 const verify = (who, code, email = ADMIN) => actions.verify(event(who, { email, code }));
 
 beforeAll(() => {
-	sqlite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort())
-		sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	sqlite = applyMigrations(new DatabaseSync(':memory:'));
+	const corpus = applyMigrations(new DatabaseSync(':memory:'), { upTo: CORPUS_SCHEMA_LAST });
+	corpus.exec(`INSERT INTO ingredients (id, canonical_key, category, recipe_count) VALUES (1, 'egg', 'protein', 1);
+		INSERT INTO ingredient_i18n (ingredient_id, lang, name) VALUES (1, 'en', 'Egg');
+		INSERT INTO recipes (id, source_url, source_lang, license) VALUES (7, 'u', 'en', 'PD');
+		INSERT INTO recipe_i18n (recipe_id, lang, title, instructions) VALUES (7, 'en', 'Eggnog', '');
+		INSERT INTO recipe_ingredients (recipe_id, ingredient_id) VALUES (7, 1);`);
+	assets = buildArtefacts(corpus).files;
 });
 
 beforeEach(() => {
 	sqlite.exec('DELETE FROM admin_otp; DELETE FROM admin_session;');
-	env = { DB: d1(sqlite), ADMIN_EMAILS: ADMIN, RESEND_API_KEY: 'key', RESEND_FROM: 'from@x.test' };
+	sqlite.exec('DELETE FROM page_view;');
+	resetDashboardCache();
+	env = { DB: d1(sqlite), ASSETS: artefactAssets(assets), ADMIN_EMAILS: ADMIN, RESEND_API_KEY: 'key', RESEND_FROM: 'from@x.test' };
 	pending = [];
 	sent = [];
 	vi.stubGlobal(
@@ -130,6 +142,20 @@ describe('verify', () => {
 
 		const data = await load(event(a, {}));
 		expect(data.authed).toBe(true);
+	});
+
+	it('shows the dashboard from page_view and the artefacts alone', async () => {
+		const a = browser();
+		await requestCode(a);
+		await verify(a, sent[0].code);
+		sqlite.exec(`INSERT INTO page_view (path, recipe_id) VALUES ('/recipe/7', 7), ('/recipe/7', 7), ('/recipe/99', 99), ('/', NULL)`);
+		const data = await load(event(a, {}));
+		expect(data.authed).toBe(true);
+		expect(data.dashboard.traffic.views.total).toBe(4);
+		expect(data.dashboard.topAll).toEqual([{ id: 7, title: 'Eggnog', views: 2 }]);
+		expect(data.dashboard.unseen).toBe(0);
+		expect(data.dashboard.content.recipes).toBe(1);
+		expect(data.dashboard.topIngredients).toEqual([{ key: 'Egg', n: 1 }]);
 	});
 
 	it('gives one error for an unknown address, a wrong code, a used code and another browser', async () => {

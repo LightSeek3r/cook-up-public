@@ -1,23 +1,22 @@
 // The public API routes and the sitemap over the data artefacts built from a
-// small SQLite corpus (every migration applied): input validation, the
+// small SQLite corpus (migrations up to CORPUS_SCHEMA_LAST): input validation, the
 // answers that must load no data at all, and the property the edge-cache key normalisation
 // in hooks.server.ts rests on — a raw URL and its canonical URL get the same
 // response. `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
 import { version } from '$app/environment';
 import { canonicalUrl, MAX_HAVE, MAX_IDS } from './apiParams';
 import { sqliteD1 } from './test/d1';
 import { artefactAssets } from './test/assets';
 import { buildArtefacts } from '../../pipeline/lib/artefacts.mjs';
+import { applyMigrations, CORPUS_SCHEMA_LAST } from '../../pipeline/lib/migrations.mjs';
 import * as ingredients from '../routes/api/ingredients/+server';
 import * as search from '../routes/api/search/+server';
 import * as match from '../routes/api/match/+server';
 import * as recipes from '../routes/api/recipes/+server';
 import * as sitemap from '../routes/sitemap.xml/+server';
 
-const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 const ORIGIN = 'https://cook.test';
 const KEYS = ['egg', 'onion', 'garlic', 'tomato', 'milk', 'flour', 'butter', 'leek'];
 const RECIPES = 160;
@@ -35,9 +34,8 @@ const noDb = {
 };
 
 beforeAll(() => {
-	const sqlite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort())
-		sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	// The corpus the artefacts are built from; D1 itself gets the runtime schema only.
+	const sqlite = applyMigrations(new DatabaseSync(':memory:'), { upTo: CORPUS_SCHEMA_LAST });
 	const run = (sql, rows) => {
 		const st = sqlite.prepare(sql);
 		for (const r of rows) st.run(...r);
@@ -62,7 +60,7 @@ beforeAll(() => {
 		INSERT INTO recipe_title_fts(rowid, title) SELECT rowid, title FROM recipe_i18n WHERE lang = 'en';
 		INSERT INTO ingredient_fts(rowid, name) SELECT rowid, name FROM ingredient_i18n;`);
 	platform = {
-		env: { DB: sqliteD1(sqlite), ASSETS: artefactAssets(buildArtefacts(sqlite).files) },
+		env: { DB: sqliteD1(applyMigrations(new DatabaseSync(':memory:'))), ASSETS: artefactAssets(buildArtefacts(sqlite).files) },
 		ctx: { waitUntil: () => {} }
 	};
 });

@@ -13,9 +13,10 @@ export {
 	recipesByIds,
 	searchIngredients,
 	searchTitles,
+	titleQueryReady,
 	INGREDIENT_HIT_LIMIT,
 	MIN_FTS_LENGTH,
 	RECIPE_HIT_LIMIT
 } from './search.js';
 export { nameForKey, recipePage } from './recipe.js';
-export { compareBinary, ftsFold, likeFold, trigramMatch } from './text.js';
+export { compareBinary, foldText, ftsFold, likeFold, trigramMatch } from './text.js';

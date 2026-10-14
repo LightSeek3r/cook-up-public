@@ -1,6 +1,28 @@
 /**
  * Generates a remote-safe, chunked seed for cook-up-db --remote.
  *
+ * RETIRED FOR PUBLISHING. Since phase 3.2-3.4 nothing reads the corpus from
+ * D1, and migrations/0013_retire_recipe_corpus.sql drops it: publishing data
+ * is `npm run data:build` (artefacts), `npm run data:publish` (release),
+ * deploy. Once 0013 is applied the full reseed and every --only mode have no
+ * tables left to write (pipeline/lib/d1.mjs then says so); the one mode that
+ * still means something is --restore-corpus, the rollback of 0013:
+ *
+ *   node pipeline/gen_remote_seed.mjs --restore-corpus
+ *   node pipeline/tools/apply_remote_chunks.mjs --dir=pipeline/out/remote-chunks-restore --across-days
+ *
+ * It writes the corpus schema of 0001-0012 (lib/migrations.mjs corpusSchemaSql,
+ * IF NOT EXISTS) and then 06_seed_d1.mjs's statements, the same rows the
+ * artefacts are built from (pipeline/out, the recipe translation store and
+ * the ingredient-name backup), with no
+ * DELETE and no remote read: ~352k rows written on today's corpus, about five
+ * days of the free plan's 80k/day pipeline budget, which apply_remote_chunks
+ * --across-days spreads over as many UTC days as it needs. Harmless while
+ * partial, because nothing reads these tables any more. It does not touch
+ * d1_migrations, which still lists 0013 as applied.
+ *
+ * What follows describes the reseed as it ran while D1 served the corpus.
+ *
  * NOT FOR THE FREE PLAN AS A FULL RESEED. A full run writes ~270k rows (every
  * pipeline table deleted and reinserted; measured through Miniflare's D1 on a
  * 16-language copy with migrations/0011 applied, ~295k without it) and D1 Free
@@ -83,6 +105,9 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { d1, D1_WRITE_BUDGET } from './lib/d1.mjs';
 import { readBackup, readManifest } from './lib/i18n_backup.mjs';
+import { corpusSchemaSql } from './lib/migrations.mjs';
+import { readStore, recipeI18nRows, storeExists } from './lib/recipe_i18n_store.mjs';
+import { buildLocalSeed } from './06_seed_d1.mjs';
 import {
 	COLUMNS,
 	RECIPE_UPDATE_COLUMNS,
@@ -107,6 +132,7 @@ const CHUNK_DIR = path.resolve('pipeline/out/remote-chunks');
 const RELATED_CHUNK_DIR = path.resolve('pipeline/out/remote-chunks-related');
 const STATS_CHUNK_DIR = path.resolve('pipeline/out/remote-chunks-stats');
 const FTS_CHUNK_DIR = path.resolve('pipeline/out/remote-chunks-fts');
+const RESTORE_CHUNK_DIR = path.resolve('pipeline/out/remote-chunks-restore');
 export const MAX_CHUNK_BYTES = 20_000;
 
 // Rows per INSERT statement, tuned per table from the row shape; every
@@ -143,6 +169,17 @@ export function buildRelatedUnits(data, { indexes, maxBytes = MAX_CHUNK_BYTES })
 
 export function buildStatsUnits() {
 	return [i18nStatsRefresh()];
+}
+
+/**
+ * The corpus restore after migrations/0013 as units: the schema first, as one
+ * unit (2 rows written per CREATE, measured), then every seed statement on
+ * its own. `backup` is `{ recipe_i18n, ingredient_i18n }` rows, as for
+ * 06_seed_d1.mjs buildLocalSeed.
+ */
+export function buildRestoreUnits(data, backup, { indexes, maxBytes = MAX_CHUNK_BYTES }) {
+	const seed = buildLocalSeed(data, backup, { maxBytes, indexes, deletes: false });
+	return { units: [corpusSchemaSql().map((sql) => stmt(sql, 2)), ...seed.statements.map((s) => [s])], seed };
 }
 
 /**
@@ -244,7 +281,7 @@ function parseArgs(argv) {
 	const opt = (name) => argv.find((a) => a.startsWith(`--${name}=`))?.split('=').slice(1).join('=');
 	const budget = Number(opt('write-budget') ?? D1_WRITE_BUDGET);
 	if (!Number.isFinite(budget) || budget <= 0) throw new Error('--write-budget must be a positive number');
-	return { only: opt('only') ?? null, budget, paidPlan: argv.includes('--paid-plan') };
+	return { only: opt('only') ?? null, budget, paidPlan: argv.includes('--paid-plan'), restore: argv.includes('--restore-corpus') };
 }
 
 /** Remote per-language ingredient_i18n counts must equal the backup's, or the reseed would drop names. */
@@ -280,6 +317,24 @@ function guard(planned, opts, label) {
 async function main() {
 	const opts = parseArgs(process.argv.slice(2));
 	const indexes = schemaIndexes();
+
+	if (opts.restore) {
+		// The same translations the artefacts carry: the recipe translation store
+		// (pipeline/lib/recipe_i18n_store.mjs), else the D1 export it was imported from.
+		const recipeRows = storeExists() ? recipeI18nRows(readStore()) : readBackup('recipe_i18n')?.rows;
+		const nameBackup = readBackup('ingredient_i18n');
+		if (!recipeRows || !nameBackup) throw new Error('no translation store or backup: a restore without them would lose every translation');
+		const { units, seed } = buildRestoreUnits(await readSeedInputs(), { recipe_i18n: recipeRows, ingredient_i18n: nameBackup.rows }, { indexes });
+		const chunks = packChunks(units, MAX_CHUNK_BYTES);
+		const planned = chunks.reduce((s, c) => s + c.writes, 0);
+		await writeChunks(RESTORE_CHUNK_DIR, chunks, { mode: 'restore', planned_writes: planned, ingredient_names_exported_at: nameBackup.exported_at });
+		console.log(
+			`gen_remote_seed --restore-corpus: ${chunks.length} chunk files in pipeline/out/remote-chunks-restore/, ~${planned} rows written ` +
+				`(${seed.rows.keptRecipes.length} recipes, ${seed.i18n.fromBackup + seed.i18n.fromPipeline} recipe_i18n rows), ` +
+				`about ${Math.ceil(planned / opts.budget)} day(s) at ${opts.budget} rows/day. Apply with apply_remote_chunks.mjs --across-days.`
+		);
+		return;
+	}
 
 	if (opts.only === 'fts') {
 		const chunks = packChunks([titleFtsRefresh(3_500)], MAX_CHUNK_BYTES);

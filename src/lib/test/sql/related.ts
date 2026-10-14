@@ -1,6 +1,15 @@
+/**
+ * D1 reference: the recipe page's related list, as the app ran it against D1
+ * before the data moved to the static artefacts (phases 3.2-3.3). D1 no
+ * longer holds these tables (migrations/0013_retire_recipe_corpus.sql), so
+ * this runs only in the parity suites, on SQLite built with migrations up to
+ * CORPUS_SCHEMA_LAST (pipeline/lib/migrations.mjs): the regression reference
+ * for the artefact generator and the in-memory queries. Nothing outside
+ * src/lib/test may import it (src/lib/test/corpusReads.test.mjs).
+ */
 import type { D1Database } from '@cloudflare/workers-types';
 import { RELATED_LIMIT, RELATED_MAX_INGREDIENT_RECIPES, RELATED_MIN_SHARED, type Lang } from '$lib/config';
-import { getRecipesByIds, HIT_COLS, HIT_JOINS } from '$lib/search';
+import { getRecipesByIds, HIT_COLS, HIT_JOINS } from './search';
 import type { RecipeHit } from '$lib/types';
 
 /**
@@ -12,10 +21,6 @@ import type { RecipeHit } from '$lib/types';
  * average (up to ~3,800) for ranking live. A recipe without a stored row — the
  * table not seeded yet, or a recipe written by a path that skips it — gets the
  * live ranking instead, so the page is never wrong, only slower.
- *
- * The page now reads the stored list from r/<id>.json; this stays as the D1
- * reference of the parity suite (src/lib/test/sqlRoutes.ts) until the corpus
- * tables are dropped.
  */
 export async function relatedRecipes(
 	db: D1Database,

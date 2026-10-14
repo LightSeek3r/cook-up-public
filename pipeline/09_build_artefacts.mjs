@@ -1,10 +1,12 @@
 /**
  * Stage 09 — static data artefacts (pipeline/lib/artefacts.mjs) from the
- * pipeline snapshot: pipeline/out plus the translation backup, through the
+ * pipeline snapshot: pipeline/out, the recipe translation store
+ * (pipeline/data/recipe-i18n) and the backup's ingredient names, through the
  * same statements 06_seed_d1.mjs writes for a local D1.
  *
  * Usage:
  *   node pipeline/09_build_artefacts.mjs [--out=pipeline/out/artefacts] [--sql=<fixture.sql>] [--save-db=<file>]
+ *     [--store=pipeline/data/recipe-i18n]
  *
  * --sql builds from plain INSERTs applied after every migration (a test
  * fixture such as tests/e2e/fixtures/seed.sql) instead of the snapshot.
@@ -20,6 +22,7 @@ import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
 import { buildArtefacts, checkBudgets, fixtureDb, snapshotDb } from './lib/artefacts.mjs';
 import { readManifest } from './lib/i18n_backup.mjs';
+import { storeDigest, STORE_DIR } from './lib/recipe_i18n_store.mjs';
 import { sha256, writeTree } from '../scripts/lib/datapack.mjs';
 
 const option = (/** @type {string} */ name) =>
@@ -76,17 +79,19 @@ async function main() {
 		db = fixtureDb(sql.toString('utf8'));
 		source = { fixture: path.basename(sqlFile), sha256: sha256(sql) };
 	} else {
-		const snap = await snapshotDb();
+		const storeDir = path.resolve(option('store') ?? STORE_DIR);
+		const snap = await snapshotDb({ storeDir });
 		db = snap.db;
 		const backupManifest = readManifest();
 		source = {
 			pipeline_out: Object.fromEntries(INPUT_FILES.map((f) => [f, sha256(readFileSync(path.join('pipeline/out', f)))])),
-			i18n_backup: { exported_at: backupManifest?.exported_at ?? null, manifest_sha256: sha256(readFileSync('pipeline/data/i18n-backup/manifest.json')) }
+			i18n_backup: { exported_at: backupManifest?.exported_at ?? null, manifest_sha256: sha256(readFileSync('pipeline/data/i18n-backup/manifest.json')) },
+			recipe_i18n_store: storeDigest(storeDir)
 		};
 		const s = snap.seed;
 		console.log(
 			`09_build_artefacts: snapshot ${s.rows.keptRecipes.length} recipes, ${s.rows.ingredients.length} ingredients; ` +
-				`${s.i18n.notKept} backed-up recipe_i18n rows left out (recipes with no kept ingredient)`
+				`${s.i18n.notKept} translation store rows left out (recipes with no kept ingredient)`
 		);
 	}
 	const started = performance.now();

@@ -1,14 +1,14 @@
-// searchRecipeTitles against SQLite (every migration applied) and a real
-// trigram index, compared with the single-level query it replaced, which joined
+// searchRecipeTitles against SQLite (the corpus schema: migrations up to
+// CORPUS_SCHEMA_LAST) and a real trigram index, compared with the single-level query it replaced, which joined
 // both titles for every FTS hit before GROUP BY / LIMIT. search.test.ts only
 // sees SQL text through a spy. `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
-import { searchRecipeTitles, getRecipesByIds, ftsPhrase, RECIPE_HIT_LIMIT } from './search';
-import { sqliteD1, D1_MAX_BOUND_PARAMS } from './test/d1';
+import { searchRecipeTitles, getRecipesByIds, ftsPhrase } from './search';
+import { RECIPE_HIT_LIMIT } from '$lib/search';
+import { sqliteD1, D1_MAX_BOUND_PARAMS } from '../d1';
+import { applyMigrations, CORPUS_SCHEMA_LAST } from '../../../../pipeline/lib/migrations.mjs';
 
-const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 const ORDER = 'ORDER BY (r.balance_grade IS NULL) ASC, r.total_minutes IS NULL, r.total_minutes ASC, r.id ASC';
 const REPLACED = `SELECT r.id, COALESCE(t.title, src.title) AS title, r.cuisine, r.total_minutes, r.balance_grade, r.nutrition_coverage
 	FROM recipe_title_fts f
@@ -25,8 +25,7 @@ let db;
 
 beforeAll(() => {
 	sqlite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort())
-		sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	applyMigrations(sqlite, { upTo: CORPUS_SCHEMA_LAST });
 	const recipe = sqlite.prepare(`INSERT INTO recipes (id, source_url, source_lang, license, cuisine, total_minutes, balance_grade, nutrition_coverage)
 		VALUES (?, 'u', 'en', 'PD', ?, ?, ?, ?)`);
 	const title = sqlite.prepare(`INSERT INTO recipe_i18n (recipe_id, lang, title, instructions) VALUES (?, ?, ?, '')`);

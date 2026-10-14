@@ -1,15 +1,14 @@
-// Both seeds applied to node:sqlite with every migration and foreign keys on
-// (D1 enforces them), on a small synthetic corpus.
+// Both seeds applied to node:sqlite with the corpus schema (migrations up to
+// CORPUS_SCHEMA_LAST) and foreign keys on (D1 enforces them), on a small
+// synthetic corpus.
 import { describe, it, expect } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
 import { buildLocalSeed } from './06_seed_d1.mjs';
-import { buildRemoteSeed, buildRelatedUnits } from './gen_remote_seed.mjs';
+import { buildRemoteSeed, buildRelatedUnits, buildRestoreUnits } from './gen_remote_seed.mjs';
+import { applyMigrations, CORPUS_SCHEMA_LAST, CORPUS_TABLES } from './lib/migrations.mjs';
 import { packChunks, schemaIndexes, checkWriteBudget, WriteBudgetExceeded, mergeIngredientNames, mergeRecipeI18n, titleFtsRefresh } from './lib/seed_sql.mjs';
 
-const MIGRATIONS = new URL('../migrations/', import.meta.url);
-const indexes = schemaIndexes(fileURLToPath(MIGRATIONS));
+const indexes = schemaIndexes();
 
 const KEYS = ['chicken', 'onion', 'garlic', 'tomato', 'beef', 'rice', 'egg', 'egg_yolk', 'milk', 'flour', 'salt', 'water', 'saffron', 'leek'];
 const TITLES = [
@@ -73,8 +72,7 @@ function i18nBackup(data, langs) {
 function migrated() {
 	const db = new DatabaseSync(':memory:');
 	db.exec('PRAGMA foreign_keys = ON;');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort()) db.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
-	return db;
+	return applyMigrations(db, { upTo: CORPUS_SCHEMA_LAST });
 }
 
 const localSeed = (db, data, backup) => db.exec(buildLocalSeed(data, backup).sql.join('\n'));
@@ -260,6 +258,53 @@ describe('gen_remote_seed (remote)', () => {
 				expect(db.prepare(`SELECT COUNT(*) n FROM ${t}`).get().n, `${t} after chunk ${k}`).toBeGreaterThan(0);
 			}
 		}
+	});
+});
+
+describe('gen_remote_seed --restore-corpus (the rollback of migrations/0013)', () => {
+	/** Remote after 0013: the corpus schema with every corpus table dropped, runtime rows kept. */
+	function retired() {
+		const db = migrated();
+		db.exec(`INSERT INTO page_view (path, recipe_id) VALUES ('/recipe/1000', 1000)`);
+		for (const t of CORPUS_TABLES) db.exec(`DROP TABLE ${t}`);
+		return db;
+	}
+	const schema = (db) => db.prepare(`SELECT type, name, tbl_name FROM sqlite_master ORDER BY type, name`).all().map((r) => ({ ...r }));
+
+	it('puts back the 0001-0012 corpus schema and every row the local seed writes, in chunks D1 accepts', () => {
+		const data = corpus();
+		const backup = { recipe_i18n: i18nBackup(data, ['en', 'fr', 'ja', 'pnb']) };
+		const db = retired();
+		const { units } = buildRestoreUnits(data, backup, { indexes });
+		const chunks = packChunks(units, 20_000);
+		for (const c of chunks) expect(Buffer.byteLength(c.sql)).toBeLessThanOrEqual(30_000);
+		applyChunks(db, chunks);
+
+		const local = migrated();
+		localSeed(local, data, backup);
+		expect(schema(db)).toEqual(schema(local));
+		for (const t of CORPUS_TABLES.filter((t) => !t.endsWith('_fts'))) {
+			const all = (d) => d.prepare(`SELECT * FROM ${t} ORDER BY 1, 2`).all();
+			expect(all(db), t).toEqual(all(local));
+		}
+		expectConsistentFts(db);
+		expect(db.prepare('SELECT COUNT(*) AS n FROM page_view').get().n).toBe(1);
+	});
+
+	it('can be rerun from the start without harm to the schema (CREATE … IF NOT EXISTS)', () => {
+		const db = retired();
+		const [schemaUnit] = buildRestoreUnits(corpus(), {}, { indexes }).units;
+		for (let i = 0; i < 2; i++) for (const s of schemaUnit) db.exec(s.sql);
+		expect(db.prepare(`SELECT COUNT(*) AS n FROM recipes`).get().n).toBe(0);
+	});
+
+	it('estimates its writes like the reseeds: a row plus one per index entry', () => {
+		const data = corpus();
+		const { units, seed } = buildRestoreUnits(data, {}, { indexes });
+		const i18nWrites = units.flat().filter((s) => s.sql.startsWith('INSERT INTO recipe_i18n ')).reduce((n, s) => n + s.writes, 0);
+		expect(i18nWrites).toBe((seed.i18n.fromBackup + seed.i18n.fromPipeline) * (1 + indexes.recipe_i18n.length));
+		// Only the stats refresh's own clear, on a table the schema unit has just created.
+		expect(units.flat().filter((s) => s.sql.startsWith('DELETE')).map((s) => s.sql)).toEqual(['DELETE FROM recipe_i18n_stats;']);
 	});
 });
 

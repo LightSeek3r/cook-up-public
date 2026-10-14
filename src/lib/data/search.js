@@ -1,10 +1,11 @@
 // /api/search, /api/recipes and /api/ingredients over the artefacts, with the
-// semantics of their SQL (src/lib/search.ts, src/routes/api/ingredients):
-// FTS5 trigram phrase matching for queries of 3+ characters, the LIKE
-// fallback below that, and the same ORDER BY ties.
+// semantics of the SQL they replaced (src/lib/test/sql, src/routes/api/
+// ingredients): FTS5 trigram phrase matching of source titles for queries of
+// 3+ characters, the LIKE fallback below that, and the same ORDER BY ties;
+// plus, beyond the SQL, translated titles (see searchTitles).
 
 import { intOrNull, vocabOrNull } from './core.js';
-import { compareBinary, ftsFold, likeFold, trigramMatch } from './text.js';
+import { compareBinary, foldText, ftsFold, likeFold, trigramMatch } from './text.js';
 
 // Mirror $lib/search (pinned equal by search.test.mjs); see match.js for why
 // these are not imported.
@@ -16,6 +17,17 @@ export const INGREDIENT_HIT_LIMIT = 60;
 
 /** @param {string | null | undefined} raw */
 export const normaliseQuery = (raw) => (raw ?? '').trim().slice(0, MAX_QUERY);
+
+// One or two Han, kana or Hangul characters are a word (汤, 鸡肉, 국), where
+// two Latin letters are not.
+const CJK = /[\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}\p{Script=Hangul}]/u;
+
+/**
+ * Whether a normalised query is worth a title search: 3+ characters, or any
+ * CJK one. Shorter non-CJK queries are answered empty without loading data.
+ * @param {string} q
+ */
+export const titleQueryReady = (q) => q.length >= MIN_FTS_LENGTH || (q.length > 0 && CJK.test(q));
 
 /**
  * @typedef {object} RecipeHit
@@ -75,9 +87,15 @@ function inHitOrder(c, hit, limit) {
 }
 
 /**
- * `searchRecipeTitles`. 3+ characters match the source-language title the
- * way recipe_title_fts does; shorter queries LIKE-match the title shown in
- * `lang` (case-insensitive for ASCII only, as SQLite's LIKE).
+ * `searchRecipeTitles`, extended to translated titles. 3+ characters match
+ * the source-language title the way recipe_title_fts did (so an English
+ * query finds the same recipes in every language), and also the title in
+ * `lang` where it differs from the source one, compared in foldText form
+ * (case, accents and script variants folded: "creme" finds "Crème"). Shorter
+ * queries LIKE-match the title shown in `lang` (case-insensitive for ASCII
+ * only, as SQLite's LIKE), which is how one or two CJK characters find a
+ * translated title. Hits are ranked as the SQL ranked them, never by which
+ * title matched.
  * @param {Corpus} corpus
  * @param {{ q: string, lang: string, limit?: number }} p
  * @returns {{ recipes: RecipeHit[] }}
@@ -95,6 +113,8 @@ export function searchTitles(corpus, p) {
 			const t = titles[r];
 			if (t !== null && trigramMatch(t, phrase)) hit[r] = 1;
 		}
+		const needle = foldText(q);
+		if (needle) for (const { r, folded } of corpus.foldedTitleOverrides(p.lang)) if (folded.includes(needle)) hit[r] = 1;
 	} else {
 		const term = likeFold(q);
 		for (let r = 0; r < c.recipes; r++) {

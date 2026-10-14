@@ -8,10 +8,10 @@ let dir;
 let used;
 let sent;
 
-function plan(writes, generated_at = '2026-10-12T00:00:00.000Z') {
+function plan(writes, generated_at = '2026-10-12T00:00:00.000Z', mode = 'full') {
 	const chunks = writes.map((w, i) => ({ file: `${String(i + 1).padStart(3, '0')}.sql`, writes: w, statements: 1 }));
 	for (const c of chunks) writeFileSync(path.join(dir, c.file), `-- ${c.file}\n`);
-	writeFileSync(path.join(dir, 'plan.json'), JSON.stringify({ generated_at, chunks }));
+	writeFileSync(path.join(dir, 'plan.json'), JSON.stringify({ mode, generated_at, chunks }));
 }
 
 const exec = (fail = {}) => (sql) => {
@@ -44,6 +44,22 @@ describe('applyChunks', () => {
 		expect(run()).toMatchObject({ applied: 0, stopped: 'budget' });
 		expect(sent).toEqual([]);
 		expect(run({ paidPlan: true })).toMatchObject({ applied: 2, stopped: null });
+	});
+
+	it('spreads a corpus restore over days: applies what fits today, resumes on the next', () => {
+		plan([400, 400, 400], undefined, 'restore');
+		const day = () => applyChunks({ dir, exec: (sql) => (exec()(sql), (used += 400)), used: () => used, budget: 1000, acrossDays: true });
+		used = 100;
+		expect(day()).toEqual({ applied: 2, remaining: 1, stopped: 'budget' });
+		used = 0; // the next UTC day
+		expect(day()).toEqual({ applied: 1, remaining: 0, stopped: null });
+		expect(sent).toEqual(['001.sql', '002.sql', '003.sql']);
+	});
+
+	it('refuses --across-days for anything but a restore', () => {
+		plan([400, 400]);
+		expect(() => run({ acrossDays: true })).toThrow(/corpus restore/);
+		expect(sent).toEqual([]);
 	});
 
 	it('stops before a chunk that would cross the budget once real usage runs over the estimate', () => {

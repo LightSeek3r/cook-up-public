@@ -1,7 +1,9 @@
--- Deterministic seed for the Playwright smoke suite. Applied after all
--- migrations to an isolated local D1 (.wrangler/e2e-state), never to the
--- developer's local database and never remotely. Small on purpose: it only has
--- to make every public page render real data, not exercise ranking.
+-- Deterministic corpus for the Playwright smoke suite: scripts/e2e-server.mjs
+-- builds the data artefacts it serves from it (pipeline/lib/artefacts.mjs
+-- fixtureDb, the corpus schema of migrations up to CORPUS_SCHEMA_LAST). Never
+-- applied to any D1: since migrations/0013 none has these tables. Small on
+-- purpose: it only has to make every public page render real data, not
+-- exercise ranking.
 --
 -- Recipe ids 1-6. Recipe 1 has en/fr/ar rows and a stored related list; the
 -- rest are English only, so non-English pages also exercise the source-language

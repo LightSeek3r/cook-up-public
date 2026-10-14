@@ -3,12 +3,12 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdtempSync, rmSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
+import { applyMigrations, CORPUS_SCHEMA_LAST } from './migrations.mjs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { gunzipSync } from 'node:zlib';
 import { stageTable, writeTable, readBackup, verifySample, serializeByLang, writeManifest, sample } from './i18n_backup.mjs';
 
-const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 const LANGS = ['en', 'fr', 'hi', 'zh', 'pnb'];
 
 let db;
@@ -16,9 +16,8 @@ let work;
 let calls;
 
 function migrated() {
-	const lite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort()) lite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
-	return lite;
+	// Remote D1 as it is until migrations/0013 retires the corpus: the export's only window.
+	return applyMigrations(new DatabaseSync(':memory:'), { upTo: CORPUS_SCHEMA_LAST });
 }
 
 const query = (sql) => {

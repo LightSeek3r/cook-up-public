@@ -1,9 +1,9 @@
 {
-	"version": "d489600e90918f71",
+	"version": "1ad6283a8ccf8ed0",
 	"repo": "LightSeek3r/cook-up",
-	"tag": "data-d489600e90918f71",
-	"asset": "data-d489600e90918f71.pack.gz",
-	"sha256": "787f4caf0778ffc825e5c628de89bcb134d9b5a0b64ba731d3240625dfae29a8",
-	"bytes": 22345571,
-	"manifest_sha256": "d6988f84352aed5d78fb461c06553eae235090dce6ab68669b2ee080c3eb2e2c"
+	"tag": "data-1ad6283a8ccf8ed0",
+	"asset": "data-1ad6283a8ccf8ed0.pack.gz",
+	"sha256": "947809d82b534e5721b7d5c543a07bd280e2ed6588b9a1c8503f3978f30f738c",
+	"bytes": 22291733,
+	"manifest_sha256": "b3de6f4bad1d1c7fb1f6e16d0e13892b41a071de789053ab35e497d9c44184c7"
 }

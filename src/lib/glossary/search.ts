@@ -1,58 +1,10 @@
 import { normaliseQuery } from '$lib/search';
+import { foldText } from '$lib/data/text.js';
 import type { CategoryId, GlossarySummary } from './types';
 
-// Only these combining ranges are stripped, never all of \p{M}: Devanagari and
-// Bengali vowel signs are marks too, and removing them would make every word
-// collapse to its bare consonants.
-//   U+0300-036F  Latin/Cyrillic/Greek accents; also what NFKD splits Arabic
-//                alef-hamza/madda and Cyrillic yo into, so those fold for free
-//   U+064B-065F, U+0670  Arabic harakat and hamza/madda marks
-//   U+0640  tatweel
-//   U+200C, U+200D  ZWNJ / ZWJ (typed inconsistently in Persian-script and Indic text)
-//   U+093C, U+09BC  Devanagari / Bengali nukta, so U+095C (ड़) folds to ड
-const STRIP = /[\u0300-\u036F\u064B-\u065F\u0670\u0640\u200C\u200D\u093C\u09BC]/g;
-
-// Letters that survive NFKD unchanged and must be folded by hand. The
-// Arabic-script entries are spellings people type interchangeably, each mapped
-// to one canonical form.
-const TABLE: Record<string, string> = {
-	'\u00DF': 'ss', // sharp s
-	'\u0111': 'd', // d with stroke
-	'\u00F8': 'o', // o with stroke
-	'\u00E6': 'ae',
-	'\u0153': 'oe',
-	'\u0142': 'l', // l with stroke
-	'\u0131': 'i', // dotless i
-	'\u0671': '\u0627', // alef wasla -> alef
-	'\u0649': '\u064A', // alef maksura -> yeh
-	'\u06CC': '\u064A', // Farsi/Shahmukhi yeh -> yeh
-	'\u06D2': '\u064A', // yeh barree -> yeh
-	'\u06A9': '\u0643', // keheh -> kaf
-	'\u0629': '\u0647', // teh marbuta -> heh
-	'\u06BE': '\u0647', // heh doachashmee (Shahmukhi aspirate marker) -> heh
-	'\u06C1': '\u0647', // heh goal -> heh
-	'\u06BA': '\u0646' // noon ghunna -> noon
-};
-const TABLE_RE = new RegExp(`[${Object.keys(TABLE).join('')}]`, 'g');
-
-const KATAKANA = /[\u30A1-\u30F6]/g;
-
-/**
- * Canonical comparison form for glossary text and queries. NFKC after the strip
- * recomposes everything that was not removed (Hangul syllables, kana with
- * dakuten, Indic conjuncts), so only the intended marks disappear.
- */
-export function foldText(s: string): string {
-	return s
-		.normalize('NFKD')
-		.replace(STRIP, '')
-		.normalize('NFKC')
-		.toLowerCase()
-		.replace(TABLE_RE, (c) => TABLE[c])
-		.replace(KATAKANA, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60))
-		.replace(/\s+/g, ' ')
-		.trim();
-}
+// One folding for every text people search in their own language (recipe
+// titles use it too); see src/lib/data/text.js.
+export { foldText };
 
 /** Marks stay inside tokens so Indic words are not split at their vowel signs. */
 const tokenise = (folded: string): string[] =>

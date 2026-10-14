@@ -89,15 +89,19 @@ src/                    SvelteKit app
   lib/                     matching/search/nutrition/i18n logic, config, types — the pure,
                            testable core. SQL lives here, not inline in routes, so it can be
                            unit-tested against a spy without a real D1.
-migrations/             D1 schema — 0001_init.sql plus append-only follow-ups. 0001 is frozen:
-                        the shared remote DB holds machine-translated content that cannot be
-                        regenerated, so schema changes ship as new numbered files.
+    data/                    the data artefacts' decoders and queries (Worker and browser)
+    test/sql/                the D1 implementations the artefacts replaced, kept only as the
+                             parity suites' reference; nothing outside src/lib/test imports them
+migrations/             D1 schema — 0001_init.sql plus append-only follow-ups. 0001 is frozen,
+                        schema changes ship as new numbered files. 0013 drops the recipe corpus:
+                        D1 holds runtime state only (page_view, admin_otp, admin_session).
 pipeline/               offline data build (see below) — Node ESM, run outside the Worker
   01_fetch.mjs .. 08_fetch_images.mjs   the eight numbered stages, run in order
-  gen_remote_seed.mjs      the remote-safe seed generator (see Deployment)
+  09_build_artefacts.mjs   the data artefacts the site serves (see Data artefacts)
+  gen_remote_seed.mjs      retired remote reseed; only --restore-corpus, the rollback of 0013
   lib/                     shared pure logic (wikitext parsing, unit parsing, FDC matching, ...)
-  data/                    fetched/downloaded raw sources (git-ignored)
-  out/                     generated .jsonl / seed.sql (git-ignored)
+  data/                    fetched/downloaded raw sources, translation store and backup (git-ignored)
+  out/                     generated .jsonl and artefacts (git-ignored)
 tasks/                  working notes: todo.md (build log per phase), lessons.md (hard-won fixes)
 ```
 
@@ -105,22 +109,20 @@ tasks/                  working notes: todo.md (build log per phase), lessons.md
 
 ```bash
 npm install
-npm run db:migrate          # apply the D1 schema to your local database
+npm run db:migrate          # the D1 schema (page views, admin auth) on your local database
 npm run data:fetch          # data artefacts pinned by src/lib/data/lock.json (needs gh or GITHUB_TOKEN)
 npm run dev                 # vite dev, with D1 emulated locally (no Cloudflare login needed)
 ```
+
+All recipe and ingredient data comes from the data artefacts `data:fetch` installs; the local D1
+needs no seeding (it holds no corpus since migrations/0013).
 
 All configuration is via `wrangler.toml` bindings — there's no `.env` file in this project.
 The three `/admin` secrets are the one exception, and they are set with `wrangler secret put`
 rather than committed (see **Deployment**). For `npm run dev`, put the same three in a
 git-ignored `.dev.vars`; without them the app runs normally and only `/admin` is unusable.
 
-Without seeded data the app runs but has nothing to show. See **Data pipeline** below to
-build a real dataset, or ask whoever set up the project for a `seed.sql` to load directly:
-
-```bash
-wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql
-```
+To serve data you built yourself rather than the pinned release, see **Data artefacts** below.
 
 ## Match API
 
@@ -155,8 +157,8 @@ rather than a comma (a comma can appear inside a translated name).
 ## Data pipeline
 
 All recipe, ingredient, and nutrition data is built offline by a sequence of Node scripts
-under `pipeline/`, then loaded into D1 as one seed file — nothing is scraped or computed at
-request time.
+under `pipeline/`, then shipped with the build as data artefacts (stage 09, **Data artefacts**
+below) — nothing is scraped or computed at request time, and nothing of it is in D1.
 
 | Stage | Script | What it does |
 |---|---|---|
@@ -165,17 +167,17 @@ request time.
 | 03 | `pipeline:normalize` | Matches ingredient text against the OFF taxonomy; derives category/diet/allergens |
 | 04 | `node pipeline/04_map_fdc.mjs` | Matches ingredients to USDA FoodData Central entries; resolves recipe quantities to grams |
 | 05 | `node pipeline/05_compute_nutrition.mjs` | Aggregates per-recipe macros/micros and computes the Balance Grade |
-| 06 | `pipeline:seed` | Writes `pipeline/out/seed.sql` for D1 |
-| 07 | (removed) | The batch machine-translation stage is gone: all 3,484 recipes are translated into all 15 non-English languages and stored. Corrections go through `db:translate:manual` (validated writer, not a job) |
+| 06 | (library) | `06_seed_d1.mjs`: the corpus database's statements, used by stage 09 and the corpus restore; no longer seeds any D1 |
+| 07 | (removed) | The batch machine-translation stage is gone: translations are agent batches validated and merged into the recipe translation store (**Recipe translations** below) |
 | 08 | `node pipeline/08_fetch_images.mjs` | Resolves each recipe's Wikimedia Commons photo to a URL plus its author and licence (the only networked stage besides 01; disk-cached) |
+| 09 | `data:build` | Builds the data artefacts from all of the above plus the translations |
 
 Stage 04 needs the USDA FoodData Central **Foundation Foods** and **SR Legacy** CSV bulk
 downloads in place first — there's no automated fetch for these (license/rate-limit
 reasons); get them from [fdc.nal.usda.gov](https://fdc.nal.usda.gov)'s bulk data download
 page and unzip into `pipeline/data/fdc/foundation/` and `pipeline/data/fdc/sr_legacy/`.
 
-Run stages 01-05 and 08 before 06 — the seed reads all of their output, so don't skip straight to
-seeding:
+Run stages 01-05 and 08 before 09 — the artefacts read all of their output:
 
 ```bash
 npm run pipeline:fetch
@@ -183,12 +185,9 @@ npm run pipeline:parse
 npm run pipeline:normalize
 node pipeline/04_map_fdc.mjs
 node pipeline/05_compute_nutrition.mjs
-npm run pipeline:seed
-wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql
+node pipeline/08_fetch_images.mjs
+npm run data:build -- --save-db=pipeline/out/snapshot.sqlite   # artefacts + the corpus as SQLite, to inspect
 ```
-
-(`npm run db:seed:real` chains 01/02/03/06 and applies the result, but skips 04/05 — only
-use it on its own if you don't need nutrition data, e.g. a quick UX-only smoke test.)
 
 Each stage is resumable and logs real counts (pages fetched, ingredients matched, recipes
 graded, etc.) rather than just "done" — check `tasks/todo.md` for what those numbers should
@@ -196,56 +195,124 @@ look like on the full corpus. As a reference point, the full build currently yie
 **3,400 recipes and 1,030 distinct ingredients**, about a third of them carrying enough
 resolved mass to show nutrition.
 
-### Seeding the *remote* database
+### Retiring the D1 corpus
 
-`pipeline/out/seed.sql` is for local use only. Applying it to `--remote` would delete content
-that exists nowhere else — see **Deployment** below. Use the dedicated generator, then the
-chunk applier:
+Since phase 3.2-3.4 no request reads the recipe corpus from D1, and
+`migrations/0013_retire_recipe_corpus.sql` drops it: the 14 corpus tables (`recipes`,
+`recipe_i18n`, `recipe_ingredients`, `ingredients`, `ingredient_i18n`, the nutrition, diet,
+allergen and related tables, `recipe_i18n_stats`) and both FTS indexes. D1 keeps `page_view`,
+`admin_otp` and `admin_session`. Applying it costs ~541 rows read and 0 written (measured
+through Miniflare on the full corpus); the file's header has the details, the precondition
+list and the restore. `pipeline/lib/migrations.mjs` `CORPUS_SCHEMA_LAST` (12) is the schema
+the pipeline and the SQL parity tests still build their in-memory corpus databases with.
 
-```bash
-npm run pipeline:gen-remote-seed          # writes pipeline/out/remote-chunks/*.sql + plan.json
-node pipeline/tools/apply_remote_chunks.mjs --dir=pipeline/out/remote-chunks
-```
+The cutover, in order, each step a hard stop:
 
-**A full reseed does not fit the Free plan.** It writes about 270k rows, and D1 Free stops
-accepting writes at 100k/day, so it would halt partway and leave the site without ingredients
-until 00:00 UTC. The generator therefore refuses when its estimate exceeds the write budget
-(80% of the cap, 80,000 rows) unless `--paid-plan` is passed.
+1. **Deploy the code that reads no corpus table** (`/admin` now takes its corpus figures from
+   the artefacts) *without* 0013: commit everything else first, or `deploy.mjs` stops on the
+   pending migration. Code first, because the old code's `/admin` still queries the corpus.
+2. **A full day with no corpus query.** After 24 h:
+   `npx wrangler d1 insights cook-up-db --time-period=1d --sort-by=count --limit=500 --json > pipeline/out/insights-1d.json`
+   then `node pipeline/tools/corpus_reads_check.mjs pipeline/out/insights-1d.json` must print
+   `no corpus query`.
+3. **Fresh backup**: `node pipeline/tools/export_remote_i18n.mjs --fresh` (~150k rows read),
+   uploaded as a private release like `i18n-backup-2026-10-12`, and nothing in it missing from
+   the recipe translation store.
+4. **Parity once more**: `npm run data:parity:remote -- --only=sample` (~6k rows read).
+5. **Bookmark**: `npx wrangler d1 time-travel info cook-up-db --json`, kept with the date.
+6. **Owner confirmation**, then commit 0013 and `npm run db:migrate:remote`.
+7. **Check**: `npx wrangler d1 execute cook-up-db --remote --command "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"`
+   lists only `_cf_*`/`d1_migrations`/`admin_otp`/`admin_session`/`page_view` (and
+   `sqlite_sequence` if present); `/admin` signs in and shows its dashboard; a recipe page
+   view still lands in `page_view`.
 
-`apply_remote_chunks.mjs` goes through `pipeline/lib/d1.mjs`: every chunk is checked against
-today's write budget and logged in the daily ledger, it stops before a chunk that would cross
-the budget, retries Cloudflare's transient 7403 error once, and records each committed chunk in
-`applied.json`, so a rerun resumes at the first uncommitted chunk (re-sending a committed one is
-not safe). `--dry-run` shows the plan. Both scripts' header comments have the details.
+After 0013, **never `wrangler rollback` to a version older than step 1's**: older versions'
+`/admin` (and, before 3.2-3.3, every page) read the dropped tables. To undo 0013 itself:
+within Time Travel's window (7 days on Free, 30 on Paid)
+`npx wrangler d1 time-travel restore cook-up-db --bookmark=<step 5>` (page views and admin
+sessions since are lost); later, `node pipeline/gen_remote_seed.mjs --restore-corpus` then
+`node pipeline/tools/apply_remote_chunks.mjs --dir=pipeline/out/remote-chunks-restore --across-days`,
+rerun each day: 2,974 chunks, ~352k rows written, about five days on the free plan (one go on
+Workers Paid), harmless while partial because nothing reads those tables.
 
-Smaller refreshes that do fit the Free plan, applied with the same tool and their own `--dir`:
-
-```bash
-node pipeline/gen_remote_seed.mjs --only=related  # recipe_related (0010), ~7k rows written
-node pipeline/gen_remote_seed.mjs --only=stats    # admin translation counts (0011), after a translation session
-node pipeline/gen_remote_seed.mjs --only=fts      # rebuild recipe_title_fts, ~3.5k rows written
-```
-
-`--only=related` ranks from `pipeline/out`, so it matches remote only while remote's ingredients
-came from that same `pipeline/out`. The site no longer reads remote `recipe_related`: recipe
-pages take their related lists from the data artefacts (below), ranked the same way.
+**The remote reseed is retired.** `gen_remote_seed.mjs` (full, `--only=related|stats|fts`) and
+`apply_remote_chunks.mjs` wrote the corpus into D1; publishing data is now
+`npm run data:build`, `npm run data:publish` and a deploy (**Data artefacts**). After 0013 any
+tool that still reads or writes a corpus table on remote (the reseed, `db:translate:manual`,
+the ingredient-name tools, `export_remote_i18n.mjs`, `artefact_remote_parity.mjs`) stops with
+"D1 has no recipe_i18n: migrations/0013 … retired the recipe corpus" from `pipeline/lib/d1.mjs`.
 
 **Translation backup.** Remote `recipe_i18n` / `ingredient_i18n` are backed up into
 `pipeline/data/i18n-backup/` by `node pipeline/tools/export_remote_i18n.mjs` (read-only, ~150k
-rows read, resumable). Refresh it with `--fresh` after every translation session. The local seed
-(`06_seed_d1.mjs`) loads translations from that backup, so a local database is no longer
-English-only once a backup exists.
+rows read, resumable); it reads D1, so it works only until 0013, and its last `--fresh` run is
+the frozen record of what D1 served. Recipe translations now live in the recipe translation
+store (`pipeline/data/recipe-i18n`, `pipeline/lib/recipe_i18n_store.mjs`); ingredient names are
+still read from this backup by the artefact build.
+
+### Recipe translations
+
+Recipe titles and instructions in all 16 languages live in the **recipe translation store**,
+`pipeline/data/recipe-i18n/` (git-ignored, like the backup it was seeded from): per language
+`titles/<lang>.jsonl` (a few hundred KB) and `instructions/<lang>.jsonl.gz` (~1 MB), so a title
+batch never rewrites a language's instructions. Each file starts with a header carrying its row
+count and the sha256 of its content, rows in recipe id order with a fixed key order (equal content
+is equal bytes); a damaged or hand-edited file stops every tool and the build. There is no shared
+manifest, so agents translating different languages in parallel never write the same file, and
+each write is one atomic replace, refused if the file changed meanwhile. Stage 09 reads it (no D1
+anywhere in this flow): a language row has the language's title, else the English one; a title
+without instructions of its own still reaches the cards and the page, over the English text.
+
+Each row records the hash of the English text it was translated from (a changed source shows up
+as `stale`), whether it was imported from the backup or applied through the full gate, and
+whether a second-pass reviewer has passed it. Content changes only through these tools (the
+translating agents' rules: `.claude/rules/recipe-translation-subagents.md`):
+
+```bash
+node pipeline/tools/recipe_i18n_import_backup.mjs     # seed from the verified backup, once (idempotent: fills only what is missing)
+node pipeline/tools/recipe_i18n_next_batch.mjs --kind=titles --lang=fr --out=pipeline/out/recipe_i18n_batches/in_titles_fr_1.json
+node pipeline/tools/recipe_i18n_apply.mjs --kind=titles --lang=fr --file=pipeline/out/recipe_i18n_batches/titles_fr_1.json
+node pipeline/tools/recipe_i18n_terms.mjs --lang=fr --out=pipeline/out/recipe_i18n_batches/terms_fr.json   # recurring title words, for consistency
+npm run recipe-i18n:status                            # coverage matrix: done, missing, invalid, stale, reviewed
+npm run recipe-i18n:mirror                            # whole store as a private release asset (--restore=<pack> brings it back)
+```
+
+`--kind=instructions` works the same way (15 recipes a batch instead of 100 titles); `--review`
+on next_batch and apply is the second pass, which only touches existing entries, holds them to
+the full gate, marks them reviewed and is the only way to keep a title exactly as in English
+(`keep_source`, with the reason). Every tool takes `--store=<dir>` (and `--pipeline-out=<dir>`),
+which is how `pipeline/tools/recipe_i18n_tools.test.mjs` runs the whole flow, from import to a
+search over the built artefacts, on a three-recipe corpus.
+
+The gate (`pipeline/lib/recipe_i18n_gate.mjs`) checks a whole batch before anything is written.
+Titles: target script (CJK, Devanagari without Bengali and back, Shahmukhi versus Arabic,
+Cyrillic, Hangul; Latin letters only and Vietnamese diacritics for the Latin languages), no
+markup, line breaks or backslashes, length against the English (looser for CJK), digits and
+Roman variant numerals kept, no English left in a Latin-script title (a word common in the
+English recipes and not in the language's own translated instructions, unless a listed
+loanword), no title identical to English unless it is a proper noun or a reviewer kept it, no
+title copied from other languages. Instructions: the line count, script, copy, length and
+backslash rules the old D1 writer had, plus identical digits, Western digits, the decimal
+separator per language, no English unit words, no foreign letters, no markup. Rows imported from
+the backup are held to the old rules plus foreign letters; their other issues show as
+`advisory` in the status and are not handed out again.
+
+The import leaves out 409 backup rows that are another recipe's title and instructions
+(pipeline/lib/recipe_i18n_legacy.mjs, from the 2026-10-14 audit of the 417 backup titles that
+differed from English: e.g. zh 488 "Creamed Potatoes" with creamed-potato steps for
+"Atkins-Friendly Mock Tiramisu"; every row with equal line counts was read), and every backup
+title that fails the gate. Those recipes show English in that language until translated.
 
 ### Data artefacts
 
-The read-only corpus is moving out of D1 into versioned files that ship with the build
+The read-only corpus ships as versioned files with the build
 (`.claude/plans/phase3-static-data.md`). Stage 09 builds them from the pipeline snapshot,
-through the same statements `06_seed_d1.mjs` writes, so every value is exactly what D1 holds:
+through the statements `06_seed_d1.mjs` writes into an in-memory SQLite with the corpus schema
+(migrations up to `CORPUS_SCHEMA_LAST`), so every value is what D1 held before 0013:
 
 | File | Holds | Size (gzip) |
 |---|---|---|
 | `core.bin` | everything `/api/match` and title search need, in a typed-array layout (`src/lib/data/core.js`) | 186 KB |
-| `titles/<lang>.json` | the titles that differ from the source title, per language | 0.1-2 KB |
+| `titles/<lang>.json` | the titles that differ from the source title (translated titles), per language | 0.1-2 KB today; ~50-60 KB once a language's 3,478 titles are translated |
 | `names/<lang>.json` | ingredient display names, and which are the language's own | 5-7 KB |
 | `mosaic/<lang>.json` | the `/api/ingredients` mosaic, as the API returns it | 17-20 KB |
 | `r/<id>.json` | one recipe page, every language (3,478 files) | median 7 KB, max 44 KB |
@@ -253,11 +320,20 @@ through the same statements `06_seed_d1.mjs` writes, so every value is exactly w
 
 `src/lib/data/` reads them in the Worker and in the browser alike (plain JS, no `$lib`
 imports) and reproduces the SQL exactly: `matchCore`, `searchTitles`, `searchIngredients`,
-`recipesByIds`, `recipePage`.
+`recipesByIds`, `recipePage`. `searchTitles` goes one step further than the SQL did: besides
+the source title (FTS trigram semantics, so English queries find the same recipes in every
+language), a query of 3+ characters also matches the page language's translated title in
+`foldText` form (case, accents, Arabic-script variants, width and kana folded:
+`src/lib/data/text.js`, shared with the glossary search), and one or two CJK characters are
+searched (substring of the title shown) where the route used to answer them empty. Ranking is
+unchanged. The parity suite compares English byte for byte with the SQL, and other languages
+with the SQL extended by the translated titles (`src/lib/test/titleSearch.mjs`).
 
 `/api/match`, `/api/search`, `/api/ingredients`, `/api/recipes`, the recipe pages and
-`/sitemap.xml` serve from them and never touch D1, which now only serves `/api/track`
-(`page_view`) and `/admin`. `src/lib/server/data.ts` fetches `core.bin` and English from
+`/sitemap.xml` serve from them and never touch D1, which only serves `/api/track`
+(`page_view`) and `/admin` (auth, and the traffic half of the dashboard; its corpus figures
+come from `core.bin` and `manifest.json`'s `counts`). `src/lib/server/data.ts` fetches
+`core.bin` and English from
 `env.ASSETS` on an isolate's first data request, each other language's two small files on its
 first use, and keeps them for the isolate's lifetime; a recipe page also fetches its own
 `r/<id>.json` (alongside the corpus on a cold isolate), the sitemap `sitemap.json`, on every
@@ -269,12 +345,17 @@ sliced, not re-serialised. The `init` hook warms the query code up on a tiny emb
 
 `src/lib/data/parity.sqlite.test.mjs` compares the real route handlers and the real recipe
 page load (with a D1 stub that throws if touched) against the D1 implementations they replaced
-(`src/lib/test/sqlRoutes.ts`): status, headers and body byte for byte, over the D1 match
+(`src/lib/test/sqlRoutes.ts`, over `src/lib/test/sql/`): status, headers and body byte for
+byte, over the D1 match
 harness matrix, generated URLs and search, ingredient, favorites and sitemap queries, and the
 page data as JSON (or the 400/404 thrown) for every recipe in every language plus an unknown
 one. It runs on a real slice of the corpus in `pipeline/fixtures/artefact-corpus.sql`
 (regenerate with `node pipeline/tools/make_artefact_fixture.mjs`); `DATA_PARITY_DB=<file>`
-adds the full corpus saved by `--save-db`. The e2e server (`scripts/e2e-server.mjs`) serves
+adds the full corpus saved by `--save-db`. Every database these suites build for the SQL side has
+the corpus schema (`applyMigrations(db, { upTo: CORPUS_SCHEMA_LAST })`), while the D1 binding
+the routes get has every migration, i.e. no corpus; `src/lib/test/corpusReads.test.mjs` fails if
+app code outside `src/lib/test` names a corpus table in SQL. The e2e server
+(`scripts/e2e-server.mjs`) serves
 artefacts built from its own seed, stamped with the lock's data version so the browser path
 below runs against them.
 
@@ -322,7 +403,7 @@ npm run data:fetch                        # once per clone and after the lock ch
 npm run data:build -- --save-db=pipeline/out/snapshot.sqlite   # rebuild from the snapshot
 DATA_PARITY_DB=pipeline/out/snapshot.sqlite npx vitest run src/lib/data   # full-corpus parity
 GH_TOKEN=$(cat ../pat.txt) npm run data:publish   # release data-<version>, update the lock, install
-npm run data:parity:remote -- --only=sample       # read-only snapshot == remote D1 check
+npm run data:parity:remote -- --only=sample       # read-only snapshot == remote D1 check (until 0013)
 ```
 
 `data:fetch` uses the `gh` CLI when installed (`GH_TOKEN` or `gh auth login`), else the
@@ -330,7 +411,7 @@ GitHub API with `GITHUB_TOKEN`/`GH_TOKEN`. Commit `src/lib/data/lock.json` after
 The full remote parity check (`data:parity:remote` without `--only`) reads ~265k rows, D1
 billing about two rows per row scanned; `--only=sample` reads ~6k.
 
-After any reseed or translation batch, redeploy with fresh cache keys:
+After publishing new artefacts, redeploy with fresh cache keys:
 `npm run deploy -- --fresh-cache`. Public API responses are cached under the build version (see
 **HTTP caching**), and the version is now the commit, so a plain redeploy of the same commit
 would keep serving the old data for up to a day.
@@ -344,9 +425,10 @@ npm run check     # svelte-kit sync + svelte-check — 0 errors is the bar
 ```
 
 End-to-end smoke tests (Playwright) run against the real Worker bundle under
-`wrangler dev --local`, on a throwaway D1 in `.wrangler/e2e-state` that gets all migrations plus
-the small fixture `tests/e2e/fixtures/seed.sql` (6 recipes, 10 ingredients). Your own local D1 is
-never touched. They cover hydration and the mosaic, selecting an ingredient, a recipe page and its
+`wrangler dev --local`, on a throwaway D1 in `.wrangler/e2e-state` that gets all migrations
+(runtime tables only), and data artefacts built from the small fixture
+`tests/e2e/fixtures/seed.sql` (6 recipes, 10 ingredients). Your own local D1 is never
+touched. They cover hydration and the mosaic, selecting an ingredient, a recipe page and its
 stored translation, the glossary list and an Arabic (RTL) term, 404s, security headers on static
 files, and that every `/_app/immutable` chunk the pages reference is served by the same build.
 Every test also fails on any page error or console error (a broken CSP hash shows up there).
@@ -381,19 +463,9 @@ sends anything. That is deliberate: the form answers identically whether or not 
 allowlisted, so it cannot be used to discover who the admin is. Check `wrangler secret list`
 rather than the UI when a code fails to arrive.
 
-**Local and remote D1 are not interchangeable.** Remote holds the translated recipe content
-(`recipe_i18n`, every language) — rows that exist *only* there and that the pipeline cannot
-reproduce, because they never flow back into its inputs.
-
-`pipeline/out/seed.sql` unconditionally deletes and reinserts `recipe_i18n` from whatever the
-local translation backup holds (source language only without one).
-**Never apply it to `--remote`.** Use `npm run pipeline:gen-remote-seed` (above), which never
-touches `recipe_i18n` and updates `recipes` in place rather than replacing it. Cheap way to
-confirm you're on the safe path before running anything:
-
-```bash
-grep -l "DELETE FROM recipe_i18n" pipeline/out/remote-chunks/*.sql   # must print nothing
-```
+**D1 holds runtime state only** (`page_view`, `admin_otp`, `admin_session`), local and remote
+alike once 0013 is applied. Until then remote still holds the translated recipe content
+(`recipe_i18n`) that `export_remote_i18n.mjs` backs up; see **Retiring the D1 corpus**.
 
 **HTTP caching.** `/api/ingredients`, `/api/search`, `/api/match`, `/api/recipes` and
 `/sitemap.xml` send a public `Cache-Control` (browser 1 h, edge 1 day; exact values in
@@ -446,15 +518,18 @@ npm run deploy                     # options: --fresh-cache, --allow-dirty, --dr
 Builds are reproducible: two builds of one commit produce byte-identical `.svelte-kit/cloudflare`
 and `.svelte-kit/output/server`, so a rebuild can never mix chunk names.
 
-**Release order:** remote migrations, then deploy, then any data chunks (reseed, `--only=…`),
-then `npm run deploy -- --fresh-cache` if data changed.
+**Release order:** remote migrations, then deploy; new data is new artefacts (`data:publish`,
+which updates the lock) and a deploy, with `--fresh-cache` when only data changed. The one
+exception to "migrations first" is 0013, which drops what old code reads: deploy the code that
+no longer reads it first (**Retiring the D1 corpus**).
 
 **Rollback.** `npx wrangler rollback` returns to the previous version (`npx wrangler deployments
 list` shows the history; pass a version id to pick another). It rolls back code and static
 assets together, but **not D1**: if the bad release came with a migration, the old code must
 still work on the new schema (append-only migrations keep that true), and data changes are
 undone only through D1 Time Travel (`npx wrangler d1 time-travel restore cook-up-db
---timestamp=<before>`, 7 days on Free). Run `npm run verify:deploy -- <url>` after a rollback.
+--timestamp=<before>`, 7 days on Free). Once 0013 is applied, never roll back past the release
+that stopped reading the corpus. Run `npm run verify:deploy -- <url>` after a rollback.
 
 If the dashboard still shows a Workers Builds Git connection for this Worker (it was once created
 that way, `tasks/lessons.md`), disconnect it: it would deploy every push to `main` without the

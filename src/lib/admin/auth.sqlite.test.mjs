@@ -3,7 +3,6 @@
 // `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll, beforeEach } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
 import {
 	OTP_MAX_ATTEMPTS,
 	OTP_MAX_FAILURES_PER_DAY,
@@ -18,8 +17,8 @@ import {
 	sha256Hex,
 	verifyOtp
 } from './auth';
+import { applyMigrations } from '../../../pipeline/lib/migrations.mjs';
 
-const MIGRATIONS = new URL('../../../migrations/', import.meta.url);
 const ADMIN = 'admin@example.com';
 
 let sqlite;
@@ -59,9 +58,7 @@ const age = (sql) =>
 	);
 
 beforeAll(() => {
-	sqlite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort())
-		sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	sqlite = applyMigrations(new DatabaseSync(':memory:'));
 	db = d1(sqlite);
 });
 

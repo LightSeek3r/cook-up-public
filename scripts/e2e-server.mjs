@@ -2,14 +2,17 @@
 // Usage: node scripts/e2e-server.mjs [port]   (started by playwright.config.ts)
 //
 // Serves the current build with `wrangler dev --local` on a throwaway D1 in
-// .wrangler/e2e-state: recreated from scratch, all migrations applied, then
-// tests/e2e/fixtures/seed.sql. The developer's own local D1 (.wrangler/state)
-// is never touched. Needs a prior `npm run build:checked`.
+// .wrangler/e2e-state: recreated from scratch with every migration applied,
+// which since migrations/0013 is the runtime schema only (page_view and the
+// admin tables; no recipe corpus). The developer's own local D1
+// (.wrangler/state) is never touched. Needs a prior `npm run build:checked`.
 //
-// The pages and public APIs read the data artefacts from the static assets,
-// not D1 (only /api/track and /admin use it), so the build's assets are
-// served from a copy in .wrangler/e2e-assets whose data/ is built from the
-// same seed. The build output itself is never modified.
+// The pages, the public APIs and /admin's corpus figures read the data
+// artefacts from the static assets, so the build's assets are served from a
+// copy in .wrangler/e2e-assets whose data/ is built from
+// tests/e2e/fixtures/seed.sql (pipeline/lib/artefacts.mjs fixtureDb, the
+// corpus schema of migrations up to CORPUS_SCHEMA_LAST). The build output
+// itself is never modified.
 //
 // The browser only matches with artefacts of the data version its bundle was
 // built against (lock.json), so the seed's files are stamped with that
@@ -47,7 +50,6 @@ function wrangler(args) {
 rmSync(PERSIST, { recursive: true, force: true });
 // stdin closed, so wrangler treats the "apply?" prompt as non-interactive and proceeds.
 wrangler(['d1', 'migrations', 'apply', DB, '--local', '--persist-to', PERSIST]);
-wrangler(['d1', 'execute', DB, '--local', '--persist-to', PERSIST, '--file', SEED]);
 
 rmSync(ASSETS, { recursive: true, force: true });
 const buildData = path.resolve(BUILD, 'data');
@@ -57,21 +59,23 @@ writeTree(path.join(ASSETS, 'data'), stamped(seed.files, seed.version, readLock(
 
 /**
  * Every file with `"version":"<from>"` (core.bin's header and the JSON
- * files) rewritten to `to`, a same-length hash, so core.bin's layout holds.
- * manifest.json (pretty-printed, so not matched) keeps the seed's version
- * and sha256 list; nothing at runtime reads it.
+ * files) or, in the pretty-printed manifest.json, `"version": "<from>"`,
+ * rewritten to `to`, a same-length hash, so core.bin's layout holds.
+ * /admin reads the manifest's counts and checks its version; its sha256
+ * list stays the seed's, which nothing at runtime reads.
  * @param {Map<string, Buffer>} files
  * @param {string} from
  * @param {string} to
  */
 function stamped(files, from, to) {
 	if (from.length !== to.length) throw new Error(`data versions ${from} and ${to} differ in length`);
-	const needle = Buffer.from(`"version":"${from}"`);
-	const replacement = Buffer.from(`"version":"${to}"`);
+	const pairs = ['', ' '].map((gap) => [Buffer.from(`"version":${gap}"${from}"`), Buffer.from(`"version":${gap}"${to}"`)]);
 	const out = new Map();
 	for (const [name, body] of files) {
 		const copy = Buffer.from(body);
-		for (let at = copy.indexOf(needle); at >= 0; at = copy.indexOf(needle, at + needle.length)) replacement.copy(copy, at);
+		for (const [needle, replacement] of pairs) {
+			for (let at = copy.indexOf(needle); at >= 0; at = copy.indexOf(needle, at + needle.length)) replacement.copy(copy, at);
+		}
 		out.set(name, copy);
 	}
 	return out;

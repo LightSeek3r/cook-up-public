@@ -1,24 +1,29 @@
 /**
- * Stage 06 — seed D1 from the phase-2 + phase-3 pipeline output.
+ * Stage 06 — the corpus database's statements, from the phase-2 + phase-3
+ * pipeline output.
  *
  * Input:  pipeline/out/{recipes,ingredients,recipe_ingredients,recipe_diets,
  *          recipes.nutrition,ingredient_nutrition,ingredient_micronutrient,
- *          recipe_micronutrient}.jsonl, and the translation backup in
- *          pipeline/data/i18n-backup (pipeline/tools/export_remote_i18n.mjs)
- * Output: pipeline/out/seed.sql, applied with:
- *   wrangler d1 execute cook-up-db --local --file=pipeline/out/seed.sql
+ *          recipe_micronutrient}.jsonl (lib/seed_sql.mjs readSeedInputs), and
+ *          the translation backup in pipeline/data/i18n-backup
  *
- * recipe_i18n and ingredient_i18n come from the backup, so a local database
- * serves the same translated text as remote; the pipeline's own rows fill
- * only what the backup lacks (a recipe or name remote has never had). Without
- * a backup the seed is English-only, as it was before the backup existed.
- * Needs every migration applied locally first (recipe_i18n_stats is 0011's).
+ * A library, no longer a command. It used to write pipeline/out/seed.sql for
+ * a local D1; since migrations/0013_retire_recipe_corpus.sql neither D1 (local
+ * or remote) has the corpus tables, and nothing at runtime reads them. Its
+ * statements now fill an SQLite with the corpus schema (migrations up to
+ * CORPUS_SCHEMA_LAST, pipeline/lib/migrations.mjs) for:
+ *   - the data artefacts (pipeline/lib/artefacts.mjs snapshotDb, stage 09),
+ *   - the remote restore after 0013 (gen_remote_seed.mjs --restore-corpus),
+ *   - the seed tests (pipeline/seed.test.mjs).
+ * A local copy of that database, for inspection: `node
+ * pipeline/09_build_artefacts.mjs --save-db=<file>`.
+ *
+ * recipe_i18n and ingredient_i18n come from the backup, so the database holds
+ * the same translated text remote served; the pipeline's own rows fill only
+ * what the backup lacks (a recipe or name remote has never had). Without a
+ * backup the seed is English-only.
  */
 
-import { writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import { pathToFileURL } from 'node:url';
-import { readBackup } from './lib/i18n_backup.mjs';
 import {
 	COLUMNS,
 	batchInsert,
@@ -26,43 +31,58 @@ import {
 	ingredientFtsRefresh,
 	mergeIngredientNames,
 	mergeRecipeI18n,
-	readSeedInputs,
 	recipeCountRefresh,
 	seedRows,
+	stmt,
 	titleFtsRefresh,
 	writeCost
 } from './lib/seed_sql.mjs';
-
-const OUT_DIR = path.resolve('pipeline/out');
 
 // 50 for recipes: a row carries a Commons image URL, a file-page URL, an author
 // and the notes text, and 200 of those exceeded SQLite's statement-length cap
 // (SQLITE_TOOBIG). recipe_i18n rows are capped by bytes instead (up to ~14 KB).
 const BATCH = { recipes: 50 };
 
-/** seed.sql's statements, in order. `backup` is `{ recipe_i18n, ingredient_i18n }` rows or nulls. */
-export function buildLocalSeed(data, backup = {}) {
+/** Child tables before parents, so the deletes satisfy every foreign key. */
+const DELETE_ORDER = [
+	'recipe_related',
+	'recipe_micronutrient',
+	'recipe_diets',
+	'recipe_ingredients',
+	'recipe_i18n',
+	'recipes',
+	'ingredient_allergens',
+	'ingredient_generic_of',
+	'ingredient_micronutrient',
+	'ingredient_nutrition',
+	'ingredient_i18n',
+	'ingredients',
+	'allergens'
+];
+
+/**
+ * The seed's statements, in order. `backup` is `{ recipe_i18n, ingredient_i18n }`
+ * rows or nulls. `opts.maxBytes` caps each INSERT's size (default: lib/seed_sql.mjs
+ * MAX_STATEMENT_BYTES); `opts.indexes` (schemaIndexes()) makes `statements[].writes`
+ * the rows D1 would bill; `opts.deletes: false` leaves out the leading DELETEs,
+ * for a database whose tables are known to be empty.
+ * @returns {{ sql: string[], statements: { sql: string, writes: number }[], rows: any, names: any, i18n: any }}
+ */
+export function buildLocalSeed(data, backup = {}, { maxBytes, indexes, deletes = true } = {}) {
 	const rows = seedRows(data);
 	const names = mergeIngredientNames(data.ingredients, backup.ingredient_i18n);
 	const i18n = mergeRecipeI18n(rows.keptRecipes, backup.recipe_i18n);
+	const cost = writeCost(indexes ?? {});
 	const insert = (table, list) =>
-		batchInsert(table, COLUMNS[table], list, { batchSize: BATCH[table] ?? 200, sep: ',\n' }).map((s) => s.sql);
-	const noCost = writeCost({});
+		batchInsert(table, COLUMNS[table], list, {
+			batchSize: BATCH[table] ?? 200,
+			sep: ',\n',
+			writesPerRow: cost.insert(table, 1),
+			...(maxBytes ? { maxBytes } : {})
+		});
 
-	const sql = [
-		'DELETE FROM recipe_related;',
-		'DELETE FROM recipe_micronutrient;',
-		'DELETE FROM recipe_diets;',
-		'DELETE FROM recipe_ingredients;',
-		'DELETE FROM recipe_i18n;',
-		'DELETE FROM recipes;',
-		'DELETE FROM ingredient_allergens;',
-		'DELETE FROM ingredient_generic_of;',
-		'DELETE FROM ingredient_micronutrient;',
-		'DELETE FROM ingredient_nutrition;',
-		'DELETE FROM ingredient_i18n;',
-		'DELETE FROM ingredients;',
-		'DELETE FROM allergens;',
+	const statements = [
+		...(deletes ? DELETE_ORDER.map((table) => stmt(`DELETE FROM ${table};`)) : []),
 		...insert('allergens', rows.allergens),
 		...insert('ingredients', rows.ingredients),
 		...insert(
@@ -79,34 +99,10 @@ export function buildLocalSeed(data, backup = {}) {
 		...insert('ingredient_nutrition', rows.ingredientNutrition),
 		...insert('ingredient_micronutrient', rows.ingredientMicros),
 		...insert('recipe_micronutrient', rows.recipeMicros),
-		...[
-			recipeCountRefresh(noCost, 0),
-			...ingredientFtsRefresh(),
-			...titleFtsRefresh(0),
-			...i18nStatsRefresh()
-		].map((s) => s.sql)
+		recipeCountRefresh(cost, rows.ingredients.length),
+		...ingredientFtsRefresh(),
+		...titleFtsRefresh(rows.keptRecipes.length),
+		...i18nStatsRefresh()
 	];
-	return { sql, rows, names: names.stats, i18n: i18n.stats };
+	return { sql: statements.map((s) => s.sql), statements, rows, names: names.stats, i18n: i18n.stats };
 }
-
-async function main() {
-	const data = await readSeedInputs(OUT_DIR);
-	const recipeBackup = readBackup('recipe_i18n');
-	const nameBackup = readBackup('ingredient_i18n');
-	if (!recipeBackup) console.warn('06_seed_d1: no translation backup in pipeline/data/i18n-backup; seeding source-language rows only');
-	const seed = buildLocalSeed(data, { recipe_i18n: recipeBackup?.rows ?? null, ingredient_i18n: nameBackup?.rows ?? null });
-
-	await writeFile(path.join(OUT_DIR, 'seed.sql'), seed.sql.join('\n\n') + '\n');
-	console.log(
-		`06_seed_d1: wrote pipeline/out/seed.sql — ${seed.rows.keptRecipes.length} recipes, ${seed.rows.ingredients.length} ingredients, ` +
-			`${seed.rows.recipeIngredients.length} recipe_ingredients rows, ${seed.rows.genericOf.length} generic-ingredient pairs`
-	);
-	console.log(
-		`06_seed_d1: recipe_i18n ${seed.i18n.fromBackup} rows from the backup (${recipeBackup?.exported_at ?? 'none'}), ` +
-			`${seed.i18n.fromPipeline} source rows from recipes.jsonl, ${seed.i18n.notKept} backup rows of recipes not kept, ` +
-			`${seed.i18n.sourceDiffers} source rows where recipes.jsonl differs from the backup (backup kept); ` +
-			`ingredient_i18n ${seed.names.fromBackup} from the backup, ${seed.names.fromPipeline} from ingredients.jsonl`
-	);
-}
-
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) await main();

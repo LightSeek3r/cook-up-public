@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import { dev } from '$app/environment';
 import { requireDb } from '$lib/db';
 import { cachedDashboard } from '$lib/admin/stats';
+import { corpusFor, manifestCounts } from '$lib/server/data';
 import { NEVER_CACHE } from '$lib/httpCache';
 import {
 	OTP_TTL_MINUTES,
@@ -62,7 +63,11 @@ export const load: PageServerLoad = async ({ cookies, platform, setHeaders }) =>
 	);
 
 	if (!email) return { authed: false as const };
-	return { authed: true as const, email, dashboard: await cachedDashboard(db) };
+	const corpus = async () => {
+		const [loaded, counts] = await Promise.all([corpusFor(platform, 'en'), manifestCounts(platform)]);
+		return { corpus: loaded, counts };
+	};
+	return { authed: true as const, email, dashboard: await cachedDashboard(db, corpus) };
 };
 
 export const actions: Actions = {

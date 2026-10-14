@@ -11,6 +11,7 @@
 	import LoadError from '$components/LoadError.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { MIN_FTS_LENGTH } from '$lib/search';
+	import { titleQueryReady } from '$lib/data/search.js';
 	import { ALLERGENS } from '$lib/config';
 	import { slackFor } from '$lib/match';
 	import { matchRequest } from '$lib/matchRequest';
@@ -289,7 +290,7 @@
 		const value = debouncedQuery.trim();
 		void searchAttempt;
 		searchFailed = false;
-		if (value.length < MIN_FTS_LENGTH) {
+		if (!titleQueryReady(value)) {
 			recipeHits = [];
 			return;
 		}

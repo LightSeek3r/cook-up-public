@@ -16,6 +16,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
+import { CORPUS_TABLES } from './migrations.mjs';
 
 export const WRANGLER_BIN = path.resolve('node_modules/wrangler/bin/wrangler.js');
 
@@ -106,6 +107,28 @@ function writeLedger(date, ledger) {
 }
 
 /**
+ * migrations/0013_retire_recipe_corpus.sql drops the recipe corpus from D1, so
+ * after it every remote read or write of a corpus table (a reseed chunk, a
+ * translation apply, the backup export, the parity check) fails with "no such
+ * table". That error, reworded to say why and what replaced the tool; null
+ * for any other error. Pure, for the tests.
+ * @param {unknown} err
+ * @returns {Error | null}
+ */
+export function retiredCorpusError(err) {
+	const e = /** @type {{ message?: unknown, stdout?: unknown, stderr?: unknown }} */ (err ?? {});
+	const text = [e.message, e.stdout, e.stderr].map((v) => String(v ?? '')).join('\n');
+	const table = text.match(/no such table: (?:main\.)?(\w+)/)?.[1];
+	if (!table || !CORPUS_TABLES.includes(table)) return null;
+	return new Error(
+		`D1 has no ${table}: migrations/0013_retire_recipe_corpus.sql retired the recipe corpus from D1, so this ` +
+			'tool no longer has anything to read or write there. The corpus lives in pipeline/out and the translation ' +
+			'backup; publishing it is `npm run data:build`, `npm run data:publish`, deploy (README, "Data artefacts").',
+		{ cause: err }
+	);
+}
+
+/**
  * Runs one D1 statement.
  *
  * Local mode never touches the ledger or the budget: wrangler's `--local`
@@ -126,7 +149,12 @@ export function d1(sql, { local, json = true } = {}) {
 	}
 
 	const args = [WRANGLER_BIN, 'd1', 'execute', 'cook-up-db', local ? '--local' : '--remote', '--json', '--command', sql];
-	const out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 100 });
+	let out;
+	try {
+		out = execFileSync(process.execPath, args, { encoding: 'utf8', maxBuffer: 1024 * 1024 * 100 });
+	} catch (err) {
+		throw retiredCorpusError(err) ?? err;
+	}
 	const parsed = JSON.parse(out);
 
 	if (!local) {

@@ -1,16 +1,15 @@
-// Runs relatedRecipes against SQLite (every migration applied) on a generated
-// corpus, with recipe_related filled by the seeds' own pipeline module, and
+// Runs relatedRecipes against SQLite (the corpus schema: migrations up to
+// CORPUS_SCHEMA_LAST) on a generated corpus, with recipe_related filled by the seeds' own pipeline module, and
 // checks every recipe's stored list against the live SQL ranking it replaces.
 // related.test.ts only sees SQL text through a spy. `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
 import { relatedRecipes, liveRelatedRecipes, storedRelatedRecipes } from './related';
-import { RELATED_LIMIT, RELATED_MAX_INGREDIENT_RECIPES, RELATED_MIN_SHARED } from './config';
-import * as pipeline from '../../pipeline/lib/related_recipes.mjs';
-import { sqliteD1 as d1 } from './test/d1';
+import { RELATED_LIMIT, RELATED_MAX_INGREDIENT_RECIPES, RELATED_MIN_SHARED } from '$lib/config';
+import * as pipeline from '../../../../pipeline/lib/related_recipes.mjs';
+import { applyMigrations, CORPUS_SCHEMA_LAST } from '../../../../pipeline/lib/migrations.mjs';
+import { sqliteD1 as d1 } from '../d1';
 
-const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 
 // Deterministic corpus: enough recipes for one ingredient to cross the
 // recipe_count cap, a few staples, and ties on the shared count.
@@ -32,8 +31,7 @@ let db;
 
 beforeAll(() => {
 	sqlite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort())
-		sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	applyMigrations(sqlite, { upTo: CORPUS_SCHEMA_LAST });
 	const id = new Map(INGREDIENTS.map((i) => [i.canonical_key, i.id]));
 	const ins = (sql, rows) => { const st = sqlite.prepare(sql); for (const r of rows) st.run(...r); };
 	ins(`INSERT INTO ingredients (id, canonical_key, category, is_staple) VALUES (?, ?, 'other', ?)`, INGREDIENTS.map((i) => [i.id, i.canonical_key, i.is_staple]));

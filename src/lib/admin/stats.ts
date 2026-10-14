@@ -1,14 +1,31 @@
 import type { D1Database } from '@cloudflare/workers-types';
 import { COVERAGE_MIN } from '$lib/config';
+import { compareBinary, type loadCorpus } from '$lib/data';
+import { vocabOrNull } from '$lib/data/core.js';
 
 /**
- * Every query behind /admin.
+ * Everything behind /admin.
  *
- * SQL lives here rather than in the route for the reason the rest of `src/lib`
- * does: it can then be exercised against a spy instead of a real D1. The
- * `column` of the generic breakdown is whitelisted rather than interpolated —
- * it is the one place in this file where a string reaches the SQL text.
+ * Traffic comes from D1's page_view, the one corpus-independent table the
+ * Worker writes. Every corpus figure (recipe and ingredient counts, grades,
+ * nutrition coverage, translation counts, the titles of the most viewed
+ * recipes) comes from the data artefacts the site itself serves: D1 no longer
+ * holds the recipe corpus (migrations/0013_retire_recipe_corpus.sql), and the
+ * dashboard then describes exactly what is deployed.
+ *
+ * SQL lives here rather than in the route so it can be exercised against a
+ * spy. The `column` of the generic breakdown is whitelisted rather than
+ * interpolated; it is the one place in this file where a string reaches the
+ * SQL text.
  */
+
+type Corpus = ReturnType<typeof loadCorpus>;
+
+/** The artefacts the corpus figures come from: core.bin with English loaded, and manifest.json's `counts`. */
+export interface CorpusSource {
+	corpus: Corpus;
+	counts: unknown;
+}
 
 export interface Kpi {
 	today: number;
@@ -45,23 +62,30 @@ export interface Slice {
 export interface LangRow {
 	lang: string;
 	translated: number;
-	machine: number;
+	/** null while the artefacts do not record it (manifest `counts.recipe_i18n_machine`). */
+	machine: number | null;
 }
 
+/** A null figure is one the deployed artefacts do not carry; the page leaves its bar out. */
 export interface ContentHealth {
 	recipes: number;
-	withImage: number;
+	withImage: number | null;
 	withKcal: number;
-	withNotes: number;
-	withDifficulty: number;
+	withNotes: number | null;
+	withDifficulty: number | null;
 	withCuisine: number;
 	nutritionVisible: number;
 }
 
 export interface IngredientHealth {
 	ingredients: number;
-	withNutrition: number;
+	withNutrition: number | null;
 	orphans: number;
+}
+
+export interface RecipeViews {
+	id: number;
+	views: number;
 }
 
 const zeroKpi = (): Kpi => ({ today: 0, last7: 0, prev7: 0, last30: 0, prev30: 0, total: 0 });
@@ -123,36 +147,46 @@ export async function dailySeries(db: D1Database, days = 90): Promise<DayPoint[]
 	return results ?? [];
 }
 
-/** `days = null` means all time. */
-export async function topRecipes(
-	db: D1Database,
-	days: number | null,
-	limit = 25
-): Promise<TopRecipe[]> {
-	const where = days === null ? '' : `AND pv.viewed_at >= datetime('now', ?)`;
-	// Counted per recipe first (idx_page_view_recipe), then joined to recipes
-	// once per viewed recipe and to the titles only for the `limit` rows kept:
-	// joining every page_view row before grouping read ~2.3 rows per view. The
-	// inner JOIN still drops views of recipes that no longer exist before the
-	// ranking, as it did then.
+/**
+ * Views per viewed recipe id (`days = null`: all time), unranked. Walks
+ * idx_page_view_recipe; the ranking and the titles are applied by
+ * `rankRecipes` from the artefacts.
+ *
+ * deliberate: every viewed id comes back, not a LIMITed top list, because
+ * views of recipes no longer in the corpus must drop out *before* the
+ * ranking, and only the artefacts know which those are. One row per distinct
+ * viewed recipe, so at most the corpus size (~3.5k) plus deleted ids; switch
+ * to a LIMIT with headroom if that ever grows past ~20k.
+ */
+export async function recipeViews(db: D1Database, days: number | null): Promise<RecipeViews[]> {
+	const where = days === null ? '' : `AND viewed_at >= datetime('now', ?)`;
 	const stmt = db.prepare(
-		`SELECT v.id, COALESCE(t.title, src.title, 'recipe ' || v.id) AS title, v.views
-     FROM (SELECT a.id, a.views, r.source_lang
-           FROM (SELECT pv.recipe_id AS id, COUNT(*) AS views
-                 FROM page_view pv
-                 WHERE pv.recipe_id IS NOT NULL ${where}
-                 GROUP BY pv.recipe_id) a
-           JOIN recipes r ON r.id = a.id
-           ORDER BY a.views DESC, a.id ASC
-           LIMIT ?) v
-     LEFT JOIN recipe_i18n t    ON t.recipe_id = v.id AND t.lang = 'en'
-     LEFT JOIN recipe_i18n src  ON src.recipe_id = v.id AND src.lang = v.source_lang
-     ORDER BY v.views DESC, v.id ASC`
+		`SELECT recipe_id AS id, COUNT(*) AS views
+     FROM page_view
+     WHERE recipe_id IS NOT NULL ${where}
+     GROUP BY recipe_id`
 	);
-	const bound =
-		days === null ? stmt.bind(limit) : stmt.bind(`-${Math.trunc(days)} day`, limit);
-	const { results } = await bound.all<TopRecipe>();
+	const { results } = await (days === null ? stmt : stmt.bind(`-${Math.trunc(days)} day`)).all<RecipeViews>();
 	return results ?? [];
+}
+
+/**
+ * The `limit` most viewed recipes the corpus still has, most views first,
+ * ties by id. Title: the English one, else the source-language one (the
+ * artefacts' fallback), else "recipe <id>".
+ */
+export function rankRecipes(views: RecipeViews[], corpus: Corpus, limit = 25): TopRecipe[] {
+	return views
+		.filter((v) => corpus.recipeIndex(v.id) >= 0)
+		.sort((a, b) => b.views - a.views || a.id - b.id)
+		.slice(0, limit)
+		.map((v) => ({ id: v.id, title: corpus.title(corpus.recipeIndex(v.id), 'en') ?? `recipe ${v.id}`, views: v.views }));
+}
+
+/** How many corpus recipes nobody has ever opened, from the all-time views. */
+export function unseenRecipes(allTime: RecipeViews[], corpus: Corpus): number {
+	const seen = new Set(allTime.map((v) => v.id).filter((id) => corpus.recipeIndex(id) >= 0));
+	return corpus.core.recipes - seen.size;
 }
 
 const BREAKDOWN_COLUMNS = ['lang', 'country', 'referrer_host', 'device'] as const;
@@ -179,126 +213,96 @@ export async function breakdown(
 	return results ?? [];
 }
 
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+	typeof v === 'object' && v !== null && !Array.isArray(v);
+
+/** A count from the manifest, or null when absent or not a count (an older artefact build). */
+const countOrNull = (v: unknown): number | null => (Number.isInteger(v) && (v as number) >= 0 ? (v as number) : null);
+
 /**
- * Rows in `recipe_i18n` per language. Note this counts the source-language rows
- * the pipeline writes for every recipe too, which is why English reads as
- * complete: the translation tooling stores the untranslated title in every
- * language, so `machine` is the honest measure of translated rows.
- *
- * Read from `recipe_i18n_stats` (migrations/0011), which the seeds recount: 16
- * rows instead of every recipe_i18n row (~55k). Counted live while that table
- * is empty or not migrated yet, so the figures are never missing, only dearer.
+ * Rows per language in recipe_i18n, from manifest `counts.recipe_i18n`, most
+ * first. The source-language rows count too, which is why English reads as
+ * complete: `machine` (`counts.recipe_i18n_machine`) is the honest measure of
+ * translated rows.
  */
-export async function translationRows(db: D1Database): Promise<LangRow[]> {
-	const stored = await db
-		.prepare(`SELECT lang, translated, machine FROM recipe_i18n_stats ORDER BY translated DESC, lang`)
-		.all<LangRow>()
-		.catch((err: unknown) => {
-			if (/no such table: recipe_i18n_stats/.test(String(err))) return null;
-			throw err;
-		});
-	if (stored?.results?.length) return stored.results;
-	return liveTranslationRows(db);
+export function translationRows(counts: unknown): LangRow[] {
+	const c = isRecord(counts) ? counts : {};
+	const rows = isRecord(c.recipe_i18n) ? c.recipe_i18n : {};
+	const machine = isRecord(c.recipe_i18n_machine) ? c.recipe_i18n_machine : {};
+	return Object.entries(rows)
+		.flatMap(([lang, n]) => {
+			const translated = countOrNull(n);
+			return translated === null ? [] : [{ lang, translated, machine: countOrNull(machine[lang]) }];
+		})
+		.sort((a, b) => b.translated - a.translated || compareBinary(a.lang, b.lang));
 }
 
-export async function liveTranslationRows(db: D1Database): Promise<LangRow[]> {
-	const { results } = await db
-		.prepare(
-			`SELECT lang, COUNT(*) AS translated, COALESCE(SUM(is_machine), 0) AS machine
-       FROM recipe_i18n GROUP BY lang ORDER BY translated DESC, lang`
-		)
-		.all<LangRow>();
-	return results ?? [];
+/** Counts per key, as `GROUP BY key ORDER BY key` (BINARY collation) gives them. */
+function slices(keys: Iterable<string>, order: (a: string, b: string) => number = compareBinary): Slice[] {
+	const n = new Map<string, number>();
+	for (const key of keys) n.set(key, (n.get(key) ?? 0) + 1);
+	return [...n].sort(([a], [b]) => order(a, b)).map(([key, count]) => ({ key, n: count }));
 }
 
-export async function contentHealth(db: D1Database): Promise<ContentHealth> {
-	const row = await db
-		.prepare(
-			`SELECT COUNT(*) AS recipes,
-              SUM(CASE WHEN image_url IS NOT NULL THEN 1 ELSE 0 END) AS withImage,
-              SUM(CASE WHEN kcal IS NOT NULL THEN 1 ELSE 0 END) AS withKcal,
-              SUM(CASE WHEN notes IS NOT NULL AND notes <> '' THEN 1 ELSE 0 END) AS withNotes,
-              SUM(CASE WHEN difficulty IS NOT NULL THEN 1 ELSE 0 END) AS withDifficulty,
-              SUM(CASE WHEN cuisine IS NOT NULL AND cuisine <> '' THEN 1 ELSE 0 END) AS withCuisine,
-              SUM(CASE WHEN nutrition_coverage >= ? THEN 1 ELSE 0 END) AS nutritionVisible
-       FROM recipes`
-		)
-		.bind(COVERAGE_MIN)
-		.first<ContentHealth>();
+const range = (n: number) => Array.from({ length: n }, (_, i) => i);
 
-	return (
-		row ?? {
-			recipes: 0,
-			withImage: 0,
-			withKcal: 0,
-			withNotes: 0,
-			withDifficulty: 0,
-			withCuisine: 0,
-			nutritionVisible: 0
-		}
+/**
+ * The corpus figures, from the artefacts. Each one is what the D1 query it
+ * replaced returned over the same rows (src/lib/admin/stats.sqlite.test.mjs
+ * keeps those queries as the reference); figures core.bin does not hold come
+ * from manifest.json's `counts` and are null when an artefact build predates
+ * them.
+ */
+export function corpusFigures({ corpus, counts }: CorpusSource) {
+	const core = corpus.core;
+	const recipes = range(core.recipes);
+	const ingredients = range(core.ingredients);
+	const c = isRecord(counts) ? counts : {};
+	const recipesWith = isRecord(c.recipes_with) ? c.recipes_with : {};
+	const tally = (rows: number[], test: (i: number) => boolean) => rows.filter(test).length;
+
+	const content: ContentHealth = {
+		recipes: core.recipes,
+		withImage: countOrNull(recipesWith.image),
+		withKcal: tally(recipes, (r) => !Number.isNaN(core.kcal[r])),
+		withNotes: countOrNull(recipesWith.notes),
+		withDifficulty: countOrNull(recipesWith.difficulty),
+		withCuisine: tally(recipes, (r) => Boolean(vocabOrNull(core.vocab.cuisine, core.cuisine[r]))),
+		nutritionVisible: tally(recipes, (r) => core.coverage[r] >= COVERAGE_MIN)
+	};
+
+	// `COALESCE(balance_grade, '—')`, ordered by key.
+	const grades = slices(recipes.map((r) => vocabOrNull(core.vocab.grade, core.grade[r]) ?? '—'));
+
+	// Ten-percent buckets of nutrition_coverage, `CAST(MIN(c, 0.999) * 10 AS
+	// INTEGER)`, in numeric order. The shoulder just below COVERAGE_MIN is the
+	// interesting part: those recipes have their panel hidden and are the
+	// cheapest ones for the pipeline to rescue.
+	const coverage = slices(
+		recipes.map((r) => String(Math.trunc(Math.min(core.coverage[r], 0.999) * 10))),
+		(a, b) => Number(a) - Number(b)
 	);
-}
 
-export async function gradeDistribution(db: D1Database): Promise<Slice[]> {
-	const { results } = await db
-		.prepare(
-			`SELECT COALESCE(balance_grade, '—') AS key, COUNT(*) AS n
-       FROM recipes GROUP BY key ORDER BY key`
-		)
-		.all<Slice>();
-	return results ?? [];
-}
+	const ingredientHealth: IngredientHealth = {
+		ingredients: core.ingredients,
+		withNutrition: countOrNull(c.ingredient_nutrition),
+		orphans: tally(ingredients, (g) => core.recipeCount[g] === 0)
+	};
 
-/**
- * Ten-percent buckets of `nutrition_coverage`. The interesting part is the
- * shoulder just below COVERAGE_MIN: those recipes have their panel hidden and
- * are the cheapest ones for the pipeline to rescue.
- */
-export async function coverageHistogram(db: D1Database): Promise<Slice[]> {
-	const { results } = await db
-		.prepare(
-			`SELECT CAST(MIN(nutrition_coverage, 0.999) * 10 AS INTEGER) AS key, COUNT(*) AS n
-       FROM recipes GROUP BY key ORDER BY key`
-		)
-		.all<{ key: number; n: number }>();
-	return (results ?? []).map((r) => ({ key: String(r.key), n: r.n }));
-}
+	// `COALESCE(en.name, canonical_key)`, by recipe_count, ties by id.
+	const topIngredients: Slice[] = [...ingredients]
+		.sort((a, b) => core.recipeCount[b] - core.recipeCount[a] || a - b)
+		.slice(0, 20)
+		.map((g) => ({ key: corpus.name(g, 'en'), n: core.recipeCount[g] }));
 
-export async function ingredientHealth(db: D1Database): Promise<IngredientHealth> {
-	const row = await db
-		.prepare(
-			`SELECT COUNT(*) AS ingredients,
-              SUM(CASE WHEN n.ingredient_id IS NOT NULL THEN 1 ELSE 0 END) AS withNutrition,
-              SUM(CASE WHEN i.recipe_count = 0 THEN 1 ELSE 0 END) AS orphans
-       FROM ingredients i
-       LEFT JOIN ingredient_nutrition n ON n.ingredient_id = i.id`
-		)
-		.first<IngredientHealth>();
-	return row ?? { ingredients: 0, withNutrition: 0, orphans: 0 };
-}
-
-export async function topIngredients(db: D1Database, limit = 20): Promise<Slice[]> {
-	const { results } = await db
-		.prepare(
-			`SELECT COALESCE(en.name, i.canonical_key) AS key, i.recipe_count AS n
-       FROM ingredients i
-       LEFT JOIN ingredient_i18n en ON en.ingredient_id = i.id AND en.lang = 'en'
-       ORDER BY i.recipe_count DESC LIMIT ?`
-		)
-		.bind(limit)
-		.all<Slice>();
-	return results ?? [];
-}
-
-/** The long tail: how much of the corpus nobody has ever opened. */
-export async function unseenRecipes(db: D1Database): Promise<number> {
-	const row = await db
-		.prepare(
-			`SELECT COUNT(*) AS n FROM recipes r
-       WHERE NOT EXISTS (SELECT 1 FROM page_view pv WHERE pv.recipe_id = r.id)`
-		)
-		.first<{ n: number }>();
-	return row?.n ?? 0;
+	return {
+		content,
+		grades,
+		coverage,
+		ingredients: ingredientHealth,
+		topIngredients,
+		translations: translationRows(counts)
+	};
 }
 
 export type Dashboard = Awaited<ReturnType<typeof loadDashboard>>;
@@ -311,16 +315,19 @@ let memo: { at: number; value: Promise<Dashboard> } | null = null;
 /**
  * `loadDashboard`, reused for DASHBOARD_TTL_MS within an isolate.
  *
- * One load reads every page_view row several times over plus the corpus
- * figures (~27k rows on the 16-language corpus before any traffic, ~200k at
- * 30k views), and every reload or form action on /admin runs the load
- * again. The figures are the same for every admin, so sharing them between
- * requests leaks nothing; they are at most five minutes old. A failed load is
- * not kept.
+ * One load reads every page_view row several times over (~150k rows at 30k
+ * views) and every reload or form action on /admin runs the load again. The
+ * figures are the same for every admin, so sharing them between requests
+ * leaks nothing; they are at most five minutes old. A failed load is not
+ * kept.
  */
-export function cachedDashboard(db: D1Database, now = Date.now()): Promise<Dashboard> {
+export function cachedDashboard(
+	db: D1Database,
+	source: () => Promise<CorpusSource>,
+	now = Date.now()
+): Promise<Dashboard> {
 	if (memo && now - memo.at < DASHBOARD_TTL_MS) return memo.value;
-	const entry = { at: now, value: loadDashboard(db) };
+	const entry = { at: now, value: loadDashboard(db, source) };
 	memo = entry;
 	entry.value.catch(() => {
 		if (memo === entry) memo = null;
@@ -333,57 +340,32 @@ export function resetDashboardCache() {
 	memo = null;
 }
 
-export async function loadDashboard(db: D1Database) {
-	const [
-		trafficTotals,
-		series,
-		top30,
-		topAll,
-		langs,
-		countries,
-		referrers,
-		devices,
-		translations,
-		content,
-		grades,
-		coverage,
-		ingredients,
-		topIngr,
-		unseen
-	] = await Promise.all([
-		traffic(db),
-		dailySeries(db),
-		topRecipes(db, 30),
-		topRecipes(db, null),
-		breakdown(db, 'lang'),
-		breakdown(db, 'country'),
-		breakdown(db, 'referrer_host'),
-		breakdown(db, 'device'),
-		translationRows(db),
-		contentHealth(db),
-		gradeDistribution(db),
-		coverageHistogram(db),
-		ingredientHealth(db),
-		topIngredients(db),
-		unseenRecipes(db)
-	]);
+export async function loadDashboard(db: D1Database, source: () => Promise<CorpusSource>) {
+	const [corpusSource, trafficTotals, series, views30, viewsAll, langs, countries, referrers, devices] =
+		await Promise.all([
+			source(),
+			traffic(db),
+			dailySeries(db),
+			recipeViews(db, 30),
+			recipeViews(db, null),
+			breakdown(db, 'lang'),
+			breakdown(db, 'country'),
+			breakdown(db, 'referrer_host'),
+			breakdown(db, 'device')
+		]);
+	const { corpus } = corpusSource;
 
 	return {
 		traffic: trafficTotals,
 		series,
-		top30,
-		topAll,
+		top30: rankRecipes(views30, corpus),
+		topAll: rankRecipes(viewsAll, corpus),
 		langs,
 		countries,
 		referrers,
 		devices,
-		translations,
-		content,
-		grades,
-		coverage,
-		ingredients,
-		topIngredients: topIngr,
-		unseen,
+		...corpusFigures(corpusSource),
+		unseen: unseenRecipes(viewsAll, corpus),
 		coverageMin: COVERAGE_MIN
 	};
 }

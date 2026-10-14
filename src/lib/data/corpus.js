@@ -7,7 +7,7 @@
 // first use of their language, so a Worker that bundles every language pays
 // only for the ones its requests ask for.
 
-import { compareBinary, ftsFold } from './text.js';
+import { compareBinary, foldText, ftsFold } from './text.js';
 import { decodeCore } from './core.js';
 
 /**
@@ -139,6 +139,8 @@ export function loadCorpus(input) {
 
 	/** @type {(string | null)[] | null} */
 	let foldedTitles = null;
+	/** @type {Map<string, { r: number, folded: string }[]>} */
+	const foldedOverrides = new Map();
 	const noNames = () => Array.from({ length: core.ingredients }, () => '');
 
 	return {
@@ -205,6 +207,20 @@ export function loadCorpus(input) {
 				foldedTitles = core.sourceTitles().map((t, r) => (t === null ? null : list ? list[r] : ftsFold(t)));
 			}
 			return foldedTitles;
+		},
+		/**
+		 * The language's own titles (those that differ from the source title)
+		 * in foldText form, with their recipe index.
+		 * @param {string} lang
+		 * @returns {{ r: number, folded: string }[]}
+		 */
+		foldedTitleOverrides(lang) {
+			let list = foldedOverrides.get(lang);
+			if (!list) {
+				list = [...overridesFor(lang)].map(([r, t]) => ({ r, folded: foldText(t) }));
+				foldedOverrides.set(lang, list);
+			}
+			return list;
 		},
 		/**
 		 * The language's own names FTS-folded, by ingredient index ('' where it

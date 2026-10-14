@@ -6,9 +6,11 @@
  */
 import { error, json } from '@sveltejs/kit';
 import { requireDb } from '$lib/db';
-import { matchRecipes, resolveIngredientIds, slackFor } from '$lib/match';
-import { ftsPhrase, getRecipesByIds, MIN_FTS_LENGTH, searchRecipeTitles } from '$lib/search';
-import { relatedRecipes } from '$lib/related';
+import { slackFor } from '$lib/match';
+import { MIN_FTS_LENGTH } from '$lib/search';
+import { matchRecipes, resolveIngredientIds } from './sql/match';
+import { ftsPhrase, getRecipesByIds, searchRecipeTitles } from './sql/search';
+import { relatedRecipes } from './sql/related';
 import { substitutionsFor } from '$lib/substitutions';
 import { getTermIds } from '$lib/glossary/load';
 import { resolveLang } from '$lib/i18n';

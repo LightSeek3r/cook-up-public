@@ -10,7 +10,7 @@
  */
 
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
+import { applyMigrations, CORPUS_SCHEMA_LAST, MIGRATIONS_DIR } from './migrations.mjs';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { esc } from './d1.mjs';
@@ -196,13 +196,13 @@ export const MAX_STATEMENT_BYTES = 90_000;
 export const stmt = (sql, writes = 0) => ({ sql, writes });
 
 /**
- * Index list per table, as the migrations leave the schema: `{ table: [cols[]] }`,
+ * Index list per table of the corpus schema (migrations up to
+ * CORPUS_SCHEMA_LAST, the last one with the corpus tables): `{ table: [cols[]] }`,
  * one entry per index including SQLite's automatic PRIMARY KEY / UNIQUE ones.
- * The write estimate assumes remote has every migration in `dir` applied.
+ * The write estimate assumes the target database has that schema.
  */
-export function schemaIndexes(dir = path.resolve('migrations')) {
-	const lite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(dir).filter((f) => f.endsWith('.sql')).sort()) lite.exec(readFileSync(path.join(dir, f), 'utf8'));
+export function schemaIndexes(dir = MIGRATIONS_DIR) {
+	const lite = applyMigrations(new DatabaseSync(':memory:'), { upTo: CORPUS_SCHEMA_LAST, dir });
 	const out = {};
 	for (const { name, tbl_name } of lite.prepare(`SELECT name, tbl_name FROM sqlite_master WHERE type = 'index'`).all()) {
 		const cols = lite.prepare(`SELECT name FROM pragma_index_info(?)`).all(name).map((r) => r.name);

@@ -2,12 +2,12 @@
  * Static data artefacts: the read-only corpus the app serves, as versioned
  * files instead of D1 rows (.claude/plans/phase3-static-data.md).
  *
- * Built from a SQLite database holding exactly what D1 holds: by default the
- * one 06_seed_d1.mjs's statements produce from pipeline/out and the
- * translation backup (`snapshotDb`), so every value went through the same
- * SQL text, column affinity and float parsing as remote D1's own seed. The
- * parity tests then compare the app's SQL against these files on one and the
- * same database.
+ * Built from a SQLite database with D1's corpus schema: by default the one
+ * 06_seed_d1.mjs's statements produce from pipeline/out, the recipe
+ * translation store and the backup's ingredient names (`snapshotDb`), so
+ * every value goes through the same SQL text, column affinity and float
+ * parsing as remote D1's own seed did. The parity tests then compare the
+ * SQL reference against these files on one and the same database.
  *
  * Output, all paths relative to the artefact root:
  *   core.bin               everything /api/match and title search need, source
@@ -25,8 +25,6 @@
  */
 
 import { createHash } from 'node:crypto';
-import { readdirSync, readFileSync } from 'node:fs';
-import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { gzipSync } from 'node:zlib';
 import { CORE_FORMAT, CORE_MAGIC, CORE_SECTIONS, ELEMENT, NULL_INT, sectionBase } from '../../src/lib/data/core.js';
@@ -36,35 +34,38 @@ import { compareBinary, ftsFold } from '../../src/lib/data/text.js';
 import { buildLocalSeed } from '../06_seed_d1.mjs';
 import { readBackup } from './i18n_backup.mjs';
 import { SUPPORTED_LANGS } from './langs.mjs';
+import { CORPUS_SCHEMA_LAST, migrationsUpTo } from './migrations.mjs';
+import { readStore, recipeI18nRows, storeExists, STORE_DIR } from './recipe_i18n_store.mjs';
 import { ingredientFtsRefresh, readSeedInputs, titleFtsRefresh } from './seed_sql.mjs';
 import { sha256 } from '../../scripts/lib/datapack.mjs';
 
 export const ARTEFACT_FORMAT = 1;
-const MIGRATIONS = path.resolve(import.meta.dirname, '../../migrations');
 
-/** In-memory SQLite with every migration applied, the schema D1 has. */
+/** In-memory SQLite with the corpus schema D1 had (migrations up to CORPUS_SCHEMA_LAST). */
 export function schemaDb() {
 	const db = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort()) {
-		db.exec(readFileSync(path.join(MIGRATIONS, f), 'utf8'));
-	}
+	for (const sql of migrationsUpTo(CORPUS_SCHEMA_LAST)) db.exec(sql);
 	return db;
 }
 
 /**
- * The database 06_seed_d1.mjs would give a local D1, from pipeline/out and
- * the translation backup.
- * @param {{ outDir?: string, backupDir?: string }} [opts]
+ * The database 06_seed_d1.mjs's statements give, from pipeline/out, the
+ * recipe translation store (titles and instructions, pipeline/lib/
+ * recipe_i18n_store.mjs) and the translation backup's ingredient names.
+ * @param {{ outDir?: string, backupDir?: string, storeDir?: string }} [opts]
  */
 export async function snapshotDb(opts = {}) {
 	const data = await readSeedInputs(opts.outDir);
-	const recipeBackup = readBackup('recipe_i18n', opts.backupDir);
+	const storeDir = opts.storeDir ?? STORE_DIR;
+	if (!storeExists(storeDir)) {
+		throw new Error(`no recipe translation store in ${storeDir}: run node pipeline/tools/recipe_i18n_import_backup.mjs first`);
+	}
 	const nameBackup = readBackup('ingredient_i18n', opts.backupDir);
-	if (!recipeBackup || !nameBackup) throw new Error('no translation backup: artefacts must carry the translations remote serves');
-	const seed = buildLocalSeed(data, { recipe_i18n: recipeBackup.rows, ingredient_i18n: nameBackup.rows });
+	if (!nameBackup) throw new Error('no ingredient_i18n backup: artefacts must carry the translated ingredient names');
+	const seed = buildLocalSeed(data, { recipe_i18n: recipeI18nRows(readStore(storeDir)), ingredient_i18n: nameBackup.rows });
 	const db = schemaDb();
 	for (const sql of seed.sql) db.exec(sql);
-	return { db, seed, backup: { recipe_i18n: recipeBackup.exported_at, ingredient_i18n: nameBackup.exported_at } };
+	return { db, seed, backup: { ingredient_i18n: nameBackup.exported_at } };
 }
 
 /**
@@ -146,7 +147,12 @@ function readCorpus(db) {
 			db,
 			'SELECT recipe_id, nutrient_key, amount, unit, pct_nrv FROM recipe_micronutrient ORDER BY recipe_id, nutrient_key'
 		),
-		related: all(db, 'SELECT recipe_id, related_ids FROM recipe_related ORDER BY recipe_id')
+		related: all(db, 'SELECT recipe_id, related_ids FROM recipe_related ORDER BY recipe_id'),
+		// The /admin figures that have no other artefact source; the SQL is
+		// exactly what src/lib/admin/stats.ts ran against D1.
+		ingredientsWithNutrition: Number(
+			all(db, 'SELECT COUNT(*) AS n FROM ingredients i WHERE EXISTS (SELECT 1 FROM ingredient_nutrition n WHERE n.ingredient_id = i.id)')[0].n
+		)
 	};
 }
 
@@ -550,11 +556,11 @@ export function buildArtefacts(db, opts = {}) {
 	const version = contentVersion(new Map([...smallFiles(d, '', langs), ...recipes]));
 	const files = new Map([...smallFiles(d, version, langs), ...recipes]);
 
-	const perLang = (/** @type {{ lang: string }[]} */ rows) => {
+	const perLang = (/** @type {{ lang: string }[]} */ rows, /** @type {(row: any) => number} */ weight = () => 1) => {
 		/** @type {Record<string, number>} */
 		const out = {};
 		for (const lang of langs) out[lang] = 0;
-		for (const r of rows) out[r.lang]++;
+		for (const r of rows) out[r.lang] += weight(r);
 		return out;
 	};
 	const overrides = Object.fromEntries(
@@ -570,7 +576,14 @@ export function buildArtefacts(db, opts = {}) {
 			recipe_ingredients: d.recipeIngredients.length,
 			recipe_i18n: perLang(d.recipeI18n),
 			ingredient_i18n: perLang(d.ingredientI18n),
-			title_overrides: overrides
+			title_overrides: overrides,
+			recipes_with: {
+				image: d.recipes.filter((r) => r.image_url !== null).length,
+				notes: d.recipes.filter((r) => r.notes !== null && r.notes !== '').length,
+				difficulty: d.recipes.filter((r) => r.difficulty !== null).length
+			},
+			ingredient_nutrition: d.ingredientsWithNutrition,
+			recipe_i18n_machine: perLang(d.recipeI18n, (r) => r.is_machine ?? 0)
 		},
 		source: opts.source ?? {},
 		files: [...files.keys()].sort(compareBinary).map((p) => {

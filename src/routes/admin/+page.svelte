@@ -24,6 +24,9 @@
 
 	const nf = new Intl.NumberFormat();
 	const pct = (n: number, of: number) => (of ? Math.round((n / of) * 100) : 0);
+	// A null figure is one the deployed data artefacts do not record: no bar rather than a false 0.
+	const known = (items: { key: string; n: number | null }[]) =>
+		items.filter((item): item is { key: string; n: number } => item.n !== null);
 
 	// In an attribute this would need entity-escaping to survive Svelte's `{`
 	// expression syntax; as a binding it is just a string.
@@ -51,7 +54,7 @@
 				lang,
 				name: LANG_NAMES[lang],
 				translated: row?.translated ?? 0,
-				machine: row?.machine ?? 0,
+				machine: row?.machine ?? null,
 				missing: Math.max(0, total - (row?.translated ?? 0)),
 				pct: pct(row?.translated ?? 0, total)
 			};
@@ -205,7 +208,7 @@
 						<tr>
 							<th scope="row">{row.name}</th>
 							<td>{nf.format(row.translated)}</td>
-							<td>{nf.format(row.machine)}</td>
+							<td>{row.machine === null ? '—' : nf.format(row.machine)}</td>
 							<td class:warn={row.missing > 0}>{nf.format(row.missing)}</td>
 							<td class="barcell">
 								<span class="track"><span class="bar" style:width="{row.pct}%"></span></span>
@@ -235,14 +238,14 @@
 				<BarList
 					total={d.content.recipes}
 					asPercent
-					items={[
+					items={known([
 						{ key: 'Photo', n: d.content.withImage },
 						{ key: 'Nutrition shown', n: d.content.nutritionVisible },
 						{ key: 'Calories', n: d.content.withKcal },
 						{ key: 'Difficulty', n: d.content.withDifficulty },
 						{ key: 'Notes', n: d.content.withNotes },
 						{ key: 'Cuisine', n: d.content.withCuisine }
-					]}
+					])}
 				/>
 				<p class="muted">Out of {nf.format(d.content.recipes)} recipes.</p>
 			</div>
@@ -251,10 +254,10 @@
 				<BarList
 					total={d.ingredients.ingredients}
 					asPercent
-					items={[
+					items={known([
 						{ key: 'With nutrition', n: d.ingredients.withNutrition },
 						{ key: 'Used by no recipe', n: d.ingredients.orphans }
-					]}
+					])}
 				/>
 				<p class="muted">Out of {nf.format(d.ingredients.ingredients)} ingredients.</p>
 			</div>

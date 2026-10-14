@@ -15,10 +15,12 @@ import { readFileSync } from 'node:fs';
 import { sqliteD1 } from '../test/d1';
 import { artefactAssets, throwingDb } from '../test/assets';
 import { SQL_ROUTES, sqlRecipePageLoad } from '../test/sqlRoutes';
-import { matchRecipes } from '../match';
-import { searchRecipeTitles, getRecipesByIds } from '../search';
+import { matchRecipes } from '../test/sql/match';
+import { searchRecipeTitles, getRecipesByIds } from '../test/sql/search';
 import { buildArtefacts, fixtureDb } from '../../../pipeline/lib/artefacts.mjs';
-import { loadCorpus, matchCore, recipesByIds, searchTitles, slackFor } from './index.js';
+import { loadCorpus, matchCore, recipesByIds, searchTitles, slackFor, titleQueryReady } from './index.js';
+import { referenceTitleSearch } from '../test/titleSearch.mjs';
+import { parseSearchQuery } from '../apiParams';
 import * as ingredientsRoute from '../../routes/api/ingredients/+server';
 import * as searchRoute from '../../routes/api/search/+server';
 import * as matchRoute from '../../routes/api/match/+server';
@@ -404,18 +406,33 @@ function paritySuite(name, open, size) {
 			browserCompared = local;
 		}, 600_000);
 
-		it('/api/search: FTS trigram semantics for 3+ characters, empty below', async () => {
+		// Search matches translated titles too, which the SQL never did: the
+		// expected body is the D1 route's wherever no translated title of the
+		// language contains the query (always for English), else the SQL
+		// reference extended by them (test/titleSearch.mjs). One or two CJK
+		// characters are searched where the D1 route answered them empty.
+		it('/api/search: the D1 route for source titles, plus translated titles; empty below 3 characters unless CJK', async () => {
 			for (const q of searchQueries(sqlite, size.search)) {
-				for (const lang of ['en', 'zh', LANGS[q.length % LANGS.length]]) await same(`/api/search?q=${encodeURIComponent(q)}&lang=${lang}`);
+				for (const lang of ['en', 'zh', LANGS[q.length % LANGS.length]]) {
+					const path = `/api/search?q=${encodeURIComponent(q)}&lang=${lang}`;
+					const [route, sql] = [await routeGet(path), await sqlGet(path)];
+					const p = parseSearchQuery(new URL(path, ORIGIN).searchParams);
+					const body = titleQueryReady(p.q) ? JSON.stringify(await referenceTitleSearch(sqlite, p)) : sql.body;
+					const headers = sql.headers.map(([k, v]) => [k, k === 'content-length' ? String(Buffer.byteLength(body)) : v]);
+					expect(route, path).toEqual({ ...sql, headers, body });
+					if (p.lang === 'en') expect(route, path).toEqual(sql);
+					compared++;
+				}
 			}
 		}, 300_000);
 
-		it('searchRecipeTitles == searchTitles, LIKE path and limits included', async () => {
+		it('searchTitles == the SQL reference (plus translated titles), LIKE path and limits included', async () => {
 			const db = sqliteD1(sqlite);
 			for (const q of searchQueries(sqlite, Math.ceil(size.search / 3))) {
-				for (const p of [{ q, lang: 'zh' }, { q, lang: 'xx', limit: 50 }, { q, lang: 'ar', limit: -1 }]) {
-					expect(JSON.stringify(searchTitles(art.corpus, p)), JSON.stringify(p)).toBe(JSON.stringify(await searchRecipeTitles(db, p)));
+				for (const p of [{ q, lang: 'zh' }, { q, lang: 'xx', limit: 50 }, { q, lang: 'ar', limit: -1 }, { q, lang: 'en', limit: 30 }]) {
+					expect(JSON.stringify(searchTitles(art.corpus, p)), JSON.stringify(p)).toBe(JSON.stringify(await referenceTitleSearch(sqlite, p)));
 				}
+				expect(JSON.stringify(searchTitles(art.corpus, { q, lang: 'en' }))).toBe(JSON.stringify(await searchRecipeTitles(db, { q, lang: 'en' })));
 			}
 		}, 300_000);
 

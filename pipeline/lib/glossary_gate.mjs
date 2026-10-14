@@ -69,9 +69,9 @@ export const REQUIRE_COMPLETE_LANGS = SUPPORTED_LANGS;
 const TEXT_KEYS = ['name', 'short', 'long', 'steps', 'tips', 'aliases', 'diagramAlt'];
 const CJK_LANGS = new Set(['zh', 'ja', 'ko']);
 // Languages whose cooks write 0,5 not 0.5. The digit-run check cannot tell the two apart, so this pins one convention per language.
-const COMMA_DECIMAL_LANGS = new Set(['es', 'fr', 'de', 'pt', 'it', 'ru', 'vi', 'jv']);
+export const COMMA_DECIMAL_LANGS = new Set(['es', 'fr', 'de', 'pt', 'it', 'ru', 'vi', 'jv']);
 // English unit/hedge words that translators left behind inside otherwise translated prose.
-const ENGLISH_LEFTOVER = /(?<![\p{L}\p{N}])(?:tablespoons?|teaspoons?|cups?|about|inch(?:es)?|ounces?|pounds?)(?![\p{L}\p{N}])/iu;
+export const ENGLISH_LEFTOVER = /(?<![\p{L}\p{N}])(?:tablespoons?|teaspoons?|cups?|about|inch(?:es)?|ounces?|pounds?)(?![\p{L}\p{N}])/iu;
 
 const isStr = (v) => typeof v === 'string';
 const isObject = (v) => typeof v === 'object' && v !== null && !Array.isArray(v);

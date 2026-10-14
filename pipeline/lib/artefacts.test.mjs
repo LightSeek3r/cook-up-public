@@ -49,6 +49,23 @@ describe('manifest and versions', () => {
 		expect(verifyAgainstManifest(built.files)).toEqual([]);
 	});
 
+	it('counts the /admin figures with the SQL the dashboard ran on D1', () => {
+		const { counts, langs } = json('manifest.json');
+		const one = (sql) => Number(all(sql)[0].n);
+		expect(counts.recipes_with).toEqual({
+			image: one('SELECT COUNT(*) AS n FROM recipes WHERE image_url IS NOT NULL'),
+			notes: one("SELECT COUNT(*) AS n FROM recipes WHERE notes IS NOT NULL AND notes <> ''"),
+			difficulty: one('SELECT COUNT(*) AS n FROM recipes WHERE difficulty IS NOT NULL')
+		});
+		expect(counts.ingredient_nutrition).toBe(
+			one('SELECT COUNT(*) AS n FROM ingredients i WHERE EXISTS (SELECT 1 FROM ingredient_nutrition n WHERE n.ingredient_id = i.id)')
+		);
+		const machine = Object.fromEntries(all('SELECT lang, COALESCE(SUM(is_machine), 0) AS n FROM recipe_i18n GROUP BY lang').map((r) => [r.lang, Number(r.n)]));
+		expect(counts.recipe_i18n_machine).toEqual(Object.fromEntries(langs.map((l) => [l, machine[l] ?? 0])));
+		expect(Object.keys(counts.recipe_i18n_machine)).toEqual(Object.keys(counts.recipe_i18n));
+		expect(counts.recipes_with.difficulty).toBeGreaterThan(0);
+	});
+
 	it('every small file carries the data version; per-recipe files do not', () => {
 		for (const [p] of built.files) {
 			if (p === 'manifest.json') continue;

@@ -1,11 +1,10 @@
-// Calls the real route handlers on SQLite (every migration applied, a tiny
-// fixture, and the data artefacts built from it) and checks the Cache-Control
-// of every response branch: public data must be edge-cacheable, anything
-// per-user or with side effects never.
+// Calls the real route handlers on SQLite (a tiny corpus fixture on the corpus
+// schema, the data artefacts built from it, and a runtime-schema D1) and
+// checks the Cache-Control of every response branch: public data must be
+// edge-cacheable, anything per-user or with side effects never.
 // `.mjs` for node:sqlite.
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
-import { readdirSync, readFileSync } from 'node:fs';
 import { NEVER_CACHE, PUBLIC_DATA, PUBLIC_STATIC } from './httpCache';
 import * as ingredients from '../routes/api/ingredients/+server';
 import * as search from '../routes/api/search/+server';
@@ -19,14 +18,13 @@ import * as admin from '../routes/admin/+page.server';
 import { sqliteD1 } from './test/d1';
 import { artefactAssets } from './test/assets';
 import { buildArtefacts } from '../../pipeline/lib/artefacts.mjs';
+import { applyMigrations, CORPUS_SCHEMA_LAST } from '../../pipeline/lib/migrations.mjs';
 
-const MIGRATIONS = new URL('../../migrations/', import.meta.url);
 let platform;
 
 beforeAll(() => {
-	const sqlite = new DatabaseSync(':memory:');
-	for (const f of readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort())
-		sqlite.exec(readFileSync(new URL(f, MIGRATIONS), 'utf8'));
+	// The corpus the artefacts are built from; D1 itself gets the runtime schema only.
+	const sqlite = applyMigrations(new DatabaseSync(':memory:'), { upTo: CORPUS_SCHEMA_LAST });
 	sqlite.exec(`INSERT INTO ingredients (id, canonical_key, category, recipe_count) VALUES (1, 'egg', 'protein', 1);
 		INSERT INTO ingredient_i18n (ingredient_id, lang, name) VALUES (1, 'en', 'egg');
 		INSERT INTO recipes (id, source_url, source_lang, license, non_staple_count) VALUES (7, 'u', 'en', 'PD', 1);
@@ -35,7 +33,7 @@ beforeAll(() => {
 		INSERT INTO recipe_title_fts(rowid, title) SELECT rowid, title FROM recipe_i18n;
 		INSERT INTO ingredient_fts(rowid, name) SELECT rowid, name FROM ingredient_i18n;`);
 	platform = {
-		env: { DB: sqliteD1(sqlite), ASSETS: artefactAssets(buildArtefacts(sqlite).files) },
+		env: { DB: sqliteD1(applyMigrations(new DatabaseSync(':memory:'))), ASSETS: artefactAssets(buildArtefacts(sqlite).files) },
 		ctx: { waitUntil: () => {} }
 	};
 });
