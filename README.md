@@ -391,8 +391,13 @@ checks; `tests/e2e/smoke.spec.ts` the local path and both fallbacks in the real 
 MB, regenerated whenever a translation changes, and `pipeline/out` is not in git anyway, so
 committing them would bloat the history with every data version while CI still could not
 rebuild them. Instead the files are one data pack (`scripts/lib/datapack.mjs`) on a GitHub
-release `data-<version>` of this private repository (never a `v*` tag: those deploy), pinned
-by `src/lib/data/lock.json` (tag, asset sha256, manifest sha256). `npm run data:fetch`
+release `data-<version>` of the **public** repository
+[`LightSeek3r/cook-up-data`](https://github.com/LightSeek3r/cook-up-data) (it holds nothing
+else, and every file in it is already served publicly under `/data`; never a `v*` tag: those
+deploy), pinned by `src/lib/data/lock.json` (repo, tag, asset sha256, manifest sha256). A
+public repository means any build, Cloudflare's included, downloads the data with no token
+that could expire. The translation backups stay private releases of this repository.
+`npm run data:fetch`
 installs it into `static/data/` (served as static assets) and the files the Worker may
 bundle into `src/lib/data/generated/`; both are git-ignored. `scripts/build.mjs` refuses to
 build unless the installed files match the lock, file by file. Code and data then deploy as
@@ -402,12 +407,13 @@ one Worker version, and a rollback rolls both back.
 npm run data:fetch                        # once per clone and after the lock changes (CI does it)
 npm run data:build -- --save-db=pipeline/out/snapshot.sqlite   # rebuild from the snapshot
 DATA_PARITY_DB=pipeline/out/snapshot.sqlite npx vitest run src/lib/data   # full-corpus parity
-GH_TOKEN=$(cat ../pat.txt) npm run data:publish   # release data-<version>, update the lock, install
+GH_TOKEN=$(cat ../pat.txt) npm run data:publish   # release data-<version> in cook-up-data (needs write access), update the lock, install
 npm run data:parity:remote -- --only=sample       # read-only snapshot == remote D1 check (until 0013)
 ```
 
 `data:fetch` uses the `gh` CLI when installed (`GH_TOKEN` or `gh auth login`), else the
-GitHub API with `GITHUB_TOKEN`/`GH_TOKEN`. Commit `src/lib/data/lock.json` after publishing.
+GitHub API, with `GITHUB_TOKEN`/`GH_TOKEN` when set and without a token otherwise (the data
+repository is public). Commit `src/lib/data/lock.json` after publishing.
 The full remote parity check (`data:parity:remote` without `--only`) reads ~265k rows, D1
 billing about two rows per row scanned; `--only=sample` reads ~6k.
 

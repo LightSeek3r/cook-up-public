@@ -4,12 +4,12 @@
 // Installs the data version pinned by src/lib/data/lock.json (static data
 // artefacts, README "Data artefacts") into static/data and, for the files the
 // Worker may bundle, src/lib/data/generated. Both are gitignored: the pack is
-// a release asset of this (private) repository, checked against the lock's
-// sha256 before anything is written, and every file against the manifest.
+// a release asset of the public data repository the lock names, checked against
+// the lock's sha256 before anything is written, and every file against the manifest.
 //
 // Download: `gh release download` when the gh CLI is installed (it uses
-// GH_TOKEN or its own login), else the GitHub REST API with GITHUB_TOKEN or
-// GH_TOKEN. Packs are cached in node_modules/.cache/cook-up-data. --check
+// GH_TOKEN or its own login), else the GitHub REST API, with GITHUB_TOKEN or
+// GH_TOKEN when set and without any token otherwise (public repository). Packs are cached in node_modules/.cache/cook-up-data. --check
 // only verifies what is installed (the same check scripts/build.mjs runs).
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
@@ -34,13 +34,20 @@ function viaGh(lock, dir) {
 
 /** @param {import('./lib/datapack.mjs').DataLock} lock */
 async function viaRest(lock) {
+	// The data repository is public: no token is needed (Cloudflare's build has none). A token only
+	// raises the API rate limit, and is required if the lock ever points at a private repository.
 	const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
-	if (!token) fail('no gh CLI and no GITHUB_TOKEN/GH_TOKEN: the data release is in a private repository');
-	const headers = { authorization: `Bearer ${token}`, 'x-github-api-version': '2022-11-28', 'user-agent': 'cook-up-data-fetch' };
+	const headers = {
+		...(token ? { authorization: `Bearer ${token}` } : {}),
+		'x-github-api-version': '2022-11-28',
+		'user-agent': 'cook-up-data-fetch'
+	};
 	const release = await fetch(`https://api.github.com/repos/${lock.repo}/releases/tags/${lock.tag}`, {
 		headers: { ...headers, accept: 'application/vnd.github+json' }
 	});
-	if (!release.ok) fail(`release ${lock.tag}: HTTP ${release.status}`);
+	if (!release.ok) {
+		fail(`release ${lock.tag} of ${lock.repo}: HTTP ${release.status}${token ? '' : ' (no GITHUB_TOKEN/GH_TOKEN set: needed if that repository is private)'}`);
+	}
 	/** @type {{ assets: { id: number, name: string }[] }} */
 	const body = await release.json();
 	const asset = body.assets.find((a) => a.name === lock.asset);

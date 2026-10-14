@@ -10,7 +10,8 @@
  * v* tags.
  *
  * Usage: node pipeline/tools/publish_artefacts.mjs [--dir=pipeline/out/artefacts] [--repo=owner/name] [--dry-run]
- * Needs the gh CLI, authenticated (GH_TOKEN or `gh auth login`).
+ * Publishes to the public data repository (DATA_REPO below) unless --repo says otherwise.
+ * Needs the gh CLI, authenticated with write access to it (GH_TOKEN or `gh auth login`).
  */
 
 import { execFileSync } from 'node:child_process';
@@ -26,12 +27,10 @@ const dryRun = process.argv.includes('--dry-run');
 /** @param {string[]} args */
 const gh = (args, opts = {}) => execFileSync('gh', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'], ...opts });
 
-function originRepo() {
-	const url = execFileSync('git', ['remote', 'get-url', 'origin'], { encoding: 'utf8' }).trim();
-	const m = url.match(/github\.com[:/](.+?)(\.git)?$/);
-	if (!m) throw new Error(`origin ${url} is not a GitHub repository; pass --repo=owner/name`);
-	return m[1];
-}
+// A small public repository that holds nothing but the data releases, so builds download them
+// without a token (the site serves every one of these files publicly under /data anyway). The
+// translation backups (recipe-i18n-*, i18n-backup-*) stay releases of the private code repository.
+const DATA_REPO = 'LightSeek3r/cook-up-data';
 
 /** @param {string} repo @param {string} tag @param {string} asset @returns {Buffer | null} */
 function downloadAsset(repo, tag, asset) {
@@ -53,7 +52,7 @@ function main() {
 	if (problems.length) throw new Error(`${dir} is not a publishable artefact set: ${problems.slice(0, 5).join('; ')}`);
 	const manifestBytes = /** @type {Buffer} */ (files.get('manifest.json'));
 	const manifest = JSON.parse(manifestBytes.toString('utf8'));
-	const repo = option('repo') ?? originRepo();
+	const repo = option('repo') ?? DATA_REPO;
 	const tag = `data-${manifest.version}`;
 	const asset = `${tag}.pack.gz`;
 
@@ -74,6 +73,8 @@ function main() {
 			`Static data artefacts, data version ${manifest.version}: ${manifest.counts.recipes} recipes, ${manifest.counts.ingredients} ingredients, ${manifest.langs.length} languages, ${files.size} files.`,
 			'',
 			'Built by pipeline/09_build_artefacts.mjs from the pipeline snapshot (pipeline/out + translation backup). Pinned by src/lib/data/lock.json; install with `npm run data:fetch`.',
+			'',
+			'Derived from the Wikibooks Cookbook (CC BY-SA 3.0), Open Food Facts (ODbL) and USDA FoodData Central (public domain); see the repository README.',
 			'',
 			'Not a deploy tag (deploy.yml only reacts to v* tags).'
 		].join('\n');

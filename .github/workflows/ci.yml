@@ -31,7 +31,7 @@ jobs:
 
       - run: npm ci
 
-      # The data artefacts are a release asset of this private repository,
+      # The data artefacts are a release asset of the public data repository,
       # pinned by src/lib/data/lock.json; the build refuses to run without
       # them and the tests check them against their manifest and budgets.
       - name: Data artefacts
