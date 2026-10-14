@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import FilterBar from '$components/FilterBar.svelte';
@@ -13,6 +14,13 @@
 	import { ALLERGENS } from '$lib/config';
 	import { slackFor } from '$lib/match';
 	import { matchRequest } from '$lib/matchRequest';
+	import {
+		afterPaint,
+		localMatch,
+		localMatchReady,
+		prefetchMatchData,
+		wantMatchData
+	} from '$lib/client/localMatch';
 	import { MAX_HAVE } from '$lib/apiParams';
 	import { cachedJson } from '$lib/responseCache';
 	import { apiUrl } from '$lib/httpCache';
@@ -42,6 +50,8 @@
 	let loading = $state(false);
 	let loadingMore = $state(false);
 	let loadMoreFailed = $state(false);
+	/** Where the shown results came from: the browser's own match, or /api/match. */
+	let resultSource = $state<'' | 'local' | 'server'>('');
 	/** Identifies the selection a response belongs to; see `loadMore`. */
 	let requestToken = $state('');
 	let recipeHits = $state<RecipeHit[]>([]);
@@ -164,6 +174,7 @@
 	}
 
 	function toggle(canonicalKey: string) {
+		wantMatchData(lang);
 		const adding = !selected.includes(canonicalKey);
 		atLimit = adding && selected.length >= MAX_HAVE;
 		if (atLimit) return;
@@ -322,6 +333,12 @@
 		return () => (stale = true);
 	});
 
+	// At an idle moment once the mosaic is in, so the download never competes
+	// with it on a slow link; a language switch loads that language.
+	$effect(() => {
+		if (tilesLoaded) prefetchMatchData(lang);
+	});
+
 	function matchInput() {
 		return { selected, lang, cuisine, meal, diet, sort, noAllergen, must, slack };
 	}
@@ -331,9 +348,50 @@
 	// write, the debounced `?q=` included.
 	const matchKey = $derived(matchRequest(matchInput()));
 
+	/** The server path, unchanged: /api/match through the response cache. */
+	function askServer(query: string) {
+		loading = true;
+		cachedJson<MatchResponse & { error?: unknown }>(apiUrl('/api/match', query))
+			.then(unlessError)
+			.then((data) => {
+				if (requestToken !== query) return;
+				results = data.results ?? [];
+				total = data.total ?? 0;
+				haveCount = data.haveCount ?? 0;
+				resultSource = 'server';
+			})
+			.catch(() => {
+				if (requestToken !== query) return;
+				results = [];
+				total = 0;
+				haveCount = 0;
+				matchFailed = true;
+			})
+			.finally(() => {
+				if (requestToken === query) loading = false;
+			});
+	}
+
+	/** Answers `query` in the browser, or hands it to the server if it cannot. */
+	function answerLocally(query: string) {
+		if (requestToken !== query) return;
+		const local = localMatch(query);
+		if (!local) return askServer(query);
+		results = local.results;
+		total = local.total;
+		haveCount = local.haveCount;
+		resultSource = 'local';
+		loading = false;
+	}
+
+	/** Whether the effect below has run since this page mounted. */
+	let matchedOnce = false;
+
 	$effect(() => {
 		const query = matchKey;
 		void matchAttempt;
+		const firstRun = !matchedOnce;
+		matchedOnce = true;
 		matchFailed = false;
 		loadMoreFailed = false;
 		if (!query) {
@@ -346,25 +404,15 @@
 		// of this one — see `loadMore`.
 		requestToken = query;
 
-		loading = true;
-		cachedJson<MatchResponse & { error?: unknown }>(apiUrl('/api/match', query))
-			.then(unlessError)
-			.then((data) => {
-				if (requestToken !== query) return;
-				results = data.results ?? [];
-				total = data.total ?? 0;
-				haveCount = data.haveCount ?? 0;
-			})
-			.catch(() => {
-				if (requestToken !== query) return;
-				results = [];
-				total = 0;
-				haveCount = 0;
-				matchFailed = true;
-			})
-			.finally(() => {
-				if (requestToken === query) loading = false;
-			});
+		if (!localMatchReady(lang)) return askServer(query);
+		// On mount (back from a recipe) there is no tap to show first. Untracked:
+		// `results` must not become a dependency, or appending a page in
+		// loadMore would re-run this and replace the list with its first page.
+		if (firstRun) return untrack(() => answerLocally(query));
+		// The answer is a frame away: earlier results stay up until it lands, and
+		// with none to keep the skeleton shows, as on the server path.
+		if (untrack(() => results.length) === 0) loading = true;
+		return afterPaint(() => answerLocally(query));
 	});
 
 	/**
@@ -382,7 +430,13 @@
 		loadingMore = true;
 		loadMoreFailed = false;
 		try {
-			const data = unlessError(
+			let data: MatchResponse | null = null;
+			if (localMatchReady(lang)) {
+				await new Promise<void>((resolve) => afterPaint(resolve));
+				if (requestToken !== token) return;
+				data = localMatch(query);
+			}
+			data ??= unlessError(
 				await cachedJson<MatchResponse & { error?: unknown }>(apiUrl('/api/match', query))
 			);
 			if (requestToken !== token) return;
@@ -444,7 +498,13 @@
 		{/if}
 	</div>
 
-	<section class="results" id="results" tabindex="-1" aria-labelledby="results-heading">
+	<section
+		class="results"
+		id="results"
+		tabindex="-1"
+		aria-labelledby="results-heading"
+		data-source={resultSource || undefined}
+	>
 		<div class="results-inner">
 			<div class="results-head">
 				<h2 id="results-heading">{t('results.heading')}</h2>

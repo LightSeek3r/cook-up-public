@@ -263,3 +263,64 @@ export function matchCore(corpus, p) {
 	});
 	return { results, total };
 }
+
+/**
+ * A parsed /api/match query (apiParams' MatchQuery): canonical_keys, sorted
+ * and unique, with the route's own parameter names.
+ * @typedef {object} MatchApiQuery
+ * @property {string[]} have
+ * @property {string} lang
+ * @property {string} [cuisine]
+ * @property {string} [meal]
+ * @property {string} [diet]
+ * @property {'kcal' | 'grade' | 'time'} [sort]
+ * @property {string[]} noAllergen
+ * @property {string[]} must
+ * @property {number} offset
+ */
+
+/**
+ * The /api/match response body, built the same way by the route and by the
+ * browser (src/lib/client), so both answer one query with one JSON.
+ * @param {import('./corpus.js').Corpus} corpus with `query.lang` loaded
+ * @param {MatchApiQuery} query
+ * @returns {{ results: MatchRow[], total: number, haveCount: number }}
+ */
+export function matchResponse(corpus, query) {
+	// Keys that don't exist are dropped by the lookup rather than erroring, so
+	// a stale or hand-edited link degrades to a smaller selection.
+	const have = resolveKeys(corpus, query.have);
+	if (have.length === 0) return { results: [], total: 0, haveCount: 0 };
+
+	const slack = slackFor(have.length);
+
+	// `must` (canonical keys, same shape as `have`) only matters once `slack`
+	// lets a recipe skip some of the selection — with no slack every selection
+	// is already required. Resolved with the same lookup `have` uses, then
+	// intersected with `have`: a `must` id outside the selection could never be
+	// satisfied.
+	const mustUse =
+		slack > 0 && query.must.length ? resolveKeys(corpus, query.must).filter((id) => have.includes(id)) : [];
+
+	const data = matchCore(corpus, {
+		have,
+		lang: query.lang,
+		cuisine: query.cuisine,
+		mealType: query.meal,
+		diet: query.diet,
+		excludeAllergens: query.noAllergen,
+		sort: query.sort,
+		// Derived from the selection size, not accepted from the query string:
+		// slack is a product rule, and a client-supplied value would let a URL
+		// widen the match floor arbitrarily.
+		slack,
+		mustUse,
+		offset: query.offset
+	});
+
+	// `have.length` travels with the results so the client can tell a full
+	// match (`matched === haveCount`) from a near-miss without re-deriving it
+	// from the URL: only the side that resolves and dedupes the keys knows how
+	// many actually count.
+	return { ...data, haveCount: have.length };
+}

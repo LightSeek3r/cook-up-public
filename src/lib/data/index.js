@@ -5,7 +5,7 @@
 
 export { decodeCore, CORE_FORMAT, NULL_INT } from './core.js';
 export { loadCorpus } from './corpus.js';
-export { matchCore, resolveKeys, slackFor, MATCH_PAGE_SIZE, MISSING_NAMES_SEP } from './match.js';
+export { matchCore, matchResponse, resolveKeys, slackFor, MATCH_PAGE_SIZE, MISSING_NAMES_SEP } from './match.js';
 export {
 	buildMosaic,
 	normaliseQuery,

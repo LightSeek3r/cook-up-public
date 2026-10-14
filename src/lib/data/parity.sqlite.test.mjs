@@ -25,6 +25,8 @@ import * as matchRoute from '../../routes/api/match/+server';
 import * as recipesRoute from '../../routes/api/recipes/+server';
 import * as sitemapRoute from '../../routes/sitemap.xml/+server';
 import * as recipePageServer from '../../routes/recipe/[id]/+page.server';
+import { openMatchData } from '../client/matchData';
+import { matchRequest } from '../matchRequest';
 
 const FIXTURE = new URL('../../../pipeline/fixtures/artefact-corpus.sql', import.meta.url);
 const ORIGIN = 'https://cook.test';
@@ -206,17 +208,38 @@ function harnessCases(sqlite) {
  * become canonical_keys (unknown ids a key no ingredient has), in the order
  * given; limit and slack have no URL form (the route derives slack).
  */
+const keyOf = (sqlite, id) => sqlite.prepare('SELECT canonical_key k FROM ingredients WHERE id = ?').get(id)?.k ?? 'not_a_key';
+
 function matchUrl(sqlite, p) {
-	const keyOf = (id) => sqlite.prepare('SELECT canonical_key k FROM ingredients WHERE id = ?').get(id)?.k ?? 'not_a_key';
-	const search = new URLSearchParams({ have: p.have.map(keyOf).join(','), lang: p.lang });
+	const key = (id) => keyOf(sqlite, id);
+	const search = new URLSearchParams({ have: p.have.map(key).join(','), lang: p.lang });
 	if (p.cuisine) search.set('cuisine', p.cuisine);
 	if (p.mealType) search.set('meal', p.mealType);
 	if (p.diet) search.set('diet', p.diet);
 	if (p.sort) search.set('sort', p.sort);
 	if (p.excludeAllergens?.length) search.set('noAllergen', p.excludeAllergens.join(','));
-	if (p.mustUse?.length) search.set('must', p.mustUse.map(keyOf).join(','));
+	if (p.mustUse?.length) search.set('must', p.mustUse.map(key).join(','));
 	if (p.offset !== undefined) search.set('offset', String(p.offset));
 	return `/api/match?${search}`;
+}
+
+/** Hand-written /api/match URLs: odd casing, unknown keys and values, bad offsets, over the cap. */
+function handMatchUrls(sqlite) {
+	const keys = sqlite.prepare('SELECT canonical_key AS k FROM ingredients ORDER BY recipe_count DESC LIMIT 12').all().map((r) => r.k);
+	const many = Array.from({ length: 51 }, (_, k) => `ing_${k}`).join(',');
+	return [
+		`/api/match?have=${keys.slice(0, 3).join(',')}&lang=fr`,
+		`/api/match?have=${keys.slice(0, 6).join(',')}&lang=zh&sort=kcal&must=${keys[1]}`,
+		`/api/match?have=${keys.slice(2, 5).join(',')},not_a_key&lang=bn&diet=vegetarian&noAllergen=dairy,gluten`,
+		`/api/match?have=${keys.slice(0, 2).join(',')}&lang=hi&sort=time&offset=5`,
+		`/api/match?have=${keys.join(',')}&lang=jv&sort=grade&meal=dinner`,
+		`/api/match?have=${keys.slice(0, 4).map((k) => k.toUpperCase()).join(',')},${keys[0]}&lang=xx&cuisine=mars&sort=bogus`,
+		`/api/match?have=nothing_here&lang=en`,
+		`/api/match?lang=en`,
+		`/api/match?have=${keys[0]}&lang=en&offset=2.5`,
+		`/api/match?have=${keys[0]}&lang=en&offset=10001`,
+		`/api/match?have=${many}&lang=en`
+	];
 }
 
 /** Search queries: title fragments in varied case, non-ASCII, query syntax, short. */
@@ -276,6 +299,7 @@ function paritySuite(name, open, size) {
 		let compared = 0;
 		let pages = 0;
 		let harnessSize = 0;
+		let browserCompared = 0;
 		const sqlGet = async (path) => {
 			const url = new URL(path, ORIGIN);
 			return observed(await SQL_ROUTES[url.pathname].GET({ url, platform }));
@@ -300,7 +324,7 @@ function paritySuite(name, open, size) {
 		}, 120_000);
 
 		afterAll(() => {
-			console.log(`artefact parity (${name}): harness matrix ${harnessSize} cases; ${compared} responses identical through the real route handlers; ${pages} recipe page loads identical through the real load`);
+			console.log(`artefact parity (${name}): harness matrix ${harnessSize} cases; ${compared} responses identical through the real route handlers; ${browserCompared} browser matches identical to the route; ${pages} recipe page loads identical through the real load`);
 		});
 
 		it('matchRecipes == matchCore over generated inputs (rows, totals, ties)', async () => {
@@ -338,23 +362,47 @@ function paritySuite(name, open, size) {
 		}, 600_000);
 
 		it('/api/match answers the same response for hand-written URLs, 400s included', async () => {
-			const keys = sqlite.prepare('SELECT canonical_key AS k FROM ingredients ORDER BY recipe_count DESC LIMIT 12').all().map((r) => r.k);
-			const many = Array.from({ length: 51 }, (_, k) => `ing_${k}`).join(',');
-			const urls = [
-				`/api/match?have=${keys.slice(0, 3).join(',')}&lang=fr`,
-				`/api/match?have=${keys.slice(0, 6).join(',')}&lang=zh&sort=kcal&must=${keys[1]}`,
-				`/api/match?have=${keys.slice(2, 5).join(',')},not_a_key&lang=bn&diet=vegetarian&noAllergen=dairy,gluten`,
-				`/api/match?have=${keys.slice(0, 2).join(',')}&lang=hi&sort=time&offset=5`,
-				`/api/match?have=${keys.join(',')}&lang=jv&sort=grade&meal=dinner`,
-				`/api/match?have=${keys.slice(0, 4).map((k) => k.toUpperCase()).join(',')},${keys[0]}&lang=xx&cuisine=mars&sort=bogus`,
-				`/api/match?have=nothing_here&lang=en`,
-				`/api/match?lang=en`,
-				`/api/match?have=${keys[0]}&lang=en&offset=2.5`,
-				`/api/match?have=${keys[0]}&lang=en&offset=10001`,
-				`/api/match?have=${many}&lang=en`
-			];
-			for (const url of urls) await same(url);
+			for (const url of handMatchUrls(sqlite)) await same(url);
 		});
+
+		it('browser matching (src/lib/client) answers exactly what the real /api/match route does', async () => {
+			// What the home page sends: matchRequest's string, pages by offset.
+			const pageUrls = harnessCases(sqlite).map((p) => {
+				const keys = (ids) => ids.map((id) => keyOf(sqlite, id));
+				const selected = keys(p.have);
+				const input = {
+					selected,
+					lang: p.lang,
+					cuisine: p.cuisine ?? '',
+					meal: p.mealType ?? '',
+					diet: p.diet ?? '',
+					sort: p.sort ?? '',
+					noAllergen: p.excludeAllergens ?? [],
+					must: p.mustUse?.length ? keys(p.mustUse) : [],
+					slack: slackFor(new Set(selected).size)
+				};
+				return `/api/match?${matchRequest(input, Math.max(0, p.offset ?? 0))}`;
+			});
+			const urls = new Set([
+				...pageUrls,
+				...harnessCases(sqlite).map((p) => matchUrl(sqlite, p)),
+				...matchCases(sqlite, size.match).map((p) => matchUrl(sqlite, p)),
+				...handMatchUrls(sqlite)
+			]);
+			const data = await openMatchData({ version: art.corpus.version, lang: 'en', fetch: (url) => artefactAssets(art.files).fetch(new URL(url, ORIGIN)) });
+			for (const lang of LANGS) await data.load(lang);
+			let local = 0;
+			for (const url of urls) {
+				const route = await routeGet(url);
+				const body = data.match(url.slice(url.indexOf('?') + 1));
+				if (route.status === 200) {
+					expect(JSON.stringify(body), url).toBe(route.body);
+					local++;
+				} else expect(body, url).toBeNull();
+			}
+			expect(local).toBeGreaterThan(urls.size * 0.9);
+			browserCompared = local;
+		}, 600_000);
 
 		it('/api/search: FTS trigram semantics for 3+ characters, empty below', async () => {
 			for (const q of searchQueries(sqlite, size.search)) {

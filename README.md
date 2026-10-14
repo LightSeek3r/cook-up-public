@@ -275,7 +275,36 @@ page data as JSON (or the 400/404 thrown) for every recipe in every language plu
 one. It runs on a real slice of the corpus in `pipeline/fixtures/artefact-corpus.sql`
 (regenerate with `node pipeline/tools/make_artefact_fixture.mjs`); `DATA_PARITY_DB=<file>`
 adds the full corpus saved by `--save-db`. The e2e server (`scripts/e2e-server.mjs`) serves
-artefacts built from its own seed.
+artefacts built from its own seed, stamped with the lock's data version so the browser path
+below runs against them.
+
+**Matching in the browser.** The home page matches locally once it has `core.bin`, English
+names and the page language's names and titles (207 KB compressed for English: `core.bin` 199
+KB brotli, names 6 KB, titles 1 KB), so toggling an ingredient, sorting, filtering or loading
+more makes no request. `src/lib/client/localMatch.ts` schedules the download with
+`requestIdleCallback` once the mosaic is in (low fetch priority, so it never competes with
+it), or at the first ingredient tap if that comes first; on Save-Data or a 2G connection only
+at that tap. The decoder and match code are a separate chunk (`src/lib/client/matchData.ts`,
+5 KB gzip), imported only then. Each file is fetched as `/data/<file>?v=<data version>`
+(lock.json's version, a hash of the content), and `_headers` serves `core.bin`, `names/*` and
+`titles/*` with `Cache-Control: public, max-age=31536000, immutable`, so a repeat visit
+downloads nothing until the data changes; a deploy that changes only code keeps the cached
+copy. `core.bin` is also given `Content-Type: application/x-protobuf`: Cloudflare does not
+compress `application/octet-stream`, which sent it raw (434 KB). Every file must carry this
+build's data version: a mismatch (a tab older than the deploy, or a copy cached by a request
+that raced one, since the assets ignore `?v=`) is fetched once more with `cache: 'reload'`,
+and if it still differs the browser path stays off. Until the files are in, after any download
+failure, a mismatch, or a match that throws, the page asks `/api/match` exactly as before
+(same `responseCache`, loading and error states); a language whose files fail goes to the
+server alone, and a language switch asks the server once while that language's two files
+load. A tap's local answer is computed after the next paint (`afterPaint`), so the pressed
+tile shows before the 50 new cards render, which is the expensive part: the match itself takes
+3-12 ms on a 4x-throttled CPU and decoding about 30 ms in several short tasks, so there is no
+Web Worker. Route and browser build the body with one function, `matchResponse`
+(`src/lib/data/match.js`), and the parity suite checks the browser path against the real route
+over the harness matrix, generated and hand-written URLs and the page's own `matchRequest`
+strings, JSON byte for byte (`src/lib/client/*.test.*` cover scheduling and the version
+checks; `tests/e2e/smoke.spec.ts` the local path and both fallbacks in the real bundle).
 
 **Delivery: a pinned release asset, not committed files.** The per-recipe files alone are ~58
 MB, regenerated whenever a translation changes, and `pipeline/out` is not in git anyway, so

@@ -29,14 +29,22 @@ describe('_headers', () => {
 		expect(existsSync(new URL('static/_headers', ROOT))).toBe(false);
 	});
 
-	it('gives every static asset the same security headers as the hook', () => {
+	const IMMUTABLE = { 'cache-control': 'public, max-age=31536000, immutable' };
+
+	it('gives every static asset the same security headers as the hook, and the browser-match artefacts long-term caching', () => {
 		expect(parseHeadersFile(text)).toEqual([
-			{ path: '/*', headers: { ...SECURITY_HEADERS, 'strict-transport-security': HSTS } }
+			{ path: '/*', headers: { ...SECURITY_HEADERS, 'strict-transport-security': HSTS } },
+			// A type Cloudflare compresses; application/octet-stream goes out raw.
+			{ path: '/data/core.bin', headers: { ...IMMUTABLE, 'content-type': 'application/x-protobuf' } },
+			{ path: '/data/names/*', headers: IMMUTABLE },
+			{ path: '/data/titles/*', headers: IMMUTABLE }
 		]);
 	});
 
-	it('sets no Cache-Control, so the adapter\'s immutable rule for /_app/immutable/* stands', () => {
-		expect(text).not.toMatch(/^\s*cache-control\s*:/im);
+	it('sets Cache-Control only under /data/, so the adapter\'s immutable rule for /_app/immutable/* stands', () => {
+		for (const rule of parseHeadersFile(text)) {
+			if (!rule.path.startsWith('/data/')) expect(rule.headers, rule.path).not.toHaveProperty('cache-control');
+		}
 		expect(text).not.toMatch(/^\s*!/m);
 	});
 

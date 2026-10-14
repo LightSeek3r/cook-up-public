@@ -10,11 +10,16 @@
 // not D1 (only /api/track and /admin use it), so the build's assets are
 // served from a copy in .wrangler/e2e-assets whose data/ is built from the
 // same seed. The build output itself is never modified.
+//
+// The browser only matches with artefacts of the data version its bundle was
+// built against (lock.json), so the seed's files are stamped with that
+// version: their own, a hash of different content, would send every match to
+// /api/match and leave the browser path untested.
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { buildArtefacts, fixtureDb } from '../pipeline/lib/artefacts.mjs';
-import { writeTree } from './lib/datapack.mjs';
+import { readLock, writeTree } from './lib/datapack.mjs';
 
 const PERSIST = '.wrangler/e2e-state';
 const BUILD = '.svelte-kit/cloudflare';
@@ -47,7 +52,30 @@ wrangler(['d1', 'execute', DB, '--local', '--persist-to', PERSIST, '--file', SEE
 rmSync(ASSETS, { recursive: true, force: true });
 const buildData = path.resolve(BUILD, 'data');
 cpSync(BUILD, ASSETS, { recursive: true, filter: (src) => path.resolve(src) !== buildData });
-writeTree(path.join(ASSETS, 'data'), buildArtefacts(fixtureDb(readFileSync(SEED, 'utf8'))).files);
+const seed = buildArtefacts(fixtureDb(readFileSync(SEED, 'utf8')));
+writeTree(path.join(ASSETS, 'data'), stamped(seed.files, seed.version, readLock().version));
+
+/**
+ * Every file with `"version":"<from>"` (core.bin's header and the JSON
+ * files) rewritten to `to`, a same-length hash, so core.bin's layout holds.
+ * manifest.json (pretty-printed, so not matched) keeps the seed's version
+ * and sha256 list; nothing at runtime reads it.
+ * @param {Map<string, Buffer>} files
+ * @param {string} from
+ * @param {string} to
+ */
+function stamped(files, from, to) {
+	if (from.length !== to.length) throw new Error(`data versions ${from} and ${to} differ in length`);
+	const needle = Buffer.from(`"version":"${from}"`);
+	const replacement = Buffer.from(`"version":"${to}"`);
+	const out = new Map();
+	for (const [name, body] of files) {
+		const copy = Buffer.from(body);
+		for (let at = copy.indexOf(needle); at >= 0; at = copy.indexOf(needle, at + needle.length)) replacement.copy(copy, at);
+		out.set(name, copy);
+	}
+	return out;
+}
 
 const dev = spawn(
 	process.execPath,

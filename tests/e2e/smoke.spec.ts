@@ -43,9 +43,8 @@ test('home hydrates and the mosaic loads', async ({ page }) => {
 
 test('selecting an ingredient shows matching recipes', async ({ page }) => {
 	await page.goto('/?lang=en');
-	const match = page.waitForResponse((r) => r.url().includes('/api/match'));
+	// Matched in the browser or by /api/match, whichever is ready (see below).
 	await tile(page, 'Tomato').click();
-	expect((await match).status()).toBe(200);
 	await expect(tile(page, 'Tomato')).toHaveAttribute('aria-pressed', 'true');
 	await expect(page).toHaveURL(/[?&]have=tomato\b/);
 	const results = page.locator('#results');
@@ -124,4 +123,86 @@ test('every referenced /_app/immutable file is served from one build', async ({ 
 	expect(report.problems).toEqual([]);
 	expect(report.checked).toBeGreaterThan(10);
 	expect(chunkReportOk(report)).toBe(true);
+});
+
+test.describe('matching in the browser', () => {
+	const DATA = ['/data/core.bin', '/data/names/en.json', '/data/titles/en.json'];
+	type Page = import('@playwright/test').Page;
+
+	/** Ids of the result cards, in the order shown. */
+	const shownIds = (page: Page) =>
+		page.locator('#results a.card-link').evaluateAll((links) =>
+			links.map((a) => Number(new URL((a as HTMLAnchorElement).href).pathname.split('/').pop()))
+		);
+
+	async function serverIds(request: import('@playwright/test').APIRequestContext, query: string) {
+		const res = await request.get(`/api/match?${query}`);
+		expect(res.status()).toBe(200);
+		return ((await res.json()) as { results: { id: number }[] }).results.map((r) => r.id);
+	}
+
+	/** /api/match requests the page makes from now on. */
+	function matchRequests(page: Page) {
+		const urls: string[] = [];
+		page.on('request', (r) => {
+			if (new URL(r.url()).pathname === '/api/match') urls.push(r.url());
+		});
+		return urls;
+	}
+
+	test('once the artefacts are in, taps match locally with the same results as /api/match', async ({ page, request }) => {
+		const loaded = Promise.all(
+			DATA.map((path) => page.waitForResponse((r) => new URL(r.url()).pathname === path))
+		);
+		await page.goto('/?lang=en');
+		for (const res of await loaded) {
+			expect(res.status(), res.url()).toBe(200);
+			expect(new URL(res.url()).searchParams.get('v'), res.url()).toMatch(/^[0-9a-f]{16}$/);
+			expect(res.headers()['cache-control'], res.url()).toBe('public, max-age=31536000, immutable');
+			await res.finished();
+		}
+		const asked = matchRequests(page);
+
+		await tile(page, 'Tomato').click();
+		await expect(page.locator('#results')).toHaveAttribute('data-source', 'local');
+		await expect(page.locator('#results a.card-link').first()).toBeVisible();
+		expect(await shownIds(page)).toEqual(await serverIds(request, 'have=tomato&lang=en'));
+
+		await tile(page, 'Onion').click();
+		await expect(page).toHaveURL(/[?&]have=tomato(%2C|,)onion\b/);
+		await expect(page.locator('#results a.card-link').first()).toBeVisible();
+		expect(await shownIds(page)).toEqual(await serverIds(request, 'have=onion,tomato&lang=en'));
+		expect(asked).toEqual([]);
+	});
+
+	test.describe('falls back to /api/match', () => {
+		// The browser logs the aborted artefact downloads.
+		test.use({ allowedConsole: [/ERR_FAILED/] });
+
+		test('while the artefacts cannot be downloaded', async ({ page, request }) => {
+			await page.route('**/data/**', (route) => route.abort());
+			await page.goto('/?lang=en');
+			const match = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/match');
+			await tile(page, 'Tomato').click();
+			expect((await match).status()).toBe(200);
+			await expect(page.locator('#results')).toHaveAttribute('data-source', 'server');
+			expect(await shownIds(page)).toEqual(await serverIds(request, 'have=tomato&lang=en'));
+		});
+	});
+
+	test('when the artefacts are another data version (a tab older than the deploy)', async ({ page, request }) => {
+		const stale: string[] = [];
+		await page.route('**/data/titles/en.json*', (route, req) => {
+			stale.push(req.url());
+			return route.fulfill({ json: { version: '0000000000000000', lang: 'en', ids: [], titles: [] } });
+		});
+		await page.goto('/?lang=en');
+		// The first copy and the past-the-cache retry.
+		await expect.poll(() => stale.length).toBe(2);
+		const match = page.waitForResponse((r) => new URL(r.url()).pathname === '/api/match');
+		await tile(page, 'Tomato').click();
+		expect((await match).status()).toBe(200);
+		await expect(page.locator('#results')).toHaveAttribute('data-source', 'server');
+		expect(await shownIds(page)).toEqual(await serverIds(request, 'have=tomato&lang=en'));
+	});
 });
