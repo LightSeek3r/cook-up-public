@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { spawn } from 'node:child_process';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
@@ -75,6 +76,33 @@ describe('reading and writing a store', () => {
 		expect(storeFile('instructions', 'bn')).toBe('instructions/bn.jsonl.gz');
 		expect(() => readFile('steps', 'fr', dir)).toThrow(/unknown kind/);
 	});
+
+	it('parallel writers of one file never lose a row (unique temp file, locked compare-and-rename)', async () => {
+		const storeModule = new URL('./recipe_i18n_store.mjs', import.meta.url).href;
+		const worker = `
+			import { readFile, writeFile, srcHash } from ${JSON.stringify(storeModule)};
+			const id = Number(process.argv[1]);
+			const dir = process.argv[2];
+			for (let i = 0; i < 6; i++) {
+				const recipe_id = id * 100 + i;
+				for (;;) {
+					const { rows, sha256 } = readFile('instructions', 'bn', dir);
+					rows.set(recipe_id, { recipe_id, instructions: '1. ' + 'x'.repeat(2000), is_machine: 1, src: srcHash('s'), origin: 'batch', reviewed: false });
+					try { writeFile('instructions', 'bn', rows, { dir, expectSha: sha256 }); break; }
+					catch (e) { if (!/changed while/.test(String(e.message))) throw e; }
+				}
+			}`;
+		const runs = Array.from({ length: 6 }, (_, n) =>
+			new Promise((resolve, reject) => {
+				const child = spawn(process.execPath, ['--input-type=module', '-e', worker, String(n + 1), dir], { stdio: ['ignore', 'ignore', 'pipe'] });
+				let err = '';
+				child.stderr.on('data', (d) => (err += d));
+				child.on('close', (code) => (code === 0 ? resolve() : reject(new Error(err))));
+			})
+		);
+		await Promise.all(runs);
+		expect(readFile('instructions', 'bn', dir).rows.size).toBe(36);
+	}, 60_000);
 
 	it('a damaged file stops readStore', () => {
 		writeFile('titles', 'fr', TITLES, { dir });

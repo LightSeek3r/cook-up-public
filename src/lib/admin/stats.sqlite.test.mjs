@@ -149,10 +149,11 @@ beforeAll(async () => {
 	for (let k = 0; k < 3000; k++) {
 		// Ids 1-3 have views but no recipe (deleted since), and the most views of all.
 		const id = k % 10 === 0 ? 1 + (k % 3) : k % 13 === 0 ? null : 10 + Math.floor(rnd() * rnd() * 55);
-		views.push([id, `-${Math.floor(rnd() * 90 * 24)} hours`]);
+		// Half an hour off the whole hour: a view exactly 24 h old sits on the days=1 cutoff, and the two queries run a few ms apart, so a second tick between them flipped it.
+		views.push([id, `-${Math.floor(rnd() * 90 * 24)} hours`, '-30 minutes']);
 	}
 	for (const db of [corpusDb, runtimeDb]) {
-		const view = db.prepare(`INSERT INTO page_view (path, recipe_id, lang, viewed_at) VALUES ('/x', ?, 'en', datetime('now', ?))`);
+		const view = db.prepare(`INSERT INTO page_view (path, recipe_id, lang, viewed_at) VALUES ('/x', ?, 'en', datetime('now', ?, ?))`);
 		for (const v of views) view.run(...v);
 	}
 

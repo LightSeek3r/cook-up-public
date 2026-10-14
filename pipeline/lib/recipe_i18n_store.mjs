@@ -30,7 +30,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, renameSync, statSync, unlinkSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
 
@@ -107,9 +107,60 @@ export function parseFile(kind, lang, bytes, what = storeFile(kind, lang)) {
 
 function writeAtomic(file, data) {
 	mkdirSync(path.dirname(file), { recursive: true });
-	const tmp = `${file}.tmp`;
+	// A name per writer: with one shared `.tmp`, two parallel applies overwrote each other's bytes before the rename.
+	const tmp = `${file}.${process.pid}.${Math.random().toString(36).slice(2)}.tmp`;
 	writeFileSync(tmp, data);
-	renameSync(tmp, file);
+	// Windows refuses to replace a file another process has open for a moment (a parallel reader): wait and retry.
+	for (let attempt = 0; ; attempt++) {
+		try {
+			renameSync(tmp, file);
+			return;
+		} catch (error) {
+			if (!['EPERM', 'EBUSY', 'EACCES'].includes(error.code) || attempt >= 100) {
+				try {
+					unlinkSync(tmp);
+				} catch {
+					// already gone
+				}
+				throw error;
+			}
+			Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20);
+		}
+	}
+}
+
+const LOCK_WAIT_MS = 30_000;
+const LOCK_STALE_MS = 60_000;
+
+/** Runs `fn` while holding an exclusive lock file next to `file`, so the compare and the rename of two writers cannot interleave. */
+function withLock(file, fn) {
+	mkdirSync(path.dirname(file), { recursive: true });
+	const lock = `${file}.lock`;
+	const deadline = Date.now() + LOCK_WAIT_MS;
+	for (;;) {
+		try {
+			closeSync(openSync(lock, 'wx'));
+			break;
+		} catch (error) {
+			if (error.code !== 'EEXIST') throw error;
+			try {
+				if (Date.now() - statSync(lock).mtimeMs > LOCK_STALE_MS) unlinkSync(lock);
+			} catch {
+				// released meanwhile
+			}
+			if (Date.now() > deadline) throw new Error(`${lock} is held by another writer; run the command again`);
+			Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 50);
+		}
+	}
+	try {
+		return fn();
+	} finally {
+		try {
+			unlinkSync(lock);
+		} catch {
+			// already gone
+		}
+	}
 }
 
 /** Every language that has a file of `kind`. */
@@ -144,13 +195,15 @@ export function writeFile(kind, lang, rows, { dir = STORE_DIR, expectSha } = {})
 	const file = path.join(dir, storeFile(kindOf(kind), lang));
 	// Serialised (gzip is slow) before the compare, so the window between the check and the rename stays tiny when several agents apply to one language at once.
 	const bytes = serializeFile(kind, lang, rows);
-	const current = existsSync(file) ? readFileSync(file) : null;
-	if (expectSha !== undefined && (current ? sha256(current) : null) !== expectSha) {
-		throw new Error(`${file} changed while this batch was being checked; run the command again`);
-	}
-	if (current && sha256(current) === sha256(bytes)) return false;
-	writeAtomic(file, bytes);
-	return true;
+	return withLock(file, () => {
+		const current = existsSync(file) ? readFileSync(file) : null;
+		if (expectSha !== undefined && (current ? sha256(current) : null) !== expectSha) {
+			throw new Error(`${file} changed while this batch was being checked; run the command again`);
+		}
+		if (current && sha256(current) === sha256(bytes)) return false;
+		writeAtomic(file, bytes);
+		return true;
+	});
 }
 
 /** Every file of the store: `{ titles: { lang: Map }, instructions: { lang: Map } }`. */
