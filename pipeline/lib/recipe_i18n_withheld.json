@@ -1,4 +1,4 @@
 {
 	"about": "Languages whose recipe instructions are served only after a reviewer has passed them (recipe_i18n_store.mjs recipeI18nRows hideUnreviewed). Until then the site shows the English text under the translated title. A 60-row audit of the rows imported from the old backup (2026-10-15) found serious defects in 80% (vi, pnb) and 95% (jv) of them: wrong foods, reversed or hazardous steps, nonsense words. Remove a language here once its imported rows have been reviewed.",
-	"hideUnreviewed": ["jv", "vi", "pnb"]
+	"hideUnreviewed": []
 }

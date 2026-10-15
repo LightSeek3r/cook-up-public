@@ -360,6 +360,43 @@ function textRatioOk(lang, source, text) {
 	return ratio >= 0.1 && ratio <= 3;
 }
 
+const nonEmptyLines = (s) => s.split('\n').filter((l) => l.trim() !== '');
+/** The scale letters written as symbols (°F, ℃) in a step, sorted; the English source also writes a bare "375 F". */
+function temperatureUnits(line, { bare = false } = {}) {
+	const found = [];
+	for (const m of line.matchAll(/[°˚º]\s*([FC])(?![A-Za-z])|([℉℃])|(?<![\w.])[0-9][0-9.,]*\s?([FC])(?!\w)(?!\.\s+[a-z])/g)) {
+		if (m[3] && !bare) continue;
+		found.push(m[1] ?? (m[2] === '℉' ? 'F' : m[2] === '℃' ? 'C' : m[3]));
+	}
+	return found.sort().join('');
+}
+
+/**
+ * The text-wide digit check passes a number moved from one step to another, or a "350 °F" relabelled "350 °C"
+ * (agents did both to get past it): hold every step to the numbers and the temperature scales of its English step.
+ */
+function addPerStepIssues(source, text, add) {
+	const from = nonEmptyLines(source);
+	const to = nonEmptyLines(text);
+	for (let i = 0; i < from.length; i++) {
+		const want = digitRuns(from[i]).join(',');
+		const got = digitRuns(to[i]).join(',');
+		if (got !== want) {
+			add('digit-step-mismatch', `step ${i + 1} has numbers [${got}], its English step has [${want}]`);
+			return;
+		}
+		const wantUnits = temperatureUnits(from[i], { bare: true });
+		const gotUnits = temperatureUnits(to[i]);
+		// Only a scale the English step lacks is an error: a text may spell a scale out in words (Arabic, Hindi) or drop
+		// the degree sign of "190 C", and that is left to the reviewer.
+		const surplus = [...gotUnits].filter((letter, n) => (wantUnits.split(letter).length - 1) <= [...gotUnits].slice(0, n).filter((x) => x === letter).length);
+		if (surplus.length) {
+			add('temperature-unit', `step ${i + 1} has temperature scales "${gotUnits}", its English step has "${wantUnits}": never relabel °F as °C`);
+			return;
+		}
+	}
+}
+
 /**
  * Rules for one translated instructions text (steps one per line).
  * @param {object} p
@@ -396,6 +433,7 @@ export function validateInstructions({ lang, source, text, others = {} }) {
 	const got = digitRuns(text).join(',');
 	const expected = digitRuns(source).join(',');
 	if (got !== expected) add('digit-mismatch', `numbers are [${got}], English has [${expected}]`);
+	else if (lines === want) addPerStepIssues(source, text, add);
 	const comma = COMMA_DECIMAL_LANGS.has(lang);
 	for (const [, a, b] of source.matchAll(/(?<![0-9.,])([0-9]+)\.([0-9]+)(?![0-9])/g)) {
 		const wrong = comma ? `${a}.${b}` : `${a},${b}`;

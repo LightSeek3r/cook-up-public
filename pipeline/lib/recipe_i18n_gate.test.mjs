@@ -293,6 +293,13 @@ describe('validateInstructions', () => {
 		expect(check('fr', FR_TEXT.replace('Faites', '<b>Faites</b>'))).toContain('markup');
 	});
 
+	it('holds every step to its own numbers and temperature scales', () => {
+		const moved = '1. Préchauffez le four à 180 °C (350 °F) pendant 25 minutes.\n2. Mélangez 1,5 tasse de farine avec 2 œufs.\n3. Faites cuire.';
+		expect(check('fr', moved)).toContain('digit-step-mismatch');
+		expect(check('fr', FR_TEXT.replace('350 °F', '350 °C'))).toContain('temperature-unit');
+		expect(check('fr', FR_TEXT.replace('180 °C (350 °F)', '350 °F (180 °C)'))).toEqual([]);
+	});
+
 	it('holds imported rows to the rules they were accepted under, plus foreign letters', () => {
 		expect([...LEGACY_INSTRUCTION_RULES].sort()).toEqual(
 			['copied-from-english', 'empty', 'foreign-script', 'length-ratio', 'line-count', 'literal-backslash-n', 'mixed-script-word', 'target-script'].sort()
