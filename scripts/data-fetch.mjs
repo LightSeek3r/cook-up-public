@@ -32,10 +32,36 @@ function viaGh(lock, dir) {
 	return readFileSync(path.join(dir, lock.asset));
 }
 
+const sleep = (/** @type {number} */ ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * The plain release URL of a public repository. Unlike api.github.com it has no per-IP quota of 60
+ * requests an hour, which Cloudflare's shared build network exhausts (HTTP 403 on the first call,
+ * 2026-10-15). null when the repository is private or the asset is missing.
+ * @param {import('./lib/datapack.mjs').DataLock} lock
+ */
+async function viaReleaseUrl(lock) {
+	const url = `https://github.com/${lock.repo}/releases/download/${lock.tag}/${lock.asset}`;
+	for (let attempt = 1; attempt <= 3; attempt++) {
+		try {
+			const response = await fetch(url, { headers: { 'user-agent': 'cook-up-data-fetch' } });
+			if (response.ok) return Buffer.from(await response.arrayBuffer());
+			console.log(`data:fetch: ${url}: HTTP ${response.status}`);
+			if (response.status === 404) return null;
+		} catch (error) {
+			console.log(`data:fetch: ${url}: ${error instanceof Error ? error.message : error}`);
+		}
+		await sleep(attempt * 2000);
+	}
+	return null;
+}
+
 /** @param {import('./lib/datapack.mjs').DataLock} lock */
 async function viaRest(lock) {
-	// The data repository is public: no token is needed (Cloudflare's build has none). A token only
-	// raises the API rate limit, and is required if the lock ever points at a private repository.
+	// The data repository is public: no token is needed (Cloudflare's build has none). A token is
+	// only for the API fallback below, and required if the lock ever points at a private repository.
+	const direct = await viaReleaseUrl(lock);
+	if (direct) return direct;
 	const token = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 	const headers = {
 		...(token ? { authorization: `Bearer ${token}` } : {}),
