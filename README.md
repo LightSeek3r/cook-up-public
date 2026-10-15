@@ -56,9 +56,12 @@ swap exists, a substitution tip.
   strings are bundled; recipe titles and instructions are pre-translated in every language and
   shipped in the static data artefacts. Translation is complete: no translation job, cron or
   runtime translation endpoint exists, and a recipe page shows the stored text for its language
-  (source language if a row is missing). The translations are machine-made and a review pass is
-  under way; Javanese, Vietnamese and Western Punjabi show the English instructions until a
-  reviewer has passed a recipe (`pipeline/lib/recipe_i18n_withheld.json`).
+  (source language if a row is missing). The translations are machine-made. Every title and every
+  instruction text has been read against the English and corrected by an independent reviewer, and
+  per-language audits of random 60-row samples found at most a few serious errors each; wording
+  slips can remain. Recipe instructions of a language listed in
+  `pipeline/lib/recipe_i18n_withheld.json` are shown in English until a reviewer has passed them
+  (the list is empty today).
 - **Cooking-techniques glossary** — `/glossary`: 152 techniques (knife cuts, dry and moist
   heat, doughs, sauces, preservation, modernist cooking...) in all 16 languages, searchable in
   each script, with 28 text-free SVG diagrams where a drawing explains it better than words.
