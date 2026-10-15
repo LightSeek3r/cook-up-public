@@ -197,6 +197,14 @@ resolved mass to show nutrition.
 
 ### Retiring the D1 corpus
 
+**Done on 2026-10-15.** Preconditions met: a full day with no corpus query in D1 insights, a
+fresh export (private release `i18n-backup-2026-10-15`, 54,798 recipe and 11,835 ingredient
+translation rows, verified), remote parity, and the Time Travel bookmark
+`00000307-00000000-00005105-94afa0370aba3d18b24dd850444b41e6` (2026-10-15 08:14:57 UTC).
+Applied in 227 ms; D1 now holds `page_view`, `admin_otp`, `admin_session` and its own tables.
+The steps below are the record of what was done; the Time Travel restore is possible until
+2026-10-22.
+
 Since phase 3.2-3.4 no request reads the recipe corpus from D1, and
 `migrations/0013_retire_recipe_corpus.sql` drops it: the 14 corpus tables (`recipes`,
 `recipe_i18n`, `recipe_ingredients`, `ingredients`, `ingredient_i18n`, the nutrition, diet,
@@ -470,8 +478,10 @@ allowlisted, so it cannot be used to discover who the admin is. Check `wrangler 
 rather than the UI when a code fails to arrive.
 
 **D1 holds runtime state only** (`page_view`, `admin_otp`, `admin_session`), local and remote
-alike once 0013 is applied. Until then remote still holds the translated recipe content
-(`recipe_i18n`) that `export_remote_i18n.mjs` backs up; see **Retiring the D1 corpus**.
+alike: migration 0013 retired the recipe corpus from remote on 2026-10-15. The translated
+recipe content that D1 used to hold is in the private release `i18n-backup-2026-10-15` and,
+as the pipeline's source of truth, in the recipe translation store; see **Retiring the D1
+corpus**.
 
 **HTTP caching.** `/api/ingredients`, `/api/search`, `/api/match`, `/api/recipes` and
 `/sitemap.xml` send a public `Cache-Control` (browser 1 h, edge 1 day; exact values in
