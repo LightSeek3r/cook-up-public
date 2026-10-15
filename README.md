@@ -53,10 +53,16 @@ swap exists, a substitution tip.
   exclusion by any of: gluten, dairy, nut, peanut, egg, soy, fish, shellfish, sesame.
 - **16 languages** — en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it, bn, ru, pnb, jv, including
   full RTL support for Arabic and Western Punjabi (Shahmukhi script). Ingredient names and UI
-  strings are bundled; recipe instructions are pre-translated and stored in D1 (`recipe_i18n`)
-  for every language. Translation is complete: no translation job, cron or runtime translation
-  endpoint exists, and a recipe page shows the stored text for its language (source language
-  if a row is missing).
+  strings are bundled; recipe titles and instructions are pre-translated in every language and
+  shipped in the static data artefacts. Translation is complete: no translation job, cron or
+  runtime translation endpoint exists, and a recipe page shows the stored text for its language
+  (source language if a row is missing). The translations are machine-made and a review pass is
+  under way; Javanese, Vietnamese and Western Punjabi show the English instructions until a
+  reviewer has passed a recipe (`pipeline/lib/recipe_i18n_withheld.json`).
+- **Cooking-techniques glossary** — `/glossary`: 152 techniques (knife cuts, dry and moist
+  heat, doughs, sauces, preservation, modernist cooking...) in all 16 languages, searchable in
+  each script, with 28 text-free SVG diagrams where a drawing explains it better than words.
+  Static data checked into the repository, no database.
 - **Recipe photos** — 711 recipes carry a Wikimedia Commons photograph, hotlinked, each credited
   to its own author and licence (all free: CC BY-SA, CC BY, CC0, public domain).
 - **Difficulty, notes and quantity equivalents** — a 1–4 difficulty meter from the source infobox,
@@ -74,8 +80,10 @@ swap exists, a substitution tip.
 
 - [SvelteKit](https://svelte.dev) 2 (Svelte 5 runes) + TypeScript, deployed as a Cloudflare
   Worker with static assets (`@sveltejs/adapter-cloudflare`).
-- **Cloudflare D1** (SQLite) for all recipe/ingredient/nutrition data, including the stored
-  translations. No KV or Workers AI binding.
+- Recipe, ingredient, nutrition and translation data is built offline into static data artefacts
+  (a pinned release of the public `cook-up-data` repository, fetched at build time). The only
+  **Cloudflare D1** (SQLite) tables left are runtime state: page views and admin sign-in. No KV
+  or Workers AI binding.
 - **Vitest** for unit tests; a plain Node ESM pipeline (no framework) for the offline data
   build.
 
