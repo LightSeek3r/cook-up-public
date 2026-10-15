@@ -36,6 +36,7 @@ import { readBackup } from './i18n_backup.mjs';
 import { SUPPORTED_LANGS } from './langs.mjs';
 import { CORPUS_SCHEMA_LAST, migrationsUpTo } from './migrations.mjs';
 import { readStore, recipeI18nRows, storeExists, STORE_DIR } from './recipe_i18n_store.mjs';
+import withheld from './recipe_i18n_withheld.json' with { type: 'json' };
 import { ingredientFtsRefresh, readSeedInputs, titleFtsRefresh } from './seed_sql.mjs';
 import { sha256 } from '../../scripts/lib/datapack.mjs';
 
@@ -52,7 +53,7 @@ export function schemaDb() {
  * The database 06_seed_d1.mjs's statements give, from pipeline/out, the
  * recipe translation store (titles and instructions, pipeline/lib/
  * recipe_i18n_store.mjs) and the translation backup's ingredient names.
- * @param {{ outDir?: string, backupDir?: string, storeDir?: string }} [opts]
+ * @param {{ outDir?: string, backupDir?: string, storeDir?: string, hideUnreviewed?: string[] }} [opts]
  */
 export async function snapshotDb(opts = {}) {
 	const data = await readSeedInputs(opts.outDir);
@@ -62,7 +63,8 @@ export async function snapshotDb(opts = {}) {
 	}
 	const nameBackup = readBackup('ingredient_i18n', opts.backupDir);
 	if (!nameBackup) throw new Error('no ingredient_i18n backup: artefacts must carry the translated ingredient names');
-	const seed = buildLocalSeed(data, { recipe_i18n: recipeI18nRows(readStore(storeDir)), ingredient_i18n: nameBackup.rows });
+	const hideUnreviewed = opts.hideUnreviewed ?? withheld.hideUnreviewed;
+	const seed = buildLocalSeed(data, { recipe_i18n: recipeI18nRows(readStore(storeDir), { hideUnreviewed }), ingredient_i18n: nameBackup.rows });
 	const db = schemaDb();
 	for (const sql of seed.sql) db.exec(sql);
 	return { db, seed, backup: { ingredient_i18n: nameBackup.exported_at } };

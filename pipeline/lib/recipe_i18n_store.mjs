@@ -225,8 +225,14 @@ export const storeExists = (dir = STORE_DIR) => KINDS.some((k) => storeLangs(k, 
  * English one. A title without instructions of its own (Bengali rows still to
  * be translated) still becomes a row, with the English instructions and
  * is_machine 0, so the page and the cards show the title in that language.
+ *
+ * `hideUnreviewed` lists languages whose instructions are shown only once a
+ * reviewer has passed them; until then the English text is served (same shape
+ * as a title without instructions). pipeline/lib/recipe_i18n_withheld.json
+ * names them and why.
  */
-export function recipeI18nRows(store) {
+export function recipeI18nRows(store, { hideUnreviewed = [] } = {}) {
+	const hide = new Set(hideUnreviewed);
 	const en = { titles: store.titles[SOURCE_LANG] ?? new Map(), instructions: store.instructions[SOURCE_LANG] ?? new Map() };
 	const rows = [];
 	for (const [id, row] of en.instructions) {
@@ -238,7 +244,8 @@ export function recipeI18nRows(store) {
 		const texts = store.instructions[lang] ?? new Map();
 		for (const id of [...new Set([...titles.keys(), ...texts.keys()])].sort((a, b) => a - b)) {
 			const source = { title: en.titles.get(id)?.title, instructions: en.instructions.get(id)?.instructions };
-			const text = texts.get(id);
+			const stored = texts.get(id);
+			const text = stored && hide.has(lang) && stored.reviewed !== true ? undefined : stored;
 			const title = titles.get(id)?.title ?? source.title;
 			if (text) rows.push({ recipe_id: id, lang, title, instructions: text.instructions, is_machine: text.is_machine });
 			else if (source.instructions !== undefined) rows.push({ recipe_id: id, lang, title, instructions: source.instructions, is_machine: 0 });

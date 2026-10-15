@@ -135,6 +135,23 @@ describe('recipeI18nRows', () => {
 		]);
 	});
 
+	it('serves the English text for a withheld language until a reviewer has passed the row', () => {
+		const withheld = {
+			titles: { en: store.titles.en, fr: rows([{ recipe_id: 1, title: 'Soupe au poulet' }, { recipe_id: 2, title: 'Tarte à la rhubarbe' }]) },
+			instructions: {
+				en: store.instructions.en,
+				fr: rows([
+					{ recipe_id: 1, instructions: '1. Bouillir.', is_machine: 1, reviewed: true },
+					{ recipe_id: 2, instructions: '1. Cuire.', is_machine: 1, reviewed: false }
+				])
+			}
+		};
+		const fr = (list) => recipeI18nRows(withheld, { hideUnreviewed: list }).filter((r) => r.lang === 'fr').map((r) => [r.recipe_id, r.title, r.instructions, r.is_machine]);
+		expect(fr([])).toEqual([[1, 'Soupe au poulet', '1. Bouillir.', 1], [2, 'Tarte à la rhubarbe', '1. Cuire.', 1]]);
+		expect(fr(['fr'])).toEqual([[1, 'Soupe au poulet', '1. Bouillir.', 1], [2, 'Tarte à la rhubarbe', '1. Bake.', 0]]);
+		expect(fr(['de'])).toEqual(fr([]));
+	});
+
 	it('refuses a language row without an English title', () => {
 		expect(() => recipeI18nRows({ titles: {}, instructions: { fr: rows([{ recipe_id: 9, instructions: 'x', is_machine: 1 }]) } })).toThrow(/no English title/);
 	});
