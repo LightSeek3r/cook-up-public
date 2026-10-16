@@ -42,16 +42,24 @@
 {/if}
 
 <style>
+	/* A recessed plate the drawing's own ground (--surface-sunken) merges
+	   into, so drawing and legend read as one figure. */
 	.diagram-figure {
 		margin: 0;
 		display: grid;
 		gap: var(--space-3);
 		max-inline-size: 40rem;
+		padding: var(--space-3);
+		background: var(--surface-sunken);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius);
+		box-shadow: inset 0 1px 3px var(--lo);
 	}
 
 	figcaption {
 		display: grid;
 		gap: var(--space-2);
+		padding-inline: var(--space-1);
 	}
 
 	.caption {
@@ -107,5 +115,12 @@
 		padding-inline-start: 1.5rem;
 		display: grid;
 		gap: var(--space-2);
+	}
+
+	@media print {
+		.diagram-figure {
+			box-shadow: none;
+			break-inside: avoid;
+		}
 	}
 </style>

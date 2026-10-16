@@ -1,6 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import SeoHead from '$components/SeoHead.svelte';
+	import FoodIcon from '$components/FoodIcon.svelte';
+	import { FALLBACK_EMOJI } from '$lib/emoji';
 	import { resolveLang, t as translator } from '$lib/i18n';
 
 	const lang = $derived(resolveLang($page.url.searchParams.get('lang')));
@@ -36,6 +38,7 @@
 />
 
 <div class="wrap">
+	<span class="art"><FoodIcon cp={FALLBACK_EMOJI} size={64} /></span>
 	{#if !isUnavailable}
 		<p class="code">{$page.status}</p>
 	{/if}
@@ -47,68 +50,106 @@
 			<a class="cta" href={$page.url.href} data-sveltekit-reload>{t('error.retry')}</a>
 		{/if}
 		{#if inGlossary}
-			<a class="cta" class:secondary={!isNotFound} href="/glossary?lang={lang}">
+			<a class={isNotFound ? 'cta' : 'chrome-control secondary'} href="/glossary?lang={lang}">
 				{t('glossary.backToList')}
 			</a>
 		{/if}
-		<a class="cta" class:secondary={inGlossary || !isNotFound} href="/?lang={lang}">
+		<a
+			class={inGlossary || !isNotFound ? 'chrome-control secondary' : 'cta'}
+			href="/?lang={lang}"
+		>
 			{t('error.backHome')}
 		</a>
 	</div>
 </div>
 
 <style>
+	/* An empty bowl on a plate, then the status stamped in copper. */
 	.wrap {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
 		gap: var(--space-2);
-		max-inline-size: 32rem;
+		max-inline-size: 34rem;
 		margin: var(--space-6) auto;
-		padding: var(--space-5);
+		padding: var(--space-6) var(--space-5);
+		background: var(--surface);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-card);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 0 var(--lo),
+			0 10px 20px -16px var(--lo-2);
+	}
+	.art {
+		display: grid;
+		place-items: center;
+		width: 5.5rem;
+		height: 5.5rem;
+		padding: 1rem;
+		margin-block-end: var(--space-2);
+		border-radius: 50%;
+		background: var(--surface-sunken);
+		box-shadow:
+			inset 0 0 0 1px var(--line-strong),
+			inset 0 2px 5px var(--lo);
 	}
 	.code {
+		margin: 0;
+		color: var(--primary);
 		font-family: var(--font-display);
 		font-size: 3.5rem;
-		font-weight: 700;
-		color: var(--primary);
+		font-weight: 800;
 		line-height: 1;
-		margin: 0;
+		font-variant-numeric: tabular-nums;
 	}
 	h1 {
 		margin: 0;
+		overflow-wrap: anywhere;
 	}
 	.body {
+		margin: 0;
+		max-inline-size: 34ch;
 		color: var(--muted);
-		max-inline-size: 30ch;
 	}
 	.actions {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
 		gap: var(--space-2);
-		margin-block-start: var(--space-2);
+		margin-block-start: var(--space-3);
 	}
+	.cta,
+	.secondary {
+		padding-inline: 1.3rem;
+		font-weight: 700;
+		text-decoration: none;
+	}
+	/* Polished copper, the glossary search button's finish. */
 	.cta {
 		display: inline-flex;
 		align-items: center;
-		background: var(--primary);
+		min-block-size: var(--tap);
+		border: 1px solid color-mix(in srgb, var(--primary) 75%, black);
+		border-radius: var(--radius-btn);
+		background:
+			linear-gradient(180deg, rgb(255 255 255 / 22%), transparent 34% 66%, rgb(0 0 0 / 14%)),
+			var(--primary);
 		color: var(--on-primary);
-		text-decoration: none;
-		border: 1px solid var(--primary);
-		border-radius: var(--radius-pill);
-		padding: 0.6rem 1.4rem;
-		min-block-size: 2.75rem;
-		font-weight: 700;
-		box-shadow: var(--shadow-2);
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 30%),
+			0 8px 18px -12px var(--primary);
+		transition: transform var(--dur) var(--ease-out);
 	}
-	.cta:hover {
-		box-shadow: var(--shadow-1);
+	.cta:active {
+		transform: translateY(1px);
 	}
-	.cta.secondary {
-		background: var(--surface);
-		color: var(--primary);
-		box-shadow: var(--shadow-1);
+	@media (forced-colors: active) {
+		.cta {
+			background: ButtonFace;
+			color: ButtonText;
+			border-color: ButtonText;
+		}
 	}
 </style>

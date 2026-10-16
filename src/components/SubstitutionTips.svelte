@@ -10,7 +10,7 @@
 </script>
 
 {#if tips.length}
-	<section class="card tips">
+	<section class="sheet tips">
 		<h2>{t('tips.heading')}</h2>
 		<p class="muted">{t('tips.intro')}</p>
 		<ul>
@@ -38,11 +38,24 @@
 {/if}
 
 <style>
-	.tips {
-		margin-top: var(--space-5);
+	/* Same raised sheet as the recipe method (recipe/[id]/+page.svelte). */
+	.sheet {
+		margin-block-start: var(--space-5);
+		padding: var(--space-4);
+		background: var(--surface);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-card);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 0 var(--lo),
+			0 10px 20px -16px var(--lo-2);
 	}
 	.tips h2 {
-		margin-top: 0;
+		margin: 0 0 var(--space-1);
+		font-size: 1.35rem;
+	}
+	.tips > p {
+		margin: 0;
 	}
 	ul {
 		list-style: none;
@@ -52,7 +65,7 @@
 	li {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: baseline;
+		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2);
 		padding: var(--space-2) 0;
@@ -63,19 +76,21 @@
 	}
 	.swap {
 		display: inline-flex;
+		flex-wrap: wrap;
 		align-items: center;
 		gap: 0.4rem;
+		min-width: 0;
 	}
 	.from {
 		color: var(--muted);
 	}
 	.to {
-		font-weight: 600;
+		font-weight: 700;
 	}
 	.tip-arrow {
 		width: 1.1em;
 		height: 1.1em;
-		color: var(--muted);
+		color: var(--primary);
 		flex: none;
 	}
 	/* Same mirroring precedent as .back svg on the recipe page: the arrow
@@ -83,10 +98,25 @@
 	:global([dir='rtl']) .tip-arrow {
 		transform: scaleX(-1);
 	}
+	/* --on-ok-tint is the token measured for text on this 14% accent tint. */
 	.benefit {
-		color: var(--accent);
-		font-size: 0.82rem;
-		font-weight: 600;
-		white-space: nowrap;
+		padding: 0.1rem 0.6rem;
+		border-radius: var(--radius-pill);
+		background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+		color: var(--on-ok-tint);
+		font-size: 0.78rem;
+		font-weight: 700;
+	}
+
+	@media print {
+		.sheet {
+			box-shadow: none;
+			break-inside: avoid;
+		}
+	}
+	@media (forced-colors: active) {
+		.benefit {
+			border: 1px solid CanvasText;
+		}
 	}
 </style>

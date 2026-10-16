@@ -5,9 +5,14 @@
 	import SubstitutionTips from '$components/SubstitutionTips.svelte';
 	import IngredientIcon from '$components/IngredientIcon.svelte';
 	import FavoriteButton from '$components/FavoriteButton.svelte';
+	import BalanceGrade from '$components/BalanceGrade.svelte';
+	import FoodIcon from '$components/FoodIcon.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
 	import { DIFFICULTY_MAX } from '$lib/config';
+	import { FALLBACK_EMOJI } from '$lib/emoji';
+	import { cuisineIcon, mealIcon } from '$lib/icons';
 	import { t as translator } from '$lib/i18n';
+	import { nutritionVisible } from '$lib/nutrition';
 	import { splitSteps } from '$lib/steps';
 	import { equivalentOf } from '$lib/measure';
 	import { commonsSrcset } from '$lib/photo';
@@ -51,9 +56,19 @@
 	// "Middle Eastern" — the keys already existed in all ten locales.
 	const tags = $derived(
 		[
-			data.recipe.cuisine ? t(`cuisine.${data.recipe.cuisine}`) : null,
-			data.recipe.meal_type ? t(`meal.${data.recipe.meal_type}`) : null
-		].filter((tag): tag is string => Boolean(tag))
+			data.recipe.cuisine
+				? { key: 'cuisine', label: t(`cuisine.${data.recipe.cuisine}`), icon: cuisineIcon(data.recipe.cuisine) }
+				: null,
+			data.recipe.meal_type
+				? { key: 'meal', label: t(`meal.${data.recipe.meal_type}`), icon: mealIcon(data.recipe.meal_type) }
+				: null
+		].filter((tag) => tag !== null)
+	);
+	// Most recipes have no photo: the frame then shows the dish on the board,
+	// the same glyph the result card used to get the visitor here.
+	const dishIcon = $derived(tags[0]?.icon ?? FALLBACK_EMOJI);
+	const grade = $derived(
+		nutritionVisible(data.recipe.nutrition_coverage) ? data.recipe.balance_grade : null
 	);
 </script>
 
@@ -90,7 +105,7 @@
 		</a>
 		<div class="toolbar-actions">
 			<FavoriteButton id={data.recipe.id} {t} />
-			<button type="button" class="print-btn" onclick={() => window.print()}>
+			<button type="button" class="chrome-control print-btn" onclick={() => window.print()}>
 				<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
 					<path
 						d="M10 2.8v9.4m0 0-3.2-3.2M10 12.2l3.2-3.2M4.4 14v1.8c0 .66.54 1.2 1.2 1.2h8.8c.66 0 1.2-.54 1.2-1.2V14"
@@ -106,123 +121,144 @@
 		</div>
 	</div>
 
-	<header class="hero">
+	<header class="hero" class:has-photo={Boolean(data.recipe.image_url)}>
 		{#if data.recipe.image_url}
 			<!-- width/height come from the API so the box is reserved before the image
 			     arrives (no layout shift). Eager with high priority because this is the
 			     page's lead image and LCP element, above the fold. `sizes` follows the
-			     full-bleed hero: the viewport on phones, the 78rem page column minus its
-			     padding on wide screens. `no-referrer` keeps the visitor's page out of
+			     hero's photo column: the viewport on phones, at most ~40rem once the
+			     hero splits into photo and text. `no-referrer` keeps the visitor's page out of
 			     Wikimedia's logs, which is the privacy cost of hotlinking rather than
 			     mirroring. -->
-			<img
-				class="photo"
-				src={data.recipe.image_url}
-				{srcset}
-				sizes={srcset ? '(min-width: 78rem) 75rem, 100vw' : undefined}
-				width={data.recipe.image_width}
-				height={data.recipe.image_height}
-				alt={title}
-				loading="eager"
-				fetchpriority="high"
-				decoding="async"
-				referrerpolicy="no-referrer"
-			/>
+			<div class="photo">
+				<img
+					src={data.recipe.image_url}
+					{srcset}
+					sizes={srcset ? '(min-width: 52rem) 40rem, 100vw' : undefined}
+					width={data.recipe.image_width}
+					height={data.recipe.image_height}
+					alt={title}
+					loading="eager"
+					fetchpriority="high"
+					decoding="async"
+					referrerpolicy="no-referrer"
+				/>
+			</div>
+		{:else}
+			<div class="photo board no-print" aria-hidden="true">
+				<span class="dish"><FoodIcon cp={dishIcon} size={96} /></span>
+			</div>
 		{/if}
-		{#if tags.length}
-			<p class="eyebrow">{tags.join(' · ')}</p>
-		{/if}
-		<h1>{title}</h1>
+		<div class="hero-body">
+			{#if tags.length}
+				<p class="eyebrow">
+					{#each tags as tag, i (tag.key)}
+						{#if i > 0}<span class="sep" aria-hidden="true">·</span>{/if}
+						<span class="eyebrow-tag">
+							<span class="eyebrow-icon"><FoodIcon cp={tag.icon} size={20} /></span>
+							{tag.label}
+						</span>
+					{/each}
+				</p>
+			{/if}
+			<h1>{title}</h1>
 
-		<ul class="stats">
-			{#if data.recipe.total_minutes}
-				<li>
-					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<path
-							d="M12 3.8a8.2 8.2 0 1 1 0 16.4 8.2 8.2 0 0 1 0-16.4ZM12 7.6V12l3 2"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span><strong>{data.recipe.total_minutes}</strong> {t('card.minutes')}</span>
-				</li>
-			{/if}
-			{#if data.recipe.difficulty}
-				<li>
-					<!-- A filled/empty pip meter rather than a bare number: "3" means
-					     nothing without its scale, and the scale is only 1-4. The
-					     accessible name carries the same information as text, since the
-					     pips are decorative shapes. -->
-					<span
-						class="pips"
-						role="img"
-						aria-label="{t('recipe.difficulty')}: {data.recipe.difficulty}/{DIFFICULTY_MAX}"
-					>
-						{#each Array(DIFFICULTY_MAX) as _, i (i)}
-							<span class="pip" class:on={i < data.recipe.difficulty}></span>
-						{/each}
-					</span>
-					<span>{t('recipe.difficulty')}</span>
-				</li>
-			{/if}
-			{#if data.recipe.servings}
-				<li>
-					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<path
-							d="M3.6 12.4h16.8a8.4 8.4 0 0 1-16.8 0ZM2.4 12.4h19.2M12 5.6V8.4M9.6 7l2.4-1.4L14.4 7"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span><strong>{data.recipe.servings}</strong> {t('recipe.servings')}</span>
-					{#if data.recipe.servings_assumed}
-						<!-- Was <abbr title>, which abbreviates nothing and is mouse-hover-only:
-						     the caveat was invisible to keyboard and touch users. Now visible text. -->
-						<em class="assumed">({t('recipe.assumed')})</em>
-					{/if}
-				</li>
-			{/if}
-			{#if data.recipe.kcal}
-				<li>
-					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<path
-							d="M13.4 2.6c.6 3-.6 4.8-2.4 6.6-2 2-4.4 3.8-4.4 7.2a6.4 6.4 0 0 0 12.8 0c0-2.2-1-4-2.2-5.4-.4 1.4-1.2 2.2-2.2 2.4 1-3.6-.4-8.2-1.6-10.8Z"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span><strong>{Math.round(data.recipe.kcal)}</strong> {t('nutrition.kcal')}</span>
-				</li>
-			{/if}
-			{#if machine}
-				<li class="mt">
-					<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-						<path
-							d="M3.6 7.2h8.4M7.8 4.8v2.4c0 3.6-1.8 6-4.2 7.2M8.4 10.8c0 3 2.4 4.8 5.4 5.4M13.2 19.2l3.6-9.6 3.6 9.6M14.6 16.2h4.4"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span>{t('recipe.autoTranslated')}</span>
-				</li>
-			{/if}
-		</ul>
+			<ul class="stats">
+				{#if data.recipe.total_minutes}
+					<li>
+						<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+							<path
+								d="M12 3.8a8.2 8.2 0 1 1 0 16.4 8.2 8.2 0 0 1 0-16.4ZM12 7.6V12l3 2"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<span><strong>{data.recipe.total_minutes}</strong> {t('card.minutes')}</span>
+					</li>
+				{/if}
+				{#if data.recipe.difficulty}
+					<li>
+						<!-- A filled/empty pip meter rather than a bare number: "3" means
+						     nothing without its scale, and the scale is only 1-4. The
+						     accessible name carries the same information as text, since the
+						     pips are decorative shapes. -->
+						<span
+							class="pips"
+							role="img"
+							aria-label="{t('recipe.difficulty')}: {data.recipe.difficulty}/{DIFFICULTY_MAX}"
+						>
+							{#each Array(DIFFICULTY_MAX) as _, i (i)}
+								<span class="pip" class:on={i < data.recipe.difficulty}></span>
+							{/each}
+						</span>
+						<span>{t('recipe.difficulty')}</span>
+					</li>
+				{/if}
+				{#if data.recipe.servings}
+					<li>
+						<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+							<path
+								d="M3.6 12.4h16.8a8.4 8.4 0 0 1-16.8 0ZM2.4 12.4h19.2M12 5.6V8.4M9.6 7l2.4-1.4L14.4 7"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<span><strong>{data.recipe.servings}</strong> {t('recipe.servings')}</span>
+						{#if data.recipe.servings_assumed}
+							<!-- Was <abbr title>, which abbreviates nothing and is mouse-hover-only:
+							     the caveat was invisible to keyboard and touch users. Now visible text. -->
+							<em class="assumed">({t('recipe.assumed')})</em>
+						{/if}
+					</li>
+				{/if}
+				{#if data.recipe.kcal}
+					<li>
+						<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+							<path
+								d="M13.4 2.6c.6 3-.6 4.8-2.4 6.6-2 2-4.4 3.8-4.4 7.2a6.4 6.4 0 0 0 12.8 0c0-2.2-1-4-2.2-5.4-.4 1.4-1.2 2.2-2.2 2.4 1-3.6-.4-8.2-1.6-10.8Z"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<span><strong>{Math.round(data.recipe.kcal)}</strong> {t('nutrition.kcal')}</span>
+					</li>
+				{/if}
+				{#if machine}
+					<li class="mt">
+						<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+							<path
+								d="M3.6 7.2h8.4M7.8 4.8v2.4c0 3.6-1.8 6-4.2 7.2M8.4 10.8c0 3 2.4 4.8 5.4 5.4M13.2 19.2l3.6-9.6 3.6 9.6M14.6 16.2h4.4"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<span>{t('recipe.autoTranslated')}</span>
+					</li>
+				{/if}
+				{#if grade}
+					<li class="stat-grade">
+						<BalanceGrade {grade} gradeLabel={t('grade.label')} />
+						<span aria-hidden="true">{t('grade.label')}</span>
+					</li>
+				{/if}
+			</ul>
+		</div>
 	</header>
 
 	<div class="cols">
-		<section class="panel">
+		<section class="panel ingredients-panel">
 			<h2>{t('recipe.ingredients')}</h2>
 			<ul class="ingredients">
 				{#each data.recipe.ingredients as ingredient (ingredient.id)}
@@ -233,7 +269,7 @@
 								category={ingredient.category}
 							/>
 						</span>
-						<span>
+						<span class="ing-text">
 							{data.lang === data.recipe.source_lang && ingredient.raw_text
 								? ingredient.raw_text
 								: ingredient.name}
@@ -250,7 +286,7 @@
 			</ul>
 		</section>
 
-		<section class="method">
+		<section class="method sheet">
 			<h2>{t('recipe.instructions')}</h2>
 			<ol>
 				{#each steps as step, index (index)}
@@ -268,7 +304,7 @@
 	     Arabic page would be worse than omitting them. Same rule already applied
 	     to ingredient `raw_text` above. -->
 	{#if notes.length && data.lang === data.recipe.source_lang}
-		<section class="card notes">
+		<section class="sheet notes">
 			<h2>{t('recipe.notes')}</h2>
 			<ul>
 				{#each notes as note, index (index)}
@@ -334,20 +370,22 @@
 	.back {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
-		font-size: 0.85rem;
-		font-weight: 600;
+		gap: 0.35rem;
+		/* 44px: the only back affordance on the page. */
+		min-height: var(--tap);
+		padding-inline-end: var(--space-2);
+		color: var(--ink);
+		font-size: 0.92rem;
+		font-weight: 700;
 		text-decoration: none;
-		color: var(--muted);
-		/* 44px — the only back affordance on the page. */
-		min-height: 2.75rem;
 	}
 	.back:hover {
 		color: var(--primary);
 	}
 	.back svg {
-		width: 1.1em;
-		height: 1.1em;
+		width: 1.15rem;
+		height: 1.15rem;
+		color: var(--primary);
 	}
 	/* The chevron points back along the reading direction in both scripts. */
 	:global([dir='rtl']) .back svg {
@@ -355,107 +393,221 @@
 	}
 
 	.print-btn {
+		gap: 0.45rem;
+		padding-inline: 0.95rem;
+		font-size: 0.85rem;
+		font-weight: 700;
+	}
+	.print-btn svg {
+		width: 1.1rem;
+		height: 1.1rem;
+	}
+
+	/* A sheet of the worktop: solid surface, steel edge, the same 1px bevel as
+	   the chrome so it reads as lying on the brushed ground. */
+	.hero,
+	.sheet {
+		background: var(--surface);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-card);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 0 var(--lo),
+			0 10px 20px -16px var(--lo-2);
+	}
+
+	/* Photo (or the board standing in for one) beside the title on wide screens,
+	   above it on phones. */
+	.hero {
+		display: grid;
+		overflow: hidden;
+		margin: var(--space-3) 0 var(--space-5);
+	}
+	@media (min-width: 52rem) {
+		.hero {
+			grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+		}
+	}
+
+	.photo {
+		position: relative;
+		aspect-ratio: 4 / 3;
+		min-height: 13rem;
+		background: var(--surface-sunken);
+	}
+	/* object-fit inside a frame of its own ratio: the frame is reserved before
+	   the image lands, whatever its stored dimensions. */
+	.photo > img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	@media (min-width: 52rem) {
+		.photo {
+			aspect-ratio: auto;
+			min-height: 22rem;
+		}
+	}
+
+	/* No photo: the dish on the wooden board, drawn the way the home page's
+	   board is (plank seams and slanted grain in black/white alpha over
+	   --board), shallower on phones so the title stays on the first screen. */
+	.board {
+		display: grid;
+		place-items: center;
+		isolation: isolate;
+		aspect-ratio: 16 / 7;
+		min-height: 9rem;
+		background-color: var(--board);
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 25%),
+			inset 0 -1px 0 var(--board-edge);
+	}
+	.board::before {
+		content: '';
+		position: absolute;
+		inset: 0;
+		z-index: -1;
+		background-image:
+			repeating-linear-gradient(
+				180deg,
+				transparent 0 calc(4.5rem - 2px),
+				rgb(0 0 0 / 20%) calc(4.5rem - 2px) calc(4.5rem - 1px),
+				rgb(255 255 255 / 12%) calc(4.5rem - 1px) 4.5rem
+			),
+			repeating-linear-gradient(
+				176deg,
+				rgb(0 0 0 / 4.5%) 0 1px,
+				transparent 1px 6px,
+				rgb(255 255 255 / 5%) 6px 7px,
+				transparent 7px 13px
+			),
+			repeating-linear-gradient(183deg, transparent 0 21px, rgb(0 0 0 / 5%) 21px 23px, transparent 23px 47px);
+		pointer-events: none;
+	}
+	@media (min-width: 52rem) {
+		.board {
+			aspect-ratio: auto;
+		}
+	}
+	/* A plate on the board, the same --surface medallion the tiles use. */
+	.dish {
+		display: grid;
+		place-items: center;
+		width: clamp(6rem, 4rem + 9vw, 10rem);
+		aspect-ratio: 1;
+		/* Not a percentage: padding resolves against the board's width. */
+		padding: clamp(1.1rem, 0.7rem + 1.6vw, 1.8rem);
+		border-radius: 50%;
+		background: var(--surface);
+		box-shadow:
+			inset 0 0 0 1px var(--line-strong),
+			inset 0 -6px 12px -6px var(--lo-2),
+			0 2px 0 var(--board-edge),
+			0 18px 26px -14px rgb(0 0 0 / 55%);
+	}
+
+	.hero-body {
+		display: grid;
+		align-content: center;
+		gap: var(--space-3);
+		min-width: 0;
+		padding: var(--space-5);
+	}
+	@media (max-width: 30rem) {
+		.hero-body {
+			padding: var(--space-4);
+		}
+	}
+
+	.eyebrow {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-1) var(--space-2);
+		margin: 0;
+		color: var(--primary);
+		font-size: 0.75rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+	/* Tracking pulls joined scripts apart (Arabic, Shahmukhi) and breaks the
+	   Devanagari and Bengali headline; caps tracking is a Latin habit. */
+	.eyebrow:is(:lang(ar), :lang(pnb), :lang(hi), :lang(bn)) {
+		letter-spacing: 0;
+	}
+	.eyebrow-tag {
 		display: inline-flex;
 		align-items: center;
 		gap: 0.4rem;
-		min-height: 2.75rem;
-		padding: 0.4rem 0.9rem;
-		border: 1px solid var(--line-strong);
-		border-radius: var(--radius-pill);
-		background: var(--surface);
+	}
+	.eyebrow-icon {
+		display: grid;
+		place-items: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0.2rem;
+		flex: none;
+		border-radius: 50%;
+		background: var(--surface-sunken);
+		box-shadow: inset 0 0 0 1px var(--line);
+	}
+	.sep {
 		color: var(--muted);
-		font-size: 0.85rem;
-		font-weight: 600;
-		box-shadow: var(--shadow-1);
-	}
-	.print-btn:hover {
-		color: var(--primary);
-		border-color: var(--primary);
-	}
-	.print-btn svg {
-		width: 1.1em;
-		height: 1.1em;
 	}
 
-	/* Flatten this page's own hero gradients for print ("no gradients") and
-	   keep each logical block from splitting across a page break. Chrome hiding
-	   (.no-print) and the global light-palette/doodle override live in app.css. */
-	@media print {
-		.hero {
-			background: var(--surface) !important;
-			box-shadow: none;
-		}
-		.hero,
-		.panel,
-		.method li,
-		.ingredients li,
-		.notes {
-			break-inside: avoid;
-		}
-	}
-
-	/* Editorial opener: the title carries the page and the numbers sit under it as
-	   an at-a-glance strip rather than another paragraph of grey text. */
-	.hero {
-		position: relative;
-		overflow: hidden;
-		margin: var(--space-2) 0 var(--space-5);
-		padding: var(--space-5);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-lg);
-		background:
-			radial-gradient(
-				30rem 16rem at 12% -6rem,
-				color-mix(in srgb, var(--primary) 16%, transparent),
-				transparent 70%
-			),
-			radial-gradient(
-				24rem 14rem at 92% 120%,
-				color-mix(in srgb, var(--accent) 14%, transparent),
-				transparent 70%
-			),
-			var(--surface);
-		box-shadow: var(--shadow-1);
-	}
-	.eyebrow {
-		margin: 0 0 var(--space-2);
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		color: var(--primary);
-	}
 	.hero h1 {
-		font-size: clamp(1.8rem, 1.1rem + 3vw, 3rem);
-		max-width: 18ch;
+		margin: 0;
+		font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+		line-height: 1.05;
+		overflow-wrap: anywhere;
 	}
 
+	/* The numbers as an at-a-glance strip, each over a hairline rule. */
 	.stats {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2) var(--space-4);
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+		gap: var(--space-3);
 		list-style: none;
-		margin: var(--space-4) 0 0;
+		margin: var(--space-2) 0 0;
 		padding: 0;
 	}
 	.stats li {
-		display: inline-flex;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr);
 		align-items: center;
-		gap: 0.4rem;
-		font-size: 0.9rem;
+		gap: 0.15rem 0.45rem;
+		padding-block-start: var(--space-2);
+		border-block-start: 1px solid var(--line);
 		color: var(--muted);
+		font-size: 0.85rem;
 	}
 	.stats strong {
 		font-family: var(--font-display);
-		font-size: 1.15rem;
+		font-size: 1.2rem;
 		color: var(--ink);
+		font-variant-numeric: tabular-nums;
 	}
 	.stats svg {
-		width: 1.25rem;
-		height: 1.25rem;
+		width: 1.3rem;
+		height: 1.3rem;
+		flex: none;
 		color: var(--primary);
 	}
 	.stats .mt svg {
+		color: var(--muted);
+	}
+	.stats .stat-grade {
+		grid-column: 1 / -1;
+		gap: var(--space-2);
+	}
+	.assumed {
+		grid-column: 1 / -1;
+		font-size: 0.8rem;
+		font-style: italic;
 		color: var(--muted);
 	}
 
@@ -468,69 +620,14 @@
 		align-items: center;
 	}
 	.pip {
-		width: 0.5rem;
-		height: 0.5rem;
+		width: 0.55rem;
+		height: 0.55rem;
 		border-radius: 50%;
-		border: 1.5px solid var(--line-strong);
+		border: 1.5px solid var(--muted);
 	}
 	.pip.on {
 		background: var(--primary);
 		border-color: var(--primary);
-	}
-	@media (forced-colors: active) {
-		.pip {
-			border-color: CanvasText;
-		}
-		.pip.on {
-			background: CanvasText;
-			border-color: CanvasText;
-		}
-	}
-
-	/* Quieter than the ingredient name it follows: this is a convenience, and it
-	   must not compete with the source's own wording. */
-	/* Full-bleed inside the hero card, above the eyebrow. aspect-ratio comes from
-	   the stored dimensions via the width/height attributes, so the box is reserved
-	   and nothing shifts when the image lands. */
-	.photo {
-		display: block;
-		width: 100%;
-		height: auto;
-		max-height: 22rem;
-		object-fit: cover;
-		border-radius: var(--radius) var(--radius) 0 0;
-		margin: calc(-1 * var(--space-5)) calc(-1 * var(--space-5)) var(--space-4);
-		width: calc(100% + 2 * var(--space-5));
-		background: var(--surface-sunken);
-	}
-
-	.equiv {
-		color: var(--muted);
-		font-size: 0.85em;
-		white-space: nowrap;
-	}
-
-	.notes {
-		margin-top: var(--space-5);
-	}
-	.notes h2 {
-		margin: 0 0 var(--space-3);
-		font-size: 1.05rem;
-	}
-	.notes ul {
-		margin: 0;
-		padding-left: 1.1rem;
-		display: grid;
-		gap: var(--space-2);
-	}
-	.notes li {
-		font-size: 0.92rem;
-		line-height: 1.55;
-	}
-	.assumed {
-		font-size: 0.8rem;
-		font-style: italic;
-		color: var(--muted);
 	}
 
 	.cols {
@@ -540,24 +637,28 @@
 	}
 	@media (min-width: 52rem) {
 		.cols {
-			grid-template-columns: minmax(15rem, 1fr) minmax(0, 1.9fr);
+			grid-template-columns: minmax(16rem, 1fr) minmax(0, 1.8fr);
 			align-items: start;
 		}
-		.panel {
+		.ingredients-panel {
 			position: sticky;
 			top: var(--space-4);
 		}
 	}
 
+	/* Sunk into the worktop, where the method sheet is raised from it. */
 	.panel {
-		background: var(--surface-sunken);
-		border: 1px solid var(--line);
-		border-radius: var(--radius-lg);
 		padding: var(--space-4);
+		background: var(--surface-sunken);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-card);
+		box-shadow: inset 0 1px 3px var(--lo);
 	}
 	.panel h2,
-	.method h2 {
-		margin-top: 0;
+	.method h2,
+	.notes h2 {
+		margin: 0 0 var(--space-2);
+		font-size: 1.35rem;
 	}
 
 	.ingredients {
@@ -568,20 +669,42 @@
 	.ingredients li {
 		display: flex;
 		align-items: center;
-		gap: var(--space-2);
-		padding: var(--space-2) 0;
-		font-size: 0.92rem;
+		gap: var(--space-3);
+		padding-block: 0.5rem;
+		font-size: 0.95rem;
 	}
 	.ingredients li + li {
 		border-block-start: 1px solid var(--line);
 	}
+	/* The same medallion as the home tiles, ringed in the category's line. */
 	.art {
-		width: 1.75rem;
-		height: 1.75rem;
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0.32rem;
 		flex: none;
-		color: var(--cat-ink, var(--muted));
+		border-radius: 50%;
+		background: var(--surface);
+		box-shadow:
+			inset 0 0 0 1px var(--cat-line, var(--line-strong)),
+			0 1px 0 var(--hi);
+	}
+	.ing-text {
+		min-width: 0;
+		overflow-wrap: anywhere;
+	}
+	/* Quieter than the ingredient name it follows: this is a convenience, and it
+	   must not compete with the source's own wording. */
+	.equiv {
+		color: var(--muted);
+		font-size: 0.85em;
+		white-space: nowrap;
 	}
 
+	.method {
+		padding: var(--space-4) var(--space-5);
+	}
 	.method ol {
 		list-style: none;
 		margin: 0;
@@ -589,7 +712,7 @@
 	}
 	.method li {
 		display: grid;
-		grid-template-columns: 2.5rem 1fr;
+		grid-template-columns: 2.3rem minmax(0, 1fr);
 		gap: var(--space-3);
 		align-items: start;
 		padding-block: var(--space-3);
@@ -597,23 +720,114 @@
 	.method li + li {
 		border-block-start: 1px solid var(--line);
 	}
+	/* A stamped steel pip per step. Body face, not the display serif: under
+	   :lang(pnb) or the system fallback the numbers stay Western and even. */
 	.num {
-		font-family: var(--font-display);
-		font-size: 1.5rem;
+		display: grid;
+		place-items: center;
+		width: 2.3rem;
+		height: 2.3rem;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-sm);
+		background: var(--sheen);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 1px var(--lo-2);
+		color: var(--ink);
+		font-family: var(--font-body);
+		font-size: 0.95rem;
 		font-weight: 700;
 		line-height: 1;
-		color: var(--primary);
-		/* Optical alignment with the first line of the step text. */
-		padding-block-start: 0.1rem;
 		font-variant-numeric: tabular-nums;
 	}
 	.method p {
 		margin: 0;
 		max-width: 62ch;
+		/* Optical alignment of the first line with the middle of the pip. */
+		padding-block-start: 0.3rem;
 		line-height: 1.7;
+	}
+
+	.notes {
+		margin-top: var(--space-5);
+		padding: var(--space-4);
+	}
+	.notes ul {
+		margin: 0;
+		padding-inline-start: 1.1rem;
+		display: grid;
+		gap: var(--space-2);
+	}
+	.notes li {
+		font-size: 0.92rem;
+		line-height: 1.55;
+	}
+	.notes li::marker {
+		color: var(--primary);
 	}
 
 	.source {
 		margin-top: var(--space-5);
+		overflow-wrap: anywhere;
+	}
+	.source + .source {
+		margin-top: var(--space-1);
+	}
+
+	@media (forced-colors: active) {
+		.pip {
+			border-color: CanvasText;
+		}
+		.pip.on {
+			background: CanvasText;
+			border-color: CanvasText;
+		}
+		.board::before {
+			display: none;
+		}
+		.num {
+			background: Canvas;
+		}
+	}
+
+	/* Print: flat (no gradients, no bevels), one column, and each logical block
+	   kept off a page break. Chrome hiding (.no-print, which also drops the
+	   empty board) and the global light-palette override live in app.css. */
+	@media print {
+		.hero,
+		.sheet,
+		.panel {
+			background: var(--surface) !important;
+			box-shadow: none;
+		}
+		.hero {
+			display: block;
+		}
+		.photo {
+			aspect-ratio: auto;
+			min-height: 0;
+			height: 18rem;
+		}
+		.hero-body {
+			padding: var(--space-4);
+		}
+		.cols {
+			display: block;
+		}
+		.ingredients-panel {
+			position: static;
+			margin-bottom: var(--space-4);
+		}
+		.num {
+			background: none;
+			box-shadow: none;
+		}
+		.hero,
+		.panel,
+		.method li,
+		.ingredients li,
+		.notes {
+			break-inside: avoid;
+		}
 	}
 </style>

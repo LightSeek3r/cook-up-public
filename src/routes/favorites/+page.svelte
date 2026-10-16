@@ -3,6 +3,8 @@
 	import RecipeHits from '$components/RecipeHits.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
 	import LoadError from '$components/LoadError.svelte';
+	import FoodIcon from '$components/FoodIcon.svelte';
+	import { FALLBACK_EMOJI } from '$lib/emoji';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 	import { apiUrl } from '$lib/httpCache';
@@ -79,15 +81,98 @@
 {#if failed}
 	<LoadError message={t('error.loadFailed')} retryLabel={t('error.retry')} onRetry={retry} />
 {:else if !loaded}
-	<p class="muted state">{t('results.loading')}</p>
+	<p class="muted loading">{t('results.loading')}</p>
+	<div class="skeleton" aria-hidden="true">
+		{#each { length: Math.min(Math.max(favoriteIds.length, 1), 4) } as _, i (i)}
+			<span class="row"><span class="dot"></span><span class="bar"></span></span>
+		{/each}
+	</div>
 {:else if ordered.length === 0}
-	<p class="muted state">{t('favorites.empty')}</p>
+	<div class="empty">
+		<span class="empty-art"><FoodIcon cp={FALLBACK_EMOJI} size={56} /></span>
+		<p class="empty-title">{t('favorites.empty')}</p>
+		<a class="chrome-control home" href="/?lang={lang}">{t('error.backHome')}</a>
+	</div>
 {:else}
 	<RecipeHits recipes={ordered} {lang} {t} heading={t('favorites.heading')} />
 {/if}
 
 <style>
-	.state {
-		margin: var(--space-4) 0;
+	.loading {
+		margin: var(--space-4) 0 var(--space-2);
+	}
+	/* The shape of the list about to arrive, one row per saved recipe. */
+	.skeleton {
+		display: grid;
+		border: 1px solid var(--line);
+		border-radius: var(--radius);
+		background: var(--surface);
+		overflow: hidden;
+	}
+	.row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		min-height: 44px;
+		padding: var(--space-2) var(--space-3);
+	}
+	.row + .row {
+		border-top: 1px solid var(--line);
+	}
+	.dot,
+	.bar {
+		background: var(--surface-sunken);
+		animation: pulse 1.2s ease-in-out infinite alternate;
+	}
+	.dot {
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: var(--radius-sm);
+	}
+	.bar {
+		width: min(20rem, 60%);
+		height: 0.85rem;
+		border-radius: var(--radius-pill);
+	}
+	@keyframes pulse {
+		to {
+			opacity: 0.45;
+		}
+	}
+
+	.empty {
+		display: grid;
+		justify-items: center;
+		gap: var(--space-3);
+		margin: var(--space-5) 0;
+		padding: var(--space-6) var(--space-4);
+		border: 1.5px dashed var(--line-strong);
+		border-radius: var(--radius-card);
+		text-align: center;
+	}
+	.empty-art {
+		display: grid;
+		place-items: center;
+		width: 4.5rem;
+		height: 4.5rem;
+		padding: 0.8rem;
+		border-radius: 50%;
+		background: var(--surface);
+		box-shadow:
+			inset 0 0 0 1px var(--line-strong),
+			0 1px 0 var(--hi);
+	}
+	.empty-title {
+		margin: 0;
+		max-width: 34ch;
+		font-family: var(--font-display);
+		font-size: 1.15rem;
+		font-weight: 700;
+	}
+	.home {
+		padding-inline: 1.1rem;
+		font-size: 0.9rem;
+		font-weight: 700;
+		text-decoration: none;
 	}
 </style>

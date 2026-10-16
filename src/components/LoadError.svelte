@@ -15,15 +15,17 @@
 
 <div class="load-error" role={announce ? 'alert' : undefined}>
 	<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-		<circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.7" />
-		<path d="M10 5.8v5.2" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" />
-		<circle cx="10" cy="14" r="1.1" fill="currentColor" />
+		<path d="M10 3 18 17H2Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+		<path d="M10 8v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+		<circle cx="10" cy="14.6" r="1.1" fill="currentColor" />
 	</svg>
 	<p>{message}</p>
-	<button type="button" onclick={onRetry}>{retryLabel}</button>
+	<button type="button" class="chrome-control" onclick={onRetry}>{retryLabel}</button>
 </div>
 
 <style>
+	/* A warning banner: the red runs down the start edge and tints the ground
+	   only faintly, so the message itself stays plain --ink. */
 	.load-error {
 		display: flex;
 		flex-wrap: wrap;
@@ -31,33 +33,27 @@
 		gap: var(--space-2) var(--space-3);
 		margin-block: var(--space-2);
 		padding: var(--space-3) var(--space-4);
-		border: 1px solid var(--line-strong);
-		border-inline-start: 4px solid var(--primary);
+		padding-inline-start: var(--space-3);
+		border: 1px solid color-mix(in srgb, var(--grade-e) 40%, var(--line-strong));
+		border-inline-start: 4px solid var(--grade-e);
 		border-radius: var(--radius);
-		background: var(--surface);
+		background: color-mix(in srgb, var(--grade-e) 7%, var(--surface));
 		color: var(--ink);
+		font-size: 0.92rem;
 	}
 	svg {
-		inline-size: 1.25rem;
-		block-size: 1.25rem;
+		inline-size: 1.35rem;
+		block-size: 1.35rem;
 		flex: none;
-		color: var(--primary);
+		color: var(--grade-e);
 	}
 	p {
 		flex: 1 1 14rem;
 		margin: 0;
 	}
 	button {
-		min-block-size: 2.75rem;
-		padding: 0.4rem 1rem;
-		border: 1px solid var(--primary);
-		border-radius: var(--radius-pill);
-		background: none;
-		color: var(--primary);
+		padding-inline: 1rem;
+		font-size: 0.85rem;
 		font-weight: 700;
-	}
-	button:hover {
-		background: var(--primary);
-		color: var(--on-primary);
 	}
 </style>

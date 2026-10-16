@@ -40,16 +40,18 @@
 	);
 </script>
 
-<section class="card">
+<section class="sheet nutrition">
 	<div class="head">
 		<h2>{t('nutrition.heading')}</h2>
 		{#if visible}
-			<BalanceGrade
-				grade={recipe.balance_grade}
-				score={recipe.balance_score}
-				showScore
-				gradeLabel={t('grade.label')}
-			/>
+			<span class="stamp">
+				<BalanceGrade
+					grade={recipe.balance_grade}
+					score={recipe.balance_score}
+					showScore
+					gradeLabel={t('grade.label')}
+				/>
+			</span>
 		{/if}
 	</div>
 
@@ -60,27 +62,29 @@
 
 		<dl>
 			{#each macros as macro (macro.key)}
-				<div>
+				<div class:lead={macro.key === 'kcal'}>
 					<dt>{t(`nutrition.${macro.key}`)}</dt>
-					<dd>{Math.round(macro.value ?? 0)}{macro.unit}</dd>
+					<dd>
+						{Math.round(macro.value ?? 0)}{#if macro.unit}<span class="unit">{macro.unit}</span>{/if}
+					</dd>
 				</div>
 			{/each}
 		</dl>
 
 		{#if highlights.high.length}
-			<p>
+			<p class="highlights">
 				<strong>{t('nutrition.highIn')}:</strong>
 				{listFormat.format(highlights.high.map((m) => microLabel(m.nutrient_key)))}
 			</p>
 		{/if}
 		{#if highlights.source.length}
-			<p>
+			<p class="highlights">
 				<strong>{t('nutrition.sourceOf')}:</strong>
 				{listFormat.format(highlights.source.map((m) => microLabel(m.nutrient_key)))}
 			</p>
 		{/if}
 
-		<details>
+		<details class="explain">
 			<summary>{t('grade.label')}</summary>
 			<p class="muted">{t('grade.explain')}</p>
 			{#if recipe.micronutrients.length}
@@ -109,46 +113,160 @@
 </section>
 
 <style>
+	/* Same raised sheet as the recipe method (recipe/[id]/+page.svelte). */
+	.sheet {
+		display: grid;
+		gap: var(--space-3);
+		margin-block-start: var(--space-5);
+		padding: var(--space-4);
+		background: var(--surface);
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-card);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 0 var(--lo),
+			0 10px 20px -16px var(--lo-2);
+	}
+	.sheet > * {
+		margin: 0;
+	}
 	.head {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2);
 	}
 	.head h2 {
 		margin: 0;
+		font-size: 1.35rem;
 	}
+	/* The grade as a larger stamp here, where it heads the numbers it sums up.
+	   span.grade outranks BalanceGrade's own single-class rule. */
+	.stamp :global(span.grade) {
+		height: 2.6rem;
+		padding: 0 0.8rem;
+		font-size: 1.3rem;
+	}
+
 	dl {
 		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		gap: 0.35rem var(--space-2);
-		margin: 0.75rem 0;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-2);
 	}
-	@media (min-width: 30rem) {
+	@media (min-width: 36rem) {
 		dl {
-			grid-template-columns: repeat(4, 1fr);
+			grid-template-columns: repeat(4, minmax(0, 1fr));
 		}
 	}
+	/* Each figure in a small recessed well. */
 	dl div {
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		padding: 0.35rem 0.5rem;
+		min-width: 0;
+		padding: 0.5rem 0.7rem;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-sm);
+		box-shadow: inset 0 1px 2px var(--lo);
+	}
+	dl .lead {
+		background: color-mix(in srgb, var(--primary) 8%, var(--surface));
+		border-color: color-mix(in srgb, var(--primary) 45%, var(--line-strong));
 	}
 	dt {
-		font-size: 0.75rem;
 		color: var(--muted);
+		font-size: 0.78rem;
+		font-weight: 600;
+		overflow-wrap: anywhere;
 	}
 	dd {
 		margin: 0;
+		font-size: 1.35rem;
+		font-weight: 700;
+		line-height: 1.3;
+		font-variant-numeric: tabular-nums;
+	}
+	.unit {
+		margin-inline-start: 0.1rem;
+		color: var(--muted);
+		font-size: 0.8rem;
 		font-weight: 600;
 	}
+
+	.highlights {
+		font-size: 0.92rem;
+	}
+
+	.explain summary {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		min-height: var(--tap);
+		width: fit-content;
+		font-weight: 700;
+		cursor: pointer;
+		list-style: none;
+	}
+	.explain summary::-webkit-details-marker {
+		display: none;
+	}
+	/* A chevron that turns down when open; it points along the reading
+	   direction while closed. */
+	.explain summary::before {
+		content: '';
+		flex: none;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-inline-end: 2px solid var(--primary);
+		border-block-end: 2px solid var(--primary);
+		transform: rotate(-45deg);
+		transition: transform var(--dur) var(--ease-out);
+	}
+	:global([dir='rtl']) .explain summary::before {
+		transform: rotate(45deg);
+	}
+	.explain[open] summary::before {
+		transform: rotate(45deg);
+	}
+	:global([dir='rtl']) .explain[open] summary::before {
+		transform: rotate(-45deg);
+	}
+	.explain > p {
+		margin: 0 0 var(--space-2);
+	}
+
 	table {
 		width: 100%;
 		border-collapse: collapse;
 		font-size: 0.85rem;
+		font-variant-numeric: tabular-nums;
 	}
+	th,
 	td {
-		border-top: 1px solid var(--line);
-		padding: 0.25rem 0;
+		padding: 0.35rem 0;
+		text-align: start;
+	}
+	thead th {
+		color: var(--muted);
+		font-size: 0.78rem;
+		font-weight: 600;
+	}
+	tbody th {
+		font-weight: 600;
+	}
+	tbody tr {
+		border-block-start: 1px solid var(--line);
+	}
+	td + td,
+	th + th {
+		text-align: end;
+	}
+
+	@media print {
+		.sheet {
+			box-shadow: none;
+			break-inside: avoid;
+		}
+		dl div {
+			box-shadow: none;
+		}
 	}
 </style>

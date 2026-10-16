@@ -3,6 +3,8 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import SeoHead from '$components/SeoHead.svelte';
+	import FoodIcon from '$components/FoodIcon.svelte';
+	import { FALLBACK_EMOJI } from '$lib/emoji';
 	import { t as translator } from '$lib/i18n';
 	import { MAX_QUERY } from '$lib/search';
 	import { CATEGORY_DATA_CAT } from '$lib/glossary/categories';
@@ -158,16 +160,17 @@
 <p class="count muted" aria-live="polite">{countText}</p>
 
 {#if hits.length === 0}
-	<div class="card empty">
-		<p>{t('glossary.empty')}</p>
-		<a class="clear" href={clearHref}>{t('glossary.clear')}</a>
+	<div class="empty">
+		<span class="empty-art"><FoodIcon cp={FALLBACK_EMOJI} size={56} /></span>
+		<p class="empty-title">{t('glossary.empty')}</p>
+		<a class="chrome-control clear" href={clearHref}>{t('glossary.clear')}</a>
 	</div>
 {:else}
 	<ul class="grid">
 		{#each hits as entry (entry.id)}
 			<li>
 				<a
-					class="card entry"
+					class="entry"
 					data-cat={CATEGORY_DATA_CAT[entry.category]}
 					href="/glossary/{entry.id}?lang={lang}"
 				>
@@ -210,9 +213,13 @@
 	</ul>
 {/if}
 
+
 <style>
 	.intro {
-		margin: var(--space-3) 0 var(--space-3);
+		margin: var(--space-3) 0;
+	}
+	.intro h1 {
+		font-size: clamp(1.8rem, 1.3rem + 1.8vw, 2.5rem);
 	}
 	.lede {
 		margin: var(--space-1) 0 0;
@@ -234,43 +241,65 @@
 	}
 	.field svg {
 		position: absolute;
-		inset-inline-start: 0.7rem;
-		width: 1.1rem;
-		height: 1.1rem;
+		inset-inline-start: 0.85rem;
+		width: 1.15rem;
+		height: 1.15rem;
 		color: var(--muted);
 		pointer-events: none;
 	}
+	/* A recessed well in the worktop, the same as the home search. */
 	.field input {
 		width: 100%;
-		min-height: 2.75rem;
-		padding: 0.5rem 0.7rem;
-		padding-inline-start: 2.35rem;
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
+		min-height: var(--tap);
+		padding: 0.45rem 0.85rem;
+		padding-inline-start: 2.6rem;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-btn);
 		background: var(--surface);
 		color: var(--ink);
-		box-shadow: var(--shadow-1);
+		/* 16px: below it iOS zooms the page on focus. */
+		font-size: 1rem;
+		box-shadow:
+			inset 0 1px 2px var(--lo-2),
+			0 1px 0 var(--hi);
 		transition: border-color var(--dur-fast) ease;
 	}
-	.field input:hover {
-		border-color: var(--line-strong);
+	.field input::placeholder {
+		color: var(--muted);
+		opacity: 1;
 	}
+	.field input:hover {
+		border-color: var(--muted);
+	}
+	/* Polished copper: a light/shade sheen over the fill, kept off the middle
+	   band where the label sits so --on-primary keeps its contrast. */
 	.submit {
-		min-height: 2.75rem;
-		min-width: 2.75rem;
-		padding: 0 1.1rem;
-		border: none;
-		border-radius: var(--radius-pill);
-		background: var(--primary);
+		min-height: var(--tap);
+		min-width: var(--tap);
+		padding: 0 1.2rem;
+		border: 1px solid color-mix(in srgb, var(--primary) 75%, black);
+		border-radius: var(--radius-btn);
+		background:
+			linear-gradient(180deg, rgb(255 255 255 / 22%), transparent 34% 66%, rgb(0 0 0 / 14%)),
+			var(--primary);
 		color: var(--on-primary);
 		font-weight: 700;
-		box-shadow: var(--shadow-2);
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 30%),
+			0 8px 18px -12px var(--primary);
+		transition: transform var(--dur) var(--ease-out);
+	}
+	.submit:active {
+		transform: translateY(1px);
 	}
 
+	/* Category switches, dressed like the home page's quick filters: steel
+	   face, an indicator lamp, pressed in when current. The category's own ink
+	   runs down the start edge, the same stripe as its cards below. */
 	.chips ul {
 		display: flex;
 		flex-wrap: wrap;
-		gap: var(--space-1);
+		gap: var(--space-2);
 		margin: 0;
 		padding: 0;
 		list-style: none;
@@ -278,35 +307,70 @@
 	.chip {
 		display: inline-flex;
 		align-items: center;
-		min-height: 2.75rem;
-		padding: 0.3rem 0.9rem;
-		background: var(--cat-tint, var(--surface));
-		color: var(--cat-ink, var(--ink));
-		border: 1px solid var(--cat-line, var(--line-strong));
-		border-radius: var(--radius-pill);
-		font-size: 0.85rem;
+		gap: 0.45rem;
+		min-height: var(--tap);
+		padding-inline: 0.7rem 0.65rem;
+		border: 1px solid var(--line-strong);
+		border-inline-start: 3px solid var(--cat-ink, var(--line-strong));
+		border-radius: var(--radius-chip);
+		background: var(--sheen);
+		color: var(--ink);
+		font-size: 0.88rem;
 		font-weight: 600;
 		text-decoration: none;
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 1px var(--lo-2);
 		transition:
-			border-color var(--dur-fast) ease,
-			box-shadow var(--dur-fast) ease;
+			transform var(--dur) var(--ease-out),
+			border-color var(--dur-fast) ease;
 	}
 	.chip:hover {
-		border-color: var(--cat-ink, var(--primary));
+		border-color: var(--primary);
+		border-inline-start-color: var(--cat-ink, var(--primary));
 	}
-	/* Selection is a heavier ring plus weight, not colour alone, so it survives
-	   greyscale and forced-colors. */
+	.chip:active {
+		transform: scale(0.96);
+	}
+	.chip::after {
+		content: '';
+		flex: none;
+		width: 0.45rem;
+		height: 0.45rem;
+		border-radius: 50%;
+		background: var(--line-strong);
+		box-shadow: inset 0 1px 1px rgb(0 0 0 / 30%);
+	}
+	/* Current is a pushed-in switch: tint, inset, heavier type and a lit lamp,
+	   never the border colour alone. */
 	.chip[aria-current='true'] {
-		border-color: var(--cat-ink, var(--primary));
-		box-shadow: inset 0 0 0 1px var(--cat-ink, var(--primary));
-		font-weight: 800;
+		background: color-mix(in srgb, var(--primary) 13%, var(--surface));
+		border-color: var(--primary);
+		border-inline-start-color: var(--cat-ink, var(--primary));
+		box-shadow: var(--shadow-press);
+		font-weight: 750;
+	}
+	.chip[aria-current='true']::after {
+		background: var(--accent);
+		box-shadow:
+			0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent),
+			0 0 8px var(--accent);
 	}
 	@media (forced-colors: active) {
+		.chip {
+			background: ButtonFace;
+		}
+		.chip::after {
+			border: 1px solid CanvasText;
+		}
 		.chip[aria-current='true'] {
 			background: Highlight;
 			color: HighlightText;
 			border-color: Highlight;
 			forced-color-adjust: none;
+		}
+		.chip[aria-current='true']::after {
+			background: HighlightText;
 		}
 	}
 
@@ -318,33 +382,43 @@
 	.grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
-		gap: var(--space-2);
+		gap: var(--space-3);
 		margin: 0;
 		padding: 0;
 		list-style: none;
 	}
+	/* A raised sheet with the category's ink down its start edge. */
 	.entry {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-1);
 		height: 100%;
+		padding: var(--space-3) var(--space-4);
+		background: var(--surface);
+		border: 1px solid var(--line-strong);
 		border-inline-start: 4px solid var(--cat-ink, var(--line-strong));
+		border-radius: var(--radius-card);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 0 var(--lo),
+			0 10px 20px -16px var(--lo-2);
 		color: var(--ink);
 		text-decoration: none;
 		transition:
-			transform var(--dur) var(--ease-spring),
-			box-shadow var(--dur) ease,
-			border-color var(--dur-fast) ease;
+			transform var(--dur) var(--ease-out),
+			box-shadow var(--dur) ease;
 	}
 	.entry:hover {
 		transform: translateY(-2px);
 		box-shadow: var(--shadow-2);
-		border-color: var(--line-strong);
-		border-inline-start-color: var(--cat-ink, var(--line-strong));
+	}
+	.entry:hover .name {
+		color: var(--primary);
 	}
 	.name {
 		margin: 0;
-		font-size: 1.05rem;
+		font-size: 1.15rem;
+		overflow-wrap: anywhere;
 	}
 	.en-name {
 		color: var(--muted);
@@ -383,18 +457,36 @@
 	}
 
 	.empty {
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
+		display: grid;
+		justify-items: center;
 		gap: var(--space-2);
+		padding: var(--space-5) var(--space-4);
+		border: 1.5px dashed var(--line-strong);
+		border-radius: var(--radius-card);
+		text-align: center;
 	}
-	.empty p {
+	.empty-art {
+		display: grid;
+		place-items: center;
+		width: 4rem;
+		height: 4rem;
+		padding: 0.7rem;
+		border-radius: 50%;
+		background: var(--surface);
+		box-shadow:
+			inset 0 0 0 1px var(--line-strong),
+			0 1px 0 var(--hi);
+	}
+	.empty-title {
 		margin: 0;
+		font-family: var(--font-display);
+		font-size: 1.1rem;
+		font-weight: 700;
 	}
 	.clear {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.75rem;
-		font-weight: 600;
+		padding-inline: 1rem;
+		font-size: 0.88rem;
+		font-weight: 700;
+		text-decoration: none;
 	}
 </style>
