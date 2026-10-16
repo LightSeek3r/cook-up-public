@@ -997,8 +997,8 @@
 		   border is the only edge a chip has left. */
 		border: 1px solid transparent;
 		border-radius: var(--radius-chip);
-		background: var(--primary);
-		color: var(--on-primary);
+		background: var(--accent);
+		color: var(--on-accent);
 		font-size: 0.85rem;
 		font-weight: 700;
 		white-space: nowrap;
@@ -1053,12 +1053,12 @@
 	.pin:hover {
 		color: var(--primary);
 	}
-	/* Steel, not copper: a pinned pin beside a copper chip has to read as a
+	/* Copper on a steel chip: a pinned pin has to read as a
 	   second state, not as more of the chip. */
 	.pin.pinned {
-		background: var(--accent);
-		border-color: var(--accent);
-		color: var(--on-accent);
+		background: var(--primary);
+		border-color: var(--primary);
+		color: var(--on-primary);
 	}
 
 	.ghost {

@@ -92,8 +92,8 @@
 			0 1px 0 rgb(0 0 0 / 14%);
 		transition-duration: var(--dur-fast);
 	}
-	/* The ring sits on a --surface halo: the board's wood and the copper of a
-	   selected tile both fail against --focus, the halo does not. */
+	/* The ring sits on a --surface halo: the board's wood and a
+	   selected tile can both be close to --focus, the halo is not. */
 	.tile:focus-visible {
 		outline: 3px solid var(--focus);
 		outline-offset: 2px;
@@ -149,9 +149,9 @@
 	}
 
 	.tile.selected {
-		background: var(--primary);
-		border-color: var(--primary);
-		color: var(--on-primary);
+		background: var(--accent);
+		border-color: var(--accent);
+		color: var(--on-accent);
 		box-shadow:
 			inset 0 1px 0 rgb(255 255 255 / 25%),
 			0 2px 0 rgb(0 0 0 / 20%),
@@ -159,7 +159,7 @@
 	}
 	.tile.selected .art {
 		box-shadow:
-			inset 0 0 0 1px color-mix(in srgb, var(--on-primary) 45%, transparent),
+			inset 0 0 0 1px color-mix(in srgb, var(--on-accent) 45%, transparent),
 			0 1px 0 rgb(0 0 0 / 15%);
 	}
 	.tile.selected .name {
@@ -175,8 +175,8 @@
 		width: 1.35rem;
 		height: 1.35rem;
 		border-radius: 50%;
-		background: var(--on-primary);
-		color: var(--primary);
+		background: var(--on-accent);
+		color: var(--accent);
 		opacity: 0;
 		transform: scale(0.5);
 		transition:
@@ -192,7 +192,7 @@
 		transform: none;
 	}
 
-	/* Forced colours drop the copper fill, which would leave the check as the
+	/* Forced colours drop the steel fill, which would leave the check as the
 	   only sign of selection. Highlight/HighlightText are the system's own
 	   selected pair; forced-color-adjust is what makes them stick. */
 	@media (forced-colors: active) {
