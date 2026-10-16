@@ -28,10 +28,10 @@
 	<span class="chip ok">
 		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
 			<path
-				d="M4 10.5 8 14.5 16 6"
+				d="M4.5 10.5 8.5 14.5 15.5 6"
 				fill="none"
 				stroke="currentColor"
-				stroke-width="2.5"
+				stroke-width="2.4"
 				stroke-linecap="round"
 				stroke-linejoin="round"
 			/>
@@ -39,21 +39,19 @@
 		{t('card.canMake')}
 	</span>
 {:else if tappable}
-	<span class="chip warn">
-		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-			<path d="M10 4v7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-			<circle cx="10" cy="15.2" r="1.35" fill="currentColor" />
-		</svg>
-		{t('card.missing')}:
-	</span>
+	<span class="chip-label">{t('card.missing')}</span>
+	<!-- Dashed: "not in your kitchen yet". Each one adds itself on tap. -->
 	{#each names as name, i (keys[i])}
 		<button
 			type="button"
-			class="chip warn add"
+			class="chip add"
 			onclick={() => onAdd?.(keys[i])}
 			aria-label={t('results.addIngredient').replace('{name}', name)}
 		>
-			+ {name}
+			<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+				<path d="M10 5v10M5 10h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+			</svg>
+			{name}
 		</button>
 	{/each}
 {:else}
@@ -72,15 +70,8 @@
 	     slashed-circle icon carries that meaning without relying on colour. -->
 	<span class="chip unused">
 		<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-			<circle
-				cx="10"
-				cy="10"
-				r="6.2"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-			/>
-			<path d="M5.6 5.6l8.8 8.8" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+			<circle cx="10" cy="10" r="6.2" fill="none" stroke="currentColor" stroke-width="1.8" />
+			<path d="M5.6 5.6l8.8 8.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
 		</svg>
 		{t('card.unused')}: {unusedNames.join(', ')}
 	</span>
@@ -90,54 +81,81 @@
 	.chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.28rem;
-		border-radius: var(--radius-pill);
-		padding: 0.2rem 0.6rem;
-		font-size: 0.78rem;
+		gap: 0.3rem;
+		max-width: 100%;
+		border: 1px solid transparent;
+		border-radius: var(--radius-chip);
+		font-size: 0.82rem;
 		font-weight: 700;
 		/* The icon carries the meaning too — never colour alone. */
-		border: 1px solid transparent;
 	}
 	.chip svg {
-		width: 0.95em;
-		height: 0.95em;
+		width: 1rem;
+		height: 1rem;
 		flex: none;
+	}
+	.chip-label {
+		font-size: 0.7rem;
+		font-weight: 600;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--muted);
+	}
+	:global(:is(:lang(ar), :lang(pnb), :lang(hi), :lang(bn), :lang(zh), :lang(ja), :lang(ko)))
+		.chip-label {
+		letter-spacing: 0;
+		font-size: 0.78rem;
 	}
 	/* Text colour is a dedicated on-tint token, not the fill colour: reusing the
 	   fill measured 3.61:1 (light) / 3.12:1 (dark) on its own 14% tint, and at
 	   12.5px bold this is not WCAG "large text", so 4.5:1 applies. */
 	.ok {
+		min-height: 2rem;
+		padding: 0.2rem 0.7rem;
+		padding-inline-start: 0.5rem;
 		background: color-mix(in srgb, var(--accent) 14%, var(--surface));
-		border-color: color-mix(in srgb, var(--accent) 35%, transparent);
+		border-color: color-mix(in srgb, var(--accent) 45%, transparent);
 		color: var(--on-ok-tint);
 	}
 	.warn {
+		padding: 0.2rem 0.6rem;
 		background: color-mix(in srgb, var(--grade-d) 14%, var(--surface));
 		border-color: color-mix(in srgb, var(--grade-d) 35%, transparent);
 		color: var(--on-warn-tint);
 	}
-	/* Tappable variant of .warn: compact rather than the project's usual
-	   2.75rem minimum (that convention is for primary controls; this is an
-	   inline, secondary add-to-selection action), but still comfortably
-	   focusable and pressable. */
-	.warn.add {
-		min-height: 1.7rem;
+	.add {
+		min-height: var(--tap);
+		padding-inline: 0.5rem 0.8rem;
+		border: 1.5px dashed color-mix(in srgb, var(--primary) 65%, var(--line-strong));
+		background: var(--surface);
+		color: var(--ink);
+		text-align: start;
 		cursor: pointer;
-		transition: transform var(--dur) var(--ease-spring), background var(--dur-fast) ease;
+		transition:
+			transform var(--dur) var(--ease-spring),
+			background var(--dur-fast) ease;
 	}
-	.warn.add:hover {
-		background: color-mix(in srgb, var(--grade-d) 24%, var(--surface));
+	.add svg {
+		color: var(--primary);
 	}
-	.warn.add:active {
-		transform: scale(0.94);
+	.add:hover {
+		border-style: solid;
+		background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+	}
+	.add:active {
+		transform: scale(0.95);
 		transition-duration: var(--dur-fast);
 	}
 	/* `--muted` is already a contrast-verified body-text colour against
-	   `--surface` in both themes, so this needs no dedicated on-tint token the
-	   way .ok and .warn do — it sits on the plain card surface, not on a tint. */
+	   `--surface-sunken` in both themes, so this needs no dedicated on-tint token
+	   the way .warn does. Its own line: it explains the whole card. */
 	.unused {
-		background: var(--surface-sunken);
+		flex-basis: 100%;
+		padding: 0.2rem 0.6rem;
 		border-color: var(--line);
+		background: var(--surface-sunken);
 		color: var(--muted);
+		font-size: 0.78rem;
+		font-weight: 600;
 	}
 </style>

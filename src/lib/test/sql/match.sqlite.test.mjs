@@ -132,6 +132,8 @@ function reference(p) {
 			total_minutes: total, kcal, balance_grade: grade, balance_score: score, nutrition_coverage: coverage,
 			servings_assumed: assumed, matched: used.length,
 			unused_names: join(unused.map((h) => nameOf(h, p.lang))),
+			used_names: join(used.map((h) => nameOf(h, p.lang))),
+			used_keys: join(used.map((h) => keyOf.get(h))),
 			missing: missingIds.length, required_non_staple: nonStaple.length,
 			missing_names: join(missingIds.map((i) => nameOf(i, p.lang))),
 			missing_keys: join(missingIds.map((i) => keyOf.get(i))),
@@ -152,7 +154,7 @@ function reference(p) {
 }
 
 const COLUMNS = ['id', 'title', 'cuisine', 'meal_type', 'prep_minutes', 'total_minutes', 'kcal', 'balance_grade',
-	'balance_score', 'nutrition_coverage', 'servings_assumed', 'matched', 'unused_names', 'missing',
+	'balance_score', 'nutrition_coverage', 'servings_assumed', 'matched', 'unused_names', 'used_names', 'used_keys', 'missing',
 	'required_non_staple', 'missing_names', 'missing_keys', 'total'];
 
 function subsets(items, maxSize) {

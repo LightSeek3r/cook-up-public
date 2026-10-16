@@ -288,6 +288,18 @@ export async function matchRecipes(
          LEFT JOIN ingredient_i18n ut  ON ut.ingredient_id = ui.id AND ut.lang = ?2
          LEFT JOIN ingredient_i18n uen ON uen.ingredient_id = ui.id AND uen.lang = 'en'
         WHERE h.value NOT IN (SELECT value FROM json_each('[' || r.matched_ids || ']'))) AS unused_names,
+      -- The selections it does use, same order, names then keys: the card's
+      -- "Uses" row draws an icon per key and labels it with the name.
+      (SELECT GROUP_CONCAT(COALESCE(ut.name, uen.name, ui.canonical_key), '${MISSING_NAMES_SEP}')
+         FROM json_each(?1) h
+         JOIN ingredients ui           ON ui.id = h.value
+         LEFT JOIN ingredient_i18n ut  ON ut.ingredient_id = ui.id AND ut.lang = ?2
+         LEFT JOIN ingredient_i18n uen ON uen.ingredient_id = ui.id AND uen.lang = 'en'
+        WHERE h.value IN (SELECT value FROM json_each('[' || r.matched_ids || ']'))) AS used_names,
+      (SELECT GROUP_CONCAT(ui.canonical_key, '${MISSING_NAMES_SEP}')
+         FROM json_each(?1) h
+         JOIN ingredients ui ON ui.id = h.value
+        WHERE h.value IN (SELECT value FROM json_each('[' || r.matched_ids || ']'))) AS used_keys,
       r.missing,
       r.required_non_staple,
       (SELECT GROUP_CONCAT(COALESCE(mt.name, men.name, i.canonical_key), '${MISSING_NAMES_SEP}')

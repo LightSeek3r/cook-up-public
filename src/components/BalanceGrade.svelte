@@ -33,15 +33,27 @@
 {/if}
 
 <style>
+	/* A stamped metal tag: the bevel is white/black alpha, so it reads the same
+	   on all five fills without touching the --on-grade contrast. */
 	.grade {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
-		font-weight: 700;
-		color: var(--on-grade);
-		border-radius: var(--radius-sm);
-		padding: 0.1rem 0.45rem;
+		justify-content: center;
+		gap: 0.35rem;
+		min-width: 2rem;
+		height: 2rem;
+		padding: 0 0.5rem;
+		border-radius: 3px;
 		background: var(--grade-c);
+		color: var(--on-grade);
+		font-family: var(--font-body);
+		font-size: 1rem;
+		font-weight: 800;
+		line-height: 1;
+		font-variant-numeric: tabular-nums;
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 32%),
+			inset 0 -1px 0 rgb(0 0 0 / 22%);
 	}
 	.grade[data-grade='A'] {
 		background: var(--grade-a);
@@ -66,7 +78,14 @@
 		   3.9753–4.1496:1 on all ten grade/theme pairs — below 4.5:1 in every
 		   case. Clearing 4.5:1 would need opacity >= 0.983 light / 0.998 dark,
 		   i.e. no usable fade exists here. De-emphasis comes from <small>'s
-		   size and this 500 against the badge's 700 instead. */
-		font-weight: 500;
+		   size and this 600 against the badge's 800 instead. */
+		font-size: 0.78rem;
+		font-weight: 600;
+	}
+	/* The fill is what makes it a badge, and forced colours drop it. */
+	@media (forced-colors: active) {
+		.grade {
+			border: 1px solid CanvasText;
+		}
 	}
 </style>

@@ -1,5 +1,8 @@
 <script lang="ts">
 	import BalanceGrade from './BalanceGrade.svelte';
+	import FoodIcon from './FoodIcon.svelte';
+	import { FALLBACK_EMOJI } from '$lib/emoji';
+	import { cuisineIcon } from '$lib/icons';
 	import { nutritionVisible } from '$lib/nutrition';
 	import type { RecipeHit } from '$lib/types';
 
@@ -28,6 +31,9 @@
 		{#each recipes as recipe (recipe.id)}
 			<li>
 				<a href="/recipe/{recipe.id}?lang={lang}">
+					<span class="art">
+						<FoodIcon cp={recipe.cuisine ? cuisineIcon(recipe.cuisine) : FALLBACK_EMOJI} size={24} />
+					</span>
 					<span class="title">{recipe.title}</span>
 					<span class="meta">
 						{#if nutritionVisible(recipe.nutrition_coverage)}
@@ -78,7 +84,6 @@
 	a {
 		display: flex;
 		align-items: center;
-		justify-content: space-between;
 		gap: var(--space-3);
 		/* 44px minimum target, same rule the ingredient tiles follow. */
 		min-height: 44px;
@@ -90,14 +95,31 @@
 	a:hover {
 		background: var(--surface-sunken);
 	}
+	.art {
+		flex: none;
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		padding: 0.3rem;
+		border: 1px solid var(--line);
+		border-radius: var(--radius-sm);
+		background: color-mix(in srgb, var(--primary) 11%, var(--surface));
+	}
 	.title {
+		flex: 1;
+		min-width: 0;
 		font-weight: 600;
+		overflow-wrap: anywhere;
 	}
 	.meta {
 		display: flex;
+		flex-wrap: wrap;
+		justify-content: flex-end;
 		align-items: center;
-		gap: var(--space-2);
+		gap: var(--space-1) var(--space-2);
 		flex: none;
+		max-width: 45%;
 		font-size: 0.8rem;
 	}
 	/* The row is the link, so the focus ring belongs on the row, not on a

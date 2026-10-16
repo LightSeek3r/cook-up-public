@@ -47,6 +47,8 @@ export function slackFor(haveCount) {
  * @property {number} servings_assumed
  * @property {number} matched
  * @property {string | null} unused_names
+ * @property {string | null} used_names
+ * @property {string | null} used_keys
  * @property {number} missing
  * @property {number} required_non_staple
  * @property {string | null} missing_names
@@ -222,9 +224,17 @@ export function matchCore(corpus, p) {
 
 		/** @type {string[]} */
 		const unused = [];
+		/** @type {string[]} */
+		const usedNames = [];
+		/** @type {string[]} */
+		const usedKeys = [];
 		for (let k = 0; k < have.length; k++) {
 			if (sat[k].length === 0) continue;
 			if (!sat[k].some((g) => inRecipe[g])) unused.push(corpus.name(sat[k][0], lang));
+			else {
+				usedNames.push(corpus.name(sat[k][0], lang));
+				usedKeys.push(c.key(sat[k][0]));
+			}
 		}
 		/** @type {string[]} */
 		const missingNames = [];
@@ -253,6 +263,8 @@ export function matchCore(corpus, p) {
 			servings_assumed: c.servingsAssumed[r],
 			matched: matched[r],
 			unused_names: unused.length ? unused.join(MISSING_NAMES_SEP) : null,
+			used_names: usedNames.length ? usedNames.join(MISSING_NAMES_SEP) : null,
+			used_keys: usedKeys.length ? usedKeys.join(MISSING_NAMES_SEP) : null,
 			missing: missing(r),
 			required_non_staple: c.nonStaple[r],
 			missing_names: missingNames.length ? missingNames.join(MISSING_NAMES_SEP) : null,

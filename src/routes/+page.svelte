@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { untrack } from 'svelte';
+	import { tick, untrack } from 'svelte';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import FilterBar from '$components/FilterBar.svelte';
@@ -160,41 +160,87 @@
 	function updateUrl(mutate: (url: URL) => void) {
 		const url = new URL($page.url);
 		mutate(url);
-		goto(url, { keepFocus: true, noScroll: true, replaceState: true });
+		return goto(url, { keepFocus: true, noScroll: true, replaceState: true });
 	}
 
 	/**
-	 * The tray is gated on `selected.length`, so emptying it deletes the element
-	 * the user was focused on and drops focus to <body> — losing both keyboard
-	 * position and context. `keepFocus` can't help: it preserves focus across the
-	 * navigation, not across a reactive unmount. Hand focus to the results region.
+	 * A selection change can unmount the very control that made it: a tray chip,
+	 * the whole tray when it empties, a tile from a collapsed group's tail, a
+	 * result card that drops out of the list. Focus would then fall to <body>,
+	 * losing both keyboard position and context; `keepFocus` can't help, it
+	 * preserves focus across the navigation, not across a reactive unmount.
+	 * Hand it to `next()` instead, or to the results region.
 	 */
-	function handOffFocusIfTrayCloses(nextLength: number) {
-		if (nextLength > 0) return;
-		requestAnimationFrame(() => document.getElementById('results')?.focus());
+	async function keepFocusThrough(
+		navigation: Promise<void>,
+		next: () => HTMLElement | null = () => null
+	) {
+		const active = document.activeElement;
+		await navigation;
+		await tick();
+		if (active instanceof HTMLElement && !active.isConnected) {
+			(next() ?? document.getElementById('results'))?.focus();
+		}
 	}
 
-	function toggle(canonicalKey: string) {
+	function toggle(canonicalKey: string, next?: () => HTMLElement | null) {
 		wantMatchData(lang);
 		const adding = !selected.includes(canonicalKey);
 		atLimit = adding && selected.length >= MAX_HAVE;
 		if (atLimit) return;
-		const next = adding
+		const nextKeys = adding
 			? [...selected, canonicalKey]
 			: selected.filter((value) => value !== canonicalKey);
-		handOffFocusIfTrayCloses(next.length);
-		updateUrl((url) => {
-			if (next.length) url.searchParams.set('have', next.join(','));
+		const navigation = updateUrl((url) => {
+			if (nextKeys.length) url.searchParams.set('have', nextKeys.join(','));
 			else url.searchParams.delete('have');
 			// A pin on an ingredient that just got deselected could never be
 			// satisfied (see matchRecipes' mustUse check) — drop it from `must`
 			// too rather than leave a dead pin sitting in the URL.
-			if (!next.includes(canonicalKey) && must.includes(canonicalKey)) {
+			if (!nextKeys.includes(canonicalKey) && must.includes(canonicalKey)) {
 				const nextMust = must.filter((key) => key !== canonicalKey);
 				if (nextMust.length) url.searchParams.set('must', nextMust.join(','));
 				else url.searchParams.delete('must');
 			}
 		});
+		keepFocusThrough(navigation, next);
+	}
+
+	/** Removes a tray chip and moves focus to the chip after it, else the one before. */
+	function removeFromTray(canonicalKey: string) {
+		const keys = selectedTiles.map((tile) => tile.canonical_key);
+		const at = keys.indexOf(canonicalKey);
+		const neighbours = [keys[at + 1], keys[at - 1]].filter(Boolean);
+		toggle(
+			canonicalKey,
+			() =>
+				neighbours
+					.map((key) => document.querySelector<HTMLElement>(`[data-remove="${key}"]`))
+					.find(Boolean) ?? document.getElementById('tray-clear')
+		);
+	}
+
+	let resultsPane = $state<HTMLElement>();
+	let trayHeight = $state(0);
+	// On the root, not on an element of this page: the fixed bottom bar needs
+	// its height as room after the layout's footer, and the desktop card is
+	// how far the results pane's scroll padding must reach.
+	$effect(() => {
+		const root = document.documentElement;
+		root.style.setProperty('--tray-room', `${selected.length ? trayHeight : 0}px`);
+		return () => root.style.removeProperty('--tray-room');
+	});
+
+	/**
+	 * Stacked layout: the plain jump to #results. Two panes: the results are
+	 * already on screen beside the mosaic, so bring their pane back to its first
+	 * card instead of scrolling the page.
+	 */
+	function seeResults(event: MouseEvent) {
+		if (!matchMedia('(min-width: 64rem)').matches) return;
+		event.preventDefault();
+		resultsPane?.scrollTo({ top: 0 });
+		document.getElementById('results')?.focus({ preventScroll: true });
 	}
 
 	function toggleMust(canonicalKey: string) {
@@ -222,11 +268,12 @@
 	}
 
 	function clearAll() {
-		handOffFocusIfTrayCloses(0);
-		updateUrl((url) => {
-			url.searchParams.delete('have');
-			url.searchParams.delete('must');
-		});
+		keepFocusThrough(
+			updateUrl((url) => {
+				url.searchParams.delete('have');
+				url.searchParams.delete('must');
+			})
+		);
 	}
 
 	function pickForMe() {
@@ -459,6 +506,16 @@
 	{lang}
 />
 
+<!-- The page's one <h1>: the layout leaves its tagline out on this route. -->
+<div class="intro">
+	<h1>{t('app.tagline')}</h1>
+	<ol class="steps" aria-label={t('home.steps')}>
+		{#each ['home.step1', 'home.step2', 'home.step3'] as key, i (key)}
+			<li><span class="pip" aria-hidden="true">{i + 1}</span>{t(key)}</li>
+		{/each}
+	</ol>
+</div>
+
 <FilterBar
 	{cuisine}
 	{meal}
@@ -506,7 +563,101 @@
 		aria-labelledby="results-heading"
 		data-source={resultSource || undefined}
 	>
-		<div class="results-inner">
+		<div class="results-inner" bind:this={resultsPane}>
+			<!-- Selection tray: keeps the current basket and the result count in reach
+			     however far down the mosaic the user has scrolled. A bottom bar on
+			     the stacked layout; on two panes, a card stuck to the top of this
+			     scrolling pane, above the results it summarises. -->
+			{#if selected.length}
+				<div
+					class="tray"
+					role="region"
+					aria-label={t('mosaic.selected')}
+					bind:offsetHeight={trayHeight}
+				>
+					<div class="tray-head">
+						<h2 class="tray-title">
+							<span class="tray-label">{t('mosaic.selected')}</span>
+							<span class="tray-count">{selected.length}</span>
+						</h2>
+						<button type="button" class="ghost" id="tray-clear" onclick={clearAll}>
+							{t('mosaic.clear')}
+						</button>
+					</div>
+					<!-- Mounted with the tray, so the refusal is announced when it appears. -->
+					<p class="limit" role="status">
+						{atLimit ? t('mosaic.limit').replace('{n}', String(MAX_HAVE)) : ''}
+					</p>
+					<ul class="chips">
+						{#each selectedTiles as tile (tile.id)}
+							<li class="chip-wrap">
+								<button
+									type="button"
+									class="chip"
+									data-remove={tile.canonical_key}
+									onclick={() => removeFromTray(tile.canonical_key)}
+								>
+									<span class="chip-art">
+										<IngredientIcon
+											canonicalKey={tile.canonical_key}
+											category={tile.category}
+											size={24}
+										/>
+									</span>
+									<span class="chip-name">{tile.name}</span>
+									<svg class="x" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+										<path
+											d="M6 6l8 8M14 6l-8 8"
+											stroke="currentColor"
+											stroke-width="2.2"
+											stroke-linecap="round"
+										/>
+									</svg>
+									<!-- `mosaic.remove`, not `mosaic.clear`: this button removes ONE
+									     ingredient, but "Clear all" made it announce as "Tomato Clear
+									     all" — and made every chip claim to wipe the selection. -->
+									<span class="sr-only">{t('mosaic.remove')}</span>
+								</button>
+								{#if slack > 0}
+									<!-- A sibling of the chip, not nested inside it — two buttons
+									     can't nest. Only shown with slack > 0: with no slack every
+									     selection is already required, so pinning one is a no-op. -->
+									<button
+										type="button"
+										class="pin"
+										class:pinned={must.includes(tile.canonical_key)}
+										aria-pressed={must.includes(tile.canonical_key)}
+										aria-label={t('mosaic.mustUse').replace('{name}', tile.name)}
+										onclick={() => toggleMust(tile.canonical_key)}
+									>
+										<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+											<circle
+												cx="10"
+												cy="7"
+												r="3.4"
+												fill={must.includes(tile.canonical_key) ? 'currentColor' : 'none'}
+												stroke="currentColor"
+												stroke-width="1.8"
+											/>
+											<path
+												d="M10 10.4V17"
+												stroke="currentColor"
+												stroke-width="1.8"
+												stroke-linecap="round"
+											/>
+										</svg>
+									</button>
+								{/if}
+							</li>
+						{/each}
+					</ul>
+					<a class="cta" href="#results" onclick={seeResults}>
+						{t('results.see')}
+						{#if !loading && !matchFailed}<span class="badge">{total}</span>{/if}
+					</a>
+				</div>
+			{/if}
+
 			<div class="results-head">
 				<h2 id="results-heading">{t('results.heading')}</h2>
 				<div class="results-head-actions">
@@ -593,67 +744,54 @@
 	</section>
 </div>
 
-{#if selected.length}
-	<div class="tray" role="region" aria-label={t('mosaic.selected')}>
-		<!-- Mounted with the tray, so the refusal is announced when it appears. -->
-		<p class="limit" role="status">
-			{atLimit ? t('mosaic.limit').replace('{n}', String(MAX_HAVE)) : ''}
-		</p>
-		<div class="tray-inner">
-			<div class="chips">
-				{#each selectedTiles as tile (tile.id)}
-					<span class="chip-wrap">
-						<button type="button" class="chip" onclick={() => toggle(tile.canonical_key)}>
-							<span class="chip-art">
-								<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />
-							</span>
-							{tile.name}
-							<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-								<path
-									d="M6 6l8 8M14 6l-8 8"
-									stroke="currentColor"
-									stroke-width="2.2"
-									stroke-linecap="round"
-								/>
-							</svg>
-							<!-- `mosaic.remove`, not `mosaic.clear`: this button removes ONE
-							     ingredient, but "Clear all" made it announce as "Tomato Clear
-							     all" — and made every chip claim to wipe the selection. -->
-							<span class="sr-only">{t('mosaic.remove')}</span>
-						</button>
-						{#if slack > 0}
-							<!-- A sibling of the chip, not nested inside it — two buttons
-							     can't nest. Only shown with slack > 0: with no slack every
-							     selection is already required, so pinning one is a no-op. -->
-							<button
-								type="button"
-								class="pin"
-								class:pinned={must.includes(tile.canonical_key)}
-								aria-pressed={must.includes(tile.canonical_key)}
-								aria-label={t('mosaic.mustUse').replace('{name}', tile.name)}
-								onclick={() => toggleMust(tile.canonical_key)}
-							>
-								<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-									<circle cx="10" cy="7" r="3.4" fill="none" stroke="currentColor" stroke-width="1.8" />
-									<path d="M10 10.4V17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
-								</svg>
-							</button>
-						{/if}
-					</span>
-				{/each}
-			</div>
-			<div class="tray-actions">
-				<button type="button" class="ghost" onclick={clearAll}>{t('mosaic.clear')}</button>
-				<a class="cta" href="#results">
-					{t('results.see')}
-					{#if !loading && !matchFailed}<span class="badge">{total}</span>{/if}
-				</a>
-			</div>
-		</div>
-	</div>
-{/if}
-
 <style>
+	.intro {
+		display: grid;
+		gap: var(--space-3);
+		margin: var(--space-4) 0 var(--space-5);
+	}
+	.intro h1 {
+		max-inline-size: 26ch;
+		font-size: clamp(1.55rem, 1.05rem + 1.9vw, 2.55rem);
+		font-weight: 650;
+		line-height: 1.1;
+		text-wrap: balance;
+		font-variation-settings: 'SOFT' 0, 'WONK' 0;
+	}
+	.steps {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-2) var(--space-4);
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		color: var(--muted);
+		font-size: 0.9rem;
+	}
+	.steps li {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.45rem;
+	}
+	.pip {
+		display: grid;
+		place-items: center;
+		flex: none;
+		width: 1.5rem;
+		height: 1.5rem;
+		border: 1.5px solid var(--line-strong);
+		border-radius: 50%;
+		color: var(--ink);
+		font-size: 0.75rem;
+		font-weight: 700;
+		font-variant-numeric: tabular-nums;
+	}
+	.steps li:first-child .pip {
+		background: var(--primary);
+		border-color: var(--primary);
+		color: var(--on-primary);
+	}
+
 	.layout {
 		display: grid;
 		gap: var(--space-4);
@@ -665,8 +803,15 @@
 			grid-template-columns: minmax(0, 1.6fr) minmax(20rem, 1fr);
 			align-items: start;
 		}
+		/* Stretched to the mosaic's height: a sticky child only sticks while its
+		   parent is taller than it, and a start-aligned cell is exactly as tall
+		   as the pane, so the pane used to scroll away with the page. */
+		.results {
+			align-self: stretch;
+		}
 		.results-inner {
 			position: sticky;
+			/* Clear of FilterBar's sticky search row. */
 			top: 5.5rem;
 			max-height: calc(100vh - 7rem);
 			overflow-y: auto;
@@ -674,9 +819,16 @@
 			/* 5px = the global 3px ring + its 2px offset. Without it a card scrolled
 			   to either edge of this scrollport has its focus ring shaved off by the
 			   overflow clip; scroll-padding keeps focus-driven scrolling clear of the
-			   same edge rather than parking the card flush against it. */
+			   same edge, and of the tray card stuck over the top of it. */
 			padding-block: 5px;
-			scroll-padding-block: 5px;
+			scroll-padding-block: calc(var(--tray-room, 0px) + 5px) 5px;
+		}
+	}
+	/* The bottom bar is fixed: without its height as room after the footer it
+	   would cover the end of the page. */
+	@media (max-width: 63.99rem) {
+		:global(.page:has(.tray)) {
+			padding-block-end: calc(var(--tray-room, 7rem) + var(--space-4));
 		}
 	}
 
@@ -768,187 +920,299 @@
 		}
 	}
 
-	/* Selection tray: keeps the current basket and the result count reachable
-	   however far down the mosaic the user has scrolled. */
+	/* Selection tray */
 	.tray {
-		position: fixed;
-		inset-inline: 0;
-		bottom: 0;
 		z-index: 10;
-		background: color-mix(in srgb, var(--surface) 92%, transparent);
-		backdrop-filter: blur(10px);
-		border-top: 1px solid var(--line);
-		box-shadow: var(--shadow-2);
-		padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-3);
+		background: var(--surface);
+		border: 1px solid var(--line-strong);
 	}
-	/* The blur is what makes a 92%-opaque tray legible over the mosaic scrolling
-	   under it. Without transparency there is nothing to blur, so go fully opaque
-	   rather than leaving text over unblurred tiles. */
-	@media (prefers-reduced-transparency: reduce) {
-		.tray {
-			background: var(--surface);
-			backdrop-filter: none;
-		}
+	.tray-head {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
 	}
+	.tray-title {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		margin: 0;
+		font-size: 1.2rem;
+	}
+	.tray-count {
+		display: inline-grid;
+		place-items: center;
+		min-width: 1.6rem;
+		height: 1.6rem;
+		padding: 0 0.4rem;
+		border-radius: var(--radius-pill);
+		background: var(--primary);
+		color: var(--on-primary);
+		font-family: var(--font-body);
+		font-size: 0.8rem;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+	}
+	/* Out of the layout while empty, but never display:none: a live region
+	   has to exist before its text changes for the change to be announced. */
 	.limit {
-		max-inline-size: 78rem;
-		margin: 0 auto;
+		flex-basis: 100%;
+		margin: 0;
 		font-size: 0.8rem;
 		font-weight: 600;
 		color: var(--primary);
 	}
-	.tray-inner {
-		max-width: 78rem;
-		margin: 0 auto;
-		display: flex;
-		align-items: center;
-		gap: var(--space-3);
+	.limit:empty {
+		position: absolute;
 	}
 	.chips {
 		display: flex;
-		gap: var(--space-1);
-		overflow-x: auto;
-		flex: 1;
-		scrollbar-width: thin;
-		padding-block: 2px;
-		/* Fade the trailing edge so a clipped chip reads as "scroll for more"
-		   rather than as a broken layout. `to right` is physical, so it must be
-		   mirrored for RTL — otherwise it dims the *leading* edge in Arabic and
-		   inverts the affordance. (Same approach as .back svg on the recipe page.) */
-		mask-image: linear-gradient(to right, black calc(100% - 1.5rem), transparent);
+		gap: var(--space-2);
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		list-style: none;
 	}
-	:global([dir='rtl']) .chips {
-		mask-image: linear-gradient(to left, black calc(100% - 1.5rem), transparent);
+	.chips:empty {
+		display: none;
 	}
-	/* A mask applies to descendant rendering, focus ring included — so a chip
-	   scrolled near the trailing edge got a half-faded ring, on the one control
-	   that is the only way to undo a selection on mobile. Drop the fade entirely
-	   while focus is inside: the affordance is for pointer users scanning the row,
-	   and a keyboard user is already being moved through it one chip at a time. */
-	.chips:focus-within,
-	:global([dir='rtl']) .chips:focus-within {
-		mask-image: none;
-	}
-	/* One flex item per ingredient in `.chips`' scroll row — was the `.chip`
-	   button itself before the pin toggle needed a sibling slot beside it. */
+	/* The chip and its must-use pin read as one joined control: remove on the
+	   leading half, pin on the trailing one. */
 	.chip-wrap {
 		display: inline-flex;
-		align-items: center;
-		gap: 0.2rem;
 		flex: none;
+		max-inline-size: 100%;
 	}
 	.chip {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.3rem;
+		gap: 0.35rem;
+		min-width: 0;
+		min-height: var(--tap);
+		padding-inline: 0.3rem 0.65rem;
+		/* Transparent, not none: forced colours paint it, and in that mode the
+		   border is the only edge a chip has left. */
+		border: 1px solid transparent;
+		border-radius: var(--radius-chip);
+		background: var(--primary);
+		color: var(--on-primary);
+		font-size: 0.85rem;
+		font-weight: 700;
 		white-space: nowrap;
-		background: var(--accent);
-		color: var(--on-accent);
-		border: none;
-		border-radius: var(--radius-pill);
-		padding: 0.35rem 0.7rem;
-		font-size: 0.8rem;
-		font-weight: 600;
-		/* 44px: these are the only way to undo a selection on mobile, and they
-		   live in a horizontal scroll container — the worst place to be undersized. */
-		min-height: 2.75rem;
-		transition: transform var(--dur) var(--ease-spring);
+		transition: transform var(--dur) var(--ease-out);
+	}
+	.chip:not(:last-child) {
+		border-start-end-radius: 0;
+		border-end-end-radius: 0;
 	}
 	.chip:active {
-		transform: scale(0.94);
-	}
-	.chip svg {
-		width: 0.85em;
-		height: 0.85em;
-		opacity: 0.85;
+		transform: scale(0.96);
 	}
 	.chip-art {
-		width: 1.1rem;
-		height: 1.1rem;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0.2rem;
 		flex: none;
+		border-radius: 50%;
+		background: var(--surface);
 	}
-
-	/* Compact rather than the chip's 44px: this is a secondary toggle beside
-	   the primary "remove" control, not the only way to do something. */
-	.pin {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 1.9rem;
-		height: 1.9rem;
+	.chip-name {
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.chip .x {
 		flex: none;
-		border: 1px solid var(--line-strong);
-		border-radius: var(--radius-pill);
+		width: 0.8rem;
+		height: 0.8rem;
+		opacity: 0.85;
+	}
+	.pin {
+		display: grid;
+		place-items: center;
+		flex: none;
+		width: var(--tap);
+		height: var(--tap);
+		border: 1px solid color-mix(in srgb, var(--primary) 45%, var(--line-strong));
+		border-inline-start: 0;
+		border-radius: var(--radius-chip);
+		border-start-start-radius: 0;
+		border-end-start-radius: 0;
 		background: var(--surface);
 		color: var(--muted);
 		transition:
-			transform var(--dur) var(--ease-spring),
 			background var(--dur-fast) ease,
 			color var(--dur-fast) ease;
 	}
 	.pin svg {
-		width: 0.9rem;
-		height: 0.9rem;
+		width: 1.05rem;
+		height: 1.05rem;
 	}
 	.pin:hover {
-		border-color: var(--primary);
 		color: var(--primary);
 	}
-	.pin:active {
-		transform: scale(0.9);
-	}
+	/* Steel, not copper: a pinned pin beside a copper chip has to read as a
+	   second state, not as more of the chip. */
 	.pin.pinned {
-		background: var(--primary);
-		border-color: var(--primary);
-		color: var(--on-primary);
+		background: var(--accent);
+		border-color: var(--accent);
+		color: var(--on-accent);
 	}
 
-	.tray-actions {
-		display: flex;
-		align-items: center;
-		gap: var(--space-2);
-		flex: none;
-	}
 	.ghost {
 		background: none;
 		border: 1px solid var(--line-strong);
 		border-radius: var(--radius-pill);
 		color: var(--muted);
 		padding: 0.4rem 0.8rem;
-		min-height: 2.75rem;
+		min-height: var(--tap);
 		font-size: 0.8rem;
+		font-weight: 600;
 	}
 	.ghost:hover {
 		color: var(--primary);
 		border-color: var(--primary);
 	}
+	/* Polished copper: a highlight across the top, a shade along the bottom. */
 	.cta {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.4rem;
-		background: var(--primary);
+		justify-content: center;
+		gap: 0.5rem;
+		flex: none;
+		min-height: var(--tap);
+		padding: 0 1.1rem;
+		border: 1px solid color-mix(in srgb, var(--primary) 75%, black);
+		border-radius: var(--radius-btn);
+		background:
+			linear-gradient(
+				180deg,
+				rgb(255 255 255 / 22%) 0,
+				rgb(255 255 255 / 0%) 34%,
+				rgb(0 0 0 / 0%) 62%,
+				rgb(0 0 0 / 14%) 100%
+			),
+			var(--primary);
 		color: var(--on-primary);
-		text-decoration: none;
-		border-radius: var(--radius-pill);
-		padding: 0.5rem 1rem;
-		min-height: 2.75rem;
 		font-weight: 700;
-		box-shadow: var(--shadow-2);
-		transition: transform var(--dur) var(--ease-spring);
+		text-decoration: none;
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 38%),
+			inset 0 -1px 0 rgb(0 0 0 / 16%),
+			0 10px 22px -12px color-mix(in srgb, var(--primary) 90%, transparent);
+		transition: transform var(--dur) var(--ease-out);
 	}
 	.cta:active {
-		transform: scale(0.96);
+		transform: translateY(1px);
 	}
 	.badge {
 		background: color-mix(in srgb, var(--on-primary) 25%, transparent);
 		border-radius: var(--radius-pill);
-		padding: 0 0.4rem;
+		padding: 0 0.45rem;
+		font-size: 0.85rem;
 		font-variant-numeric: tabular-nums;
 	}
-	/* On the two-pane layout the results are already on screen. */
+
+	/* Stacked layout: a bar along the bottom of the screen, chips in one
+	   scrolling row above the count, Clear all and the jump to the results. */
+	@media (max-width: 63.99rem) {
+		.tray {
+			position: fixed;
+			inset-inline: 0;
+			inset-block-end: 0;
+			padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
+			border-inline: 0;
+			border-block-end: 0;
+			border-start-start-radius: var(--radius-lg);
+			border-start-end-radius: var(--radius-lg);
+			background: color-mix(in srgb, var(--surface) 94%, transparent);
+			backdrop-filter: blur(10px);
+			box-shadow:
+				inset 0 1px 0 var(--hi),
+				0 -10px 28px -14px rgb(0 0 0 / 40%);
+		}
+		.tray-head {
+			flex: 1 1 auto;
+		}
+		.tray-label {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+		}
+		.limit {
+			order: -2;
+		}
+		.chips {
+			order: -1;
+			flex: 1 1 100%;
+			overflow-x: auto;
+			scrollbar-width: none;
+			padding-block: 2px;
+			/* Fade the trailing edge so a clipped chip reads as "scroll for more"
+			   rather than as a broken layout. `to right` is physical, so it is
+			   mirrored for RTL. */
+			mask-image: linear-gradient(to right, black calc(100% - 1.75rem), transparent);
+		}
+		:global([dir='rtl']) .chips {
+			mask-image: linear-gradient(to left, black calc(100% - 1.75rem), transparent);
+		}
+		/* A mask applies to descendant rendering, focus ring included: drop the
+		   fade while focus is inside, the keyboard user is already being moved
+		   through the row one chip at a time. */
+		.chips:focus-within,
+		:global([dir='rtl']) .chips:focus-within {
+			mask-image: none;
+		}
+		.chip-wrap {
+			max-inline-size: none;
+		}
+	}
+	/* The blur is what makes a 94%-opaque bar legible over the mosaic scrolling
+	   under it. Without transparency there is nothing to blur, so go opaque
+	   rather than leaving text over unblurred tiles. */
+	@media (max-width: 63.99rem) and (prefers-reduced-transparency: reduce) {
+		.tray {
+			background: var(--surface);
+			backdrop-filter: none;
+		}
+	}
+
+	/* Two panes: a card stuck to the top of the results pane. */
 	@media (min-width: 64rem) {
+		.tray {
+			position: sticky;
+			inset-block-start: 0;
+			display: grid;
+			gap: var(--space-3);
+			margin-block-end: var(--space-2);
+			padding: var(--space-4);
+			border-radius: var(--radius-card);
+			box-shadow:
+				inset 0 1px 0 var(--hi),
+				0 1px 0 var(--lo),
+				var(--shadow-2);
+		}
+		.tray-head {
+			justify-content: space-between;
+		}
+		/* Up to 50 chips: past a few rows they scroll inside the card, so the
+		   card never pushes the results out of their own pane. The padding keeps
+		   the focus ring of an edge chip clear of the clip. */
+		.chips {
+			flex-wrap: wrap;
+			max-block-size: min(15.75rem, 30dvh);
+			overflow-y: auto;
+			margin: -5px;
+			padding: 5px;
+		}
 		.cta {
-			display: none;
+			min-height: 3.25rem;
+			font-size: 1.02rem;
 		}
 	}
 </style>

@@ -19,6 +19,7 @@
 	const t = $derived(translator(lang));
 	const inGlossary = $derived($page.url.pathname.startsWith('/glossary'));
 	const inFavorites = $derived($page.url.pathname.startsWith('/favorites'));
+	const isHome = $derived($page.route.id === '/');
 	// ISO 639-3 'pnb' has no two-letter code of its own; PA is Punjabi's.
 	const langCode = $derived(lang === 'pnb' ? 'PA' : lang.toUpperCase());
 
@@ -115,17 +116,33 @@
 	<header>
 		<div class="bar chrome">
 			<a class="brand" href="/?lang={lang}">
+				<!-- Same geometry as static/favicon.svg. The rim and glint mix the
+				     copper towards white, so they read as a highlight in both themes. -->
 				<svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
 					<path
-						d="M6 17h20a10 10 0 0 1-10 9 10 10 0 0 1-10-9Z"
-						fill="currentColor"
-						opacity="0.9"
+						d="M13 12c-1.5-1.5-1.5-2.5 0-4s1.5-2.5 0-4M19 12c-1.5-1.5-1.5-2.5 0-4s1.5-2.5 0-4"
+						fill="none"
+						style="stroke: var(--ink)"
+						stroke-width="2"
+						stroke-linecap="round"
 					/>
 					<path
-						d="M4 17h24M13 11c0-2 3-2 3-4M19 11c0-2 3-2 3-4"
+						d="M6 18h20a10 9 0 0 1-20 0ZM12 26h8v1a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1Z"
+						fill="currentColor"
+					/>
+					<rect
+						x="4"
+						y="14"
+						width="24"
+						height="3"
+						rx="1.5"
+						style="fill: color-mix(in srgb, currentColor 72%, #fff)"
+					/>
+					<path
+						d="M9 21a8 7 0 0 0 4 4.5"
 						fill="none"
-						stroke="currentColor"
-						stroke-width="2.2"
+						style="stroke: color-mix(in srgb, currentColor 72%, #fff)"
+						stroke-width="1.5"
 						stroke-linecap="round"
 					/>
 				</svg>
@@ -210,7 +227,8 @@
 				</div>
 			</div>
 		</div>
-		<p class="tagline">{t('app.tagline')}</p>
+		<!-- The home page carries the tagline as its own <h1>: one h1 per page. -->
+		{#if !isHome}<p class="tagline">{t('app.tagline')}</p>{/if}
 	</header>
 
 	<main id="main">
@@ -222,12 +240,18 @@
 		     database names stay untranslated; only the framing is localised. -->
 		<p>{t('footer.recipeData')}: Wikibooks Cookbook (CC BY-SA 3.0) — {t('footer.andPublicDomain')}</p>
 		<p>{t('footer.nutritionRef')}: USDA FoodData Central ({t('footer.publicDomain')})</p>
+		<!-- Apache-2.0 attribution for the food icons; full terms in NOTICE. -->
+		<p>
+			<a href="https://github.com/googlefonts/noto-emoji" target="_blank" rel="noopener noreferrer"
+				>{t('footer.emoji')}</a
+			>
+		</p>
 		<div class="credits">
 			<p>
 				{createdByPre}<a href="https://unit42.fr" target="_blank" rel="noopener noreferrer">unit42.fr</a
 				>{createdByPost}
 			</p>
-			<a class="report no-print" href={reportHref}>{t('footer.reportIssue')}</a>
+			<a class="chrome-control report no-print" href={reportHref}>{t('footer.reportIssue')}</a>
 		</div>
 	</footer>
 </div>
@@ -490,13 +514,22 @@
 		margin: var(--space-3) 0 var(--space-2);
 		font-size: 0.95rem;
 	}
+	/* The credits under a steel rule: a 1px shade with its light edge below,
+	   the same bevel as the chrome. */
 	footer {
+		display: grid;
+		gap: 0.2rem;
 		margin-top: var(--space-6);
-		border-top: 1px solid var(--line);
-		padding-top: var(--space-3);
+		padding-top: var(--space-4);
+		border-top: 1px solid var(--line-strong);
+		box-shadow: inset 0 1px 0 var(--hi);
+		font-size: 0.85rem;
 	}
 	footer p {
-		margin: 0.15rem 0;
+		margin: 0;
+	}
+	footer a:not(.report) {
+		overflow-wrap: anywhere;
 	}
 	.credits {
 		display: flex;
@@ -504,22 +537,17 @@
 		align-items: center;
 		justify-content: space-between;
 		gap: var(--space-2);
-		margin-top: var(--space-2);
+		margin-top: var(--space-3);
 	}
 	.report {
-		display: inline-flex;
-		align-items: center;
-		min-height: 2.75rem;
-		padding: 0 0.9rem;
-		border: 1px solid var(--line-strong);
-		border-radius: var(--radius);
-		background: var(--surface);
-		color: var(--ink);
-		font-weight: 600;
+		padding-inline: 1rem;
+		font-size: 0.85rem;
+		font-weight: 700;
 		text-decoration: none;
 	}
-	.report:hover {
-		color: var(--primary);
-		border-color: var(--primary);
+	@media print {
+		footer {
+			box-shadow: none;
+		}
 	}
 </style>

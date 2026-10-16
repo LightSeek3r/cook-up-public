@@ -37,6 +37,11 @@ export interface MatchResult {
 	 *  mirror of `missing_names`. NULL when the recipe uses all of them, which
 	 *  is always the case unless the query ran with slack. */
 	unused_names: string | null;
+	/** The selected ingredients this recipe does use, in the same order as
+	 *  `unused_names` walks the selection; `used_keys` is aligned 1:1 with it.
+	 *  Optional: an /api/match response cached before these existed lacks them. */
+	used_names?: string | null;
+	used_keys?: string | null;
 }
 
 /** A recipe-title search hit. Intentionally a thin projection — the search block

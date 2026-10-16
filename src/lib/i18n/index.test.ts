@@ -43,7 +43,8 @@ describe('i18n bundle key parity', () => {
 		['results.addIngredient', '{name}'],
 		['mosaic.mustUse', '{name}'],
 		['glossary.count', '{n}'],
-		['mosaic.limit', '{n}']
+		['mosaic.limit', '{n}'],
+		['filter.active', '{n}']
 	];
 
 	for (const [key, placeholder] of PLACEHOLDER_KEYS) {

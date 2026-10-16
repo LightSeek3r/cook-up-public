@@ -38,27 +38,42 @@
 
 <style>
 	.heart {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		min-width: 2.75rem;
-		min-height: 2.75rem;
+		display: inline-grid;
+		place-items: center;
+		width: var(--tap);
+		height: var(--tap);
+		flex: none;
 		border: 1px solid var(--line-strong);
-		border-radius: var(--radius-pill);
-		background: var(--surface);
+		border-radius: 50%;
+		background: var(--sheen);
 		color: var(--muted);
-		box-shadow: var(--shadow-1);
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 1px var(--lo-2);
+		transition:
+			transform var(--dur) var(--ease-spring),
+			color var(--dur-fast) ease,
+			border-color var(--dur-fast) ease;
 	}
 	.heart:hover {
 		color: var(--primary);
 		border-color: var(--primary);
 	}
+	.heart:active {
+		transform: scale(0.9);
+		transition-duration: var(--dur-fast);
+	}
 	.heart.on {
 		color: var(--primary);
-		border-color: var(--primary);
+		border-color: color-mix(in srgb, var(--primary) 55%, var(--line-strong));
+		background: color-mix(in srgb, var(--primary) 9%, var(--surface));
+		box-shadow: var(--shadow-press);
 	}
 	.heart svg {
-		width: 1.2rem;
-		height: 1.2rem;
+		width: 1.25rem;
+		height: 1.25rem;
+	}
+	.heart:focus-visible {
+		border-radius: 50%;
 	}
 </style>
