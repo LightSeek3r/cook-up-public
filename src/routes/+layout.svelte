@@ -18,6 +18,9 @@
 	const lang = $derived(resolveLang($page.url.searchParams.get('lang')));
 	const t = $derived(translator(lang));
 	const inGlossary = $derived($page.url.pathname.startsWith('/glossary'));
+	const inFavorites = $derived($page.url.pathname.startsWith('/favorites'));
+	// ISO 639-3 'pnb' has no two-letter code of its own; PA is Punjabi's.
+	const langCode = $derived(lang === 'pnb' ? 'PA' : lang.toUpperCase());
 
 	// SSR sets <html lang/dir> via hooks.server.ts; keep it correct on client nav.
 	$effect(() => {
@@ -110,7 +113,7 @@
 
 <div class="page">
 	<header>
-		<div class="bar">
+		<div class="bar chrome">
 			<a class="brand" href="/?lang={lang}">
 				<svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
 					<path
@@ -130,53 +133,81 @@
 				     title is the real document heading. -->
 				<span class="title">{t('app.title')}</span>
 			</a>
-			<!-- Wrapper, not two more flex children: .bar is space-between with the
-			     brand at one end, so a third direct child would spread them apart. -->
+			<!-- Wrapper, not more flex children: .bar is space-between with the
+			     brand at one end, so further direct children would spread apart. -->
 			<div class="controls no-print">
-				<a
-					class="nav-link"
-					href="/glossary?lang={lang}"
-					aria-label={t('nav.glossary')}
-					title={t('nav.glossary')}
-					aria-current={inGlossary ? 'page' : undefined}
-				>
-					<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-						<path
-							d="M10 5.2C8.6 4 6.4 3.6 3.5 3.8v10.9c2.9-.2 5.1.2 6.5 1.4 1.4-1.2 3.6-1.6 6.5-1.4V3.8c-2.9-.2-5.1.2-6.5 1.4ZM10 5.2v10.9"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linejoin="round"
-							stroke-linecap="round"
-						/>
-					</svg>
-				</a>
-				<a class="favorites-link" href="/favorites?lang={lang}" aria-label={t('favorites.heading')}>
-					<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-						<path
-							d="M10 16.5 3.6 10.3a4 4 0 0 1 5.5-5.8L10 5.6l.9-1.1a4 4 0 0 1 5.5 5.8Z"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.7"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					{#if favoriteIds.length}<span class="count">{favoriteIds.length}</span>{/if}
-				</a>
-				<ThemeToggle
-					label={t('app.theme')}
-					optionLabels={{
-						light: t('app.themeLight'),
-						dark: t('app.themeDark'),
-						auto: t('app.themeAuto')
-					}}
-				/>
-				<select aria-label={t('app.language')} value={lang} onchange={switchLang}>
-					{#each SUPPORTED_LANGS as code (code)}
-						<!-- Endonyms, not ISO codes: a Hindi speaker scans for "हिन्दी", not "HI". -->
-						<option value={code} lang={code}>{LANG_ENDONYMS[code]}</option>
-					{/each}
-				</select>
+				<nav class="nav">
+					<a class="nav-link" href="/glossary?lang={lang}" aria-current={inGlossary ? 'page' : undefined}>
+						<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+							<path
+								d="M10 5.2C8.6 4 6.4 3.6 3.5 3.8v10.9c2.9-.2 5.1.2 6.5 1.4 1.4-1.2 3.6-1.6 6.5-1.4V3.8c-2.9-.2-5.1.2-6.5 1.4ZM10 5.2v10.9"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linejoin="round"
+								stroke-linecap="round"
+							/>
+						</svg>
+						<span class="nav-text">{t('nav.glossary')}</span>
+					</a>
+					<a
+						class="nav-link"
+						href="/favorites?lang={lang}"
+						aria-current={inFavorites ? 'page' : undefined}
+					>
+						<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+							<path
+								d="M10 16.5 3.6 10.3a4 4 0 0 1 5.5-5.8L10 5.6l.9-1.1a4 4 0 0 1 5.5 5.8Z"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<span class="nav-text">{t('favorites.heading')}</span>
+						{#if favoriteIds.length}<span class="count">{favoriteIds.length}</span>{/if}
+					</a>
+				</nav>
+				<div class="tools">
+					<ThemeToggle toDarkLabel={t('app.themeToDark')} toLightLabel={t('app.themeToLight')} />
+					<!-- The real select, transparent over a globe and the language code:
+					     native picker and keyboard, full endonyms in its list, compact
+					     face. The code is aria-hidden; the select's own name and value
+					     ("Language, English") are what a screen reader hears. -->
+					<div class="chrome-control lang">
+						<svg class="lang-globe" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+							<g
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<circle cx="10" cy="10" r="7.2" />
+								<path
+									d="M2.8 10h14.4M10 2.8c2 2 3 4.4 3 7.2s-1 5.2-3 7.2c-2-2-3-4.4-3-7.2s1-5.2 3-7.2Z"
+								/>
+							</g>
+						</svg>
+						<span class="lang-code" aria-hidden="true">{langCode}</span>
+						<svg class="lang-chev" viewBox="0 0 10 6" aria-hidden="true" focusable="false">
+							<path
+								d="m1 1 4 4 4-4"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<select aria-label={t('app.language')} value={lang} onchange={switchLang}>
+							{#each SUPPORTED_LANGS as code (code)}
+								<!-- Endonyms, not ISO codes: a Hindi speaker scans for "हिन्दी", not "HI". -->
+								<option value={code} lang={code}>{LANG_ENDONYMS[code]}</option>
+							{/each}
+						</select>
+					</div>
+				</div>
 			</div>
 		</div>
 		<p class="tagline">{t('app.tagline')}</p>
@@ -206,37 +237,59 @@
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
-		gap: var(--space-2);
+		gap: var(--space-2) var(--space-4);
+		padding: var(--space-3) var(--space-4);
 	}
-	.controls {
+	.controls,
+	.nav,
+	.tools {
 		display: flex;
 		align-items: center;
+	}
+	.controls {
+		flex: none;
 		gap: var(--space-2);
-		/* Two controls in a narrow header: let them wrap rather than squeeze the
-		   brand on small screens. */
-		flex-wrap: wrap;
-		justify-content: flex-end;
+	}
+	.nav {
+		gap: var(--space-1);
+	}
+	.tools {
+		position: relative;
+		gap: var(--space-2);
+		margin-inline-start: var(--space-2);
+		padding-inline-start: var(--space-4);
+	}
+	/* A hairline between where you go and how you see it. */
+	.tools::before {
+		content: '';
+		position: absolute;
+		inset-block: 0.6rem;
+		inset-inline-start: 0;
+		border-inline-start: 1px solid var(--line-strong);
 	}
 	.brand {
 		display: inline-flex;
 		align-items: center;
 		gap: var(--space-2);
+		min-height: var(--tap);
+		min-width: 0;
 		color: var(--primary);
 		text-decoration: none;
 	}
 	.mark {
-		width: 1.9rem;
-		height: 1.9rem;
+		width: 2.1rem;
+		height: 2.1rem;
 		flex: none;
 	}
 	/* Visually the wordmark, but not a heading — see the markup comment. */
 	.brand .title {
 		color: var(--ink);
 		font-family: var(--font-display);
-		font-weight: 700;
-		letter-spacing: -0.01em;
-		line-height: 1.2;
-		font-size: clamp(1.5rem, 1.2rem + 1.2vw, 2rem);
+		font-weight: 650;
+		letter-spacing: -0.02em;
+		line-height: 1;
+		font-size: 1.65rem;
+		white-space: nowrap;
 	}
 
 	/* Off-screen until focused, then pinned over the header. */
@@ -256,11 +309,49 @@
 		box-shadow: var(--shadow-2);
 		font-weight: 600;
 		text-decoration: none;
-		transform: translateY(-150%);
+		/* Far enough up that --shadow-2's throw stays off-screen too. */
+		transform: translateY(-200%);
 		transition: transform var(--dur) var(--ease-spring);
 	}
 	.skip:focus-visible {
 		transform: translateY(0);
+	}
+	.lang {
+		flex: none;
+		gap: 0.25rem;
+		min-width: 4.5rem;
+		padding: 0 0.5rem;
+	}
+	.lang-globe {
+		width: 1.15rem;
+		height: 1.15rem;
+	}
+	.lang-code {
+		font-family: var(--font-system);
+		font-size: 0.8rem;
+		font-weight: 700;
+		letter-spacing: 0.05em;
+		line-height: 1;
+	}
+	.lang-chev {
+		width: 0.6rem;
+		height: 0.4rem;
+		opacity: 0.7;
+	}
+	/* The real control: invisible, but it takes the click, the keyboard and the
+	   native picker. 16px keeps iOS from zooming the page when it opens. */
+	.lang select {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		border-radius: inherit;
+		opacity: 0;
+		cursor: pointer;
+		font-size: 16px;
 	}
 	/* System font for the endonyms: in Archivo, "Tiếng Việt" alone made every
 	   page download the Vietnamese subset. The select itself too, not only its
@@ -269,41 +360,134 @@
 	.bar option {
 		font-family: var(--font-system);
 	}
-	.bar select {
-		min-height: 2.75rem;
-		padding: 0.4rem 0.6rem;
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
+	.lang option {
 		background: var(--surface);
-		box-shadow: var(--shadow-1);
+		color: var(--ink);
 	}
-	.nav-link,
-	.favorites-link {
+	.nav-link {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		min-height: 2.75rem;
-		padding: 0 0.5rem;
-		color: var(--muted);
+		gap: 0.4rem;
+		min-height: var(--tap);
+		padding: 0 0.75rem;
+		border-radius: var(--radius-btn);
+		color: var(--ink);
+		font-weight: 600;
+		font-size: 0.92rem;
+		text-decoration: none;
+		white-space: nowrap;
+		transition:
+			background-color var(--dur-fast) ease,
+			color var(--dur-fast) ease;
 	}
-	.nav-link:hover,
-	.nav-link[aria-current='page'],
-	.favorites-link:hover {
+	.nav-link svg {
+		flex: none;
+		width: 1.25rem;
+		height: 1.25rem;
 		color: var(--primary);
 	}
-	.nav-link svg,
-	.favorites-link svg {
-		width: 1.2rem;
-		height: 1.2rem;
+	.nav-link:hover,
+	.nav-link[aria-current='page'] {
+		background: color-mix(in srgb, var(--primary) 10%, transparent);
+		color: var(--primary);
 	}
-	.favorites-link .count {
+	.nav-link .count {
+		min-width: 1.4rem;
+		padding: 0 0.35rem;
+		border-radius: var(--radius-pill);
+		background: var(--primary);
+		color: var(--on-primary);
 		font-size: 0.75rem;
-		font-weight: 700;
+		font-weight: 800;
+		line-height: 1.4rem;
+		text-align: center;
 		font-variant-numeric: tabular-nums;
+	}
+
+	/* Below 760px the full header no longer fits one row, so the links become
+	   44px icons: the words stay for screen readers, the count rides on the
+	   heart. */
+	@media (max-width: 760px) {
+		.nav-text {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+		}
+		.nav-link {
+			justify-content: center;
+			width: var(--tap);
+			padding: 0;
+		}
+		.nav-link .count {
+			position: absolute;
+			inset-block-start: 0.15rem;
+			inset-inline-end: 0.05rem;
+			min-width: 1.05rem;
+			padding: 0 0.25rem;
+			font-size: 0.65rem;
+			line-height: 1.05rem;
+			box-shadow: 0 0 0 2px var(--surface);
+		}
+	}
+
+	/* One row at 360-390px: brand, the two icon links, the toggle and the
+	   language. */
+	@media (max-width: 600px) {
+		.bar {
+			gap: var(--space-2);
+			padding: var(--space-2);
+		}
+		.brand .title {
+			font-size: 1.3rem;
+		}
+		.mark {
+			width: 1.9rem;
+			height: 1.9rem;
+		}
+		.controls,
+		.nav,
+		.tools {
+			gap: 0.15rem;
+		}
+		.tools {
+			margin-inline-start: 0.15rem;
+			padding-inline-start: 0;
+		}
+		.tools::before {
+			display: none;
+		}
+	}
+	/* Small phones: the brand gives up a little so the row still fits. */
+	@media (max-width: 380px) {
+		.brand {
+			gap: 0.3rem;
+		}
+		.brand .title {
+			font-size: 1.15rem;
+		}
+		.mark {
+			width: 1.6rem;
+			height: 1.6rem;
+		}
+		.lang {
+			min-width: 4rem;
+			padding: 0 0.4rem;
+		}
+	}
+	@media (forced-colors: active) {
+		.nav-link .count {
+			forced-color-adjust: none;
+			background: Highlight;
+			color: HighlightText;
+		}
 	}
 	.tagline {
 		color: var(--muted);
-		margin: var(--space-1) 0 var(--space-2);
+		margin: var(--space-3) 0 var(--space-2);
 		font-size: 0.95rem;
 	}
 	footer {

@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<defs><linearGradient id="xce-g1" gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="118"><stop offset="0" stop-color="#A3CF5E"/><stop offset="0.6" stop-color="#C9E596"/><stop offset="1" stop-color="#EAF5CF"/></linearGradient></defs>
+<path fill="none" stroke="#5E9F3A" stroke-width="2.4" stroke-linecap="round" d="M36 50L30 32M34 44L22 39M92 50L98 32M94 44L106 39"/>
+<g fill="#4C9A32">
+<path transform="translate(30 33) rotate(-15) scale(0.85)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+<path transform="translate(22 39) rotate(-58) scale(0.75)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+<path transform="translate(98 33) rotate(15) scale(0.85)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+<path transform="translate(106 39) rotate(58) scale(0.75)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+</g>
+<path fill="url(#xce-g1)" stroke="#8DBD4C" stroke-width="2" stroke-linejoin="round" d="M40 116C40 96 38 72 32 52L41 48C47 70 52 94 55 116Z"/>
+<path fill="url(#xce-g1)" stroke="#8DBD4C" stroke-width="2" stroke-linejoin="round" d="M73 116C76 94 81 70 87 48L96 52C90 72 88 96 88 116Z"/>
+<path fill="none" stroke="#5E9F3A" stroke-width="2.6" stroke-linecap="round" d="M63 42V26M63 36L51 27M63 36L75 27"/>
+<g fill="#62AE3C">
+<path transform="translate(51 28) rotate(-48) scale(0.8)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+<path transform="translate(75 28) rotate(48) scale(0.8)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+<path transform="translate(63 28) scale(0.86)" d="M0 0C-3 -4 -10 -6 -11 -12C-11 -16 -7 -17 -6 -15C-8 -20 -4 -26 0 -26C4 -26 8 -20 6 -15C7 -17 11 -16 11 -12C10 -6 3 -4 0 0Z"/>
+</g>
+<path fill="url(#xce-g1)" stroke="#8DBD4C" stroke-width="2" stroke-linejoin="round" d="M54 118C55 96 56 70 57 42H69C70 70 72 96 74 118Z"/>
+<path fill="none" stroke="#93C255" stroke-width="1.6" stroke-linecap="round" d="M60 114C60.5 92 61 68 61.5 46M66.5 114C66.5 92 66 68 65.5 46M46 112C45 94 43 76 38 58M82 112C83 94 85 76 90 58"/>
+<g fill="#F1F8DF" stroke="#9CC85F" stroke-width="1.5"><ellipse cx="47.5" cy="116" rx="7.5" ry="2.6"/><ellipse cx="80.5" cy="116" rx="7.5" ry="2.6"/><ellipse cx="64" cy="118" rx="10" ry="3.2"/></g>
+</svg>

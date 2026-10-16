@@ -41,8 +41,9 @@ swap exists, a substitution tip.
 - **Shareable, stable URLs** — the whole UI state lives in the query string
   (`?have=onion,garlic,egg&lang=fr&cuisine=italian&sort=grade`), keyed on ingredient names
   rather than database ids so a link keeps meaning the same thing after a data rebuild.
-- **Light and dark themes** — a three-way light/dark/auto control, persisted, with no
-  flash-of-wrong-theme on load and a forced-colors fallback.
+- **Light and dark themes** — follows the OS until you press the one-button light/dark
+  toggle, which is persisted, with no flash-of-wrong-theme on load and a forced-colors
+  fallback.
 - **Nutrition & Balance Grade** — per-serving macros, a curated 10-nutrient micronutrient
   panel with % NRV (EU Reg. 1169/2011), and an A–E grade. Hidden (with an explanation)
   rather than guessed when less than 70% of a recipe's mass resolved to real nutrition data.

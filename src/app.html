@@ -9,22 +9,22 @@
 		<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
 		<link rel="manifest" href="/manifest.webmanifest" />
 
-		<!-- Media-scoped so they are correct for the default ('auto') and with no
-		     JavaScript at all. ThemeToggle repoints both at one palette when the
-		     user forces a theme, using the data-* colours below to restore them. -->
+		<!-- Media-scoped so they are correct until a theme is chosen (the OS
+		     decides) and with no JavaScript at all. ThemeToggle repoints both at
+		     one palette once a theme is chosen, using the data-* colours below. -->
 		<meta
 			name="theme-color"
-			content="#fdf8f8"
+			content="#ecedee"
 			media="(prefers-color-scheme: light)"
-			data-light="#fdf8f8"
-			data-dark="#1d1216"
+			data-light="#ecedee"
+			data-dark="#14171b"
 		/>
 		<meta
 			name="theme-color"
-			content="#1d1216"
+			content="#14171b"
 			media="(prefers-color-scheme: dark)"
-			data-light="#fdf8f8"
-			data-dark="#1d1216"
+			data-light="#ecedee"
+			data-dark="#14171b"
 		/>
 
 		<!-- Applies a stored theme override before first paint, so a user who chose

@@ -1,49 +1,52 @@
 <script lang="ts">
-	import { THEME_KEY, THEME_SETTINGS, resolveTheme, type ThemeSetting } from '$lib/theme';
+	import { THEME_KEY, resolveTheme, type Theme } from '$lib/theme';
 
 	interface Props {
-		/** Localised group name, e.g. "Theme". */
-		label: string;
-		/** Localised name per setting, used as each segment's accessible name. */
-		optionLabels: Record<ThemeSetting, string>;
+		/** Localised "Switch to dark theme", the name while light is showing. */
+		toDarkLabel: string;
+		/** Localised "Switch to light theme", the name while dark is showing. */
+		toLightLabel: string;
 	}
 
-	let { label, optionLabels }: Props = $props();
+	let { toDarkLabel, toLightLabel }: Props = $props();
 
 	/*
-	 * The stored choice lives in localStorage, which the server cannot read, so SSR
-	 * always renders the default ('auto'). The bootstrap script in app.html has
-	 * already written the real value onto <html data-theme> before first paint, so
-	 * this only has to catch up to the DOM — after hydration, to avoid asserting a
-	 * `checked` state the server didn't render.
+	 * The effective theme is the stored choice (already on <html data-theme>,
+	 * written by static/theme-init.js before first paint) or else the OS
+	 * preference — both client-side only, so SSR renders the light-mode label and
+	 * this catches up after hydration. The icon does not wait for it: CSS below
+	 * picks it from the same two sources.
 	 */
-	let setting = $state<ThemeSetting>('auto');
+	let theme = $state<Theme>('light');
+	const label = $derived(theme === 'dark' ? toLightLabel : toDarkLabel);
 
 	$effect(() => {
 		// Reads the DOM, not reactive state, so this settles once after mount.
-		const current = resolveTheme(document.documentElement.dataset.theme);
-		setting = current;
-		// Also on mount, not just on change: a stored override otherwise leaves the
+		const root = document.documentElement;
+		const osDark = matchMedia('(prefers-color-scheme: dark)');
+		const chosen = resolveTheme(root.dataset.theme);
+		theme = chosen ?? (osDark.matches ? 'dark' : 'light');
+		// Also on mount, not just on press: a stored choice otherwise leaves the
 		// browser chrome showing whichever colour the OS media query matched.
-		syncThemeColor(current);
+		syncThemeColor(chosen);
+
+		// Until the first press the CSS follows the OS live; keep the name in step.
+		const follow = (event: MediaQueryListEvent) => {
+			if (!resolveTheme(root.dataset.theme)) theme = event.matches ? 'dark' : 'light';
+		};
+		osDark.addEventListener('change', follow);
+		return () => osDark.removeEventListener('change', follow);
 	});
 
-	function choose(next: ThemeSetting) {
-		setting = next;
-		const root = document.documentElement;
-
-		if (next === 'auto') {
-			// 'auto' is the *absence* of an override, in the DOM and in storage alike.
-			delete root.dataset.theme;
-		} else {
-			root.dataset.theme = next;
-		}
+	function toggle() {
+		const next: Theme = theme === 'dark' ? 'light' : 'dark';
+		theme = next;
+		document.documentElement.dataset.theme = next;
 
 		// Private-mode Safari and cookie-blocking extensions can throw on access.
 		// A theme that fails to persist is a much smaller problem than a crash.
 		try {
-			if (next === 'auto') localStorage.removeItem(THEME_KEY);
-			else localStorage.setItem(THEME_KEY, next);
+			localStorage.setItem(THEME_KEY, next);
 		} catch {
 			/* ignore */
 		}
@@ -53,139 +56,74 @@
 
 	/**
 	 * Keep the browser chrome in step. The two metas in app.html are media-scoped,
-	 * which is right for 'auto' and for no-JS, but a forced theme has to override
-	 * whichever one the OS would otherwise match — so point both at the same
-	 * palette. Each meta carries its own palette colours in data-* so returning to
-	 * 'auto' is just putting them back.
+	 * which is right while no choice is stored and with no JavaScript, but a chosen
+	 * theme has to override whichever one the OS would otherwise match — so point
+	 * both at the same palette. Each meta carries both colours in data-*, so the
+	 * media-scoped state can be restored from them.
 	 */
-	function syncThemeColor(next: ThemeSetting) {
+	function syncThemeColor(chosen: Theme | null) {
 		const metas = document.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]');
 		for (const meta of metas) {
 			const light = meta.dataset.light;
 			const dark = meta.dataset.dark;
 			if (!light || !dark) continue;
-			if (next === 'light') meta.content = light;
-			else if (next === 'dark') meta.content = dark;
+			if (chosen === 'light') meta.content = light;
+			else if (chosen === 'dark') meta.content = dark;
 			else meta.content = meta.media.includes('dark') ? dark : light;
 		}
 	}
 </script>
 
-<!-- Real radios rather than a hand-rolled role="radiogroup": arrow-key movement,
-     roving focus and the checked state all come from the platform. The inputs are
-     visually hidden but still focusable, so the ring is drawn on the label via
-     :has() instead. -->
-<fieldset class="theme">
-	<legend class="sr-only">{label}</legend>
-	{#each THEME_SETTINGS as value (value)}
-		<label class="seg" class:on={setting === value}>
-			<input
-				class="sr-only"
-				type="radio"
-				name="cookup-theme"
-				{value}
-				checked={setting === value}
-				onchange={() => choose(value)}
-			/>
-			<span class="sr-only">{optionLabels[value]}</span>
-			{#if value === 'light'}
-				<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
-					<circle
-						cx="10"
-						cy="10"
-						r="3.5"
-						stroke="currentColor"
-						stroke-width="2.2"
-						stroke-linejoin="round"
-					/>
-					<path
-						d="M10 2.2v1.6M10 16.2v1.6M2.2 10h1.6M16.2 10h1.6M4.5 4.5l1.1 1.1M14.4 14.4l1.1 1.1M15.5 4.5l-1.1 1.1M5.6 14.4l-1.1 1.1"
-						stroke="currentColor"
-						stroke-width="2.2"
-						stroke-linecap="round"
-					/>
-				</svg>
-			{:else if value === 'dark'}
-				<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
-					<path
-						d="M15.8 12.4A6.6 6.6 0 0 1 7.6 4.2a6.6 6.6 0 1 0 8.2 8.2Z"
-						stroke="currentColor"
-						stroke-width="2.2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-					/>
-				</svg>
-			{:else}
-				<!-- Half-filled disc: the conventional "follow the system" glyph. -->
-				<svg viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
-					<circle cx="10" cy="10" r="6.5" stroke="currentColor" stroke-width="2.2" />
-					<path d="M10 3.5a6.5 6.5 0 0 0 0 13Z" fill="currentColor" />
-				</svg>
-			{/if}
-		</label>
-	{/each}
-</fieldset>
+<!-- One button, no "system" option: the icon is the theme a press switches to. -->
+<button type="button" class="chrome-control theme-btn" aria-label={label} title={label} onclick={toggle}>
+	<svg class="i-moon" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+		<path
+			d="M15.8 12.6A6.5 6.5 0 0 1 7.4 4.2a6.5 6.5 0 1 0 8.4 8.4Z"
+			fill="none"
+			stroke="currentColor"
+			stroke-width="1.7"
+			stroke-linejoin="round"
+		/>
+	</svg>
+	<svg class="i-sun" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+		<circle cx="10" cy="10" r="3.4" fill="none" stroke="currentColor" stroke-width="1.7" />
+		<path
+			d="M10 2.5v1.8M10 15.7v1.8M2.5 10h1.8M15.7 10h1.8M4.7 4.7l1.3 1.3M14 14l1.3 1.3M4.7 15.3 6 14M14 6l1.3-1.3"
+			stroke="currentColor"
+			stroke-width="1.7"
+			stroke-linecap="round"
+		/>
+	</svg>
+</button>
 
 <style>
-	.theme {
-		display: flex;
-		/* Reset the UA fieldset chrome before restyling as a segmented control. */
-		margin: 0;
-		padding: 2px;
-		gap: 2px;
-		border: 1px solid var(--line);
-		border-radius: var(--radius);
-		background: var(--surface);
-		box-shadow: var(--shadow-1);
+	.theme-btn {
+		flex: none;
+		width: var(--tap);
+		padding: 0;
+	}
+	.theme-btn svg {
+		width: 1.3rem;
+		height: 1.3rem;
 	}
 
-	.seg {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		/* 44px total with the fieldset's 2px padding — same touch-target floor as
-		   .bar select and the ingredient chips. */
-		min-height: 2.5rem;
-		min-width: 2.5rem;
-		border-radius: calc(var(--radius) - 3px);
-		color: var(--muted);
-		cursor: pointer;
-		transition:
-			background var(--dur-fast) ease,
-			color var(--dur-fast) ease;
+	/* The same two sources as the dark palette in app.css (a chosen theme, else
+	   the OS), so the icon is right from first paint, before hydration. */
+	.i-sun {
+		display: none;
 	}
-	.seg:hover:not(.on) {
-		background: var(--surface-sunken);
-		color: var(--ink);
+	:global(:root[data-theme='dark']) .i-sun {
+		display: block;
 	}
-	.seg.on {
-		background: var(--primary);
-		color: var(--on-primary);
+	:global(:root[data-theme='dark']) .i-moon {
+		display: none;
 	}
-
-	/* The input is .sr-only, so its own focus ring is invisible — draw it on the
-	   label instead, matching the global ring in app.css. */
-	.seg:has(input:focus-visible) {
-		outline: 3px solid var(--focus);
-		outline-offset: 2px;
-	}
-
-	.seg svg {
-		width: 1.15rem;
-		height: 1.15rem;
-	}
-
-	/* Forced colours flatten --primary, so the checked segment would become
-	   indistinguishable. Highlight/HighlightText are the system's own selected
-	   pair and survive the substitution. */
-	@media (forced-colors: active) {
-		.seg.on {
-			background: Highlight;
-			color: HighlightText;
-			forced-color-adjust: none;
+	@media (prefers-color-scheme: dark) {
+		:global(:root:not([data-theme='light'])) .i-sun {
+			display: block;
 		}
-		.seg:has(input:focus-visible) {
-			outline-color: Highlight;
+		:global(:root:not([data-theme='light'])) .i-moon {
+			display: none;
 		}
 	}
 </style>

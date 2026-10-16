@@ -1,11 +1,10 @@
 /*
- * Design system: "Market Stall" — a deli-counter, butcher-paper-and-ink-stamp
- * identity, deliberately away from the soft cream/terracotta "cozy AI cookbook"
- * look. Kraft-paper ground, espresso ink, one loud chili-red stamp colour, and a
- * deep petrol teal for "you can make this" — the chili-red's complement, so the
- * two brand hues sit opposite each other rather than both crowding the warm end
- * (this replaced an earlier grounded olive, which also had the least contrast
- * headroom of any light-mode token). Tokens only; components never use raw hex.
+ * Design system: "Atelier" — a professional kitchen. Brushed-inox chrome
+ * (header, controls) over a cool steel-grey ground, a wooden board behind the
+ * ingredient grid, one copper primary, and a steel blue for "you can make this",
+ * the copper's complement. Picked from four material propositions (wood, inox,
+ * copper, atelier) mocked up in design/proposals/. Tokens only; components never
+ * use raw hex.
  */
 
 /*
@@ -102,52 +101,51 @@
 :root {
 	color-scheme: light;
 
-	/* "Sorbet". Replaces the earlier kraft/butter-paper ground ("Market Stall",
-	   --bg #f0deac), which read as vanilla cream and was not wanted. Chosen from
-	   four near-white candidates screenshotted side by side — linen (warm
-	   near-white), porcelain (cool, palest), orchard (green, most saturated
-	   mosaic) and this one. See tasks/todo.md phase 10.
-
-	   The identity is in the *washes*, not the base: a peach radial meeting a
-	   lilac one across the header, and mint at the bottom right (see the
-	   html/body rule). The ground itself is near-white so the gradients read as
-	   light rather than as colour.
-
-	   --accent stays a blue-teal opposite the warm primary, same "you can make
-	   this" meaning as before. Contrast measured at full precision over the
-	   COMPOSITED ground, not the token pair, for all 18 pairs these feed:
-	   ink/bg 15.4494:1, muted/bg 6.6700:1, muted over the bg-tint wash
-	   6.4832:1, primary-as-link/surface 6.2034:1, on-primary/primary 5.9073:1,
-	   on-accent/accent 6.5063:1, on-ok-tint on its 14% tint 5.5311:1,
-	   on-warn-tint on its 14% tint 5.8832:1, muted on --surface-sunken (the
-	   .chip.unused ground) 6.2796:1. */
-	--primary: #b52a26;
-	--on-primary: #fff8f7;
-	--accent: #2f5f78;
-	--on-accent: #f4fafd;
+	/* Atelier light: steel-grey ground, near-white surfaces, copper primary,
+	   steel-blue accent. Contrast at full precision for the pairs these feed:
+	   ink/bg 13.48:1, muted/bg 5.63:1, muted/--surface-sunken (the .chip.unused
+	   ground) 5.27:1, primary-as-link/surface 5.42:1, primary/bg 4.78:1,
+	   on-primary/primary 5.33:1, on-accent/accent 7.13:1, on-ok-tint on its 14%
+	   tint 5.90:1, on-warn-tint on its 14% tint 5.72:1. primary on
+	   --surface-sunken is only 4.48:1, so copper text never sits on that ground.
+	   No colour wash on the page any more: --bg-tint is now only a deeper ground
+	   (muted on it 4.69:1), not a gradient that text has to be gated against. */
+	--primary: #a4501e;
+	--on-primary: #fff8f2;
+	--accent: #2c5878;
+	--on-accent: #f3f9fd;
 
 	/* Surfaces */
-	--bg: #fdf8f8;
-	--bg-tint: #fbdcd0;
-	--surface: #ffffff;
-	--surface-sunken: #faf0f1;
-	--ink: #291b21;
-	/* --muted's most prominent use (.tagline) sits in the header, inside the
-	   reach of the --bg-tint radial wash, which peaks at ~16.7% --bg-tint at the
-	   very top edge. So it is gated against that composited ground, not the
-	   token pair — the previous theme shipped a real WCAG failure (4.1137:1)
-	   that a token-pair check scored as passing (4.6705:1). Here: 6.4832:1
-	   composited / 6.6700:1 on raw --bg. See tasks/lessons.md. */
-	--muted: #655059;
-	--line: #f0e0e2;
-	--line-strong: #d9bfc4;
+	--bg: #ecedee;
+	--bg-tint: #d6dade;
+	--surface: #fbfbfa;
+	--surface-sunken: #e4e6e8;
+	--ink: #1f2328;
+	--muted: #555e67;
+	--line: #d8dce0;
+	--line-strong: #b7bec6;
 
 	/* Focus ring. Its own token rather than reusing --primary directly: the ring
 	   is only legible today because outline-offset lands it on the page ground
 	   instead of on the element's own fill (ring-on---primary is 1.00:1). Keeping
 	   it decoupled means a future primary- or accent-filled focusable surface can
 	   retune the ring in one place instead of discovering it has vanished. */
-	--focus: #b52a26;
+	--focus: #a4501e;
+
+	/* Materials. The board is the wood behind the ingredient grid. --sheen is
+	   the brushed-inox face of the chrome (header, 44px controls), --hi/--lo
+	   its 1px bevel light and shade (white/black alpha, so they work over any
+	   fill), and --tex the brushed grain: vertical streaks, alpha baked into the
+	   filter because a background layer has no opacity of its own. Kept faint
+	   enough that text laid straight on it stays crisp. */
+	--board: #d9b98a;
+	--board-edge: #a8834f;
+	--sheen: linear-gradient(180deg, #ffffff 0%, #e3e6e9 100%);
+	--hi: rgb(255 255 255 / 85%);
+	--hi-2: rgb(255 255 255 / 40%);
+	--lo: rgb(0 0 0 / 7%);
+	--lo-2: rgb(0 0 0 / 14%);
+	--tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.003' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.34 0 0 0 0 0.4 0.28 0 0 0 -0.112'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
 
 	/* Balance Grade — darkened so the badge's --on-grade text clears 4.5:1
 	   against every one. Measured at full precision, not rounded: --grade-e was
@@ -165,7 +163,7 @@
 	   the text colour on its own 14% tint (--grade-d on its tint measured
 	   3.61:1 light / 3.12:1 dark at 12.5px bold, well under 4.5:1). */
 	--on-warn-tint: #8d4410;
-	--on-ok-tint: #2f5f78;
+	--on-ok-tint: #2c5878;
 
 	/* Spacing — density 6/10 (standard) */
 	--space-1: 0.25rem;
@@ -174,20 +172,28 @@
 	--space-4: 1rem;
 	--space-5: 1.5rem;
 	--space-6: 2.5rem;
+	/* Minimum touch target, the side of every icon-only control. */
+	--tap: 2.75rem;
 
-	--radius-sm: 8px;
-	--radius: 14px;
-	--radius-lg: 22px;
+	--radius-sm: 6px;
+	--radius: 10px;
+	--radius-lg: 18px;
 	--radius-pill: 999px;
+	/* Per-part radii: Atelier rounds its buttons fully and keeps chips and
+	   tiles tight, so components name the part rather than a size. */
+	--radius-btn: var(--radius-pill);
+	--radius-chip: var(--radius-sm);
+	--radius-tile: var(--radius-sm);
+	--radius-card: var(--radius-lg);
 
-	/* Lighter and longer-throw than the kraft theme's: on a near-white ground a
-	   heavy shadow reads as dirt rather than as elevation. */
-	--shadow-1: 0 1px 2px rgb(41 27 33 / 7%), 0 1px 1px rgb(41 27 33 / 4%);
-	--shadow-2: 0 10px 26px -12px rgb(41 27 33 / 20%), 0 2px 5px rgb(41 27 33 / 6%);
-	--shadow-press: inset 0 2px 4px rgb(41 27 33 / 12%);
+	--shadow-1: 0 1px 2px rgb(0 0 0 / 7%), 0 1px 1px rgb(0 0 0 / 4%);
+	--shadow-2: 0 14px 30px -16px rgb(0 0 0 / 30%), 0 2px 6px -2px rgb(0 0 0 / 8%);
+	--shadow-press: inset 0 2px 4px rgb(0 0 0 / 16%);
 
-	/* Tactile: overshoot on release, quick on press. */
+	/* Tactile: overshoot on release, quick on press. --ease-out is the
+	   no-overshoot curve the metal controls use. */
 	--ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+	--ease-out: cubic-bezier(0.2, 0, 0, 1);
 	--dur-fast: 120ms;
 	--dur: 200ms;
 
@@ -216,59 +222,59 @@
  * are grouped under labelled headings), so it never has to be read on its own.
  * Set once on a container; tiles just consume --cat-ink / --cat-tint / --cat-line.
  *
- * The --cat-ink hues are unchanged from the kraft theme (they were already dark
- * enough to read on white), but every tint and line below was recomputed for the
- * near-white ground: the old values were mixed against butter #f0deac and went
- * muddy-yellow over #ffffff. Each is now its own ink composited over --surface —
- * tint at 13%, line at 30%. Those two percentages ARE the theme's mosaic
+ * The --cat-ink hues have survived every palette change (they read on any near-
+ * white), but each tint and line is its own ink composited over --surface —
+ * tint at 13%, line at 30% (ink on its tint 5.33:1 at worst, grain). Mixed
+ * against an older ground they go muddy over a new one, which is why they are
+ * recomputed, never carried over. Those two percentages ARE the theme's mosaic
  * saturation: at 6% the tiles vanish into the page, at 16% the mosaic starts
  * competing with the recipe cards for attention. Recompute both if --surface
  * changes; do not nudge one triad on its own.
  */
 [data-cat='vegetable'] {
 	--cat-ink: #3c5a1e;
-	--cat-tint: #e6eae2;
-	--cat-line: #c5cebc;
+	--cat-tint: #e2e6dd;
+	--cat-line: #c2cbb8;
 }
 [data-cat='fruit'] {
 	--cat-ink: #9c2453;
-	--cat-tint: #f2e3e9;
-	--cat-line: #e1bdcb;
+	--cat-tint: #efdfe4;
+	--cat-line: #dfbbc8;
 }
 [data-cat='protein'] {
 	--cat-ink: #8a3324;
-	--cat-tint: #f0e4e3;
-	--cat-line: #dcc2bd;
+	--cat-tint: #ece1de;
+	--cat-line: #d9bfba;
 }
 [data-cat='dairy'] {
 	--cat-ink: #285f70;
-	--cat-tint: #e3eaec;
-	--cat-line: #bfcfd4;
+	--cat-tint: #e0e7e8;
+	--cat-line: #bcccd1;
 }
 [data-cat='grain'] {
 	--cat-ink: #7f5311;
-	--cat-tint: #eee9e0;
-	--cat-line: #d9cbb8;
+	--cat-tint: #ebe5dc;
+	--cat-line: #d6c9b4;
 }
 [data-cat='legume'] {
 	--cat-ink: #276456;
-	--cat-tint: #e3ebe9;
-	--cat-line: #bed1cc;
+	--cat-tint: #dfe7e5;
+	--cat-line: #bbcec9;
 }
 [data-cat='nut'] {
 	--cat-ink: #6b3f22;
-	--cat-tint: #ece6e2;
-	--cat-line: #d3c5bd;
+	--cat-tint: #e8e3de;
+	--cat-line: #d0c3b9;
 }
 [data-cat='spice'] {
 	--cat-ink: #963e18;
-	--cat-tint: #f1e6e1;
-	--cat-line: #e0c5ba;
+	--cat-tint: #eee2dd;
+	--cat-line: #ddc2b6;
 }
 [data-cat='other'] {
 	--cat-ink: #524a3d;
-	--cat-tint: #e9e7e6;
-	--cat-line: #cbc9c5;
+	--cat-tint: #e5e4e1;
+	--cat-line: #c8c6c1;
 }
 
 /*
@@ -296,50 +302,39 @@
 	:root:not([data-theme='light']) {
 		color-scheme: dark;
 
-		/* Reworked from an earlier, near-neutral-charcoal dark mode that read
-		   as a tech-dashboard/trading-terminal dark theme rather than a
-		   kitchen at night — the giveaway combination was a near-desaturated
-		   almost-black background (#17140f) paired with a very saturated,
-		   fully-brightened "neon ember" primary (#ef6a44). Dark mode should
-		   use desaturated/lighter tonal variants, not just a brightened,
-		   still-fully-saturated hue glowing against near-black. A first pass
-		   landed on a "roasted coffee" brown ground, but brown itself was the
-		   wrong call (user preference, not a contrast issue) — replaced with
-		   "Wine Cellar": a dark aubergine/wine-maroon ground, picked from four
-		   contrast-verified candidates (cast iron / deep olive / wine cellar /
-		   dusk), screenshotted and compared before choosing. Primary/accent
-		   unchanged from the brown-ground pass (a desaturated terracotta
-		   ember + muted sage), since those read as brand hues rather than
-		   "brown" on their own. Contrast re-verified at full precision for
-		   this exact palette, not rounded — tightest pair (the --ok-tint
-		   color-mix, which depends on --surface) is 5.50:1, well clear of
-		   4.5:1.
+		/* Atelier dark: the same kitchen at night, a blue-black steel ground
+		   with the copper and steel blue lifted to pale tones rather than
+		   brightened at full saturation (a saturated hue glowing on near-black
+		   is what made an earlier dark mode read as a trading terminal).
+		   Contrast at full precision: ink/bg 15.44:1, muted/bg 7.19:1,
+		   muted/--surface-sunken 7.05:1, primary/surface 7.10:1,
+		   on-primary/primary 7.63:1, on-accent/accent 8.05:1, tightest is
+		   on-ok-tint on its 14% tint at 5.92:1. */
+		--primary: #e49a66;
+		--on-primary: #2a1306;
+		--accent: #86b9d9;
+		--on-accent: #0c1e2b;
 
-		   Accent reworked again, separately: sage green out, a complementary
-		   hue in. Dark --primary sits at ~18° (terracotta), so the complement
-		   is ~198°; landed on a blue-teal (~183°) rather than the exact
-		   steel-blue for a bit more pop against the maroon. Light mode moved
-		   to a complementary teal too (see the light --accent note) — both
-		   themes now use one hue family for "you have this ingredient", but
-		   at opposite tonal directions: light fills dark-on-pale, dark fills
-		   pale-on-dark, which is the normal dark-mode inversion rather than a
-		   mismatch. Contrast re-verified at full precision for this exact
-		   pairing: tightest is 5.69:1 (the accent used as its own text color
-		   on the --ok-tint color-mix). */
-		--primary: #d97a52;
-		--on-primary: #2a1208;
-		--accent: #62b7bc;
-		--on-accent: #0f2729;
+		--bg: #14171b;
+		--bg-tint: #1f242a;
+		--surface: #1c2025;
+		--surface-sunken: #16191d;
+		--ink: #ebeef1;
+		--muted: #9ba5af;
+		--line: #2d343b;
+		--line-strong: #3f4851;
+		--focus: #e49a66;
 
-		--bg: #1d1216;
-		--bg-tint: #271821;
-		--surface: #28191f;
-		--surface-sunken: #201217;
-		--ink: #f0e2e2;
-		--muted: #af9298;
-		--line: #432a32;
-		--line-strong: #583842;
-		--focus: #d97a52;
+		--board: #3a2a1b;
+		--board-edge: #1d140c;
+		--sheen: linear-gradient(180deg, #272c32 0%, #1c2025 100%);
+		--hi: rgb(255 255 255 / 9%);
+		--hi-2: rgb(255 255 255 / 4%);
+		--lo: rgb(0 0 0 / 35%);
+		--lo-2: rgb(0 0 0 / 50%);
+		/* Pale streaks, and fainter than light's: on a dark ground grain reads
+		   as noise much sooner. */
+		--tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.003' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.85 0 0 0 0 0.9 0.1 0 0 0 -0.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
 
 		--grade-a: #398439;
 		--grade-b: #6b7d36;
@@ -350,57 +345,57 @@
 
 		/* Light text on the dark tints — see the light-mode note. */
 		--on-warn-tint: #f0a86a;
-		--on-ok-tint: #62b7bc;
+		--on-ok-tint: #86b9d9;
 
-		--shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
-		--shadow-2: 0 8px 20px -8px rgb(0 0 0 / 60%);
-		--shadow-press: inset 0 2px 4px rgb(0 0 0 / 45%);
+		--shadow-1: 0 1px 2px rgb(0 0 0 / 45%);
+		--shadow-2: 0 16px 32px -16px rgb(0 0 0 / 75%), 0 2px 6px -2px rgb(0 0 0 / 40%);
+		--shadow-press: inset 0 2px 5px rgb(0 0 0 / 55%);
 	}
 
 	:root:not([data-theme='light']) [data-cat='vegetable'] {
 		--cat-ink: #b9c584;
-		--cat-tint: #22240f;
-		--cat-line: #3b3d1e;
+		--cat-tint: #303531;
+		--cat-line: #4b5242;
 	}
 	:root:not([data-theme='light']) [data-cat='fruit'] {
 		--cat-ink: #dd93ab;
-		--cat-tint: #271319;
-		--cat-line: #40222c;
+		--cat-tint: #352f36;
+		--cat-line: #56434d;
 	}
 	:root:not([data-theme='light']) [data-cat='protein'] {
 		--cat-ink: #dd9376;
-		--cat-tint: #261510;
-		--cat-line: #40261c;
+		--cat-tint: #352f30;
+		--cat-line: #56433d;
 	}
 	:root:not([data-theme='light']) [data-cat='dairy'] {
 		--cat-ink: #8db9c4;
-		--cat-tint: #131e21;
-		--cat-line: #223339;
+		--cat-tint: #2b343a;
+		--cat-line: #3e4e55;
 	}
 	:root:not([data-theme='light']) [data-cat='grain'] {
 		--cat-ink: #d8b671;
-		--cat-tint: #241c10;
-		--cat-line: #3c301c;
+		--cat-tint: #34342f;
+		--cat-line: #544d3c;
 	}
 	:root:not([data-theme='light']) [data-cat='legume'] {
 		--cat-ink: #8fbfa6;
-		--cat-tint: #131f1a;
-		--cat-line: #22352c;
+		--cat-tint: #2b3536;
+		--cat-line: #3f504c;
 	}
 	:root:not([data-theme='light']) [data-cat='nut'] {
 		--cat-ink: #c9a071;
-		--cat-tint: #221a11;
-		--cat-line: #3a2c1c;
+		--cat-tint: #32312f;
+		--cat-line: #50463c;
 	}
 	:root:not([data-theme='light']) [data-cat='spice'] {
 		--cat-ink: #dd9163;
-		--cat-tint: #261809;
-		--cat-line: #402813;
+		--cat-tint: #352f2d;
+		--cat-line: #564238;
 	}
 	:root:not([data-theme='light']) [data-cat='other'] {
 		--cat-ink: #c2b79f;
-		--cat-tint: #1f1c15;
-		--cat-line: #362f24;
+		--cat-tint: #323435;
+		--cat-line: #4e4d4a;
 	}
 }
 
@@ -409,20 +404,29 @@
 :root[data-theme='dark'] {
 	color-scheme: dark;
 
-	--primary: #d97a52;
-	--on-primary: #2a1208;
-	--accent: #62b7bc;
-	--on-accent: #0f2729;
+	--primary: #e49a66;
+	--on-primary: #2a1306;
+	--accent: #86b9d9;
+	--on-accent: #0c1e2b;
 
-	--bg: #1d1216;
-	--bg-tint: #271821;
-	--surface: #28191f;
-	--surface-sunken: #201217;
-	--ink: #f0e2e2;
-	--muted: #af9298;
-	--line: #432a32;
-	--line-strong: #583842;
-	--focus: #d97a52;
+	--bg: #14171b;
+	--bg-tint: #1f242a;
+	--surface: #1c2025;
+	--surface-sunken: #16191d;
+	--ink: #ebeef1;
+	--muted: #9ba5af;
+	--line: #2d343b;
+	--line-strong: #3f4851;
+	--focus: #e49a66;
+
+	--board: #3a2a1b;
+	--board-edge: #1d140c;
+	--sheen: linear-gradient(180deg, #272c32 0%, #1c2025 100%);
+	--hi: rgb(255 255 255 / 9%);
+	--hi-2: rgb(255 255 255 / 4%);
+	--lo: rgb(0 0 0 / 35%);
+	--lo-2: rgb(0 0 0 / 50%);
+	--tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.003' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.8 0 0 0 0 0.85 0 0 0 0 0.9 0.1 0 0 0 -0.04'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
 
 	--grade-a: #398439;
 	--grade-b: #6b7d36;
@@ -432,57 +436,57 @@
 	--on-grade: #ffffff;
 
 	--on-warn-tint: #f0a86a;
-	--on-ok-tint: #62b7bc;
+	--on-ok-tint: #86b9d9;
 
-	--shadow-1: 0 1px 2px rgb(0 0 0 / 40%);
-	--shadow-2: 0 8px 20px -8px rgb(0 0 0 / 60%);
-	--shadow-press: inset 0 2px 4px rgb(0 0 0 / 45%);
+	--shadow-1: 0 1px 2px rgb(0 0 0 / 45%);
+	--shadow-2: 0 16px 32px -16px rgb(0 0 0 / 75%), 0 2px 6px -2px rgb(0 0 0 / 40%);
+	--shadow-press: inset 0 2px 5px rgb(0 0 0 / 55%);
 }
 
 :root[data-theme='dark'] [data-cat='vegetable'] {
 	--cat-ink: #b9c584;
-	--cat-tint: #22240f;
-	--cat-line: #3b3d1e;
+	--cat-tint: #303531;
+	--cat-line: #4b5242;
 }
 :root[data-theme='dark'] [data-cat='fruit'] {
 	--cat-ink: #dd93ab;
-	--cat-tint: #271319;
-	--cat-line: #40222c;
+	--cat-tint: #352f36;
+	--cat-line: #56434d;
 }
 :root[data-theme='dark'] [data-cat='protein'] {
 	--cat-ink: #dd9376;
-	--cat-tint: #261510;
-	--cat-line: #40261c;
+	--cat-tint: #352f30;
+	--cat-line: #56433d;
 }
 :root[data-theme='dark'] [data-cat='dairy'] {
 	--cat-ink: #8db9c4;
-	--cat-tint: #131e21;
-	--cat-line: #223339;
+	--cat-tint: #2b343a;
+	--cat-line: #3e4e55;
 }
 :root[data-theme='dark'] [data-cat='grain'] {
 	--cat-ink: #d8b671;
-	--cat-tint: #241c10;
-	--cat-line: #3c301c;
+	--cat-tint: #34342f;
+	--cat-line: #544d3c;
 }
 :root[data-theme='dark'] [data-cat='legume'] {
 	--cat-ink: #8fbfa6;
-	--cat-tint: #131f1a;
-	--cat-line: #22352c;
+	--cat-tint: #2b3536;
+	--cat-line: #3f504c;
 }
 :root[data-theme='dark'] [data-cat='nut'] {
 	--cat-ink: #c9a071;
-	--cat-tint: #221a11;
-	--cat-line: #3a2c1c;
+	--cat-tint: #32312f;
+	--cat-line: #50463c;
 }
 :root[data-theme='dark'] [data-cat='spice'] {
 	--cat-ink: #dd9163;
-	--cat-tint: #261809;
-	--cat-line: #402813;
+	--cat-tint: #352f2d;
+	--cat-line: #564238;
 }
 :root[data-theme='dark'] [data-cat='other'] {
 	--cat-ink: #c2b79f;
-	--cat-tint: #1f1c15;
-	--cat-line: #362f24;
+	--cat-tint: #323435;
+	--cat-line: #4e4d4a;
 }
 
 * {
@@ -493,30 +497,16 @@ html,
 body {
 	margin: 0;
 	padding: 0;
-	/* Cookbook-endpaper ground: a faint, widely-spaced doodle pattern (chilli,
+	/* Brushed-steel ground: a faint, widely-spaced doodle pattern (chilli,
 	   citrus slice, and five smiling foods — leaf, apple, potato, zucchini,
-	   pear) plus a fibre/grain texture over the page wash, so the page reads
-	   as an illustrated paper, not a flat swatch or a busy repeat.
+	   pear) over the --tex brushed grain, so the page reads as a worktop, not
+	   a flat swatch or a busy repeat.
 	   The faces are drawn as plain paths inside the outer <g>, inheriting its
 	   stroke rather than declaring their own, which keeps the single
-	   stroke='...' == --ink pairing that theme-css.test.mjs asserts.
-
-	   Three washes, not one: a peach radial (--bg-tint) rising from the left of
-	   the header, a lilac one from the right, and mint at the bottom right. This
-	   is the Sorbet theme's whole identity — the base --bg is near-white, so the
-	   gradients are what stop the page reading as a blank sheet. The lilac and
-	   mint are literals rather than tokens because nothing else consumes them;
-	   promote them to tokens the moment a second rule needs either.
-
-	   Doodle stroke-opacity is 0.075 here, up from the kraft theme's 0.09 being
-	   tuned against a much darker ground — the pattern is on near-white now, and
-	   the grain layer below dropped to 0.045 for the same reason. */
+	   stroke='...' == --ink pairing that theme-css.test.mjs asserts. */
 	background:
-		radial-gradient(66rem 30rem at 22% -12rem, var(--bg-tint), transparent 68%),
-		radial-gradient(58rem 34rem at 86% -6rem, #e8dcf6, transparent 68%),
-		radial-gradient(50rem 38rem at 100% 92%, #dcf1ee, transparent 66%),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23291b21' stroke-opacity='0.075' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.045 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%231f2328' stroke-opacity='0.075' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+		var(--tex),
 		var(--bg);
 	color: var(--ink);
 	font-family: var(--font-body);
@@ -540,16 +530,16 @@ body {
 /* The dark ground, both ways. The doodle stroke colour is baked into the data
    URI (a data URI cannot read a custom property), which is why this block has
    to be restated per theme at all — and why the stroke hex drifted away from
-   dark --ink once already. It is now %23f0e2e2 == dark --ink #f0e2e2, matching
-   the light block's %23241d16 == light --ink, and theme-css.test.ts asserts that
-   pairing in both themes so it cannot drift again. */
+   dark --ink once already. It is now %23ebeef1 == dark --ink #ebeef1, matching
+   the light block's %231f2328 == light --ink, and theme-css.test.mjs asserts
+   that pairing in both themes so it cannot drift again. The grain and the
+   ground are tokens, so they follow the theme without being restated. */
 @media (prefers-color-scheme: dark) {
 	:root:not([data-theme='light']),
 	:root:not([data-theme='light']) body {
 		background:
-			radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23ebeef1' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+			var(--tex),
 			var(--bg);
 	}
 }
@@ -557,9 +547,8 @@ body {
 :root[data-theme='dark'],
 :root[data-theme='dark'] body {
 	background:
-		radial-gradient(90rem 40rem at 50% -20rem, var(--bg-tint), transparent 60%),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23f0e2e2' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
-		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+		url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23ebeef1' stroke-opacity='0.055' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+		var(--tex),
 		var(--bg);
 }
 
@@ -722,6 +711,60 @@ button {
 	box-shadow: var(--shadow-1);
 }
 
+/* Brushed-inox sheet (the header): grain over the sheen, a 1px bevel light on
+   top and shade below. */
+.chrome {
+	background: var(--tex), var(--sheen);
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius-lg);
+	box-shadow:
+		inset 0 1px 0 var(--hi),
+		inset 0 -1px 0 var(--lo),
+		0 1px 2px var(--lo-2);
+}
+
+/* A 44px control dressed in the same metal (theme toggle, language picker). */
+.chrome-control {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: var(--tap);
+	border: 1px solid var(--line-strong);
+	border-radius: var(--radius-btn);
+	background: var(--sheen);
+	color: var(--ink);
+	box-shadow:
+		inset 0 1px 0 var(--hi),
+		0 1px 1px var(--lo-2);
+	cursor: pointer;
+	transition:
+		transform var(--dur) var(--ease-out),
+		color var(--dur-fast) ease,
+		box-shadow var(--dur-fast) ease;
+}
+.chrome-control:hover {
+	/* A copper tint laid over the sheen: a background-color alone would sit
+	   under the opaque gradient and never show. */
+	background:
+		linear-gradient(color-mix(in srgb, var(--primary) 9%, transparent) 0 0),
+		var(--sheen);
+	color: var(--primary);
+}
+.chrome-control:active {
+	transform: translateY(1px);
+	box-shadow: inset 0 1px 3px var(--lo-2);
+}
+/* After the bevel rules so the ring never sits under them; the inner gap keeps
+   it apart from the control's own edge. */
+.chrome-control:focus-visible,
+.chrome-control:has(select:focus-visible) {
+	outline: 3px solid var(--focus);
+	outline-offset: 2px;
+	border-radius: var(--radius-btn);
+	box-shadow: 0 0 0 2px var(--surface);
+}
+
 /* Screen-reader-only text for icon-bearing controls. */
 .sr-only {
 	position: absolute;
@@ -780,11 +823,13 @@ button {
 		outline-color: Highlight !important;
 	}
 
-	/* The doodle and paper-grain layers are tuned to sit at 5-9% over a known
+	/* The doodle and brushed-grain layers are tuned to sit at 5-9% over a known
 	   ground. Over an OS-substituted one they stop reading as texture and start
 	   competing with the text on top of them. */
 	html,
-	body {
+	body,
+	.chrome,
+	.chrome-control {
 		background-image: none !important;
 	}
 }
@@ -797,28 +842,51 @@ button {
  * .no-print at each call site.
  */
 @media print {
-	/* Force light regardless of data-theme — @media print has to win over
-	   :root[data-theme='dark']'s own specificity, so this restates the light
-	   :root block verbatim rather than relying on cascade order. */
+	/* Force light regardless of data-theme — @media print has to win over both
+	   dark selectors' own specificity (0,2,0, the OS-dark one included: a dark
+	   OS still matches it while printing), so this restates every themed token
+	   of the light :root block verbatim rather than relying on cascade order.
+	   theme-css.test.mjs asserts it matches :root. */
 	:root,
+	:root:not([data-theme='light']),
 	:root[data-theme='dark'] {
 		color-scheme: light;
-		--primary: #b52a26;
-		--on-primary: #fff8f7;
-		--accent: #2f5f78;
-		--on-accent: #f4fafd;
-		--bg: #fdf8f8;
-		--bg-tint: #fbdcd0;
-		--surface: #ffffff;
-		--surface-sunken: #faf0f1;
-		--ink: #291b21;
-		--muted: #655059;
-		--line: #f0e0e2;
-		--line-strong: #d9bfc4;
+		--primary: #a4501e;
+		--on-primary: #fff8f2;
+		--accent: #2c5878;
+		--on-accent: #f3f9fd;
+		--bg: #ecedee;
+		--bg-tint: #d6dade;
+		--surface: #fbfbfa;
+		--surface-sunken: #e4e6e8;
+		--ink: #1f2328;
+		--muted: #555e67;
+		--line: #d8dce0;
+		--line-strong: #b7bec6;
+		--focus: #a4501e;
+		--board: #d9b98a;
+		--board-edge: #a8834f;
+		--sheen: linear-gradient(180deg, #ffffff 0%, #e3e6e9 100%);
+		--hi: rgb(255 255 255 / 85%);
+		--hi-2: rgb(255 255 255 / 40%);
+		--lo: rgb(0 0 0 / 7%);
+		--lo-2: rgb(0 0 0 / 14%);
+		--tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='b' x='0' y='0' width='100%25' height='100%25'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9 0.003' numOctaves='3' seed='4' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.3 0 0 0 0 0.34 0 0 0 0 0.4 0.28 0 0 0 -0.112'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23b)'/%3E%3C/svg%3E");
+		--grade-a: #328532;
+		--grade-b: #647e30;
+		--grade-c: #966e08;
+		--grade-d: #b35e19;
+		--grade-e: #d43727;
+		--on-grade: #ffffff;
+		--on-warn-tint: #8d4410;
+		--on-ok-tint: #2c5878;
+		--shadow-1: 0 1px 2px rgb(0 0 0 / 7%), 0 1px 1px rgb(0 0 0 / 4%);
+		--shadow-2: 0 14px 30px -16px rgb(0 0 0 / 30%), 0 2px 6px -2px rgb(0 0 0 / 8%);
+		--shadow-press: inset 0 2px 4px rgb(0 0 0 / 16%);
 	}
 
 	/* The doodle kept (sparse, mostly-transparent hand-drawn icons — trivial
-	   ink), the paper-grain noise dropped (a full-canvas texture fill, real
+	   ink), the brushed grain dropped (a full-canvas texture fill, real
 	   ink cost on every page for something purely decorative) and the base
 	   colour is true white, not the near-white --bg wash, so a plain reader
 	   without "print background graphics" enabled gets an actually-white
@@ -828,10 +896,10 @@ button {
 	html,
 	body {
 		background:
-			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%23291b21' stroke-opacity='0.075' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
+			url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520'%3E%3Cg fill='none' stroke='%231f2328' stroke-opacity='0.075' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(70,90) rotate(-14)'%3E%3Cpath d='M0,-20 C10,-16 13,-5 10,6 C7,15 2,20 0,22 C-2,20 -7,15 -10,6 C-13,-5 -10,-16 0,-20 Z'/%3E%3Cpath d='M0,-16 L0,18'/%3E%3Cpath d='M-4,0 L-4,2'/%3E%3Cpath d='M4,0 L4,2'/%3E%3Cpath d='M-5,7 Q0,11 5,7'/%3E%3C/g%3E%3Cg transform='translate(430,150) rotate(22)'%3E%3Cpath d='M0,0 C14,4 22,16 18,30 C15,42 4,46 -4,40'/%3E%3Cpath d='M0,0 C2,-6 8,-9 13,-8'/%3E%3C/g%3E%3Cg transform='translate(150,420) rotate(-8)'%3E%3Cpath d='M-18,-4 C-20,-11 -10,-15 0,-14 C10,-13 19,-9 18,-2 C17,5 8,10 -2,9 C-13,8 -17,3 -18,-4 Z'/%3E%3Cpath d='M-4,-2 L-4,0'/%3E%3Cpath d='M5,-3 L5,-1'/%3E%3Cpath d='M-6,5 Q0,10 7,4'/%3E%3C/g%3E%3Cg transform='translate(440,460) rotate(8)'%3E%3Ccircle r='15'/%3E%3Cpath d='M0,-15 L0,15'/%3E%3Cpath d='M-13,-7.5 L13,7.5'/%3E%3Cpath d='M-13,7.5 L13,-7.5'/%3E%3C/g%3E%3Cg transform='translate(265,250) rotate(-5)'%3E%3Ccircle r='14'/%3E%3Cpath d='M0,-14 L0,-23'/%3E%3Cpath d='M0,-19 Q6,-22 8,-17 Q3,-16 0,-19'/%3E%3Cpath d='M-4,-3 L-4,-1'/%3E%3Cpath d='M4,-3 L4,-1'/%3E%3Cpath d='M-5,5 Q0,10 5,5'/%3E%3C/g%3E%3Cg transform='translate(62,266) rotate(11)'%3E%3Cpath d='M-1,-18 C2,-18 4,-13 2,-9 C9,-7 15,2 12,10 C9,18 -8,19 -12,10 C-15,2 -9,-7 -2,-9 C-4,-13 -3,-18 -1,-18 Z'/%3E%3Cpath d='M0,-18 L0,-23'/%3E%3Cpath d='M-4,4 L-4,6'/%3E%3Cpath d='M4,3 L4,5'/%3E%3Cpath d='M-6,10 Q0,15 6,9'/%3E%3C/g%3E%3Cg transform='translate(350,55) rotate(9)'%3E%3Cpath d='M-22,-2 C-24,-9 -16,-13 -6,-12 L16,-9 C24,-8 25,-1 24,4 C23,10 15,12 6,11 L-14,9 C-22,8 -21,3 -22,-2 Z'/%3E%3Cpath d='M-22,-2 L-27,-5'/%3E%3Cpath d='M-2,-4 L-2,-2'/%3E%3Cpath d='M6,-3 L6,-1'/%3E%3Cpath d='M-4,4 Q2,8 8,3'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"),
 			#ffffff !important;
 		print-color-adjust: exact;
 		-webkit-print-color-adjust: exact;
-		color: #291b21 !important;
+		color: #1f2328 !important;
 	}
 }

@@ -1,0 +1,14 @@
+Cook Up includes third-party artwork.
+
+Noto Emoji
+Copyright 2013 Google Inc.
+Licensed under the Apache License, Version 2.0
+https://github.com/googlefonts/noto-emoji (2D/svg)
+
+The files src/lib/emoji/<codepoint>.svg are Noto Emoji colour SVGs. They were
+optimised and minified with SVGO (paths rounded, metadata and editor markup
+removed, styles converted to presentation attributes); the artwork is
+otherwise unchanged. The full licence text is in src/lib/emoji/LICENSE.
+
+The files src/lib/emoji/x-*.svg were drawn for Cook Up and are not part of
+Noto Emoji.

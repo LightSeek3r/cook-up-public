@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<g stroke="#A2B2C4" stroke-width="2.8" stroke-linejoin="round">
+<path fill="#FFFFFF" d="M38 48L64 62L38 76L12 62Z"/>
+<path fill="#E8EEF4" d="M12 62L38 76V106L12 92Z"/>
+<path fill="#C8D4E0" d="M38 76L64 62V92L38 106Z"/>
+<path fill="#FFFFFF" d="M90 48L116 62L90 76L64 62Z"/>
+<path fill="#E8EEF4" d="M64 62L90 76V106L64 92Z"/>
+<path fill="#C8D4E0" d="M90 76L116 62V92L90 106Z"/>
+<path fill="#FFFFFF" d="M64 18L90 32L64 46L38 32Z"/>
+<path fill="#E8EEF4" d="M38 32L64 46V76L38 62Z"/>
+<path fill="#C8D4E0" d="M64 46L90 32V62L64 76Z"/>
+</g>
+<g fill="#D3DCE6"><circle cx="58" cy="30" r="1.4"/><circle cx="70" cy="34" r="1.4"/><circle cx="32" cy="60" r="1.4"/><circle cx="96" cy="62" r="1.4"/><circle cx="46" cy="48" r="1.4"/><circle cx="54" cy="62" r="1.4"/><circle cx="20" cy="78" r="1.4"/><circle cx="28" cy="92" r="1.4"/><circle cx="72" cy="80" r="1.4"/><circle cx="80" cy="94" r="1.4"/></g>
+<g fill="#AEBDCC"><circle cx="76" cy="54" r="1.4"/><circle cx="84" cy="44" r="1.4"/><circle cx="50" cy="86" r="1.4"/><circle cx="56" cy="76" r="1.4"/><circle cx="100" cy="86" r="1.4"/><circle cx="108" cy="76" r="1.4"/></g>
+</svg>

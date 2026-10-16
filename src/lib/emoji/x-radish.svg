@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+<defs><linearGradient id="xr-g1" gradientUnits="userSpaceOnUse" x1="80" y1="46" x2="34" y2="102"><stop offset="0" stop-color="#F23A57"/><stop offset="0.62" stop-color="#D81B3C"/><stop offset="0.82" stop-color="#F2A0B2"/><stop offset="1" stop-color="#FFFFFF"/></linearGradient></defs>
+<path fill="#66B23F" d="M72 44C58 36 52 18 62 8C76 14 80 32 72 44Z"/>
+<path fill="#57A637" d="M78 46C80 30 96 14 114 12C114 30 98 46 78 46Z"/>
+<path fill="#4E9A33" d="M82 52C92 40 110 40 120 50C110 60 94 62 82 52Z"/>
+<path fill="none" stroke="#3F8F2E" stroke-width="1.8" stroke-linecap="round" d="M72 42C68 30 65 20 62 10M80 44C90 34 100 24 112 14M84 52C96 50 108 50 118 50"/>
+<path fill="none" stroke="#6FAE3C" stroke-width="3.5" stroke-linecap="round" d="M66 50L71 41M72 52L80 45M78 57L86 53"/>
+<path fill="#F9EEF0" stroke="#E2B8C2" stroke-width="1.2" stroke-linejoin="round" d="M31.8 92.4C28 104 20 114 10 121C22 117 32 110 39.6 100.2Z"/>
+<circle cx="58" cy="74" r="32" fill="url(#xr-g1)"/>
+<path fill="#FF8FA0" d="M40 64C42 56 50 50 56 50C58 52 54 56 48 61C44 64 40 68 40 64Z"/>
+</svg>

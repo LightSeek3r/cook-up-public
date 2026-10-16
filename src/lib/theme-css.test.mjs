@@ -144,8 +144,9 @@ describe('light and dark define the same tokens', () => {
 		const light = new Set(paletteOf(rule(':root')).keys());
 		const dark = new Set(paletteOf(rule(FORCED_DARK)).keys());
 		expect([...dark].filter((t) => !light.has(t))).toEqual([]);
-		// Tokens that are legitimately theme-invariant: spacing, radii, motion, fonts.
-		const invariant = /^--(space|radius|dur|ease|font)/;
+		// Tokens that are legitimately theme-invariant: spacing, touch target, radii,
+		// motion, fonts.
+		const invariant = /^--(space|tap|radius|dur|ease|font)/;
 		expect([...light].filter((t) => !dark.has(t) && !invariant.test(t))).toEqual([]);
 	});
 
@@ -157,6 +158,23 @@ describe('light and dark define the same tokens', () => {
 			expect(new Set(dark)).toEqual(light);
 		}
 	);
+});
+
+describe('print forces the light palette', () => {
+	// The print block restates light by hand to beat the dark selectors, so it is
+	// the third copy of the palette, and the one nobody looks at.
+	const PRINT = `:root, ${OS_DARK}, ${FORCED_DARK}`;
+
+	it('restates every themed light token with its light value', () => {
+		const light = paletteOf(rule(':root'));
+		const dark = paletteOf(rule(FORCED_DARK));
+		const print = paletteOf(rule(PRINT, '@media print'));
+		const themed = [...dark.keys()];
+		expect(themed.length).toBeGreaterThan(20);
+		expect(Object.fromEntries(themed.map((t) => [t, print.get(t)]))).toEqual(
+			Object.fromEntries(themed.map((t) => [t, light.get(t)]))
+		);
+	});
 });
 
 describe('background doodle stroke follows --ink', () => {
