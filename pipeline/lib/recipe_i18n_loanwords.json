@@ -18,12 +18,12 @@
 		"fish and chips", "christmas pudding", "eton mess", "banana bread", "frozen yogurt", "coronation chicken", "paneer butter masala", "fast food", "porridge"
 	],
 	"lang": {
-		"de": ["thai", "vegan", "pie", "in"],
-		"es": ["de", "pan", "cola", "tartar"],
-		"fr": ["de", "olive", "olives", "sauté", "sautés", "sautée", "sautées", "cake", "cakes", "fit", "barbecue", "vegan"],
-		"it": ["olive", "marinate", "marinato", "marinata", "marinati", "alla", "all", "in", "pan dorato", "pan di spagna", "pan di zenzero", "pan brioche", "more"],
-		"jv": ["has", "bit", "vegan", "pie"],
-		"pt": ["de", "barbecue", "marshmallow", "marshmallows", "do", "da"],
-		"vi": ["salad", "bbq", "non", "than", "thai", "to", "an", "me", "la", "mi", "ca", "ba", "pie"]
+		"de": ["thai", "vegan", "pie", "in", "orange", "cayenne", "extra"],
+		"es": ["de", "pan", "cola", "tartar", "simple"],
+		"fr": ["de", "olive", "olives", "sauté", "sautés", "sautée", "sautées", "cake", "cakes", "fit", "barbecue", "vegan", "original"],
+		"it": ["olive", "marinate", "marinato", "marinata", "marinati", "alla", "all", "in", "pan dorato", "pan di spagna", "pan di zenzero", "pan brioche", "more", "paprika", "noodles", "extra"],
+		"jv": ["has", "bit", "vegan", "pie", "salad", "microwave", "rosemary", "basil", "crème", "foil", "thyme"],
+		"pt": ["de", "barbecue", "marshmallow", "marshmallows", "do", "da", "extra"],
+		"vi": ["salad", "bbq", "non", "than", "thai", "to", "an", "me", "la", "mi", "ca", "ba", "pie", "custard", "bay"]
 	}
 }
