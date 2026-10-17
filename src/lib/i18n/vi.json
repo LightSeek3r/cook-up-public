@@ -1,10 +1,6 @@
 ﻿{
   "app.title": "Cook Up",
   "app.tagline": "Chọn nguyên liệu bạn đang có và tìm công thức bạn thực sự nấu được.",
-  "home.steps": "Cách sử dụng",
-  "home.step1": "Nhấn chọn những gì có trong bếp của bạn",
-  "home.step2": "Thu hẹp lựa chọn",
-  "home.step3": "Bắt tay vào nấu",
   "search.placeholder": "Tìm nguyên liệu hoặc món ăn",
   "filter.cuisine": "Ẩm thực",
   "filter.meal": "Bữa ăn",

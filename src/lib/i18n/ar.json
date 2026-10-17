@@ -1,10 +1,6 @@
 ﻿{
   "app.title": "Cook Up",
   "app.tagline": "اختر ما لديك من مكوّنات، واحصل على وصفات يمكنك إعدادها فعلاً.",
-  "home.steps": "كيف يعمل",
-  "home.step1": "اضغط على ما لديك في مطبخك",
-  "home.step2": "ضيّق نطاق البحث",
-  "home.step3": "ابدأ الطهي",
   "search.placeholder": "ابحث عن مكونات أو وصفات",
   "filter.cuisine": "المطبخ",
   "filter.meal": "الوجبة",

@@ -271,7 +271,7 @@
 	.field input:hover {
 		border-color: var(--muted);
 	}
-	/* Polished copper: a light/shade sheen over the fill, kept off the middle
+	/* Polished wine red: a light/shade sheen over the fill, kept off the middle
 	   band where the label sits so --on-primary keeps its contrast. */
 	.submit {
 		min-height: var(--tap);

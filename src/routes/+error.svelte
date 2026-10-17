@@ -64,7 +64,7 @@
 </div>
 
 <style>
-	/* An empty bowl on a plate, then the status stamped in copper. */
+	/* An empty bowl on a plate, then the status stamped in wine red. */
 	.wrap {
 		display: flex;
 		flex-direction: column;
@@ -126,7 +126,7 @@
 		font-weight: 700;
 		text-decoration: none;
 	}
-	/* Polished copper, the glossary search button's finish. */
+	/* Polished wine red, the glossary search button's finish. */
 	.cta {
 		display: inline-flex;
 		align-items: center;
