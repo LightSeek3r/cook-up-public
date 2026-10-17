@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security problem
+    url: https://github.com/LightSeek3r/cook-up-public/security/advisories/new
+    about: Please report vulnerabilities privately, not in a public issue (see SECURITY.md).
+  - name: About Cook Up
+    url: https://www.unit42.fr/cook-up
+    about: The product page, in English and French.

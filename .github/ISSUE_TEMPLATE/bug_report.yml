@@ -1,0 +1,27 @@
+name: Bug report
+description: Something does not work as it should
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what you got instead.
+    validations:
+      required: true
+  - type: input
+    id: url
+    attributes:
+      label: Page address
+      description: The URL carries the ingredient selection and language. Share it only if you are fine with that.
+      placeholder: https://cook-up.asakura-account.workers.dev/?lang=en
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and device
+      placeholder: Firefox 130 on Android 15
+  - type: dropdown
+    id: theme
+    attributes:
+      label: Theme
+      options: [Light, Dark, Not sure]

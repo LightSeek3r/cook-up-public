@@ -1,0 +1,36 @@
+name: Translation problem
+description: A wrong, clumsy or unsafe translation
+labels: [translation]
+body:
+  - type: input
+    id: language
+    attributes:
+      label: Language
+      placeholder: fr, ar, ja ...
+    validations:
+      required: true
+  - type: input
+    id: page
+    attributes:
+      label: Page address
+      description: The recipe or glossary page (the URL carries the language).
+    validations:
+      required: true
+  - type: textarea
+    id: shown
+    attributes:
+      label: Text as shown
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should say
+    validations:
+      required: true
+  - type: checkboxes
+    id: unsafe
+    attributes:
+      label: Safety
+      options:
+        - label: This could be unsafe (a wrong temperature, an allergen, a wrong quantity)

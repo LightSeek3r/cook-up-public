@@ -28,3 +28,8 @@ src/lib/glossary/_draft/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local assistant config and personal notes, never committed
+.claude/
+CLAUDE.md
+tasks/
