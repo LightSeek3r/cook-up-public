@@ -6,8 +6,8 @@
  * does everywhere else). Commit the lock file to ship the data with the code.
  *
  * Re-publishing the same data version reuses its release when the asset there
- * holds the same manifest. The tag never starts with "v": deploy.yml deploys
- * v* tags.
+ * holds the same manifest. The tag never starts with "v": v* tags are reserved
+ * for the app's own version releases.
  *
  * Usage: node pipeline/tools/publish_artefacts.mjs [--dir=pipeline/out/artefacts] [--repo=owner/name] [--dry-run]
  * Publishes to the public data repository (DATA_REPO below) unless --repo says otherwise.
@@ -76,7 +76,7 @@ function main() {
 			'',
 			'Derived from the Wikibooks Cookbook (CC BY-SA 3.0), Open Food Facts (ODbL) and USDA FoodData Central (public domain); see the repository README.',
 			'',
-			'Not a deploy tag (deploy.yml only reacts to v* tags).'
+			'Not an app version tag (v* tags are reserved for the app\'s own releases).'
 		].join('\n');
 		gh(['release', 'create', tag, packFile, '--repo', repo, '--title', `Data ${manifest.version}`, '--notes', notes, '--latest=false'], {
 			stdio: ['ignore', 'inherit', 'inherit']

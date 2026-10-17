@@ -473,7 +473,7 @@ rebuild them. Instead the files are one data pack (`scripts/lib/datapack.mjs`) o
 release `data-<version>` of the **public** repository
 [`LightSeek3r/cook-up-data`](https://github.com/LightSeek3r/cook-up-data) (it holds nothing
 else, and every file in it is already served publicly under `/data`; never a `v*` tag: those
-deploy), pinned by `src/lib/data/lock.json` (repo, tag, asset sha256, manifest sha256). A
+are this app's own version tags), pinned by `src/lib/data/lock.json` (repo, tag, asset sha256, manifest sha256). A
 public repository means any build, Cloudflare's included, downloads the data with no token
 that could expire. The translation backups stay private releases of this repository.
 `npm run data:fetch`
@@ -636,26 +636,19 @@ Free and Paid, with no compressed limit ("Only the uncompressed bundle size coun
 2026-10-12); the old 3 MiB-gzip Free limit is gone. The budgets are an early warning for
 startup time (1 s limit) and for unintended growth.
 
-`.github/workflows/deploy.yml` deploys: run it from Actions on `main` (option: fresh cache keys)
-or push a `v*` tag. It runs the whole CI workflow first, then waits for approval on the
-`production` environment, then runs `scripts/deploy.mjs` (all the checks above, migration gate
-included; it never applies migrations).
+Deploys are run by hand, from a clean checkout, with `npm run deploy` (see **Deploying**). The
+repository ships no deploy workflow and uses no GitHub environment, so GitHub shows no
+Deployments for it, and `v*` tags are release markers only. `scripts/deploy.mjs` needs Cloudflare
+credentials in your shell: `wrangler login`, or `CLOUDFLARE_API_TOKEN` and
+`CLOUDFLARE_ACCOUNT_ID` (dashboard → My Profile → API Tokens → Create Token → Custom token,
+*Account resources: Include → this account* only, permissions **Account · Workers Scripts · Edit**
+and **Account · D1 · Edit**; D1 Edit rather than Read because `migrations list` first runs
+`CREATE TABLE IF NOT EXISTS d1_migrations`). It never applies migrations.
 
-One-time GitHub setup (Settings):
-
-1. **Environments → New environment `production`**: add yourself under *Required reviewers*;
-   under *Deployment branches and tags* allow `main` and tags `v*`.
-2. In that environment, **environment secrets**:
-   - `CLOUDFLARE_ACCOUNT_ID`: the account id (dashboard, Workers & Pages, right sidebar).
-   - `CLOUDFLARE_API_TOKEN`: dashboard → My Profile → API Tokens → Create Token → Custom token,
-     *Account resources: Include → this account* only, permissions **Account · Workers Scripts ·
-     Edit** and **Account · D1 · Edit**. D1 Edit rather than Read because `migrations list`
-     first runs `CREATE TABLE IF NOT EXISTS d1_migrations`. (The "Edit Cloudflare Workers"
-     template also works but grants more.)
-3. For monitoring (below), **repository** secrets, since environment secrets are invisible to
-   other workflows: `CF_ANALYTICS_TOKEN` (a separate token with only **Account · Account
-   Analytics · Read**) and `CLOUDFLARE_ACCOUNT_ID` (secret or repository variable). Optional
-   repository variable `COOKUP_URL` if the site moves to another host.
+Optional GitHub setup for monitoring (below), as **repository** secrets: `CF_ANALYTICS_TOKEN` (a
+separate token with only **Account · Account Analytics · Read**) and `CLOUDFLARE_ACCOUNT_ID`
+(secret or repository variable). Optional repository variable `COOKUP_URL` if the site moves to
+another host.
 
 ### Monitoring
 
@@ -705,17 +698,15 @@ translation problem. Questions and ideas can go in an
 ## Security
 
 Please do not open a public issue for a vulnerability. [SECURITY.md](SECURITY.md) says how to
-report one privately. The repository holds no secrets: the three `/admin` secrets and the
-Cloudflare deploy credentials live in Cloudflare and in GitHub environment secrets.
+report one privately. The repository holds no secrets: the three `/admin` secrets live in
+Cloudflare, and the deploy credentials stay in the maintainer's own shell.
 
 ## Versions
 
 The version in `package.json` and the `vX.Y.Z` git tags follow [Semantic Versioning](https://semver.org)
 loosely while the project is 0.x. Notable changes are listed in [CHANGELOG.md](CHANGELOG.md) and
-each tag has a [GitHub release](https://github.com/LightSeek3r/cook-up-public/releases). Pushing a
-`v*` tag starts the deploy workflow, which waits for approval on the `production` environment
-(see **CI and secrets**). A fork or a fresh copy without the Cloudflare secrets stops at the
-credentials check with an error that says what to set; nothing is deployed. The recipe
+each tag has a [GitHub release](https://github.com/LightSeek3r/cook-up-public/releases). Tags are release
+markers only: nothing is deployed from GitHub (see **Deployment**). The recipe
 data is versioned separately: `src/lib/data/lock.json` pins one release of
 [cook-up-data](https://github.com/LightSeek3r/cook-up-data).
 

@@ -4,8 +4,6 @@ on:
   push:
     branches: [main]
   pull_request:
-  # deploy.yml runs this whole workflow first and deploys only if it passes.
-  workflow_call:
 
 permissions:
   contents: read

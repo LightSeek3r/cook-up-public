@@ -32,7 +32,7 @@ export const isHot = (p) => !p.startsWith('r/') && !p.startsWith('mosaic/');
  * @typedef {object} DataLock
  * @property {string} version data version (manifest.json's)
  * @property {string} repo owner/name holding the release
- * @property {string} tag release tag, never v* (deploy.yml deploys v* tags)
+ * @property {string} tag release tag, never v* (v* tags are the app's own version releases)
  * @property {string} asset release asset name
  * @property {string} sha256 of the asset
  * @property {number} bytes of the asset
