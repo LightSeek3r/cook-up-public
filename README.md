@@ -1,13 +1,64 @@
-# cook-up
+<p align="center">
+  <img src="static/icon-192.png" width="96" height="96" alt="Cook Up logo">
+</p>
 
-Pick the ingredients you have, find the recipes you can make.
+<h1 align="center">Cook Up</h1>
 
-cook-up is an ingredients-first recipe finder: rather than starting from a dish name, you
-select what's in your kitchen and it ranks recipes by how few ingredients you're missing.
-(You can still search by dish name when you already know what you want.) Every result carries
-honest nutrition — shown only when enough of the recipe's mass actually resolved to real data,
-and openly withheld when it didn't — a custom health grade, and, where a genuinely healthier
-swap exists, a substitution tip.
+<p align="center"><strong>Pick what you have. Get recipes you can actually make.</strong></p>
+
+<p align="center">
+  <a href="https://github.com/LightSeek3r/cook-up-public/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/LightSeek3r/cook-up-public/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-8c1c2e"></a>
+  <a href="CHANGELOG.md"><img alt="Version 0.1.0" src="https://img.shields.io/badge/version-0.1.0-8c1c2e"></a>
+  <img alt="16 languages" src="https://img.shields.io/badge/languages-16-8c1c2e">
+  <img alt="No ads, no third-party tracking" src="https://img.shields.io/badge/ads%20%26%20trackers-none-8c1c2e">
+</p>
+
+<p align="center">
+  <a href="https://cook-up.asakura-account.workers.dev/"><strong>Open the app</strong></a> ·
+  <a href="https://www.unit42.fr/cook-up">Product page on unit42.fr</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
+  <a href="https://github.com/LightSeek3r/cook-up-public/issues">Report an issue</a>
+</p>
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/mosaic.jpg" alt="The ingredient mosaic: tap what is in your kitchen"></td>
+    <td width="50%"><img src="docs/screenshots/results.jpg" alt="Onion, garlic and tomato selected, with recipes ranked by how few ingredients are missing"></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/screenshots/glossary.jpg" alt="The glossary of 152 cooking techniques"></td>
+    <td width="50%"><img src="docs/screenshots/dark.jpg" alt="The same mosaic in dark mode"></td>
+  </tr>
+</table>
+
+Cook Up is an ingredients-first recipe finder. Tap what is in your kitchen and it ranks
+recipes by how few ingredients you are missing, with the missing ones named. Already know the
+dish you are after? Type its name in the same search bar. Every result carries honest
+nutrition (shown only when enough of the recipe's mass resolved to real data, and openly
+withheld when it did not), a custom Balance Grade, and, where a genuinely healthier swap
+exists, a substitution tip. Free, no account, no ads, no third-party tracking.
+
+**Part of [Unit42](https://www.unit42.fr).** Cook Up is built and maintained by
+[LightSeek3r](https://github.com/LightSeek3r). The [product page](https://www.unit42.fr/cook-up)
+(English and French) has the short version; this README is for people who want to run, read or
+contribute to the code.
+
+- [Highlights](#highlights)
+- [Features](#features)
+- [Tech stack](#tech-stack) · [Project structure](#project-structure) · [Getting started](#getting-started)
+- [Match API](#match-api) · [Data pipeline](#data-pipeline) · [Testing](#testing) · [Deployment](#deployment)
+- [Data sources & attribution](#data-sources--attribution)
+- [Contributing](#contributing) · [Security](#security) · [Versions](#versions) · [Licence](#licence)
+
+## Highlights
+
+- **Ingredient mosaic**: tap tiles instead of typing; results ranked by what you are missing.
+- **Honest nutrition**: an A–E Balance Grade and per-serving macros, hidden rather than guessed.
+- **16 languages**, including right-to-left Arabic and Western Punjabi (Shahmukhi).
+- **Glossary** of 152 cooking techniques with 28 text-free, step-by-step diagrams.
+- **Private by design**: no account, no cookie, no IP address kept, no third-party request.
+- **Shareable URLs**: the whole state lives in the query string, so a link reopens where you left off.
 
 ## Features
 
@@ -32,8 +83,8 @@ swap exists, a substitution tip.
 - **Related recipes** — each recipe page shows similar recipes based on shared ingredients.
 - **Remembered fridge** — your ingredient selection is saved in browser storage (device-only,
   no account needed).
-- **Search by dish name too** — the search bar matches recipe titles as well as ingredients,
-  so you can go straight to a dish you already had in mind. (Recipe titles are deliberately
+- **Search by dish name** — the search bar matches recipe titles as well as ingredients,
+  so you can go straight to a dish you already have in mind. (Recipe titles are deliberately
   never translated — a dish name is a proper noun — so title search is English in every
   locale.)
 - **Honest result counts** — the count is the real number of matches, not the page size, and
@@ -114,17 +165,28 @@ pipeline/               offline data build (see below) — Node ESM, run outside
   lib/                     shared pure logic (wikitext parsing, unit parsing, FDC matching, ...)
   data/                    fetched/downloaded raw sources, translation store and backup (git-ignored)
   out/                     generated .jsonl and artefacts (git-ignored)
-tasks/                  working notes: todo.md (build log per phase), lessons.md (hard-won fixes)
+docs/screenshots/       the images used by this README
 ```
 
 ## Getting started
 
+You need Node.js 24 (what CI runs) and npm. No Cloudflare account or login is needed to run
+the app locally, and `data:fetch` needs no token: the data pack is a release asset of the
+public [cook-up-data](https://github.com/LightSeek3r/cook-up-data) repository, checked against
+the sha256 in `src/lib/data/lock.json` before anything is written.
+
 ```bash
 npm install
 npm run db:migrate          # the D1 schema (page views, admin auth) on your local database
-npm run data:fetch          # data artefacts pinned by src/lib/data/lock.json (needs gh or GITHUB_TOKEN)
-npm run dev                 # vite dev, with D1 emulated locally (no Cloudflare login needed)
+npm run data:fetch          # data artefacts pinned by src/lib/data/lock.json (about 25 MB)
+npm run build               # copies the data into the build output the Worker reads from
+npm run preview             # wrangler dev: the real Worker bundle on http://localhost:8787
 ```
+
+The Worker reads the data artefacts through its assets binding, which serves the build output
+(`.svelte-kit/cloudflare`), not `static/`. So after `data:fetch`, run `npm run build` once,
+or the API answers 503 `DataUnavailableError: data/core.bin: HTTP 404`. `npm run dev` (Vite,
+with D1 emulated) is fine for work that does not need recipe data.
 
 All recipe and ingredient data comes from the data artefacts `data:fetch` installs; the local D1
 needs no seeding (it holds no corpus since migrations/0013).
@@ -202,8 +264,7 @@ npm run data:build -- --save-db=pipeline/out/snapshot.sqlite   # artefacts + the
 ```
 
 Each stage is resumable and logs real counts (pages fetched, ingredients matched, recipes
-graded, etc.) rather than just "done" — check `tasks/todo.md` for what those numbers should
-look like on the full corpus. As a reference point, the full build currently yields roughly
+graded, etc.) rather than just "done". As a reference point, the full build currently yields roughly
 **3,400 recipes and 1,030 distinct ingredients**, about a third of them carrying enough
 resolved mass to show nutrition.
 
@@ -284,8 +345,7 @@ without instructions of its own still reaches the cards and the page, over the E
 
 Each row records the hash of the English text it was translated from (a changed source shows up
 as `stale`), whether it was imported from the backup or applied through the full gate, and
-whether a second-pass reviewer has passed it. Content changes only through these tools (the
-translating agents' rules: `.claude/rules/recipe-translation-subagents.md`):
+whether a second-pass reviewer has passed it. Content changes only through these tools:
 
 ```bash
 node pipeline/tools/recipe_i18n_import_backup.mjs     # seed from the verified backup, once (idempotent: fills only what is missing)
@@ -324,8 +384,7 @@ title that fails the gate. Those recipes show English in that language until tra
 
 ### Data artefacts
 
-The read-only corpus ships as versioned files with the build
-(`.claude/plans/phase3-static-data.md`). Stage 09 builds them from the pipeline snapshot,
+The read-only corpus ships as versioned files with the build. Stage 09 builds them from the pipeline snapshot,
 through the statements `06_seed_d1.mjs` writes into an in-memory SQLite with the corpus schema
 (migrations up to `CORPUS_SCHEMA_LAST`), so every value is what D1 held before 0013:
 
@@ -560,7 +619,7 @@ undone only through D1 Time Travel (`npx wrangler d1 time-travel restore cook-up
 that stopped reading the corpus. Run `npm run verify:deploy -- <url>` after a rollback.
 
 If the dashboard still shows a Workers Builds Git connection for this Worker (it was once created
-that way, `tasks/lessons.md`), disconnect it: it would deploy every push to `main` without the
+that way), disconnect it: it would deploy every push to `main` without the
 migration gate or these checks.
 
 ### CI and secrets
@@ -635,3 +694,33 @@ because the two have different authors and often different licences.
 `svelte.config.js`'s `img-src`. Photos are hotlinked rather than mirrored — a deliberate trade
 documented at that line. That sentence is now literally true: `/api/track` used to forward each
 visit to an external endpoint, and no longer leaves the Worker.
+
+## Contributing
+
+Bug reports, wrong or clumsy translations, and small pull requests are welcome. Please read
+[CONTRIBUTING.md](CONTRIBUTING.md) first: it lists the checks CI runs and how to report a
+translation problem. Questions and ideas can go in an
+[issue](https://github.com/LightSeek3r/cook-up-public/issues) too.
+
+## Security
+
+Please do not open a public issue for a vulnerability. [SECURITY.md](SECURITY.md) says how to
+report one privately. The repository holds no secrets: the three `/admin` secrets and the
+Cloudflare deploy credentials live in Cloudflare and in GitHub environment secrets.
+
+## Versions
+
+The version in `package.json` and the `vX.Y.Z` git tags follow [Semantic Versioning](https://semver.org)
+loosely while the project is 0.x. Notable changes are listed in [CHANGELOG.md](CHANGELOG.md) and
+each tag has a [GitHub release](https://github.com/LightSeek3r/cook-up-public/releases). Pushing a
+`v*` tag starts the deploy workflow, which waits for approval on the `production` environment
+(see **CI and secrets**), so a fork that has not configured it simply does nothing. The recipe
+data is versioned separately: `src/lib/data/lock.json` pins one release of
+[cook-up-data](https://github.com/LightSeek3r/cook-up-data).
+
+## Licence
+
+The source code is released under the [MIT licence](LICENSE). That does not cover the content
+the app serves: recipes (CC BY-SA 3.0), ingredient taxonomy (ODbL), nutrition values (public
+domain), photographs (each under its own free licence) and the Noto Emoji artwork (Apache 2.0)
+keep their own terms. See **Data sources & attribution** and [NOTICE](NOTICE).
