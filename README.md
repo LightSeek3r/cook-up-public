@@ -9,7 +9,7 @@
 <p align="center">
   <a href="https://github.com/LightSeek3r/cook-up-public/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/LightSeek3r/cook-up-public/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="MIT licence" src="https://img.shields.io/badge/licence-MIT-8c1c2e"></a>
-  <a href="CHANGELOG.md"><img alt="Version 0.1.0" src="https://img.shields.io/badge/version-0.1.0-8c1c2e"></a>
+  <a href="CHANGELOG.md"><img alt="Version" src="https://img.shields.io/github/package-json/v/LightSeek3r/cook-up-public?label=version&color=8c1c2e"></a>
   <img alt="16 languages" src="https://img.shields.io/badge/languages-16-8c1c2e">
   <img alt="No ads, no third-party tracking" src="https://img.shields.io/badge/ads%20%26%20trackers-none-8c1c2e">
 </p>
