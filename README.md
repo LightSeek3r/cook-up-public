@@ -706,7 +706,11 @@ Cloudflare, and the deploy credentials stay in the maintainer's own shell.
 The version in `package.json` and the `vX.Y.Z` git tags follow [Semantic Versioning](https://semver.org)
 loosely while the project is 0.x. Notable changes are listed in [CHANGELOG.md](CHANGELOG.md) and
 each tag has a [GitHub release](https://github.com/LightSeek3r/cook-up-public/releases). Tags are release
-markers only: nothing is deployed from GitHub (see **Deployment**). The recipe
+markers only: nothing is deployed from GitHub (see **Deployment**). To cut one, write the
+notes under `## [Unreleased]` in the changelog and run `npm run release -- patch` (or `minor`,
+`major`, an explicit `X.Y.Z`; `--dry-run` previews). It updates the version in `package.json`,
+`package-lock.json` and the changelog, commits, pushes `main` and creates the tag and release;
+the badge above reads `package.json` by itself. The recipe
 data is versioned separately: `src/lib/data/lock.json` pins one release of
 [cook-up-data](https://github.com/LightSeek3r/cook-up-data).
 

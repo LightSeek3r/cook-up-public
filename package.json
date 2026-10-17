@@ -27,6 +27,7 @@
     "build": "vite build",
     "build:checked": "node scripts/build.mjs",
     "deploy": "node scripts/deploy.mjs",
+    "release": "node scripts/release.mjs",
     "verify:deploy": "node scripts/verify-deploy.mjs",
     "check:migrations": "node scripts/check-migrations.mjs",
     "check:eol": "node scripts/check-line-endings.mjs",

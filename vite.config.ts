@@ -15,7 +15,12 @@ export default defineConfig({
 		// empty string for any CSS import (?raw and ?inline included). The generated
 		// tsconfig typechecks src/**/*.{js,ts,svelte} but not .mjs, so that extension
 		// buys node:fs without pulling in @types/node for one file.
-		include: ['src/**/*.test.ts', 'src/**/*.test.mjs', 'pipeline/**/*.test.mjs'],
+		include: [
+			'src/**/*.test.ts',
+			'src/**/*.test.mjs',
+			'pipeline/**/*.test.mjs',
+			'scripts/**/*.test.mjs'
+		],
 		environment: 'node'
 	}
 });
