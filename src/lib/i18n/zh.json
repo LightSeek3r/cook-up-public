@@ -1,10 +1,6 @@
 ﻿{
   "app.title": "Cook Up",
   "app.tagline": "选择你手边的食材，找到真正做得出来的菜谱。",
-  "home.steps": "使用方法",
-  "home.step1": "点选你厨房里有的食材",
-  "home.step2": "缩小范围",
-  "home.step3": "开始做菜",
   "search.placeholder": "搜索食材或菜谱",
   "filter.cuisine": "菜系",
   "filter.meal": "餐次",

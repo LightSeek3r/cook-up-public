@@ -1,37 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
 	<style>
-		.top { stop-color: #ecedee; }
-		.foot { stop-color: #d3d8de; }
-		.edge { stroke: #c2c8cf; }
-		.bowl { fill: #a4501e; }
-		.rim { fill: #c9743a; }
-		.sheen { stroke: #c9743a; }
-		.steam { stroke: #1f2328; }
+		.top { stop-color: #ffffff; }
+		.foot { stop-color: #f1e8e9; }
+		.edge { stroke: #e3d6d8; }
+		.w0 { stop-color: #a62a3f; }
+		.w1 { stop-color: #8c1c2e; }
+		.w2 { stop-color: #651020; }
+		.k0 { stop-color: #46343b; }
+		.k1 { stop-color: #241820; }
+		.glint { stroke: #ffffff; stroke-opacity: 0.38; }
+		.lip { stroke: #ffffff; stroke-opacity: 0.28; }
 		@media (prefers-color-scheme: dark) {
-			.top { stop-color: #262b31; }
-			.foot { stop-color: #1c2025; }
-			.edge { stroke: #3f4851; }
-			.bowl { fill: #e49a66; }
-			.rim { fill: #f2bc93; }
-			.sheen { stroke: #f2bc93; }
-			.steam { stroke: #ebeef1; }
+			.top { stop-color: #2a2224; }
+			.foot { stop-color: #1c1819; }
+			.edge { stroke: #3d3234; }
+			.w0 { stop-color: #f98086; }
+			.w1 { stop-color: #f4666c; }
+			.w2 { stop-color: #c2414c; }
+			.k0 { stop-color: #fbf3f4; }
+			.k1 { stop-color: #e0d3d5; }
+			.glint { stroke-opacity: 0.3; }
+			.lip { stroke: #1c1819; stroke-opacity: 0.25; }
 		}
 	</style>
 	<defs>
-		<linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+		<linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
 			<stop class="top" offset="0" />
 			<stop class="foot" offset="1" />
 		</linearGradient>
+		<linearGradient id="wine" x1="0" y1="0" x2="0" y2="1">
+			<stop class="w0" offset="0" />
+			<stop class="w1" offset="0.55" />
+			<stop class="w2" offset="1" />
+		</linearGradient>
+		<linearGradient id="ink" x1="0" y1="0" x2="0" y2="1">
+			<stop class="k0" offset="0" />
+			<stop class="k1" offset="1" />
+		</linearGradient>
 	</defs>
-	<rect class="edge" x="0.25" y="0.25" width="31.5" height="31.5" rx="6.75" stroke-width="0.5" fill="url(#steel)" />
-	<path
-		class="steam"
-		d="M13 12c-1.5-1.5-1.5-2.5 0-4s1.5-2.5 0-4M19 12c-1.5-1.5-1.5-2.5 0-4s1.5-2.5 0-4"
-		fill="none"
-		stroke-width="2"
-		stroke-linecap="round"
-	/>
-	<path class="bowl" d="M6 18h20a10 9 0 0 1-20 0ZM12 26h8v1a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1Z" />
-	<rect class="rim" x="4" y="14" width="24" height="3" rx="1.5" />
-	<path class="sheen" d="M9 21a8 7 0 0 0 4 4.5" fill="none" stroke-width="1.5" stroke-linecap="round" />
+	<rect class="edge" x="0.25" y="0.25" width="31.5" height="31.5" rx="6.75" fill="url(#tile)" stroke-width="0.5" />
+	<g transform="translate(16 16.2) scale(0.9) translate(-16 -16)">
+		<path d="M13 11c0-2 3-2 3-4M19 11c0-2 3-2 3-4" fill="none" stroke="url(#ink)" stroke-width="1.9" stroke-linecap="round" />
+		<path d="M6 16.8h20a10 10 0 0 1-10 9.2 10 10 0 0 1-10-9.2Z" fill="url(#wine)" />
+		<path class="glint" d="M9.2 19.6a7.6 6.4 0 0 0 3.8 4.6" fill="none" stroke-width="1.3" stroke-linecap="round" />
+		<rect x="4" y="15.5" width="24" height="2" rx="1" fill="url(#ink)" />
+		<path class="lip" d="M5.2 15.95h21.6" fill="none" stroke-width="0.45" stroke-linecap="round" />
+	</g>
 </svg>

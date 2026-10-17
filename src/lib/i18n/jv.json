@@ -1,10 +1,6 @@
 {
   "app.title": "Cook Up",
   "app.tagline": "Pilih apa sing kokgadhahi. Golek resep sing bisa tenan kokgawe.",
-  "home.steps": "Cara nganggo",
-  "home.step1": "Pencet apa sing ana ing pawonmu",
-  "home.step2": "Saring luwih rinci",
-  "home.step3": "Masak",
   "search.placeholder": "Goleki bahan utawa resep",
   "filter.cuisine": "Masakan",
   "filter.meal": "Wektu mangan",

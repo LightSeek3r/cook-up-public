@@ -54,13 +54,13 @@ const TILE_FOOT = stop('foot');
 const bareMark = (viewBox) => {
 	const tile = /\s*<rect class="edge"[^>]*\/>/;
 	const dark = /\s*@media \(prefers-color-scheme: dark\) \{[^}]*(\}[^}]*)*?\}\s*\}/;
-	const defs = /\s*<defs>[\s\S]*?<\/defs>/;
-	for (const re of [tile, dark, defs]) if (!re.test(favicon)) throw new Error(`favicon.svg no longer matches ${re}`);
+	const tileGradient = /\s*<linearGradient id="tile"[\s\S]*?<\/linearGradient>/;
+	for (const re of [tile, dark, tileGradient]) if (!re.test(favicon)) throw new Error(`favicon.svg no longer matches ${re}`);
 	return favicon
 		.replace(tile, '')
 		.replace(dark, '')
+		.replace(tileGradient, '')
 		.replace(/\s*\.(top|foot|edge) \{[^}]*\}/g, '')
-		.replace(defs, '')
 		.replace('viewBox="0 0 32 32"', `viewBox="${viewBox}"`);
 };
 
@@ -81,13 +81,12 @@ ${style}</style>${body}`;
 const MARK = bareMark('0 0 32 32');
 const markImg = `data:image/svg+xml,${encodeURIComponent(MARK)}`;
 
-/** Full-bleed inox square with the mark at `scale` of the side (launchers mask it). */
+/** Full-bleed square in the favicon's tile colour with the mark at `scale` of the side (launchers mask it). */
 const squareIcon = (size, scale) =>
 	page(
 		size,
 		size,
-		`.tile { width: ${size}px; height: ${size}px; display: grid; place-items: center;
-		  background: linear-gradient(180deg, ${TILE_TOP}, ${TILE_FOOT}); }
+		`.tile { width: ${size}px; height: ${size}px; display: grid; place-items: center; background: linear-gradient(180deg, ${TILE_TOP}, ${TILE_FOOT}); }
 		 img { width: ${Math.round(size * scale)}px; height: ${Math.round(size * scale)}px; display: block; }`,
 		`<div class="tile"><img src="${markImg}" alt=""></div>`
 	);
@@ -166,8 +165,8 @@ const shoot = async (html, w, h, file, { palette = false } = {}) => {
 
 try {
 	// iOS and maskable launchers cut their own shape, so these two are full-bleed.
-	// The mark's furthest point (a steam cap) is 13.4 of 32 units from the centre:
-	// at 0.875 it sits at 187 px of 512, inside the 205 px maskable safe circle.
+	// The mark's furthest point (an end cap of the rim bar) is 13.2 of 32 units from the
+	// centre: at 0.875 it sits at 185 px of 512, inside the 205 px maskable safe circle.
 	await shoot(squareIcon(180, 0.875), 180, 180, at('static/apple-touch-icon.png'));
 	await shoot(roundedIcon(192), 192, 192, at('static/icon-192.png'));
 	await shoot(squareIcon(512, 0.875), 512, 512, at('static/icon-512.png'));

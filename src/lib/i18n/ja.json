@@ -1,10 +1,6 @@
 ﻿{
   "app.title": "Cook Up",
   "app.tagline": "手元にある食材を選ぶだけ。今つくれるレシピが見つかります。",
-  "home.steps": "使い方",
-  "home.step1": "キッチンにある食材をタップする",
-  "home.step2": "条件で絞り込む",
-  "home.step3": "料理する",
   "search.placeholder": "食材やレシピを検索",
   "filter.cuisine": "料理ジャンル",
   "filter.meal": "食事",

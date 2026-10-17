@@ -116,33 +116,41 @@
 	<header>
 		<div class="bar chrome">
 			<a class="brand" href="/?lang={lang}">
-				<!-- Same geometry as static/favicon.svg. The rim and glint mix the
-				     copper towards white, so they read as a highlight in both themes. -->
+				<!-- Same geometry as static/favicon.svg, minus the tile: the bowl takes the
+				     brand colour (--primary via currentColor) with a light-to-shade overlay,
+				     the rim and steam the ink. -->
 				<svg class="mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+					<defs>
+						<linearGradient id="brand-shade" x1="0" y1="0" x2="0" y2="1">
+							<stop offset="0" stop-color="#fff" stop-opacity="0.22" />
+							<stop offset="0.5" stop-color="#fff" stop-opacity="0" />
+							<stop offset="1" stop-color="#000" stop-opacity="0.28" />
+						</linearGradient>
+					</defs>
 					<path
-						d="M13 12c-1.5-1.5-1.5-2.5 0-4s1.5-2.5 0-4M19 12c-1.5-1.5-1.5-2.5 0-4s1.5-2.5 0-4"
+						d="M13 11c0-2 3-2 3-4M19 11c0-2 3-2 3-4"
 						fill="none"
 						style="stroke: var(--ink)"
-						stroke-width="2"
+						stroke-width="1.9"
 						stroke-linecap="round"
 					/>
+					<path d="M6 16.8h20a10 10 0 0 1-10 9.2 10 10 0 0 1-10-9.2Z" fill="currentColor" />
+					<path d="M6 16.8h20a10 10 0 0 1-10 9.2 10 10 0 0 1-10-9.2Z" fill="url(#brand-shade)" />
 					<path
-						d="M6 18h20a10 9 0 0 1-20 0ZM12 26h8v1a1 1 0 0 1-1 1h-6a1 1 0 0 1-1-1Z"
-						fill="currentColor"
-					/>
-					<rect
-						x="4"
-						y="14"
-						width="24"
-						height="3"
-						rx="1.5"
-						style="fill: color-mix(in srgb, currentColor 72%, #fff)"
-					/>
-					<path
-						d="M9 21a8 7 0 0 0 4 4.5"
+						d="M9.2 19.6a7.6 6.4 0 0 0 3.8 4.6"
 						fill="none"
-						style="stroke: color-mix(in srgb, currentColor 72%, #fff)"
-						stroke-width="1.5"
+						stroke="#fff"
+						stroke-opacity="0.38"
+						stroke-width="1.3"
+						stroke-linecap="round"
+					/>
+					<rect x="4" y="15.5" width="24" height="2" rx="1" style="fill: var(--ink)" />
+					<path
+						d="M5.2 15.95h21.6"
+						fill="none"
+						style="stroke: var(--surface)"
+						stroke-opacity="0.3"
+						stroke-width="0.45"
 						stroke-linecap="round"
 					/>
 				</svg>

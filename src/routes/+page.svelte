@@ -509,11 +509,6 @@
 <!-- The page's one <h1>: the layout leaves its tagline out on this route. -->
 <div class="intro">
 	<h1>{t('app.tagline')}</h1>
-	<ol class="steps" aria-label={t('home.steps')}>
-		{#each ['home.step1', 'home.step2', 'home.step3'] as key, i (key)}
-			<li><span class="pip" aria-hidden="true">{i + 1}</span>{t(key)}</li>
-		{/each}
-	</ol>
 </div>
 
 <FilterBar
@@ -758,40 +753,6 @@
 		text-wrap: balance;
 		font-variation-settings: 'SOFT' 0, 'WONK' 0;
 	}
-	.steps {
-		display: flex;
-		flex-wrap: wrap;
-		gap: var(--space-2) var(--space-4);
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		color: var(--muted);
-		font-size: 0.9rem;
-	}
-	.steps li {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.45rem;
-	}
-	.pip {
-		display: grid;
-		place-items: center;
-		flex: none;
-		width: 1.5rem;
-		height: 1.5rem;
-		border: 1.5px solid var(--line-strong);
-		border-radius: 50%;
-		color: var(--ink);
-		font-size: 0.75rem;
-		font-weight: 700;
-		font-variant-numeric: tabular-nums;
-	}
-	.steps li:first-child .pip {
-		background: var(--primary);
-		border-color: var(--primary);
-		color: var(--on-primary);
-	}
-
 	.layout {
 		display: grid;
 		gap: var(--space-4);
@@ -1053,7 +1014,7 @@
 	.pin:hover {
 		color: var(--primary);
 	}
-	/* Copper on a steel chip: a pinned pin has to read as a
+	/* Wine red on a steel chip: a pinned pin has to read as a
 	   second state, not as more of the chip. */
 	.pin.pinned {
 		background: var(--primary);
@@ -1075,7 +1036,7 @@
 		color: var(--primary);
 		border-color: var(--primary);
 	}
-	/* Polished copper: a highlight across the top, a shade along the bottom. */
+	/* Polished wine red: a highlight across the top, a shade along the bottom. */
 	.cta {
 		display: inline-flex;
 		align-items: center;

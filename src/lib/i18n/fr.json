@@ -1,10 +1,6 @@
 ﻿{
   "app.title": "Cook Up",
   "app.tagline": "Choisissez ce que vous avez. Trouvez des recettes réellement réalisables.",
-  "home.steps": "Comment ça marche",
-  "home.step1": "Touchez ce que vous avez dans votre cuisine",
-  "home.step2": "Affinez les résultats",
-  "home.step3": "Cuisinez",
   "search.placeholder": "Rechercher des ingrédients ou des recettes",
   "filter.cuisine": "Cuisine",
   "filter.meal": "Repas",
