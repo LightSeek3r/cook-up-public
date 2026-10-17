@@ -1,6 +1,25 @@
 {
   "name": "cook-up",
-  "version": "0.0.1",
+  "version": "0.1.0",
+  "description": "Ingredients-first recipe finder: pick what you have, get recipes ranked by how few ingredients you are missing. SvelteKit on Cloudflare Workers.",
+  "license": "MIT",
+  "author": "LightSeek3r",
+  "homepage": "https://www.unit42.fr/cook-up",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LightSeek3r/cook-up-public.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LightSeek3r/cook-up-public/issues"
+  },
+  "keywords": [
+    "recipes",
+    "ingredients",
+    "sveltekit",
+    "cloudflare-workers",
+    "i18n",
+    "nutrition"
+  ],
   "private": true,
   "type": "module",
   "scripts": {
