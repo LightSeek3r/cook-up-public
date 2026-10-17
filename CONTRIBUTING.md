@@ -51,4 +51,4 @@ See **Getting started** in the [README](README.md). In short: `npm install`,
   source and licence.
 
 By contributing you agree that your contribution is released under the [MIT licence](LICENSE).
-Please be kind: this is a place for people who like cooking and code.
+This project follows the [Code of Conduct](CODE_OF_CONDUCT.md): be kind, this is a place for people who like cooking and code.
