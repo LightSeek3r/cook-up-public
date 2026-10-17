@@ -714,7 +714,8 @@ The version in `package.json` and the `vX.Y.Z` git tags follow [Semantic Version
 loosely while the project is 0.x. Notable changes are listed in [CHANGELOG.md](CHANGELOG.md) and
 each tag has a [GitHub release](https://github.com/LightSeek3r/cook-up-public/releases). Pushing a
 `v*` tag starts the deploy workflow, which waits for approval on the `production` environment
-(see **CI and secrets**), so a fork that has not configured it simply does nothing. The recipe
+(see **CI and secrets**). A fork or a fresh copy without the Cloudflare secrets stops at the
+credentials check with an error that says what to set; nothing is deployed. The recipe
 data is versioned separately: `src/lib/data/lock.json` pins one release of
 [cook-up-data](https://github.com/LightSeek3r/cook-up-data).
 
