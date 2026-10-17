@@ -9,7 +9,7 @@
  * Category:Recipes alone is ~3,824 pages (already "low-thousands"), with
  * consistent template/heading structure Gutenberg's prose doesn't have; FDC
  * belongs with phase 3 (stage 04 consumes it, not stage 03). See
- * tasks/todo.md's phase-2 review note for the full reasoning.
+ * the unpublished project notes' phase-2 review note for the full reasoning.
  *
  * Resumable: a page already saved on disk is not re-fetched, so repeated dev
  * runs are cheap. Output:

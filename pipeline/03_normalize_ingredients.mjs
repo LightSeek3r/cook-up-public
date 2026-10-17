@@ -1,7 +1,7 @@
 /**
  * Stage 03 — ingredient normalisation, quantity parsing, and derivation of
  * category / allergens / diets from the Open Food Facts taxonomy (not
- * regexes over ingredient names — see tasks/lessons.md for why that burned
+ * regexes over ingredient names — see the unpublished project notes for why that burned
  * us once already on eggplant/coconut).
  *
  * Input:  pipeline/out/recipes.jsonl, pipeline/data/off-ingredients.txt

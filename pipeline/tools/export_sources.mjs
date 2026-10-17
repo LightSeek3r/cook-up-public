@@ -7,7 +7,7 @@
  * would invalidate this cache, which doesn't happen mid-translation-run — so
  * re-running this once per pipeline session (not once per batch, which is
  * what apply_manual_translations.mjs used to do) is the whole point. See
- * .claude/plans/six-langs-and-d1-batching.md, Part A, for why repeated
+ * the unpublished plan notes, Part A, for why repeated
  * per-batch SELECTs were burning D1 read quota for data that never changes.
  *
  * Cost: one real D1 read per recipe row (~3,484 today, more once new recipes

@@ -217,7 +217,7 @@ export function matchFdc(name, fdc) {
 	// flour, and drops `coriander_leaf` (189 rows) to no match at all. Net-positive
 	// is plausible but unproven, and the blast radius is every ingredient's
 	// nutrition — so the individual wins are pinned in FDC_OVERRIDES and this stays
-	// as-is until it can be changed with all 55 reviewed. See tasks/todo.md.
+	// as-is until it can be changed with all 55 reviewed. See the unpublished project notes.
 	return scoreCandidates(needle, fdc, { prefixOnly: true }) ?? scoreCandidates(needle, fdc, { prefixOnly: false });
 }
 

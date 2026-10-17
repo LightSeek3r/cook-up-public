@@ -3,7 +3,7 @@ import { splitIngredientLine } from './measure.mjs';
 
 // Pins the exact class of bug this project hit: quantity/unit came back null
 // for 98% of recipe_ingredients rows because splitIngredientLine was only
-// called on the wikilink-match failure path (see tasks/todo.md). This suite
+// called on the wikilink-match failure path (see the unpublished project notes). This suite
 // exercises the function directly, independent of how the caller invokes it.
 describe('splitIngredientLine', () => {
 	it('parses a plain integer + unit + name', () => {

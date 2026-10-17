@@ -3,7 +3,7 @@
  * not a matching bug, not a synonym gap `SYNONYM_OVERRIDES` could fix, an
  * actual missing entry (verified by searching the raw taxonomy file for
  * every spelling variant tried before adding anything here). A standing,
- * reusable mechanism per the project's own decision (see tasks/todo.md) —
+ * reusable mechanism per the project's own decision (see the unpublished project notes) —
  * the next gap like this goes here too, not another one-off list.
  *
  * Each entry supplies everything the taxonomy would normally provide:

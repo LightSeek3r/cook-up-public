@@ -2,7 +2,7 @@
 // up to CORPUS_SCHEMA_LAST, then a small fixture) and compares it with a brute-force reference of the documented
 // rules. match.test.ts only sees SQL text through a spy, which cannot catch a
 // query that is invalid or merely wrong. `.mjs` for node:sqlite / node:fs
-// without @types/node (see tasks/lessons.md).
+// without @types/node (see the unpublished project notes).
 import { describe, it, expect, beforeAll } from 'vitest';
 import { DatabaseSync } from 'node:sqlite';
 import { readFileSync } from 'node:fs';

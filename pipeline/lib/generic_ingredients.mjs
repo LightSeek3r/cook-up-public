@@ -25,11 +25,11 @@
  * vinegar, oils, wine), concentrated/dehydrated forms (tomato puree, onion
  * powder), and prepared components (meringue from egg white) — made the cut.
  * That's a deliberate product decision (discovery over strict nutritional
- * fidelity), not an oversight: see tasks/todo.md for the full case-by-case
+ * fidelity), not an oversight: see the unpublished project notes for the full case-by-case
  * reasoning this list was built from.
  *
  * Regenerate by re-deriving from the taxonomy DAG and re-applying the same
- * exclusions (see `tasks/todo.md`) — don't hand-edit piecemeal without
+ * exclusions (see the unpublished project notes) — don't hand-edit piecemeal without
  * re-checking both exclusion rules still hold for the new entry.
  *
  * CLOSURE INVARIANT — this list is load-bearing for anything that makes

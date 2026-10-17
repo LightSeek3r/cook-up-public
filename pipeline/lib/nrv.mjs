@@ -59,7 +59,7 @@ export const MICRONUTRIENTS = {
  * rather than silently falling through). Every id below was looked up directly in
  * the real `pipeline/data/fdc/{foundation,sr_legacy}/food.csv` and its exact
  * description + per-100g macros confirmed before being added here — see
- * `tasks/todo.md` phase 3 for the audit that produced this list (usage counts
+ * the unpublished project notes phase 3 for the audit that produced this list (usage counts
  * against the real recipe corpus, and `pipeline/out/fdc_collisions.txt`).
  */
 export const FDC_OVERRIDES = {

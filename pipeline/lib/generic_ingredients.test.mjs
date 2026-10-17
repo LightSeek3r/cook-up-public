@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { GENERIC_PAIRS, GENERIC_PAIRS_CLOSED } from './generic_ingredients.mjs';
 
 // Structural invariants only — the actual generic/specific *content* is a
-// curated product decision (see the file's own header and tasks/todo.md for
+// curated product decision (see the file's own header and the unpublished project notes for
 // the full case-by-case reasoning), not something a unit test should assert
 // on line-by-line.
 describe('GENERIC_PAIRS', () => {

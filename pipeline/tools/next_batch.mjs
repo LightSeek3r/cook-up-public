@@ -6,7 +6,7 @@
  * reads pipeline/out/applied/<lang>.json if present (written by
  * apply_manual_translations.mjs) to skip recipes already translated for that
  * language, so a translation agent never has to query D1 itself to find its
- * own gap — see .claude/plans/six-langs-and-d1-batching.md, Part A.
+ * own gap — see the unpublished plan notes, Part A.
  *
  * Writes an array of { recipe_id, title, instructions } — the *source*
  * text for an agent to translate — to --out. This is the agent's translation

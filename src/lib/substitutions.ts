@@ -26,7 +26,7 @@ export interface Substitution {
 }
 
 /** Weighted toward the most common ingredients across the corpus (see
- *  tasks/todo.md Wave 4 note for the recipe-count figures behind this order). */
+ *  the unpublished project notes Wave 4 note for the recipe-count figures behind this order). */
 const RULES: SubstitutionRule[] = [
 	{ from: 'salt', to: 'herb', benefit: 'lessSalt' },
 	{ from: 'salt', to: 'lemon_juice', benefit: 'lessSalt' },

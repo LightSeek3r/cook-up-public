@@ -18,7 +18,7 @@
  * static (source text doesn't change mid-run) and re-reading it from D1 on
  * every batch was one of two remote SELECTs this script used to make per run,
  * neither of which needed to touch D1 at all. See
- * .claude/plans/six-langs-and-d1-batching.md, Part A, for why that mattered:
+ * the unpublished plan notes, Part A, for why that mattered:
  * it was the difference between a handful of D1 reads for the whole
  * translation effort and re-scanning thousands of rows per 25-row batch.
  *

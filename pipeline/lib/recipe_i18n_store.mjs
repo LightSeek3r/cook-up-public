@@ -1,7 +1,7 @@
 /**
  * The recipe translation store: the source of truth for recipe titles and
  * instructions in every language once D1 no longer holds them (step 3.5 of
- * .claude/plans/phase3-static-data.md). 09_build_artefacts.mjs reads it; only
+ * the unpublished plan notes). 09_build_artefacts.mjs reads it; only
  * recipe_i18n_apply.mjs and recipe_i18n_import_backup.mjs write it.
  *
  * Layout under STORE_DIR (git-ignored like the backup it was seeded from;

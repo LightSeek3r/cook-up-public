@@ -22,7 +22,7 @@
  * puree, `lemon` for lemon juice, `pepper` for black pepper — and did it
  * *silently*, because the wrong answers were real taxonomy entries, so nothing
  * ever landed in `unmatched_ingredients.txt` where a human would have seen it.
- * See tasks/lessons.md.
+ * See the unpublished project notes.
  */
 
 import { matchIngredientDetailed, ancestors, slugify } from './taxonomy.mjs';
@@ -43,7 +43,7 @@ for (const [key, entry] of Object.entries(MANUAL_INGREDIENTS)) {
 // registered OFF synonym verbatim — a product-line qualifier the taxonomy
 // simply doesn't track ("all-purpose"), not a different ingredient. Every key
 // here was looked up and confirmed absent from the raw taxonomy file first
-// (see tasks/todo.md) — same "extend deliberately, never guess" posture as
+// (see the unpublished project notes) — same "extend deliberately, never guess" posture as
 // stage 03's CATEGORY_OVERRIDES. Deliberately excludes lookalikes that are
 // nutritionally too different to alias safely (oyster sauce -> oyster, adobo
 // sauce -> anything, cooking spray with any oil) — those stay genuine,

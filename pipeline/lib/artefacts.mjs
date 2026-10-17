@@ -1,6 +1,6 @@
 /**
  * Static data artefacts: the read-only corpus the app serves, as versioned
- * files instead of D1 rows (.claude/plans/phase3-static-data.md).
+ * files instead of D1 rows (the unpublished plan notes).
  *
  * Built from a SQLite database with D1's corpus schema: by default the one
  * 06_seed_d1.mjs's statements produce from pipeline/out, the recipe
