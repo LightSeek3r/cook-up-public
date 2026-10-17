@@ -228,5 +228,19 @@
   "error.loadFailed": "Сейчас не удалось загрузить данные. Попробуйте ещё раз чуть позже.",
   "error.retry": "Повторить",
   "error.unavailableHeading": "Временно недоступно",
-  "mosaic.limit": "Не больше {n} ингредиентов. Уберите один, чтобы добавить другой."
+  "mosaic.limit": "Не больше {n} ингредиентов. Уберите один, чтобы добавить другой.",
+  "unit.pinch": "one:{n} щепотка|few:{n} щепотки|many:{n} щепоток|other:{n} щепотки",
+  "unit.dash": "one:{n} капля|few:{n} капли|many:{n} капель|other:{n} капли",
+  "unit.clove": "one:{n} зубчик|few:{n} зубчика|many:{n} зубчиков|other:{n} зубчика",
+  "unit.slice": "one:{n} ломтик|few:{n} ломтика|many:{n} ломтиков|other:{n} ломтика",
+  "unit.sprig": "one:{n} веточка|few:{n} веточки|many:{n} веточек|other:{n} веточки",
+  "unit.can": "one:{n} банка консервов|few:{n} банки консервов|many:{n} банок консервов|other:{n} банки консервов",
+  "unit.packet": "one:{n} пачка|few:{n} пачки|many:{n} пачек|other:{n} пачки",
+  "unit.jar": "one:{n} банка|few:{n} банки|many:{n} банок|other:{n} банки",
+  "unit.bottle": "one:{n} бутылка|few:{n} бутылки|many:{n} бутылок|other:{n} бутылки",
+  "unit.bag": "one:{n} пакет|few:{n} пакета|many:{n} пакетов|other:{n} пакета",
+  "unit.box": "one:{n} коробка|few:{n} коробки|many:{n} коробок|other:{n} коробки",
+  "unit.bunch": "one:{n} пучок|few:{n} пучка|many:{n} пучков|other:{n} пучка",
+  "unit.stick": "one:{n} палочка|few:{n} палочки|many:{n} палочек|other:{n} палочки",
+  "unit.handful": "one:{n} горсть|few:{n} горсти|many:{n} горстей|other:{n} горсти"
 }

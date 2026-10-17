@@ -26,9 +26,12 @@ const VOLUME_TO_ML = {
 	cl: 10,
 	tsp: 4.92892,
 	tbsp: 14.7868,
+	floz: 29.5735,
 	cup: 236.588,
 	pint: 473.176,
-	quart: 946.353
+	quart: 946.353,
+	gallon: 3785.41,
+	impgallon: 4546.09
 } as const;
 
 type MassUnit = keyof typeof MASS_TO_G;
@@ -36,6 +39,8 @@ type VolumeUnit = keyof typeof VOLUME_TO_ML;
 
 const isMass = (unit: string): unit is MassUnit => unit in MASS_TO_G;
 const isVolume = (unit: string): unit is VolumeUnit => unit in VOLUME_TO_ML;
+
+const CM_PER_INCH = 2.54;
 
 /** Metric units, so a value already in metric is not "converted" to metric. */
 const METRIC = new Set(['g', 'kg', 'ml', 'l', 'dl', 'cl']);
@@ -52,8 +57,81 @@ function tidy(value: number): number {
 	return Math.round(value * 100) / 100;
 }
 
+/** Formats a number for display; the page swaps in a per-language one. */
+type Fmt = (n: number) => string;
 /** Drops a trailing ".0" so "240 ml" doesn't render as "240.0 ml". */
-const format = (value: number) => String(tidy(value));
+const format: Fmt = (value) => String(tidy(value));
+const localized = (fmt: Fmt): Fmt => (value) => fmt(tidy(value));
+
+/** A volume in ml, as litres from 1 l up: "5.68 l" reads better than "5678 ml". */
+const metricVolume = (ml: number, fmt: Fmt = format) =>
+	ml >= 1000 ? `${fmt(ml / 1000)} l` : `${fmt(cookMl(ml))} ml`;
+/** A teaspoon is 5 ml, not 4.93: half-millilitre steps below 10 ml, whole millilitres after. */
+const cookMl = (ml: number) => (ml < 10 ? Math.round(ml * 2) / 2 : Math.round(ml));
+const metricMass = (g: number, fmt: Fmt = format) =>
+	g >= 1000 ? `${fmt(g / 1000)} kg` : `${fmt(g)} g`;
+
+/**
+ * Units that are a count of the thing itself. Nobody weighs "2 large onions" or
+ * "4 eggs" — the count is the amount — so these never get a gram suffix, and a
+ * translated line shows them as "4 × egg".
+ */
+const COUNT_UNITS = new Set([
+	'large', 'medium', 'small', 'whole', 'each', 'piece', 'strand', 'sheet', 'head', 'stalk',
+	'fillet', 'rasher', 'cube', 'drop', 'knob', 'container', 'punnet'
+]);
+
+/**
+ * Containers whose size varies from brand to brand, so FDC's weight for one is
+ * information a cook can use ("1 can = 400 g"), unlike the weight of an egg.
+ */
+const WEIGHED_UNITS = new Set(['can', 'packet', 'jar', 'bottle', 'bag', 'box', 'bunch', 'stick']);
+
+/**
+ * Units the pipeline's parser does not know (stage 03's UNIT_ALIASES stops at
+ * quart/pint), recovered from the source wording. Without this "1½ gallons apple
+ * juice" arrives as a bare count of 1.5 with a weight FDC resolved for *a* count of
+ * apple juice, and "4 litres" as a bare 4.
+ */
+const RAW_UNITS: [RegExp, string][] = [
+	[/^[\s\d½¼¾⅓⅔⅕⅛⅜⅝⅞.,/–-]*imperial\s+gallons?\b/i, 'impgallon'],
+	[/^[\s\d½¼¾⅓⅔⅕⅛⅜⅝⅞.,/–-]*(?:u\.?s\.?\s+)?gallons?\b/i, 'gallon'],
+	[/^[\s\d½¼¾⅓⅔⅕⅛⅜⅝⅞.,/–-]*(?:fl\.?\s*oz\.?|fluid\s+ounces?)(?![a-z])/i, 'floz'],
+	[/^[\s\d½¼¾⅓⅔⅕⅛⅜⅝⅞.,/–-]*(?:liters?|litres?)\b/i, 'l']
+];
+
+/**
+ * The unit and weight to use for a row. A unit recovered from the wording drops the
+ * weight: it was resolved for the unit the parser thought it had (a count), so it
+ * describes something else.
+ */
+function resolveRow(unit: string | null, grams: number | null, rawText?: string | null) {
+	if (unit || !rawText) return { unit, grams };
+	for (const [pattern, canonical] of RAW_UNITS) {
+		if (pattern.test(rawText)) return { unit: canonical, grams: null };
+	}
+	return { unit, grams };
+}
+
+/**
+ * A weight worth showing next to a volume or a container. Stage 04 falls back to a
+ * water-density approximation (1 ml = 1 g) when FDC has no portion for the food, so
+ * `grams` is frequently just `ml` restated. Printing "3 tbsp (44.4 ml · 44.4 g)"
+ * would dress that assumption up as a measurement — the one thing this must not do.
+ * When the two agree to within 2% the gram figure carries no information and is
+ * dropped; when they differ it came from FDC's own portion table and is worth
+ * showing (a cup of flour is ~125 g, not 237 g).
+ */
+function weightNote(
+	unit: string,
+	ml: number | null,
+	grams: number | null,
+	fmt: Fmt = format
+): string | null {
+	if (grams == null) return null;
+	if (ml != null) return Math.abs(grams - ml) / ml > 0.02 ? metricMass(grams, fmt) : null;
+	return WEIGHED_UNITS.has(unit) ? metricMass(grams, fmt) : null;
+}
 
 /**
  * The equivalent to show in parentheses after the source's own wording, or null
@@ -62,16 +140,19 @@ const format = (value: number) => String(tidy(value));
  * @param quantity parsed amount, or null when the source stated none
  * @param unit our canonical unit, or null for a bare count ("4 eggs")
  * @param grams the pipeline's resolved weight for this row, if any
+ * @param rawText the source wording, to recover units the parser missed
  */
 export function equivalentOf(
 	quantity: number | null,
 	unit: string | null,
-	grams: number | null
+	grams: number | null,
+	rawText?: string | null
 ): string | null {
-	// A bare count has no equivalent in another system — "4 eggs (4 eggs)". If the
-	// pipeline weighed it, the weight is the useful addition.
-	if (!unit) return quantity != null && grams != null ? `${format(grams)} g` : null;
-	if (quantity == null) return null;
+	({ unit, grams } = resolveRow(unit, grams, rawText));
+	// A bare count or a size word is the amount itself: "4 eggs (4 eggs)" is noise
+	// and "4 eggs (176 g)" turns a count into a weight nobody measures.
+	if (!unit || COUNT_UNITS.has(unit) || quantity == null) return null;
+	if (unit === 'inch') return `${format(quantity * CM_PER_INCH)} cm`;
 
 	if (isMass(unit)) {
 		const g = quantity * MASS_TO_G[unit];
@@ -81,31 +162,63 @@ export function equivalentOf(
 			? g >= 453.592
 				? `${format(g / 453.592)} lb`
 				: `${format(g / 28.3495)} oz`
-			: `${format(g)} g`;
+			: metricMass(g);
 	}
 
 	if (isVolume(unit)) {
 		const ml = quantity * VOLUME_TO_ML[unit];
 		const parts: string[] = [];
 		// Volume -> the other system's volume.
-		if (!METRIC.has(unit)) parts.push(`${format(ml)} ml`);
+		if (!METRIC.has(unit)) parts.push(metricVolume(ml));
 		else if (ml >= VOLUME_TO_ML.cup) parts.push(`${format(ml / VOLUME_TO_ML.cup)} cup`);
 		else parts.push(`${format(ml / VOLUME_TO_ML.tbsp)} tbsp`);
-		// Volume -> mass, but only when the weight says something the volume didn't.
-		//
-		// Stage 04 falls back to a water-density approximation (1 ml = 1 g) when FDC
-		// has no portion for the food, so `grams` is frequently just `ml` restated.
-		// Printing "3 tbsp (44.4 ml · 44.4 g)" would dress that assumption up as a
-		// measurement — the one thing this must not do. When the two agree to within
-		// 2% the gram figure carries no information and is dropped; when they differ
-		// it came from FDC's own portion table and is worth showing (a cup of flour
-		// is ~125 g, not 237 g).
-		if (grams != null && Math.abs(grams - ml) / ml > 0.02) parts.push(`${format(grams)} g`);
+		// Volume -> mass, only when the weight says something the volume didn't.
+		const note = weightNote(unit, ml, grams);
+		if (note) parts.push(note);
 		return parts.join(' · ');
 	}
 
-	// Everything else — clove, pinch, sprig, can, packet, large/medium/small. These
-	// are not convertible to anything, but the pipeline may still have weighed them
-	// from FDC's portion table, and a weight is the whole point for a cook.
-	return grams != null ? `${format(grams)} g` : null;
+	// clove, pinch, can, packet... not convertible to anything; a container's weight
+	// is the whole point for a cook, the rest stay silent.
+	return weightNote(unit, null, grams);
+}
+
+/** What a translated ingredient line shows around the name. */
+export type IngredientAmount = {
+	/** The amount that leads the line ("400 g", "4 ×", "2 cloves"), null when the source stated none. */
+	lead: string | null;
+	/** A weight worth adding in brackets after the name. */
+	note: string | null;
+};
+
+/**
+ * The line a translated page shows for one ingredient. The recipe's own wording is
+ * in the source language only, so a translated page has just the canonical name; the
+ * amount has to be rebuilt from the structured fields, and it is rebuilt in metric.
+ *
+ * @param fmt formats a number for the page's language (decimal comma, Western digits)
+ * @param label the localized "<n> <unit word>" for units that have one, else null;
+ *   handed the quantity already formatted by `fmt`
+ */
+export function amountOf(
+	quantity: number | null,
+	unit: string | null,
+	grams: number | null,
+	rawText: string | null | undefined,
+	fmt: Fmt,
+	label: (unit: string, quantity: number, formatted: string) => string | null
+): IngredientAmount {
+	({ unit, grams } = resolveRow(unit, grams, rawText));
+	if (quantity == null) return { lead: null, note: null };
+	const f = localized(fmt);
+	const count = `${f(quantity)} ×`;
+	if (!unit || COUNT_UNITS.has(unit)) return { lead: count, note: null };
+	if (unit === 'inch') return { lead: `${f(quantity * CM_PER_INCH)} cm`, note: null };
+
+	if (isMass(unit)) return { lead: metricMass(quantity * MASS_TO_G[unit], f), note: null };
+	if (isVolume(unit)) {
+		const ml = quantity * VOLUME_TO_ML[unit];
+		return { lead: metricVolume(ml, f), note: weightNote(unit, ml, grams, f) };
+	}
+	return { lead: label(unit, quantity, f(quantity)) ?? count, note: weightNote(unit, null, grams, f) };
 }

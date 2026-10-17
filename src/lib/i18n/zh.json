@@ -228,5 +228,19 @@
   "error.loadFailed": "暂时无法加载，请稍后再试。",
   "error.retry": "重试",
   "error.unavailableHeading": "暂时无法使用",
-  "mosaic.limit": "最多可选 {n} 种食材。请先移除一种再添加。"
+  "mosaic.limit": "最多可选 {n} 种食材。请先移除一种再添加。",
+  "unit.pinch": "{n}撮",
+  "unit.dash": "{n}滴",
+  "unit.clove": "{n}瓣",
+  "unit.slice": "{n}片",
+  "unit.sprig": "{n}枝",
+  "unit.can": "{n}罐",
+  "unit.packet": "{n}包",
+  "unit.jar": "{n}罐",
+  "unit.bottle": "{n}瓶",
+  "unit.bag": "{n}袋",
+  "unit.box": "{n}盒",
+  "unit.bunch": "{n}把",
+  "unit.stick": "{n}根",
+  "unit.handful": "{n}小把"
 }

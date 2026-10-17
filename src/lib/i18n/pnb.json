@@ -228,5 +228,19 @@
   "error.loadFailed": "ایس ویلے لوڈ نئیں ہو سکیا۔ تھوڑی دیر بعد دوبارہ کوشش کرو۔",
   "error.retry": "دوبارہ کوشش کرو",
   "error.unavailableHeading": "عارضی طور تے دستیاب نئیں",
-  "mosaic.limit": "ودھ توں ودھ {n} اجزاء۔ ہور شامل کرن لئی اک کڈو۔"
+  "mosaic.limit": "ودھ توں ودھ {n} اجزاء۔ ہور شامل کرن لئی اک کڈو۔",
+  "unit.pinch": "{n} چٹکی",
+  "unit.dash": "{n} قطرہ",
+  "unit.clove": "{n} کلی",
+  "unit.slice": "{n} ٹکڑا",
+  "unit.sprig": "{n} ٹہنی",
+  "unit.can": "{n} ڈبہ",
+  "unit.packet": "{n} پیکٹ",
+  "unit.jar": "{n} مرتبان",
+  "unit.bottle": "{n} بوتل",
+  "unit.bag": "{n} تھیلی",
+  "unit.box": "{n} ڈبی",
+  "unit.bunch": "{n} گچھا",
+  "unit.stick": "{n} ڈنڈی",
+  "unit.handful": "{n} مٹھ"
 }

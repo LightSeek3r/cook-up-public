@@ -228,5 +228,19 @@
   "error.loadFailed": "Das konnte gerade nicht geladen werden. Bitte versuchen Sie es gleich noch einmal.",
   "error.retry": "Erneut versuchen",
   "error.unavailableHeading": "Vorübergehend nicht verfügbar",
-  "mosaic.limit": "Höchstens {n} Zutaten. Entfernen Sie eine, um eine andere hinzuzufügen."
+  "mosaic.limit": "Höchstens {n} Zutaten. Entfernen Sie eine, um eine andere hinzuzufügen.",
+  "unit.pinch": "one:{n} Prise|other:{n} Prisen",
+  "unit.dash": "one:{n} Spritzer|other:{n} Spritzer",
+  "unit.clove": "one:{n} Zehe|other:{n} Zehen",
+  "unit.slice": "one:{n} Scheibe|other:{n} Scheiben",
+  "unit.sprig": "one:{n} Zweig|other:{n} Zweige",
+  "unit.can": "one:{n} Dose|other:{n} Dosen",
+  "unit.packet": "one:{n} Päckchen|other:{n} Päckchen",
+  "unit.jar": "one:{n} Glas|other:{n} Gläser",
+  "unit.bottle": "one:{n} Flasche|other:{n} Flaschen",
+  "unit.bag": "one:{n} Beutel|other:{n} Beutel",
+  "unit.box": "one:{n} Schachtel|other:{n} Schachteln",
+  "unit.bunch": "one:{n} Bund|other:{n} Bund",
+  "unit.stick": "one:{n} Stange|other:{n} Stangen",
+  "unit.handful": "one:{n} Handvoll|other:{n} Handvoll"
 }

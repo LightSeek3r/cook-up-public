@@ -228,5 +228,19 @@
   "error.loadFailed": "Hiện chưa tải được nội dung. Vui lòng thử lại sau giây lát.",
   "error.retry": "Thử lại",
   "error.unavailableHeading": "Tạm thời không khả dụng",
-  "mosaic.limit": "Tối đa {n} nguyên liệu. Hãy bỏ bớt một nguyên liệu để thêm nguyên liệu khác."
+  "mosaic.limit": "Tối đa {n} nguyên liệu. Hãy bỏ bớt một nguyên liệu để thêm nguyên liệu khác.",
+  "unit.pinch": "{n} nhúm",
+  "unit.dash": "{n} chút",
+  "unit.clove": "{n} tép",
+  "unit.slice": "{n} lát",
+  "unit.sprig": "{n} nhánh",
+  "unit.can": "{n} lon",
+  "unit.packet": "{n} gói",
+  "unit.jar": "{n} hũ",
+  "unit.bottle": "{n} chai",
+  "unit.bag": "{n} túi",
+  "unit.box": "{n} hộp",
+  "unit.bunch": "{n} bó",
+  "unit.stick": "{n} thanh",
+  "unit.handful": "{n} nắm"
 }

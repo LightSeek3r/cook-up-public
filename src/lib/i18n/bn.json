@@ -228,5 +228,19 @@
   "error.loadFailed": "এই মুহূর্তে লোড করা যায়নি। একটু পরে আবার চেষ্টা করুন।",
   "error.retry": "আবার চেষ্টা করুন",
   "error.unavailableHeading": "সাময়িকভাবে অনুপলব্ধ",
-  "mosaic.limit": "সর্বোচ্চ {n}টি উপকরণ। আরেকটি যোগ করতে একটি সরান।"
+  "mosaic.limit": "সর্বোচ্চ {n}টি উপকরণ। আরেকটি যোগ করতে একটি সরান।",
+  "unit.pinch": "{n} চিমটি",
+  "unit.dash": "{n} ফোঁটা",
+  "unit.clove": "{n} কোয়া",
+  "unit.slice": "{n} টুকরো",
+  "unit.sprig": "{n} ডাল",
+  "unit.can": "{n} কৌটো",
+  "unit.packet": "{n} প্যাকেট",
+  "unit.jar": "{n} বয়াম",
+  "unit.bottle": "{n} বোতল",
+  "unit.bag": "{n} ব্যাগ",
+  "unit.box": "{n} বাক্স",
+  "unit.bunch": "{n} আঁটি",
+  "unit.stick": "{n} স্টিক",
+  "unit.handful": "{n} মুঠো"
 }

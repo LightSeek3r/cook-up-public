@@ -228,5 +228,19 @@
   "error.loadFailed": "Saiki durung bisa dimuat. Coba maneh sedhela engkas.",
   "error.retry": "Coba maneh",
   "error.unavailableHeading": "Kanggo sawetara wektu ora kasedhiya",
-  "mosaic.limit": "Paling akèh {n} bahan. Busak siji kanggo nambahi liyané."
+  "mosaic.limit": "Paling akèh {n} bahan. Busak siji kanggo nambahi liyané.",
+  "unit.pinch": "{n} jimpit",
+  "unit.dash": "{n} sathithik",
+  "unit.clove": "{n} siung",
+  "unit.slice": "{n} iris",
+  "unit.sprig": "{n} tangkai",
+  "unit.can": "{n} kaleng",
+  "unit.packet": "{n} bungkus",
+  "unit.jar": "{n} stoples",
+  "unit.bottle": "{n} botol",
+  "unit.bag": "{n} kantong",
+  "unit.box": "{n} kothak",
+  "unit.bunch": "{n} ikat",
+  "unit.stick": "{n} batang",
+  "unit.handful": "{n} genggem"
 }

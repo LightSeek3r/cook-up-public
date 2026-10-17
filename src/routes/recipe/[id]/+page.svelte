@@ -14,7 +14,9 @@
 	import { t as translator } from '$lib/i18n';
 	import { nutritionVisible } from '$lib/nutrition';
 	import { splitSteps } from '$lib/steps';
-	import { equivalentOf } from '$lib/measure';
+	import { amountOf, equivalentOf } from '$lib/measure';
+	import { numberFormatter, unitLabeler } from '$lib/ingredientAmount';
+	import { toMetricText } from '$lib/metricText';
 	import { commonsSrcset } from '$lib/photo';
 	import type { RecipeDetail } from '$lib/types';
 	import type { PageData } from './$types';
@@ -43,13 +45,36 @@
 	);
 	const machine = $derived(Boolean(data.recipe.is_machine));
 
-	const steps = $derived(splitSteps(data.recipe.instructions));
-	const notes = $derived(data.recipe.notes?.split('\n').filter(Boolean) ?? []);
+	// The recipes keep their source's US/imperial units (a translation must not change
+	// a number), so the method is shown in metric here, in every language.
+	const steps = $derived(
+		splitSteps(data.recipe.instructions).map((step) => toMetricText(step, data.lang))
+	);
+	const notes = $derived(
+		data.recipe.notes
+			?.split('\n')
+			.filter(Boolean)
+			.map((note) => toMetricText(note, data.lang)) ?? []
+	);
 
-	/** The parenthesised metric/imperial equivalent for one ingredient line, or ''
+	type Ingredient = RecipeDetail['ingredients'][number];
+
+	/** The source's own wording is only shown in the language it was written in. */
+	const ownWording = (ing: Ingredient) => data.lang === data.recipe.source_lang && ing.raw_text;
+
+	/** The parenthesised metric/imperial equivalent after the source's wording, or ''
 	 *  when there is nothing honest to add. */
-	const equivalent = (ing: RecipeDetail['ingredients'][number]) =>
-		equivalentOf(ing.quantity, ing.unit, ing.grams) ?? '';
+	const equivalent = (ing: Ingredient) =>
+		equivalentOf(ing.quantity, ing.unit, ing.grams, ing.raw_text) ?? '';
+
+	// A translated page has only the canonical name, so its amount is rebuilt from the
+	// structured fields, in metric.
+	const amount = $derived.by(() => {
+		const format = numberFormatter(data.lang);
+		const label = unitLabeler(data.lang, t);
+		return (ing: Ingredient) =>
+			amountOf(ing.quantity, ing.unit, ing.grams, ing.raw_text, format, label);
+	});
 
 	// Both go through t(): cuisine was previously rendered raw, so this page showed
 	// "middle_eastern" where the filter bar and the search results showed
@@ -270,15 +295,21 @@
 							/>
 						</span>
 						<span class="ing-text">
-							{data.lang === data.recipe.source_lang && ingredient.raw_text
-								? ingredient.raw_text
-								: ingredient.name}
-							<!-- The other measuring system, and a real weight where the pipeline
-							     resolved one. Rendered as a quiet suffix rather than replacing the
-							     source's own wording, which stays authoritative. Silent when there
-							     is nothing honest to add — see `equivalentOf`. -->
-							{#if equivalent(ingredient)}
-								<span class="equiv">({equivalent(ingredient)})</span>
+							{#if ownWording(ingredient)}
+								{ingredient.raw_text}
+								<!-- The other measuring system, and a real weight for a container.
+								     Rendered as a quiet suffix rather than replacing the source's own
+								     wording, which stays authoritative. Silent when there is nothing
+								     honest to add — see `equivalentOf`. -->
+								{#if equivalent(ingredient)}
+									<span class="equiv">({equivalent(ingredient)})</span>
+								{/if}
+							{:else}
+								{@const measured = amount(ingredient)}
+								{#if measured.lead}{measured.lead}{' '}{/if}{ingredient.name}
+								{#if measured.note}
+									<span class="equiv">({measured.note})</span>
+								{/if}
 							{/if}
 						</span>
 					</li>

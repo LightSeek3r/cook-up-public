@@ -228,5 +228,19 @@
   "error.loadFailed": "Couldn't load this right now. Please try again in a moment.",
   "error.retry": "Try again",
   "error.unavailableHeading": "Temporarily unavailable",
-  "mosaic.limit": "Up to {n} ingredients. Remove one to add another."
+  "mosaic.limit": "Up to {n} ingredients. Remove one to add another.",
+  "unit.pinch": "one:{n} pinch|other:{n} pinches",
+  "unit.dash": "one:{n} dash|other:{n} dashes",
+  "unit.clove": "one:{n} clove|other:{n} cloves",
+  "unit.slice": "one:{n} slice|other:{n} slices",
+  "unit.sprig": "one:{n} sprig|other:{n} sprigs",
+  "unit.can": "one:{n} can|other:{n} cans",
+  "unit.packet": "one:{n} packet|other:{n} packets",
+  "unit.jar": "one:{n} jar|other:{n} jars",
+  "unit.bottle": "one:{n} bottle|other:{n} bottles",
+  "unit.bag": "one:{n} bag|other:{n} bags",
+  "unit.box": "one:{n} box|other:{n} boxes",
+  "unit.bunch": "one:{n} bunch|other:{n} bunches",
+  "unit.stick": "one:{n} stick|other:{n} sticks",
+  "unit.handful": "one:{n} handful|other:{n} handfuls"
 }

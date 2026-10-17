@@ -228,5 +228,19 @@
   "error.loadFailed": "現在読み込めません。しばらくしてからもう一度お試しください。",
   "error.retry": "再試行",
   "error.unavailableHeading": "一時的にご利用いただけません",
-  "mosaic.limit": "食材は最大{n}個までです。追加するには1つ外してください。"
+  "mosaic.limit": "食材は最大{n}個までです。追加するには1つ外してください。",
+  "unit.pinch": "{n}つまみ",
+  "unit.dash": "{n}振り",
+  "unit.clove": "{n}かけ",
+  "unit.slice": "{n}切れ",
+  "unit.sprig": "{n}枝",
+  "unit.can": "{n}缶",
+  "unit.packet": "{n}パック",
+  "unit.jar": "{n}瓶",
+  "unit.bottle": "{n}本",
+  "unit.bag": "{n}袋",
+  "unit.box": "{n}箱",
+  "unit.bunch": "{n}束",
+  "unit.stick": "{n}スティック",
+  "unit.handful": "{n}つかみ"
 }

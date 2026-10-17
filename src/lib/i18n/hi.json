@@ -228,5 +228,19 @@
   "error.loadFailed": "अभी लोड नहीं हो सका। कृपया थोड़ी देर बाद फिर से प्रयास करें।",
   "error.retry": "फिर से प्रयास करें",
   "error.unavailableHeading": "अस्थायी रूप से उपलब्ध नहीं",
-  "mosaic.limit": "अधिकतम {n} सामग्री। दूसरी जोड़ने के लिए कोई एक हटाएँ।"
+  "mosaic.limit": "अधिकतम {n} सामग्री। दूसरी जोड़ने के लिए कोई एक हटाएँ।",
+  "unit.pinch": "{n} चुटकी",
+  "unit.dash": "{n} छींटा",
+  "unit.clove": "{n} कली",
+  "unit.slice": "{n} स्लाइस",
+  "unit.sprig": "{n} टहनी",
+  "unit.can": "{n} डिब्बा",
+  "unit.packet": "{n} पैकेट",
+  "unit.jar": "{n} जार",
+  "unit.bottle": "{n} बोतल",
+  "unit.bag": "{n} थैली",
+  "unit.box": "{n} बक्सा",
+  "unit.bunch": "{n} गुच्छा",
+  "unit.stick": "{n} स्टिक",
+  "unit.handful": "{n} मुट्ठी"
 }

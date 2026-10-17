@@ -228,5 +228,19 @@
   "error.loadFailed": "Não foi possível carregar agora. Tente novamente daqui a pouco.",
   "error.retry": "Tentar novamente",
   "error.unavailableHeading": "Temporariamente indisponível",
-  "mosaic.limit": "No máximo {n} ingredientes. Remova um para adicionar outro."
+  "mosaic.limit": "No máximo {n} ingredientes. Remova um para adicionar outro.",
+  "unit.pinch": "one:{n} pitada|other:{n} pitadas",
+  "unit.dash": "one:{n} fio|other:{n} fios",
+  "unit.clove": "one:{n} dente|other:{n} dentes",
+  "unit.slice": "one:{n} fatia|other:{n} fatias",
+  "unit.sprig": "one:{n} raminho|other:{n} raminhos",
+  "unit.can": "one:{n} lata|other:{n} latas",
+  "unit.packet": "one:{n} pacote|other:{n} pacotes",
+  "unit.jar": "one:{n} pote|other:{n} potes",
+  "unit.bottle": "one:{n} garrafa|other:{n} garrafas",
+  "unit.bag": "one:{n} saco|other:{n} sacos",
+  "unit.box": "one:{n} caixa|other:{n} caixas",
+  "unit.bunch": "one:{n} maço|other:{n} maços",
+  "unit.stick": "one:{n} barra|other:{n} barras",
+  "unit.handful": "one:{n} punhado|other:{n} punhados"
 }

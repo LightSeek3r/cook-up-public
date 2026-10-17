@@ -228,5 +228,19 @@
   "error.loadFailed": "تعذّر التحميل حاليًا. يُرجى المحاولة مرة أخرى بعد قليل.",
   "error.retry": "إعادة المحاولة",
   "error.unavailableHeading": "غير متاح مؤقتًا",
-  "mosaic.limit": "الحد الأقصى {n} مكوّنًا. أزل مكوّنًا لإضافة آخر."
+  "mosaic.limit": "الحد الأقصى {n} مكوّنًا. أزل مكوّنًا لإضافة آخر.",
+  "unit.pinch": "one:{n} رشة|other:{n} رشات",
+  "unit.dash": "one:{n} رشّة خفيفة|other:{n} رشّات خفيفة",
+  "unit.clove": "one:{n} فص|other:{n} فصوص",
+  "unit.slice": "one:{n} شريحة|other:{n} شرائح",
+  "unit.sprig": "one:{n} غصن|other:{n} أغصان",
+  "unit.can": "one:{n} علبة|other:{n} علب",
+  "unit.packet": "one:{n} عبوة|other:{n} عبوات",
+  "unit.jar": "one:{n} برطمان|other:{n} برطمانات",
+  "unit.bottle": "one:{n} زجاجة|other:{n} زجاجات",
+  "unit.bag": "one:{n} كيس|other:{n} أكياس",
+  "unit.box": "one:{n} صندوق|other:{n} صناديق",
+  "unit.bunch": "one:{n} حزمة|other:{n} حزم",
+  "unit.stick": "one:{n} عود|other:{n} أعواد",
+  "unit.handful": "one:{n} حفنة|other:{n} حفنات"
 }
