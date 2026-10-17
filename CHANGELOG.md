@@ -4,6 +4,14 @@ All notable changes to Cook Up are listed here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the versions follow
 [Semantic Versioning](https://semver.org) loosely while the project is 0.x.
 
+## [0.1.1] - 2026-10-17
+
+### Fixed
+
+- Scrolling lag: the page background no longer uses `background-attachment: fixed`, which made
+  the browser repaint the whole viewport on every scroll frame. The line drawings now scroll with
+  the page.
+
 ## [0.1.0] - 2026-10-17
 
 The first tagged version, published with the source code. It covers everything since the
@@ -54,4 +62,5 @@ project started on 2026-08-18.
 - Print stylesheet: `.no-print` is scoped to `@media print` and prints with less ink.
 - The deploy's browser check retries during the edge rollout instead of failing on a stale edge.
 
+[0.1.1]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.1
 [0.1.0]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.0

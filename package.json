@@ -1,6 +1,6 @@
 {
   "name": "cook-up",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Ingredients-first recipe finder: pick what you have, get recipes ranked by how few ingredients you are missing. SvelteKit on Cloudflare Workers.",
   "license": "MIT",
   "author": "LightSeek3r",
