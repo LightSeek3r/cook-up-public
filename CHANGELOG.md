@@ -6,6 +6,11 @@ All notable changes to Cook Up are listed here. The format follows
 
 ## [Unreleased]
 
+### Security
+
+- Dependencies: `vite` and `vitest` move to patched releases, and the low `cookie` advisory in
+  SvelteKit is pinned past its fix, so `npm audit` reports no findings (23 October).
+
 ## [0.1.1] - 2026-10-17
 
 ### Fixed
