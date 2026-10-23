@@ -6,6 +6,8 @@ All notable changes to Cook Up are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-23
+
 ### Security
 
 - Dependencies: `vite` and `vitest` move to patched releases, and the low `cookie` advisory in
@@ -69,5 +71,6 @@ project started on 2026-08-18.
 - Print stylesheet: `.no-print` is scoped to `@media print` and prints with less ink.
 - The deploy's browser check retries during the edge rollout instead of failing on a stale edge.
 
+[0.1.2]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.2
 [0.1.1]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.1
 [0.1.0]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.0
