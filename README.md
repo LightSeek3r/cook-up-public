@@ -645,10 +645,8 @@ credentials in your shell: `wrangler login`, or `CLOUDFLARE_API_TOKEN` and
 and **Account · D1 · Edit**; D1 Edit rather than Read because `migrations list` first runs
 `CREATE TABLE IF NOT EXISTS d1_migrations`). It never applies migrations.
 
-Optional GitHub setup for monitoring (below), as **repository** secrets: `CF_ANALYTICS_TOKEN` (a
-separate token with only **Account · Account Analytics · Read**) and `CLOUDFLARE_ACCOUNT_ID`
-(secret or repository variable). Optional repository variable `COOKUP_URL` if the site moves to
-another host.
+Optional repository variable `COOKUP_URL` if the site moves to another host (read by the
+monitoring workflow, below).
 
 ### Monitoring
 
@@ -656,13 +654,7 @@ another host.
   `console` output, in the dashboard under Workers → cook-up → Logs. Free plan: 200,000 events
   a day, 3 days retention, nothing written to D1. `npx wrangler tail` streams live.
 - **`.github/workflows/monitor.yml`**, read-only and scheduled:
-  - *d1-usage*, hourly: today's account-wide D1 rows read/written (UTC day, the window the Free
-    caps of 5M reads / 100k writes count) from the GraphQL Analytics API, with a linear
-    projection to midnight. At 70% of either cap it opens or comments on an issue
-    `D1 quota alert YYYY-MM-DD`; at 90% the run also fails, which emails you. Without
-    `CF_ANALYTICS_TOKEN` it is skipped with a notice, not failed. Locally:
-    `CF_ANALYTICS_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/d1-usage.mjs`.
-  - *uptime*, every 30 min: `/`, `/glossary` and `/api/ingredients` answer 200 and their whole
+  - *uptime*, hourly: `/`, `/glossary` and `/api/ingredients` answer 200 and their whole
     chunk graph loads. Failures open or comment on an issue `Site check failing YYYY-MM-DD`. It
     needs no secret and runs no JavaScript, so it never records page views; `/api/ingredients`
     reads D1 only on an edge-cache miss.
