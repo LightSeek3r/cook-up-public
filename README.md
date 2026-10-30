@@ -645,21 +645,13 @@ credentials in your shell: `wrangler login`, or `CLOUDFLARE_API_TOKEN` and
 and **Account · D1 · Edit**; D1 Edit rather than Read because `migrations list` first runs
 `CREATE TABLE IF NOT EXISTS d1_migrations`). It never applies migrations.
 
-Optional repository variable `COOKUP_URL` if the site moves to another host (read by the
-monitoring workflow, below).
-
 ### Monitoring
 
 - **Workers Logs** (`[observability]` in `wrangler.toml`): every request's invocation log plus
   `console` output, in the dashboard under Workers → cook-up → Logs. Free plan: 200,000 events
   a day, 3 days retention, nothing written to D1. `npx wrangler tail` streams live.
-- **`.github/workflows/monitor.yml`**, read-only and scheduled:
-  - *uptime*, hourly: `/`, `/glossary` and `/api/ingredients` answer 200 and their whole
-    chunk graph loads. Failures open or comment on an issue `Site check failing YYYY-MM-DD`. It
-    needs no secret and runs no JavaScript, so it never records page views; `/api/ingredients`
-    reads D1 only on an edge-cache miss.
-  - GitHub can delay scheduled runs, and disables schedules after 60 days without repository
-    activity; failure emails go to whoever last edited the schedule.
+- No scheduled checks. After a deploy, `npm run verify:deploy -- <url>` checks pages, API and the
+  chunk graph on demand.
 
 ## Data sources & attribution
 
