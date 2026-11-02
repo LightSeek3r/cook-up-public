@@ -19,4 +19,17 @@ export {
 	RECIPE_HIT_LIMIT
 } from './search.js';
 export { nameForKey, recipePage } from './recipe.js';
+export {
+	ALL_YEAR,
+	VIEW_COUNT,
+	WORLD_VIEW,
+	ZONES,
+	inSeasonMask,
+	isSeasonalMask,
+	maskOf,
+	parseRange,
+	parseSeasons,
+	rotateMask,
+	viewIndex
+} from './seasons.js';
 export { compareBinary, foldText, ftsFold, likeFold, trigramMatch } from './text.js';
