@@ -25,7 +25,7 @@ describe('seasons', () => {
 
 	it('rotates masks by six months and wraps December into January', () => {
 		expect(rotateMask(0b100000000000, 1)).toBe(0b1);
-		expect(rotateMask(parseRange('11-2'), 6)).toBe(parseRange('5-8'));
+		expect(rotateMask(parseRange('11-2') ?? 0, 6)).toBe(parseRange('5-8'));
 		expect(rotateMask(ALL_YEAR, 6)).toBe(ALL_YEAR);
 		expect(rotateMask(0b101, 0)).toBe(0b101);
 	});
