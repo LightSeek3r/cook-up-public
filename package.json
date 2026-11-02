@@ -47,6 +47,8 @@
     "db:translate:manual": "node pipeline/tools/apply_manual_translations.mjs",
     "glossary:status": "node pipeline/tools/glossary_status.mjs",
     "glossary:validate": "vitest run pipeline/lib/glossary_gate.test.mjs pipeline/lib/glossary_content.test.mjs",
+    "seasons:check": "node pipeline/tools/seasons_check.mjs",
+    "seasons:status": "node pipeline/tools/seasons_status.mjs",
     "recipe-i18n:status": "node pipeline/tools/recipe_i18n_status.mjs",
     "recipe-i18n:mirror": "node pipeline/tools/recipe_i18n_mirror.mjs",
     "pipeline:fetch": "node pipeline/01_fetch.mjs",
