@@ -94,7 +94,7 @@ test.describe('not found', () => {
 	// The browser itself logs the document's 404 as a console error.
 	test.use({ allowedConsole: [/status of 404/] });
 
-	for (const path of ['/recipe/999999?lang=en', '/glossary/no-such-term?lang=en', '/no-such-page']) {
+	for (const path of ['/recipe/999999?lang=en', '/glossary/no-such-term?lang=en', '/no-such-page', '/seasonal/13?lang=en']) {
 		test(`${path} answers 404 with the error page`, async ({ page }) => {
 			const res = await page.goto(path);
 			expect(res?.status()).toBe(404);
@@ -118,7 +118,7 @@ test('static files carry the security headers from _headers', async ({ request, 
 });
 
 test('every referenced /_app/immutable file is served from one build', async ({ baseURL }) => {
-	const report = await verifyChunks(baseURL!, { pages: ['/', '/glossary', '/recipe/1'] });
+	const report = await verifyChunks(baseURL!, { pages: ['/', '/glossary', '/recipe/1', '/seasonal/4'] });
 	expect(report.failures).toEqual([]);
 	expect(report.problems).toEqual([]);
 	expect(report.checked).toBeGreaterThan(10);
@@ -204,5 +204,122 @@ test.describe('matching in the browser', () => {
 		expect((await match).status()).toBe(200);
 		await expect(page.locator('#results')).toHaveAttribute('data-source', 'server');
 		expect(await shownIds(page)).toEqual(await serverIds(request, 'have=tomato&lang=en'));
+	});
+});
+
+test.describe('seasons', () => {
+	// Mid-April: in tests/e2e/fixtures/seasons tomato is in season in Madrid
+	// (med:n) and in Sydney (subtrop:s, rotated), onion only in Sydney; garlic,
+	// egg and rice are all year.
+	const APRIL = new Date('2026-04-15T10:00:00Z');
+	type Page = import('@playwright/test').Page;
+
+	const shelf = (page: Page) => page.getByRole('region', { name: 'In season now' });
+	const shownIds = (page: Page) =>
+		page.locator('#results a.card-link').evaluateAll((links) =>
+			links.map((a) => Number(new URL((a as HTMLAnchorElement).href).pathname.split('/').pop()))
+		);
+
+	test.beforeEach(async ({ page }) => {
+		await page.clock.setFixedTime(APRIL);
+	});
+
+	test.describe('in Madrid', () => {
+		test.use({ timezoneId: 'Europe/Madrid', locale: 'es-ES' });
+
+		test('the home shelf lists what is in season in the detected climate', async ({ page }) => {
+			await page.goto('/?lang=en');
+			await expect(shelf(page)).toBeVisible();
+			await expect(shelf(page).getByText('Your climate: Mediterranean')).toBeVisible();
+			await expect(shelf(page).getByText('detected from Europe/Madrid')).toBeVisible();
+			await expect(shelf(page).getByRole('button', { name: /Tomato/ })).toBeVisible();
+			await expect(shelf(page).getByRole('button', { name: /Onion/ })).toHaveCount(0);
+			// One tap adds it to the selection, like the board's tile.
+			await shelf(page).getByRole('button', { name: /Tomato/ }).click();
+			await expect(page).toHaveURL(/[?&]have=tomato\b/);
+			await expect(tile(page, 'Tomato')).toHaveAttribute('aria-pressed', 'true');
+			await expect(tile(page, 'Tomato').getByRole('img', { name: /In season/ })).toBeVisible();
+		});
+
+		test.describe('seasonal ranking', () => {
+			// core.bin refused, so every match is a visible /api/match request.
+			test.use({ allowedConsole: [/ERR_FAILED/] });
+
+			test('puts recipes needing out-of-season food last and sends the season', async ({ page, request }) => {
+				await page.route('**/data/core.bin*', (route) => route.abort());
+				await page.goto('/?lang=en&have=rice');
+				const plain = (await (await request.get('/api/match?have=rice&lang=en')).json()).results.map((r: { id: number }) => r.id);
+				await expect.poll(() => shownIds(page)).toEqual(plain);
+
+				const seasonal = page.waitForRequest(
+					(r) => new URL(r.url()).pathname === '/api/match' && new URL(r.url()).searchParams.get('season') === 'med.n.4'
+				);
+				await page.getByText('Quick filters').click();
+				await page.getByRole('radiogroup', { name: 'Seasonal ranking' }).getByRole('radio', { name: 'My climate' }).check();
+				await seasonal;
+				const ranked = (await (await request.get('/api/match?have=rice&lang=en&season=med.n.4')).json()).results.map(
+					(r: { id: number }) => r.id
+				);
+				// Egg fried rice still needs an onion, out of season in April here.
+				expect(ranked).not.toEqual(plain);
+				expect(ranked.indexOf(2)).toBeLessThan(ranked.indexOf(3));
+				await expect.poll(() => shownIds(page)).toEqual(ranked);
+
+				// A stored preference: it survives a reload.
+				await page.reload();
+				await expect(page.getByRole('radiogroup', { name: 'Seasonal ranking' }).getByRole('radio', { name: 'My climate' })).toBeChecked();
+			});
+		});
+
+		test('the recipe page counts its fresh items in season', async ({ page }) => {
+			await page.goto('/recipe/1?lang=en');
+			await expect(page.getByText('1 of 2 fresh items in season')).toBeVisible();
+			await expect(page.getByRole('img', { name: /^Out of season/ })).toHaveCount(1);
+		});
+
+		test('/seasonal/4 renders April, server side and hydrated', async ({ page, request }) => {
+			const html = await (await request.get('/seasonal/4?lang=en')).text();
+			expect(html).toContain('In season in April');
+			expect(html).toContain('Tomato');
+			const res = await page.goto('/seasonal/4?lang=en');
+			expect(res?.status()).toBe(200);
+			await expect(page.getByRole('heading', { level: 1 })).toHaveText('In season in April');
+			await expect(page.getByRole('link', { name: /Add Tomato to your ingredients/ })).toBeVisible();
+			await expect(page.getByRole('navigation', { name: 'Months' }).getByRole('link', { name: /April/ })).toHaveAttribute(
+				'aria-current',
+				'page'
+			);
+		});
+
+		test('/seasonal goes on to the reader\'s month', async ({ page }) => {
+			await page.goto('/seasonal?lang=en');
+			await expect(page).toHaveURL(/\/seasonal\/4\?lang=en$/);
+		});
+	});
+
+	test.describe('in Sydney', () => {
+		test.use({ timezoneId: 'Australia/Sydney', locale: 'en-AU' });
+
+		test('the shelf follows the southern calendar', async ({ page }) => {
+			await page.goto('/?lang=en');
+			await expect(shelf(page).getByText('Your climate: Humid subtropical · Southern')).toBeVisible();
+			await expect(shelf(page).getByRole('button', { name: /Onion/ })).toBeVisible();
+			await expect(shelf(page).getByRole('button', { name: /Tomato/ })).toBeVisible();
+		});
+
+		test('the climate picker overrides the detection and persists', async ({ page }) => {
+			await page.goto('/?lang=en');
+			await shelf(page).getByRole('button', { name: /Your climate/ }).click();
+			const dialog = page.getByRole('dialog', { name: 'Your climate' });
+			await expect(dialog).toBeVisible();
+			await dialog.getByRole('radio', { name: /^Mediterranean/ }).check();
+			await dialog.getByRole('radio', { name: 'Northern', exact: true }).check();
+			await page.keyboard.press('Escape');
+			await expect(dialog).toBeHidden();
+			await expect(shelf(page).getByText('Your climate: Mediterranean', { exact: true })).toBeVisible();
+			await expect(shelf(page).getByRole('button', { name: /Onion/ })).toHaveCount(0);
+			await page.reload();
+			await expect(shelf(page).getByText('Your climate: Mediterranean', { exact: true })).toBeVisible();
+		});
 	});
 });

@@ -1,0 +1,10 @@
+{
+	"butter": {"ay":"farmed"},
+	"chicken": {"ay":"farmed"},
+	"egg": {"ay":"farmed"},
+	"flour": {"ay":"processed"},
+	"garlic": {"ay":"staple"},
+	"milk": {"ay":"farmed"},
+	"rice": {"ay":"staple"},
+	"salt": {"ay":"staple"}
+}

@@ -1,13 +1,21 @@
 import { browser } from '$app/environment';
 import {
 	SEASON_KEY,
+	SEASON_ONLY_KEY,
 	SEASON_ON_KEY,
+	SEASON_SCOPE_KEY,
 	detectFrom,
 	effectiveView,
+	modeOf,
+	readExtras,
 	readPrefs,
 	writeChoice,
 	writeEnabled,
+	writeOnlyInSeason,
+	writeScope,
 	type PrefSource,
+	type SeasonMode,
+	type SeasonScope,
 	type StorageLike
 } from './prefs';
 import { formatView, normaliseView, type Detection, type SeasonView } from './zones';
@@ -35,6 +43,8 @@ export class SeasonPrefs {
 	#choice = $state.raw<SeasonView | null>(null);
 	#detected = $state.raw<Detection | null>(null);
 	#enabled = $state(false);
+	#scope = $state<SeasonScope>('local');
+	#onlyInSeason = $state(false);
 	#hydrated = false;
 	readonly #env: SeasonPrefsEnv | null;
 
@@ -73,6 +83,48 @@ export class SeasonPrefs {
 		writeEnabled(this.#env.storage(), on);
 	}
 
+	/** The calendar read everywhere: the reader's climate ('local', the default) or the world's. */
+	get scope(): SeasonScope {
+		return this.#scope;
+	}
+
+	set scope(scope: SeasonScope) {
+		if (!this.#env) return;
+		this.hydrate();
+		this.#scope = scope;
+		writeScope(this.#env.storage(), scope);
+	}
+
+	/** The view `scope` stands for: the world, or the effective climate. */
+	get view(): SeasonView {
+		return this.#scope === 'world' ? 'world' : this.effective;
+	}
+
+	/** Off, or ranking by one of the two calendars. */
+	get mode(): SeasonMode {
+		return modeOf(this.#enabled, this.#scope);
+	}
+
+	set mode(mode: SeasonMode) {
+		if (mode === 'off') this.enabled = false;
+		else {
+			this.scope = mode;
+			this.enabled = true;
+		}
+	}
+
+	/** Only recipes with nothing out of season left to buy; applies while ranking is on. */
+	get onlyInSeason(): boolean {
+		return this.#onlyInSeason;
+	}
+
+	set onlyInSeason(on: boolean) {
+		if (!this.#env) return;
+		this.hydrate();
+		this.#onlyInSeason = on;
+		writeOnlyInSeason(this.#env.storage(), on);
+	}
+
 	hydrate(): void {
 		const env = this.#env;
 		if (this.#hydrated || !env) return;
@@ -80,7 +132,9 @@ export class SeasonPrefs {
 		this.#read();
 		this.#detected = env.detect();
 		env.onStorage((key) => {
-			if (key === null || key === SEASON_KEY || key === SEASON_ON_KEY) this.#read();
+			if (key === null || key === SEASON_KEY || key === SEASON_ON_KEY || key === SEASON_SCOPE_KEY || key === SEASON_ONLY_KEY) {
+				this.#read();
+			}
 		});
 	}
 
@@ -96,6 +150,9 @@ export class SeasonPrefs {
 		const stored = readPrefs(this.#env?.storage());
 		if (!sameChoice(stored.choice, this.#choice)) this.#choice = stored.choice;
 		this.#enabled = stored.enabled;
+		const extras = readExtras(this.#env?.storage());
+		this.#scope = extras.scope;
+		this.#onlyInSeason = extras.onlyInSeason;
 	}
 }
 

@@ -18,6 +18,7 @@
 	const lang = $derived(resolveLang($page.url.searchParams.get('lang')));
 	const t = $derived(translator(lang));
 	const inGlossary = $derived($page.url.pathname.startsWith('/glossary'));
+	const inSeasonal = $derived($page.url.pathname.startsWith('/seasonal'));
 	const inFavorites = $derived($page.url.pathname.startsWith('/favorites'));
 	const isHome = $derived($page.route.id === '/');
 	// ISO 639-3 'pnb' has no two-letter code of its own; PA is Punjabi's.
@@ -174,6 +175,19 @@
 							/>
 						</svg>
 						<span class="nav-text">{t('nav.glossary')}</span>
+					</a>
+					<a class="nav-link" href="/seasonal?lang={lang}" aria-current={inSeasonal ? 'page' : undefined}>
+						<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+							<path
+								d="M16.6 3.2c.7 8-2.8 13.3-9.3 13.5-1.3 0-2.4-.4-3.2-1C3.5 9.2 8 3.4 16.6 3.2ZM4 16.6c2.3-4.2 5.4-7.3 9.4-9.6"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linejoin="round"
+								stroke-linecap="round"
+							/>
+						</svg>
+						<span class="nav-text">{t('nav.seasonal')}</span>
 					</a>
 					<a
 						class="nav-link"

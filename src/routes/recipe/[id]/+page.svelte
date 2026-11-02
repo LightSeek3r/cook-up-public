@@ -8,6 +8,11 @@
 	import BalanceGrade from '$components/BalanceGrade.svelte';
 	import FoodIcon from '$components/FoodIcon.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
+	import SeasonBadge from '$components/SeasonBadge.svelte';
+	import { onMount } from 'svelte';
+	import { seasonShare, viewOf } from '$lib/seasonal';
+	import { seasonData } from '$lib/seasonal/data.svelte';
+	import { seasonPrefs } from '$lib/seasonal/prefs.svelte';
 	import { DIFFICULTY_MAX } from '$lib/config';
 	import { FALLBACK_EMOJI } from '$lib/emoji';
 	import { cuisineIcon, mealIcon } from '$lib/icons';
@@ -95,6 +100,23 @@
 	const grade = $derived(
 		nutritionVisible(data.recipe.nutrition_coverage) ? data.recipe.balance_grade : null
 	);
+
+	onMount(() => {
+		seasonPrefs.hydrate();
+		seasonData.want();
+	});
+
+	// "3 of 5 fresh items in season" over the ingredients the reader's calendar
+	// has a season for; ingredient ids are season indexes + 1. Client only:
+	// the month and the climate are the reader's.
+	const share = $derived.by(() => {
+		const seasons = seasonData.seasons;
+		if (!seasons || !seasonData.month) return '';
+		const indexes = data.recipe.ingredients.map((ingredient) => ingredient.id - 1).filter((g) => g >= 0 && g < seasons.ingredients);
+		const { inSeason, seasonal } = seasonShare(seasons, indexes, viewOf(seasonPrefs.view), seasonData.month);
+		if (!seasonal) return '';
+		return t('seasonal.share').replace('{n}', String(inSeason)).replace('{m}', String(seasonal));
+	});
 </script>
 
 <SeoHead
@@ -293,6 +315,7 @@
 								canonicalKey={ingredient.canonical_key}
 								category={ingredient.category}
 							/>
+							<SeasonBadge id={ingredient.id} showOut />
 						</span>
 						<span class="ing-text">
 							{#if ownWording(ingredient)}
@@ -315,6 +338,11 @@
 					</li>
 				{/each}
 			</ul>
+			<!-- Always in the layout, empty until the reader's season data is in (or
+			     for good when there is none), so filling it shifts nothing. -->
+			<p class="season-share" aria-live="polite">{#if share}<span class="share-count">{share}</span><span
+						class="share-note">{t('seasonal.typical')}</span
+					>{/if}</p>
 		</section>
 
 		<section class="method sheet">
@@ -709,6 +737,8 @@
 	}
 	/* The same medallion as the home tiles, ringed in the category's line. */
 	.art {
+		position: relative;
+		--season-size: 1rem;
 		display: grid;
 		place-items: center;
 		width: 2.25rem;
@@ -724,6 +754,39 @@
 	.ing-text {
 		min-width: 0;
 		overflow-wrap: anywhere;
+	}
+	/* Two lines reserved even while empty: see the markup. */
+	.season-share {
+		display: grid;
+		align-content: start;
+		gap: 0.1rem;
+		min-block-size: 2.6rem;
+		margin: var(--space-2) 0 0;
+		padding-block-start: var(--space-2);
+		border-block-start: 1px dashed var(--line-strong);
+	}
+	.season-share:empty {
+		border-block-start-color: transparent;
+	}
+	.share-count {
+		color: var(--ink);
+		font-size: 0.88rem;
+		font-weight: 700;
+	}
+	.share-count::before {
+		content: '';
+		display: inline-block;
+		width: 0.6rem;
+		height: 0.6rem;
+		margin-inline-end: 0.45rem;
+		border-radius: 50%;
+		background: var(--grade-a);
+		vertical-align: 0.05em;
+	}
+	.share-note {
+		color: var(--muted);
+		font-size: 0.75rem;
+		font-style: italic;
 	}
 	/* Quieter than the ingredient name it follows: this is a convenience, and it
 	   must not compete with the source's own wording. */

@@ -1,15 +1,22 @@
 import { describe, expect, it } from 'vitest';
 import {
 	SEASON_KEY,
+	SEASON_ONLY_KEY,
 	SEASON_ON_KEY,
+	SEASON_SCOPE_KEY,
 	detectFrom,
 	effectiveView,
 	formatSeasonPref,
+	modeOf,
 	parseEnabled,
+	parseScope,
 	parseSeasonPref,
+	readExtras,
 	readPrefs,
 	writeChoice,
 	writeEnabled,
+	writeOnlyInSeason,
+	writeScope,
 	type StorageLike
 } from './prefs';
 import { SeasonPrefs, type SeasonPrefsEnv } from './prefs.svelte';
@@ -179,5 +186,57 @@ describe('SeasonPrefs', () => {
 		prefs.set('world');
 		prefs.enabled = true;
 		expect([prefs.choice, prefs.detected, prefs.effective, prefs.source, prefs.enabled]).toEqual([null, null, 'world', 'fallback', false]);
+		prefs.mode = 'world';
+		prefs.onlyInSeason = true;
+		expect([prefs.mode, prefs.scope, prefs.onlyInSeason]).toEqual(['off', 'local', false]);
+	});
+
+	it('maps the three-way mode onto enabled and scope, and keeps the scope while off', () => {
+		const { prefs, storage } = setup();
+		expect([prefs.mode, prefs.scope, prefs.view]).toEqual(['off', 'local', 'world']);
+		prefs.hydrate();
+		expect(prefs.view).toEqual(madrid.view);
+		prefs.mode = 'world';
+		expect([prefs.enabled, prefs.scope, prefs.view]).toEqual([true, 'world', 'world']);
+		expect(storage.data.get(SEASON_SCOPE_KEY)).toBe('world');
+		prefs.mode = 'off';
+		expect([prefs.enabled, prefs.scope, prefs.mode]).toEqual([false, 'world', 'off']);
+		prefs.mode = 'local';
+		expect([prefs.enabled, prefs.mode, prefs.view]).toEqual([true, 'local', madrid.view]);
+		expect(storage.data.has(SEASON_SCOPE_KEY)).toBe(false);
+		prefs.onlyInSeason = true;
+		expect(storage.data.get(SEASON_ONLY_KEY)).toBe('1');
+	});
+
+	it('reads scope and the in-season filter at hydration and from other tabs', () => {
+		const { prefs, storage, listeners } = setup({ [SEASON_SCOPE_KEY]: 'world', [SEASON_ONLY_KEY]: '1' });
+		expect([prefs.scope, prefs.onlyInSeason]).toEqual(['local', false]);
+		prefs.hydrate();
+		expect([prefs.scope, prefs.onlyInSeason, prefs.mode]).toEqual(['world', true, 'off']);
+		storage.removeItem(SEASON_SCOPE_KEY);
+		listeners[0](SEASON_SCOPE_KEY);
+		expect(prefs.scope).toBe('local');
+		storage.setItem(SEASON_ONLY_KEY, '0');
+		listeners[0](SEASON_ONLY_KEY);
+		expect(prefs.onlyInSeason).toBe(false);
+	});
+});
+
+describe('scope and in-season filter storage', () => {
+	it('parses strictly, defaults to local and off, and survives broken storage', () => {
+		expect(parseScope('world')).toBe('world');
+		for (const raw of [null, '', 'local', 'World', 'med:n']) expect(parseScope(raw)).toBe('local');
+		expect(modeOf(false, 'world')).toBe('off');
+		expect(modeOf(true, 'world')).toBe('world');
+		expect(readExtras(throwing)).toEqual({ scope: 'local', onlyInSeason: false });
+		expect(readExtras(null)).toEqual({ scope: 'local', onlyInSeason: false });
+		expect(() => writeScope(throwing, 'world')).not.toThrow();
+		expect(() => writeOnlyInSeason(throwing, true)).not.toThrow();
+		const storage = new FakeStorage();
+		writeScope(storage, 'world');
+		writeOnlyInSeason(storage, true);
+		expect(readExtras(storage)).toEqual({ scope: 'world', onlyInSeason: true });
+		writeScope(storage, 'local');
+		expect(storage.data.has(SEASON_SCOPE_KEY)).toBe(false);
 	});
 });

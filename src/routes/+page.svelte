@@ -9,9 +9,15 @@
 	import RecipeHits from '$components/RecipeHits.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
 	import LoadError from '$components/LoadError.svelte';
+	import SeasonShelf from '$components/SeasonShelf.svelte';
+	import SeasonBadge from '$components/SeasonBadge.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { MIN_FTS_LENGTH } from '$lib/search';
 	import { titleQueryReady } from '$lib/data/search.js';
+	import { seasonParam } from '$lib/data/match.js';
+	import { viewOf } from '$lib/seasonal';
+	import { seasonData } from '$lib/seasonal/data.svelte';
+	import { seasonPrefs } from '$lib/seasonal/prefs.svelte';
 	import { ALLERGENS } from '$lib/config';
 	import { slackFor } from '$lib/match';
 	import { matchRequest } from '$lib/matchRequest';
@@ -20,7 +26,8 @@
 		localMatch,
 		localMatchReady,
 		prefetchMatchData,
-		wantMatchData
+		wantMatchData,
+		wantSeasonData
 	} from '$lib/client/localMatch';
 	import { MAX_HAVE } from '$lib/apiParams';
 	import { cachedJson } from '$lib/responseCache';
@@ -39,6 +46,8 @@
 	}
 
 	let tiles = $state<IngredientTile[]>([]);
+	/** The unfiltered mosaic, kept while a search narrows `tiles`: what the season shelf offers. */
+	let allTiles = $state<IngredientTile[]>([]);
 	let results = $state<MatchResult[]>([]);
 	// Comes back with the results rather than being read off the URL: the server
 	// dedupes `have`, so its count is the authoritative denominator for
@@ -128,6 +137,24 @@
 	);
 
 	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.canonical_key)));
+
+	// Declared before every effect that reads them, so the first match already
+	// carries the season: the climate, the ranking choice and the month are the
+	// reader's, read once mounted (the server renders the defaults: off).
+	$effect(() =>
+		untrack(() => {
+			seasonPrefs.hydrate();
+			seasonData.want();
+		})
+	);
+	/** `season=` for /api/match, '' while ranking is off; the month only ever comes from the browser's clock. */
+	const season = $derived(
+		seasonPrefs.enabled && seasonData.month ? seasonParam(viewOf(seasonPrefs.view), seasonData.month) : ''
+	);
+	// Lets the browser answer seasonal queries itself once seasons.json is in.
+	$effect(() => {
+		if (season) wantSeasonData();
+	});
 
 	// The API returns both groups in one ranked list (full matches first, by
 	// construction — see `matchRecipes`), so splitting is a partition here rather
@@ -370,6 +397,7 @@
 			.then((data) => {
 				if (stale) return;
 				const found = data.results ?? [];
+				if (!fromServer) allTiles = found;
 				tiles = fromServer ? found : filterTiles(found, value);
 				tilesLoaded = true;
 			})
@@ -388,7 +416,19 @@
 	});
 
 	function matchInput() {
-		return { selected, lang, cuisine, meal, diet, sort, noAllergen, must, slack };
+		return {
+			selected,
+			lang,
+			cuisine,
+			meal,
+			diet,
+			sort,
+			noAllergen,
+			must,
+			slack,
+			season,
+			seasonOnly: seasonPrefs.onlyInSeason
+		};
 	}
 
 	// Keyed on a string so the effect below re-runs only when the request would
@@ -547,7 +587,15 @@
 				onRetry={() => tilesAttempt++}
 			/>
 		{:else}
-			<Mosaic {tiles} {selected} {t} onToggle={toggle} loading={!tilesLoaded} />
+			{#if !debouncedQuery.trim()}
+				<SeasonShelf tiles={allTiles} {selected} {lang} {t} onToggle={toggle} />
+			{/if}
+			<!-- Remounted when the tiles first land, so the board that replaces the
+			     skeleton is a new box: a shelf appearing above it in the same frame
+			     then moves nothing that was on screen. -->
+			{#key tilesLoaded}
+				<Mosaic {tiles} {selected} {t} onToggle={toggle} loading={!tilesLoaded} />
+			{/key}
 		{/if}
 	</div>
 
@@ -598,6 +646,7 @@
 											category={tile.category}
 											size={24}
 										/>
+										<SeasonBadge id={tile.id} />
 									</span>
 									<span class="chip-name">{tile.name}</span>
 									<svg class="x" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -973,6 +1022,8 @@
 		transform: scale(0.96);
 	}
 	.chip-art {
+		position: relative;
+		--season-size: 0.9rem;
 		width: 1.75rem;
 		height: 1.75rem;
 		padding: 0.2rem;

@@ -5,6 +5,8 @@
 	import FoodIcon from './FoodIcon.svelte';
 	import { ALLERGENS, CUISINES, DIETS, MEAL_TYPES } from '$lib/config';
 	import { DIET_SLASHED, cuisineIcon, dietIcon, mealIcon } from '$lib/icons';
+	import { seasonPrefs } from '$lib/seasonal/prefs.svelte';
+	import type { SeasonMode } from '$lib/seasonal/prefs';
 
 	type FilterKey = 'cuisine' | 'meal' | 'diet' | 'sort';
 
@@ -40,6 +42,11 @@
 	}: Props = $props();
 
 	const uid = $props.id();
+
+	// A preference stored in this browser, not a URL filter: "Reset filters"
+	// leaves it alone and the active count does not include it (the summary
+	// shows its own mark instead). The page hydrates seasonPrefs on mount.
+	const SEASON_MODES: readonly SeasonMode[] = ['off', 'local', 'world'];
 
 	// The eight cuisines with the most recipes in the corpus (data-494124df,
 	// October 2026); the select still lists all of them.
@@ -229,6 +236,14 @@
 				/>
 			</svg>
 			<span class="quick-title">{t('filter.quick')}</span>
+			{#if seasonPrefs.mode !== 'off'}
+				<span class="season-on" title={t('seasonal.scope.label')}>
+					<svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+						<path d="M13.7 2.3c.6 6.7-2.3 11.1-7.7 11.3-1.1 0-2-.3-2.7-.8C2.9 7.9 6.6 3.1 13.7 2.3Z" />
+					</svg>
+					<span class="sr-only">{t('seasonal.scope.label')}: {t(`seasonal.scope.${seasonPrefs.mode}`)}</span>
+				</span>
+			{/if}
 			{#if activeCount > 0}
 				<span class="active-count">
 					<span class="active-words">{activeParts[0]}</span><b>{activeCount}</b><span
@@ -259,6 +274,35 @@
 					</div>
 				</div>
 			{/each}
+			<div class="chip-row season-row">
+				<span class="row-label" id="{uid}-season">{t('seasonal.scope.label')}</span>
+				<div class="season-controls">
+					<div class="segmented" role="radiogroup" aria-labelledby="{uid}-season">
+						{#each SEASON_MODES as mode (mode)}
+							<label>
+								<input
+									type="radio"
+									name="{uid}-season-mode"
+									value={mode}
+									checked={seasonPrefs.mode === mode}
+									onchange={() => (seasonPrefs.mode = mode)}
+								/>
+								<span>{t(`seasonal.scope.${mode}`)}</span>
+							</label>
+						{/each}
+					</div>
+					<label class="only" class:disabled={seasonPrefs.mode === 'off'}>
+						<input
+							type="checkbox"
+							checked={seasonPrefs.onlyInSeason}
+							disabled={seasonPrefs.mode === 'off'}
+							onchange={(event) =>
+								(seasonPrefs.onlyInSeason = (event.currentTarget as HTMLInputElement).checked)}
+						/>
+						{t('seasonal.onlyInSeason')}
+					</label>
+				</div>
+			</div>
 		</div>
 	</details>
 	<!-- Outside the summary, so a reset needs no opening first and the
@@ -664,6 +708,98 @@
 		white-space: nowrap;
 	}
 
+	/* Seasonal ranking: a three-way switch and the in-season-only box. */
+	.season-on {
+		display: grid;
+		place-items: center;
+		flex: none;
+		width: 1.35rem;
+		height: 1.35rem;
+		border-radius: 50%;
+		background: var(--grade-a);
+		color: var(--on-grade);
+	}
+	.season-on svg {
+		width: 0.85rem;
+		height: 0.85rem;
+		fill: currentColor;
+	}
+	.season-controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2) var(--space-4);
+		min-width: 0;
+	}
+	.segmented {
+		display: inline-flex;
+		max-width: 100%;
+		padding: 2px;
+		border: 1px solid var(--line-strong);
+		border-radius: var(--radius-pill);
+		background: var(--surface-sunken);
+		box-shadow: inset 0 1px 2px var(--lo);
+	}
+	.segmented label {
+		position: relative;
+		display: grid;
+		place-items: center;
+		min-width: 0;
+		min-height: var(--tap);
+		padding: 0 0.95rem;
+		border-radius: var(--radius-pill);
+		color: var(--muted);
+		font-size: 0.88rem;
+		font-weight: 600;
+		white-space: nowrap;
+		cursor: pointer;
+	}
+	.segmented label:hover {
+		color: var(--ink);
+	}
+	/* Undoes the text-field styling `input, select` above gives every input:
+	   the native radio stays, invisible over its segment. */
+	.segmented input {
+		all: unset;
+		position: absolute;
+		inset: 0;
+		border-radius: inherit;
+		opacity: 0;
+		cursor: pointer;
+	}
+	.segmented label:has(input:checked) {
+		background: var(--surface);
+		color: var(--ink);
+		font-weight: 750;
+		box-shadow:
+			inset 0 1px 0 var(--hi),
+			0 1px 3px var(--lo-2);
+	}
+	.segmented label:has(input:focus-visible) {
+		outline: 3px solid var(--focus);
+		outline-offset: 1px;
+	}
+	.only {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.5rem;
+		min-height: var(--tap);
+		font-size: 0.9rem;
+		font-weight: 600;
+		cursor: pointer;
+	}
+	.only input {
+		all: revert;
+		width: 1.15rem;
+		height: 1.15rem;
+		margin: 0;
+		accent-color: var(--primary);
+	}
+	.only.disabled {
+		color: var(--muted);
+		cursor: default;
+	}
+
 	/* Tablets: the selects join the sticky bar, on a row of their own. Sharing
 	   one with the search at 768px cut their values to four letters. */
 	@media (min-width: 48rem) {
@@ -719,6 +855,12 @@
 		.fchip[aria-pressed='true']::after {
 			background: Highlight;
 			forced-color-adjust: none;
+		}
+		.segmented label:has(input:checked),
+		.season-on {
+			forced-color-adjust: none;
+			background: Highlight;
+			color: HighlightText;
 		}
 	}
 </style>

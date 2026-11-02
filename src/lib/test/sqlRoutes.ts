@@ -124,6 +124,7 @@ const sitemap: Handler = async ({ url, platform }) => {
 		`${url.origin}/`,
 		`${url.origin}/glossary`,
 		...getTermIds().map((id) => `${url.origin}/glossary/${id}`),
+		...Array.from({ length: 12 }, (_, i) => `${url.origin}/seasonal/${i + 1}`),
 		...(results ?? []).map((row) => `${url.origin}/recipe/${row.id}`)
 	];
 

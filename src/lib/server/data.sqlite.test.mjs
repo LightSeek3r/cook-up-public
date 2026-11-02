@@ -233,6 +233,7 @@ describe('the recipe page and the sitemap', () => {
 		const { ASSETS, platform } = platformOver(FILES);
 		const body = await (await get('/sitemap.xml', platform)).text();
 		expect(body.match(/\/recipe\/\d+/g)).toEqual([1, 2, 3, 4, 5, 6].map((id) => `/recipe/${id}`));
+		expect(body.match(/\/seasonal\/\d+/g)).toEqual(Array.from({ length: 12 }, (_, i) => `/seasonal/${i + 1}`));
 		expect(ASSETS.fetched).toEqual(['/data/sitemap.json']);
 	});
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IngredientIcon from './IngredientIcon.svelte';
+	import SeasonBadge from './SeasonBadge.svelte';
 	import type { IngredientTile as Tile } from '$lib/types';
 
 	interface Props {
@@ -34,6 +35,7 @@
 >
 	<span class="art">
 		<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />
+		<SeasonBadge id={tile.id} />
 	</span>
 	<span class="name">{tile.name}</span>
 
@@ -105,6 +107,7 @@
 	/* Colour emoji cannot follow currentColor, so they sit on a --surface
 	   medallion that keeps them legible on every tile fill, selected included. */
 	.art {
+		position: relative;
 		display: grid;
 		place-items: center;
 		width: 2.75rem;
