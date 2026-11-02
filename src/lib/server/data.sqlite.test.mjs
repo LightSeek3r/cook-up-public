@@ -91,6 +91,25 @@ describe('loading', () => {
 		const { platform } = platformOver(FILES);
 		for (const path of DATA_URLS) expect((await get(path, platform)).status, path).toBe(200);
 	});
+
+	it('fetches seasons.json once, and only for a match that ranks by season', async () => {
+		const { ASSETS, platform } = platformOver(FILES);
+		const plain = await (await get('/api/match?have=tomato&lang=en', platform)).text();
+		expect(ASSETS.fetched).not.toContain('/data/seasons.json');
+		const seasonal = await get('/api/match?have=tomato&lang=en&season=med.n.4&seasonOnly=1', platform);
+		await get('/api/match?have=onion&lang=en&season=world.9', platform);
+		expect(ASSETS.fetched.filter((p) => p === '/data/seasons.json')).toHaveLength(1);
+		// The e2e seed has no season sources: every ingredient all year, so nothing moves.
+		expect(await seasonal.text()).toBe(plain);
+	});
+
+	it('data built before seasons.json existed: a seasonal match is the plain one', async () => {
+		const { platform } = platformOver(new Map([...FILES].filter(([p]) => p !== 'seasons.json')));
+		const plain = await (await get('/api/match?have=tomato&lang=en', platform)).text();
+		const seasonal = await get('/api/match?have=tomato&lang=en&season=med.n.4&seasonOnly=1', platform);
+		expect(seasonal.status).toBe(200);
+		expect(await seasonal.text()).toBe(plain);
+	});
 });
 
 describe('unreadable artefacts are a DataUnavailableError, never a D1 fallback', () => {
@@ -132,6 +151,7 @@ describe('unreadable artefacts are a DataUnavailableError, never a D1 fallback',
 		await unavailable(replaced('names/fr.json', OTHER.get('names/fr.json')), DATA_URLS.filter((p) => !p.endsWith('lang=fr')));
 		await unavailable(replaced('titles/fr.json', OTHER.get('titles/fr.json')), DATA_URLS.filter((p) => !p.endsWith('lang=fr')));
 		await unavailable(replaced('mosaic/fr.json', OTHER.get('mosaic/fr.json')), ['/api/ingredients?lang=fr']);
+		await unavailable(replaced('seasons.json', OTHER.get('seasons.json')), ['/api/match?have=tomato&lang=en&season=oce.n.6']);
 	});
 
 	it('a failure is not remembered: the next request retries and succeeds', async () => {

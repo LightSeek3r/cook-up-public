@@ -16,6 +16,7 @@
  *   names/<lang>.json      ingredient display name per ingredient, and which are the language's own
  *   mosaic/<lang>.json     the /api/ingredients mosaic, results as the API returns them
  *   sitemap.json           every recipe id
+ *   seasons.json           a month mask per ingredient and climate view (src/lib/data/seasons.js)
  *   r/<id>.json            one recipe page, all languages (src/lib/data/recipe.js)
  *   manifest.json          data version, counts, sha256 and size of every other file
  *
@@ -25,11 +26,14 @@
  */
 
 import { createHash } from 'node:crypto';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { gzipSync } from 'node:zlib';
 import { CORE_FORMAT, CORE_MAGIC, CORE_SECTIONS, ELEMENT, NULL_INT, sectionBase } from '../../src/lib/data/core.js';
 import { loadCorpus } from '../../src/lib/data/corpus.js';
 import { buildMosaic } from '../../src/lib/data/search.js';
+import { parseSeasons, VIEW_COUNT, ZONES } from '../../src/lib/data/seasons.js';
 import { compareBinary, ftsFold } from '../../src/lib/data/text.js';
 import { buildLocalSeed } from '../06_seed_d1.mjs';
 import { readBackup } from './i18n_backup.mjs';
@@ -359,9 +363,10 @@ function coreBytes(d, source, version) {
 
 	const maxNonStaple = Math.max(0, ...nonStaple);
 	// The largest key match.js can build (it counts at most N + 1 levels of
-	// "selections used") must stay an exact integer in a double.
+	// "selections used", and up to 4 levels of out-of-season ingredients when
+	// a season is asked for) must stay an exact integer in a double.
 	const miss = maxNonStaple + 1;
-	const largest = (N + 1) * Math.max(R * miss * R, 256 * miss * R, miss * miss * R);
+	const largest = (N + 1) * Math.max(R * miss * R, 256 * miss * R, 4 * miss * miss * R);
 	if (!(largest < 2 ** 53)) throw new Error(`match sort keys could reach ${largest}, beyond 2^53`);
 
 	const titles = stringBlob(d.recipes.map((r) => source.get(r.id) ?? ''), 'title');
@@ -434,8 +439,9 @@ function languages(d) {
  * @param {ReturnType<typeof readCorpus>} d
  * @param {string} version
  * @param {string[]} langs
+ * @param {string[]} seasonLines seasons.json's mask lines, in ingredient order
  */
-function smallFiles(d, version, langs) {
+function smallFiles(d, version, langs, seasonLines) {
 	/** @type {Map<string, Buffer>} */
 	const files = new Map();
 	const sourceLang = new Map(d.recipes.map((r) => [r.id, r.source_lang]));
@@ -487,7 +493,53 @@ function smallFiles(d, version, langs) {
 	const corpus = loadCorpus({ core, titles: titleOverrides, names });
 	for (const lang of langs) files.set(`mosaic/${lang}.json`, json({ version, lang, results: buildMosaic(corpus, lang) }));
 	files.set('sitemap.json', json({ version, ids: recipeIds }));
+	files.set('seasons.json', json({ version, zones: ZONES, masks: seasonLines.join('\n') }));
 	return files;
+}
+
+/** Every ingredient in season all year, in every view: what seasons.json holds without sources. @param {string[]} keys */
+export const allYearSeasons = (keys) => keys.map(() => 'fff'.repeat(VIEW_COUNT));
+
+/**
+ * @param {ReturnType<typeof readCorpus>} d
+ * @param {(keys: string[]) => string[]} compile
+ */
+function seasonLinesOf(d, compile) {
+	const lines = compile(d.ingredients.map((i) => i.canonical_key));
+	if (!Array.isArray(lines)) throw new Error('seasons: the compiler returned no line list');
+	// The reader's own checks (line count, length, hex), so a bad compile fails the build, not a request.
+	parseSeasons({ version: '', zones: ZONES, masks: lines.join('\n') }, { ingredients: d.ingredients.length });
+	return lines;
+}
+
+/** Hand-written season sources (pipeline/seasons/README.md). */
+export const SEASONS_DIR = 'pipeline/seasons';
+
+/**
+ * buildArtefacts' `seasons` option from the sources in `dir`, compiled by
+ * pipeline/lib/seasons_compile.mjs: undefined (every ingredient all year)
+ * while there are no sources, or no compiler yet. Sources are passed to the
+ * compiler as `{ <file name without .json>: <parsed file> }`.
+ * @param {string} [dir]
+ * @returns {Promise<{ compile: (keys: string[]) => string[], files: string[] } | undefined>}
+ */
+export async function seasonSource(dir = SEASONS_DIR) {
+	if (!existsSync(dir)) return undefined;
+	const names = readdirSync(dir)
+		.filter((f) => f.endsWith('.json'))
+		.sort(compareBinary);
+	/** @type {Record<string, any>} */
+	const sources = Object.fromEntries(names.map((f) => [f.slice(0, -'.json'.length), JSON.parse(readFileSync(path.join(dir, f), 'utf8'))]));
+	if (!Object.values(sources).some((s) => s && typeof s === 'object' && Object.keys(s).length > 0)) return undefined;
+	const compiler = new URL('./seasons_compile.mjs', import.meta.url);
+	if (!existsSync(compiler)) return undefined;
+	const { compileSeasons } = await import(compiler.href);
+	/** @param {string[]} keys */
+	const compile = (keys) => {
+		const out = compileSeasons(sources, keys);
+		return Array.isArray(out) ? out : out.lines;
+	};
+	return { compile, files: names };
 }
 
 /**
@@ -549,14 +601,17 @@ function contentVersion(files) {
  * Every artefact file and the manifest, from one database. Deterministic: the
  * same database gives byte-identical files and the same version.
  * @param {DatabaseSync} db
- * @param {{ source?: Record<string, unknown> }} [opts] provenance recorded in the manifest
+ * @param {{ source?: Record<string, unknown>, seasons?: (keys: string[]) => string[] }} [opts] `source`:
+ *   provenance recorded in the manifest; `seasons`: seasons.json's mask lines for the canonical keys in
+ *   ingredient order (seasonSource), all year when omitted
  */
 export function buildArtefacts(db, opts = {}) {
 	const d = readCorpus(db);
 	const langs = languages(d);
 	const recipes = recipeFiles(d);
-	const version = contentVersion(new Map([...smallFiles(d, '', langs), ...recipes]));
-	const files = new Map([...smallFiles(d, version, langs), ...recipes]);
+	const seasonLines = seasonLinesOf(d, opts.seasons ?? allYearSeasons);
+	const version = contentVersion(new Map([...smallFiles(d, '', langs, seasonLines), ...recipes]));
+	const files = new Map([...smallFiles(d, version, langs, seasonLines), ...recipes]);
 
 	const perLang = (/** @type {{ lang: string }[]} */ rows, /** @type {(row: any) => number} */ weight = () => 1) => {
 		/** @type {Record<string, number>} */
@@ -619,6 +674,7 @@ export const BUDGETS = {
 	titlesLangGzip: 96 * 1024,
 	namesLangGzip: 24 * 1024,
 	mosaicLangGzip: 32 * 1024,
+	seasonsGzip: 16 * 1024,
 	recipeRaw: 1024 * 1024,
 	files: 12_000,
 	totalRaw: 160 * 1024 * 1024
@@ -642,6 +698,7 @@ export function checkBudgets(files, budgets = BUDGETS) {
 		else if (p.startsWith('titles/')) over(gz(body), budgets.titlesLangGzip, 'gzip');
 		else if (p.startsWith('names/')) over(gz(body), budgets.namesLangGzip, 'gzip');
 		else if (p.startsWith('mosaic/')) over(gz(body), budgets.mosaicLangGzip, 'gzip');
+		else if (p === 'seasons.json') over(gz(body), budgets.seasonsGzip, 'gzip');
 		else if (p.startsWith('r/')) over(body.length, budgets.recipeRaw, 'raw');
 	}
 	if (files.size > budgets.files) problems.push(`${files.size} files, budget ${budgets.files}`);

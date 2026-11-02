@@ -32,14 +32,21 @@ describe('matchRequest', () => {
 				diet: 'vegetarian',
 				sort: 'kcal',
 				noAllergen: ['milk', 'gluten'],
-				must: ['onion']
+				must: ['onion'],
+				season: 'med.s.4',
+				seasonOnly: true
 			},
 			50
 		);
 		expect(query).toBe(
 			'have=garlic%2Conion%2Ctomato&lang=en&cuisine=indian&meal=dinner&diet=vegetarian' +
-				'&sort=kcal&noAllergen=gluten%2Cmilk&must=onion&offset=50'
+				'&sort=kcal&noAllergen=gluten%2Cmilk&must=onion&season=med.s.4&seasonOnly=1&offset=50'
 		);
+	});
+
+	it('sends seasonOnly only with a season', () => {
+		expect(matchRequest({ ...base, season: '', seasonOnly: true })).toBe(matchRequest(base));
+		expect(matchRequest({ ...base, season: 'world.12' })).toBe(`${matchRequest(base)}&season=world.12`);
 	});
 
 	it('is the same string for the same selection in any order, with duplicates', () => {

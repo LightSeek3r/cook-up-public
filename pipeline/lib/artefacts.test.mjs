@@ -3,9 +3,10 @@ import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'no
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { randomBytes } from 'node:crypto';
-import { BUDGETS, buildArtefacts, checkBudgets, encodeCore, fixtureDb } from './artefacts.mjs';
+import { BUDGETS, allYearSeasons, buildArtefacts, checkBudgets, encodeCore, fixtureDb, seasonSource } from './artefacts.mjs';
 import { CORE_SECTIONS, NULL_INT, decodeCore } from '../../src/lib/data/core.js';
 import { loadCorpus } from '../../src/lib/data/corpus.js';
+import { VIEW_COUNT, ZONES, maskOf } from '../../src/lib/data/seasons.js';
 import { compareBinary } from '../../src/lib/data/text.js';
 import { checkInstalled, install, isHot, pack, readLock, readTree, sha256, unpack, verifyAgainstManifest } from '../../scripts/lib/datapack.mjs';
 
@@ -170,6 +171,61 @@ describe('schema', () => {
 	});
 });
 
+describe('seasons.json', () => {
+	const keys = () => all('SELECT canonical_key FROM ingredients ORDER BY id').map((r) => r.canonical_key);
+	/** Ingredient g: in season in month g % 12 + 1 only, in view g % VIEW_COUNT; all year elsewhere. */
+	const staggered = (list) =>
+		list.map((_, g) => Array.from({ length: VIEW_COUNT }, (_, v) => (v === g % VIEW_COUNT ? (1 << g % 12).toString(16).padStart(3, '0') : 'fff')).join(''));
+
+	it('without season sources, holds every ingredient all year in every view, in core.bin order', () => {
+		const file = json('seasons.json');
+		expect(Object.keys(file)).toEqual(['version', 'zones', 'masks']);
+		expect(file.zones).toEqual([...ZONES]);
+		expect(file.masks.split('\n')).toEqual(allYearSeasons(keys()));
+		expect(json('manifest.json').files.map((f) => f.path)).toContain('seasons.json');
+	});
+
+	it('holds the compiled lines it is given, for the canonical keys in ingredient order, and loadCorpus reads them', () => {
+		let seen;
+		const other = buildArtefacts(fixtureDb(FIXTURE), { seasons: (k) => ((seen = k), staggered(k)) });
+		expect(seen).toEqual(keys());
+		// Part of the data version: other seasons, other version, every small file restamped.
+		expect(other.version).not.toBe(built.version);
+		const seasonsText = other.files.get('seasons.json').toString('utf8');
+		expect(JSON.parse(seasonsText).masks.split('\n')).toEqual(staggered(keys()));
+		const corpus = loadCorpus({ core: other.files.get('core.bin'), names: { en: other.files.get('names/en.json').toString('utf8') }, seasons: seasonsText });
+		const seasons = corpus.seasons();
+		expect(seasons.ingredients).toBe(keys().length);
+		expect(maskOf(seasons, 5, 5 % VIEW_COUNT)).toBe(1 << 5);
+		expect(maskOf(seasons, 5, (5 + 1) % VIEW_COUNT)).toBe(0xfff);
+		expect(corpus.seasons()).toBe(seasons);
+	});
+
+	it('loadCorpus has no seasons without the file, and refuses one of another build', () => {
+		const core = built.files.get('core.bin');
+		const names = { en: text('names/en.json') };
+		expect(loadCorpus({ core, names }).seasons()).toBeNull();
+		const input = { core, names, seasons: null };
+		const corpus = loadCorpus(input);
+		expect(corpus.seasons()).toBeNull();
+		// A loader may set the file once fetched.
+		input.seasons = JSON.parse(text('seasons.json'));
+		expect(corpus.seasons().ingredients).toBe(keys().length);
+		const other = buildArtefacts(fixtureDb(FIXTURE), { seasons: staggered });
+		expect(() => loadCorpus({ core, names, seasons: other.files.get('seasons.json').toString('utf8') }).seasons()).toThrow(/different builds/);
+	});
+
+	it('a compile that does not give one valid line per ingredient fails the build', () => {
+		expect(() => buildArtefacts(fixtureDb(FIXTURE), { seasons: (k) => staggered(k).slice(1) })).toThrow(/different ingredients/);
+		expect(() => buildArtefacts(fixtureDb(FIXTURE), { seasons: (k) => k.map(() => 'fff') })).toThrow(/characters/);
+		expect(() => buildArtefacts(fixtureDb(FIXTURE), { seasons: (k) => k.map(() => 'xyz'.repeat(VIEW_COUNT)) })).toThrow(/bad mask/);
+	});
+
+	it('seasonSource leaves seasons all year while there are no sources', async () => {
+		expect(await seasonSource(path.resolve('pipeline/out/no-such-seasons-dir'))).toBeUndefined();
+	});
+});
+
 describe('encodeCore', () => {
 	it('rejects a value its section type cannot hold', () => {
 		const columns = Object.fromEntries(CORE_SECTIONS.map(([name]) => [name, [0]]));
@@ -188,11 +244,13 @@ describe('size budgets', () => {
 		const files = new Map([
 			['core.bin', big],
 			['names/xx.json', big],
+			['seasons.json', big],
 			['r/1.json', Buffer.alloc(BUDGETS.recipeRaw + 1)]
 		]);
 		const problems = checkBudgets(files);
 		expect(problems.join('\n')).toMatch(/core\.bin: gzip/);
 		expect(problems.join('\n')).toMatch(/names\/xx\.json: gzip/);
+		expect(problems.join('\n')).toMatch(/seasons\.json: gzip/);
 		expect(problems.join('\n')).toMatch(/r\/1\.json: raw/);
 		expect(checkBudgets(new Map([['r/1.json', Buffer.alloc(10)]]), { ...BUDGETS, files: 0 })).toEqual(['1 files, budget 0']);
 	});

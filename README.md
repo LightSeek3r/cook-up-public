@@ -220,6 +220,12 @@ Ingredients are addressed by `canonical_key` (`onion`, `extra_virgin_olive_oil`:
   ingredients are selected (below that there are no "almost there" results, so every
   selected ingredient is already required), and only keys that are also in `have` count.
 - `cuisine`, `meal`, `diet` — single-value filters; allowed values are in `src/lib/config.ts`.
+- `season` — `<zone>.<n|s>.<month>` (`med.s.4`: Mediterranean climate, southern hemisphere,
+  April) or `world.<month>`; zones are listed in `src/lib/data/seasons.js`. The month is the
+  client's, so a response stays a function of its URL. In the default order, recipes whose
+  still-missing ingredients are out of season (up to 3 counted) rank after those with fewer,
+  just behind `missing`; other sorts are unchanged. Malformed values are ignored.
+- `seasonOnly=1` — with `season`, only recipes with no out-of-season ingredient left to buy.
 - `lang` — any supported language code (`en`, `pnb`, …); anything else falls back to `en`.
 
 Response: `{ results, total, haveCount }`. `total` is the full match count (for paging);
@@ -395,6 +401,7 @@ through the statements `06_seed_d1.mjs` writes into an in-memory SQLite with the
 | `names/<lang>.json` | ingredient display names, and which are the language's own | 5-7 KB |
 | `mosaic/<lang>.json` | the `/api/ingredients` mosaic, as the API returns it | 17-20 KB |
 | `r/<id>.json` | one recipe page, every language (3,478 files) | median 7 KB, max 44 KB |
+| `seasons.json` | a 12-month mask per ingredient for each of 19 climate views (9 zones x 2 hemispheres + world), compiled from `pipeline/seasons` (`src/lib/data/seasons.js`); every ingredient all year until those sources exist | budget 16 KB |
 | `sitemap.json`, `manifest.json` | every recipe id; data version, counts and sha256 of every file | |
 
 `src/lib/data/` reads them in the Worker and in the browser alike (plain JS, no `$lib`
@@ -414,7 +421,8 @@ with the SQL extended by the translated titles (`src/lib/test/titleSearch.mjs`).
 come from `core.bin` and `manifest.json`'s `counts`). `src/lib/server/data.ts` fetches
 `core.bin` and English from
 `env.ASSETS` on an isolate's first data request, each other language's two small files on its
-first use, and keeps them for the isolate's lifetime; a recipe page also fetches its own
+first use, `seasons.json` on the first `/api/match` with `season=` (a data set without it
+matches as if no season was asked), and keeps them for the isolate's lifetime; a recipe page also fetches its own
 `r/<id>.json` (alongside the corpus on a cold isolate), the sitemap `sitemap.json`, on every
 uncached request. A missing, corrupt or mixed-version file is `503 {"error":"unavailable"}` on
 the APIs and the "try again" error page on pages (logged by `handleError`, retried on the next

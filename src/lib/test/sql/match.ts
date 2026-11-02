@@ -36,8 +36,60 @@ export interface MatchParams {
 	 *  outside `have` are dropped rather than trusted, since a requirement on
 	 *  something the user never selected could never be satisfied. */
 	mustUse?: number[];
+	/** Rank recipes whose still-missing ingredients are out of season in
+	 *  `month` (1-12) in climate view `view` lower (default order only), or
+	 *  with `only` drop them. Read from the `temp.ingredient_season` table
+	 *  `createSeasonTable` makes; ignored while there is none, as matchCore
+	 *  ignores it without seasons.json. */
+	season?: { view: number; month: number; only?: boolean } | null;
 	limit?: number;
 	offset?: number;
+}
+
+/** Views and masks as src/lib/data/seasons.js lays them out. */
+const VIEW_COUNT = 19;
+const ALL_YEAR = 0xfff;
+
+/**
+ * The season data for `season`, as a temp table on this connection (the
+ * corpus schema has no season table; the artefacts carry seasons.json): one
+ * row per ingredient and view whose mask is not all year. `lines` are
+ * seasons.json's mask lines, ingredient id = line index + 1.
+ */
+export async function createSeasonTable(db: D1Database, lines: string[]): Promise<void> {
+	const rows: [number, number, number][] = [];
+	lines.forEach((line, g) => {
+		for (let v = 0; v < VIEW_COUNT; v++) {
+			const mask = parseInt(line.slice(v * 3, v * 3 + 3), 16);
+			if (mask !== ALL_YEAR) rows.push([g + 1, v, mask]);
+		}
+	});
+	await db.prepare('DROP TABLE IF EXISTS temp.ingredient_season').run();
+	await db
+		.prepare(
+			`CREATE TEMP TABLE ingredient_season (
+         ingredient_id INTEGER NOT NULL, view INTEGER NOT NULL, mask INTEGER NOT NULL,
+         PRIMARY KEY (ingredient_id, view))`
+		)
+		.run();
+	await db
+		.prepare(
+			`INSERT INTO temp.ingredient_season
+       SELECT json_extract(value, '$[0]'), json_extract(value, '$[1]'), json_extract(value, '$[2]') FROM json_each(?1)`
+		)
+		.bind(JSON.stringify(rows))
+		.run();
+}
+
+export async function dropSeasonTable(db: D1Database): Promise<void> {
+	await db.prepare('DROP TABLE IF EXISTS temp.ingredient_season').run();
+}
+
+async function hasSeasonTable(db: D1Database): Promise<boolean> {
+	const row = await db
+		.prepare(`SELECT 1 AS ok FROM sqlite_temp_master WHERE type = 'table' AND name = 'ingredient_season'`)
+		.first<{ ok: number }>();
+	return row !== null;
 }
 
 /**
@@ -193,7 +245,33 @@ export async function matchRecipes(
 	// the API route, same trust boundary as `p.cuisine` etc. Every variant ends
 	// on `r.id`, a total order, which is what lets the outer SELECT re-apply it
 	// to the page and get exactly the rows' LIMIT order back.
-	let orderBy = 'missing ASC, required_non_staple ASC, r.total_minutes ASC, r.id ASC';
+	const byDefault = p.sort !== 'kcal' && p.sort !== 'grade' && p.sort !== 'time';
+
+	// Season: per candidate, the still-missing ingredients (the rows
+	// missing_names lists) that the view has a calendar for and that are out
+	// of season in the month, capped at 3. Ranks only in the default order;
+	// `only` keeps the recipes with none.
+	const season = p.season && (p.season.only || byDefault) && (await hasSeasonTable(db)) ? p.season : null;
+	let oosCol = '';
+	if (season) {
+		const { view, month } = season;
+		if (!Number.isInteger(view) || view < 0 || view >= VIEW_COUNT || !Number.isInteger(month) || month < 1 || month > 12) {
+			throw new Error(`season must be a view 0..${VIEW_COUNT - 1} and a month 1..12, got ${view} and ${month}`);
+		}
+		oosCol = `,
+             MIN(3, (SELECT COUNT(*) FROM recipe_ingredients x
+                       JOIN ingredients xi ON xi.id = x.ingredient_id
+                       JOIN temp.ingredient_season s ON s.ingredient_id = x.ingredient_id AND s.view = ${param(view)}
+                      WHERE x.recipe_id = r.id AND xi.is_staple = 0
+                        AND x.ingredient_id NOT IN (SELECT ing_id FROM sat)
+                        AND s.mask <> ${ALL_YEAR}
+                        AND ((s.mask >> (${param(month)} - 1)) & 1) = 0)) AS oos`;
+	}
+	const seasonWhere = season?.only ? 'WHERE r.oos = 0' : '';
+
+	let orderBy = season
+		? 'missing ASC, oos ASC, required_non_staple ASC, r.total_minutes ASC, r.id ASC'
+		: 'missing ASC, required_non_staple ASC, r.total_minutes ASC, r.id ASC';
 	if (p.sort === 'kcal') {
 		orderBy = '(r.nutrition_coverage < 0.7 OR r.kcal IS NULL) ASC, r.kcal ASC, missing ASC, r.id ASC';
 	} else if (p.sort === 'grade') {
@@ -254,7 +332,7 @@ export async function matchRecipes(
              COALESCE(r.non_staple_count, (
                SELECT COUNT(*) FROM recipe_ingredients x
                  JOIN ingredients xi ON xi.id = x.ingredient_id
-                WHERE x.recipe_id = r.id AND xi.is_staple = 0)) AS required_non_staple
+                WHERE x.recipe_id = r.id AND xi.is_staple = 0)) AS required_non_staple${oosCol}
         FROM hit
         JOIN recipes r ON r.id = hit.recipe_id
        ${whereSql}
@@ -268,6 +346,7 @@ export async function matchRecipes(
       SELECT r.*, r.required_non_staple - r.satisfied_non_staple AS missing,
              COUNT(*) OVER () AS total
         FROM cand r
+       ${seasonWhere}
        ORDER BY ${orderBy}
        LIMIT ?4 OFFSET ?5
     )

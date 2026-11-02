@@ -9,6 +9,7 @@
 
 import { compareBinary, foldText, ftsFold } from './text.js';
 import { decodeCore } from './core.js';
+import { parseSeasons } from './seasons.js';
 
 /**
  * Titles of one language that differ from the source title; every other
@@ -40,6 +41,8 @@ import { decodeCore } from './core.js';
  * @property {import('./core.js').Core | ArrayBuffer | Uint8Array} core
  * @property {Record<string, TitleOverridesFile | string>} [titles] title overrides by language
  * @property {Record<string, NamesFile | string>} names by language; must include 'en'
+ * @property {import('./seasons.js').SeasonsFile | string | null} [seasons] seasons.json; read on
+ *   each `seasons()` call, so a loader may set it on this object once it has fetched the file
  */
 
 /**
@@ -143,6 +146,11 @@ export function loadCorpus(input) {
 	const foldedOverrides = new Map();
 	const noNames = () => Array.from({ length: core.ingredients }, () => '');
 
+	/** @type {import('./seasons.js').SeasonsFile | string | null | undefined} */
+	let seasonsRaw;
+	/** @type {import('./seasons.js').Seasons | null} */
+	let seasonsParsed = null;
+
 	return {
 		core,
 		version,
@@ -237,6 +245,20 @@ export function loadCorpus(input) {
 				loaded.folded = all.map((name, g) => (file.own.charCodeAt(g) === 49 ? name : ''));
 			}
 			return loaded.folded;
+		},
+		/**
+		 * The month masks of seasons.json, checked against core.bin's version
+		 * and ingredient count on first use; null while no file is loaded.
+		 * @returns {import('./seasons.js').Seasons | null}
+		 */
+		seasons() {
+			const raw = input.seasons;
+			if (raw === undefined || raw === null) return null;
+			if (raw !== seasonsRaw) {
+				seasonsParsed = parseSeasons(raw, { version, ingredients: core.ingredients });
+				seasonsRaw = raw;
+			}
+			return seasonsParsed;
 		}
 	};
 }

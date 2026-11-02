@@ -15,10 +15,10 @@ import { readFileSync } from 'node:fs';
 import { sqliteD1 } from '../test/d1';
 import { artefactAssets, throwingDb } from '../test/assets';
 import { SQL_ROUTES, sqlRecipePageLoad } from '../test/sqlRoutes';
-import { matchRecipes } from '../test/sql/match';
+import { matchRecipes, createSeasonTable, dropSeasonTable } from '../test/sql/match';
 import { searchRecipeTitles, getRecipesByIds } from '../test/sql/search';
 import { buildArtefacts, fixtureDb } from '../../../pipeline/lib/artefacts.mjs';
-import { loadCorpus, matchCore, recipesByIds, searchTitles, slackFor, titleQueryReady } from './index.js';
+import { loadCorpus, matchCore, recipesByIds, searchTitles, seasonParam, slackFor, titleQueryReady, viewIndex, VIEW_COUNT, WORLD_VIEW } from './index.js';
 import { referenceTitleSearch } from '../test/titleSearch.mjs';
 import { parseSearchQuery } from '../apiParams';
 import * as ingredientsRoute from '../../routes/api/ingredients/+server';
@@ -38,15 +38,20 @@ const DIETS = ['vegan', 'vegetarian', 'pescatarian', 'gluten_free', 'dairy_free'
 const MEALS = ['breakfast', 'lunch', 'dinner', 'snack', 'dessert', 'side'];
 
 /** The artefact set of `db`, loaded the way a Worker would: text files as strings. */
-function artefactsOf(db) {
-	const { files } = buildArtefacts(db);
+function artefactsOf(db, opts) {
+	const { files } = buildArtefacts(db, opts);
 	const text = (prefix) =>
 		Object.fromEntries(
 			[...files]
 				.filter(([p]) => p.startsWith(prefix))
 				.map(([p, body]) => [p.slice(prefix.length, -'.json'.length), body.toString('utf8')])
 		);
-	const corpus = loadCorpus({ core: files.get('core.bin'), titles: text('titles/'), names: text('names/') });
+	const corpus = loadCorpus({
+		core: files.get('core.bin'),
+		titles: text('titles/'),
+		names: text('names/'),
+		seasons: files.get('seasons.json').toString('utf8')
+	});
 	const json = (p) => JSON.parse(files.get(p).toString('utf8'));
 	return { files, corpus, json };
 }
@@ -221,8 +226,55 @@ function matchUrl(sqlite, p) {
 	if (p.sort) search.set('sort', p.sort);
 	if (p.excludeAllergens?.length) search.set('noAllergen', p.excludeAllergens.join(','));
 	if (p.mustUse?.length) search.set('must', p.mustUse.map(key).join(','));
+	if (p.season) {
+		search.set('season', seasonParam(p.season.view, p.season.month));
+		if (p.season.only) search.set('seasonOnly', '1');
+	}
 	if (p.offset !== undefined) search.set('offset', String(p.offset));
 	return `/api/match?${search}`;
+}
+
+/**
+ * A season table for the corpus, seasons.json's mask lines: 60 % of the
+ * ingredients (staples included, which matching must ignore) get a random
+ * mask per view, some of them all year (neutral) or none (never in season).
+ */
+function syntheticSeasons(sqlite) {
+	const rnd = random(2026);
+	const n = Number(sqlite.prepare('SELECT COUNT(*) AS n FROM ingredients').get().n);
+	return Array.from({ length: n }, () => {
+		if (rnd() < 0.4) return 'fff'.repeat(VIEW_COUNT);
+		return Array.from({ length: VIEW_COUNT }, () => {
+			const x = rnd();
+			const mask = x < 0.15 ? 0xfff : x < 0.25 ? 0 : Math.floor(rnd() * 0xfff);
+			return mask.toString(16).padStart(3, '0');
+		}).join('');
+	});
+}
+
+/** Zones in both hemispheres (trop too, which is never rotated) and the world view. */
+const SEASON_VIEWS = [
+	viewIndex('med', 'n'),
+	viewIndex('med', 's'),
+	viewIndex('oce', 'n'),
+	viewIndex('cont', 's'),
+	viewIndex('trop', 'n'),
+	viewIndex('trop', 's'),
+	viewIndex('sav', 's'),
+	viewIndex('bor', 'n'),
+	WORLD_VIEW
+];
+const SEASON_VARIANTS = SEASON_VIEWS.flatMap((view) => [1, 4, 7, 10, 12].flatMap((month) => [false, true].map((only) => ({ view, month, only }))));
+
+/** The harness matrix with a season each, then every season over a few fixed selections and sorts. */
+function seasonCases(sqlite) {
+	const base = harnessCases(sqlite);
+	const cases = base.map((p, k) => ({ ...p, season: SEASON_VARIANTS[k % SEASON_VARIANTS.length] }));
+	const fixed = base.filter((p) => p.have.length >= 2 && p.have.length <= 6 && !p.cuisine && !p.diet && !p.mealType).slice(0, 4);
+	for (const p of fixed) {
+		for (const season of SEASON_VARIANTS) for (const sort of [undefined, 'kcal', 'time']) cases.push({ have: p.have, lang: p.lang, slack: p.slack, sort, season });
+	}
+	return cases;
 }
 
 /** Hand-written /api/match URLs: odd casing, unknown keys and values, bad offsets, over the cap. */
@@ -405,6 +457,121 @@ function paritySuite(name, open, size) {
 			expect(local).toBeGreaterThan(urls.size * 0.9);
 			browserCompared = local;
 		}, 600_000);
+
+		describe('season ranking (a synthetic season table)', () => {
+			let lines;
+			let seasonal;
+			let seasonalPlatform;
+			let keyIndex;
+			beforeAll(async () => {
+				lines = syntheticSeasons(sqlite);
+				seasonal = artefactsOf(sqlite, { seasons: () => lines });
+				seasonalPlatform = { env: { DB: throwingDb, ASSETS: artefactAssets(seasonal.files) }, ctx: { waitUntil: () => {} } };
+				keyIndex = new Map(sqlite.prepare('SELECT canonical_key k, id FROM ingredients').all().map((r) => [r.k, Number(r.id) - 1]));
+				await createSeasonTable(sqliteD1(sqlite), lines);
+			}, 120_000);
+			afterAll(() => dropSeasonTable(sqliteD1(sqlite)));
+
+			/** Out-of-season ingredients of a row, recounted from its missing_keys: the rule, not either implementation. */
+			const oosOf = (row, { view, month }) =>
+				Math.min(
+					3,
+					(row.missing_keys?.split(String.fromCharCode(31)) ?? []).filter((k) => {
+						const g = keyIndex.get(k);
+						const mask = parseInt(lines[g].slice(view * 3, view * 3 + 3), 16);
+						return mask !== 0xfff && !((mask >> (month - 1)) & 1);
+					}).length
+				);
+
+			it('matchRecipes == matchCore over zones x months x hemispheres x world x seasonOnly, and both follow the rule', async () => {
+				const db = sqliteD1(sqlite);
+				const cases = seasonCases(sqlite);
+				let reordered = 0;
+				let filtered = 0;
+				let nonEmpty = 0;
+				for (const p of cases) {
+					const sql = await matchRecipes(db, p);
+					expect(JSON.stringify(matchCore(seasonal.corpus, p)), JSON.stringify(p)).toBe(JSON.stringify(sql));
+					if (sql.total) nonEmpty++;
+					const plain = matchCore(seasonal.corpus, { ...p, season: null });
+					if (sql.total !== plain.total) filtered++;
+					else if (sql.results.map((r) => r.id).join() !== plain.results.map((r) => r.id).join()) reordered++;
+
+					const byDefault = !['kcal', 'grade', 'time'].includes(p.sort);
+					if (p.season.only) for (const row of sql.results) expect(oosOf(row, p.season), JSON.stringify(p)).toBe(0);
+					else if (!byDefault) expect(sql.results, JSON.stringify(p)).toEqual(plain.results);
+					if (byDefault) {
+						const rank = (row) => [p.slack > 0 ? -row.matched : 0, row.missing, oosOf(row, p.season), row.required_non_staple];
+						for (let i = 1; i < sql.results.length; i++) {
+							const [a, b] = [rank(sql.results[i - 1]), rank(sql.results[i])];
+							const k = a.findIndex((v, j) => v !== b[j]);
+							expect(k < 0 || a[k] < b[k], `${JSON.stringify(p)} rows ${i - 1}, ${i}`).toBe(true);
+						}
+					}
+				}
+				// Guards the synthetic table, not the parity: the season must change something.
+				expect(nonEmpty).toBeGreaterThan(cases.length / 3);
+				expect(reordered).toBeGreaterThan(10);
+				expect(filtered).toBeGreaterThan(10);
+			}, 600_000);
+
+			it('without a season, or without season data, the results are exactly the no-season ones', async () => {
+				const db = sqliteD1(sqlite);
+				const textOf = (files, prefix) =>
+					Object.fromEntries([...files].filter(([p]) => p.startsWith(prefix)).map(([p, body]) => [p.slice(prefix.length, -'.json'.length), body.toString('utf8')]));
+				const bare = loadCorpus({ core: art.files.get('core.bin'), titles: textOf(art.files, 'titles/'), names: textOf(art.files, 'names/') });
+				const cases = harnessCases(sqlite).filter((_, k) => k % 3 === 0);
+				for (const [k, p] of cases.entries()) {
+					const season = SEASON_VARIANTS[k % SEASON_VARIANTS.length];
+					const base = JSON.stringify(matchCore(art.corpus, p));
+					expect(JSON.stringify(matchCore(seasonal.corpus, p)), JSON.stringify(p)).toBe(base);
+					expect(JSON.stringify(matchCore(seasonal.corpus, { ...p, season: null }))).toBe(base);
+					// No seasons.json: no season, not an error.
+					expect(JSON.stringify(matchCore(bare, { ...p, season }))).toBe(base);
+					// All year everywhere (the build without sources) is neutral, `only` included.
+					expect(JSON.stringify(matchCore(art.corpus, { ...p, season }))).toBe(base);
+				}
+				// The SQL reference likewise ignores a season while no season table exists.
+				await dropSeasonTable(db);
+				try {
+					for (const [k, p] of cases.slice(0, 60).entries()) {
+						expect(JSON.stringify(await matchRecipes(db, { ...p, season: SEASON_VARIANTS[k] }))).toBe(JSON.stringify(await matchRecipes(db, p)));
+					}
+				} finally {
+					await createSeasonTable(db, lines);
+				}
+			}, 300_000);
+
+			it('/api/match with season and seasonOnly: the real route == the D1 route == browser matching', async () => {
+				const routeOver = async (path) => {
+					const url = new URL(path, ORIGIN);
+					return observed(await matchRoute.GET({ url, platform: seasonalPlatform }));
+				};
+				const keys = sqlite.prepare('SELECT canonical_key AS k FROM ingredients ORDER BY recipe_count DESC LIMIT 6').all().map((r) => r.k);
+				const have = `have=${keys.slice(0, 3).join(',')}&lang=fr`;
+				const urls = new Set([
+					...seasonCases(sqlite).filter((_, k) => k % 4 === 0).map((p) => matchUrl(sqlite, p)),
+					// Malformed values are dropped, like an unknown filter value.
+					...['med.x.4', 'world.13', 'world.0', 'world.04', 'mars.n.4', 'med.n', 'WORLD.4', 'med.n.4.1', ''].map((s) => `/api/match?${have}&season=${s}&seasonOnly=1`),
+					`/api/match?${have}&seasonOnly=1`,
+					`/api/match?${have}&season=med.s.4&seasonOnly=yes`,
+					`/api/match?${have}&season=world.12&seasonOnly=1&sort=grade`
+				]);
+				const data = await openMatchData({ version: seasonal.corpus.version, lang: 'en', fetch: (url) => artefactAssets(seasonal.files).fetch(new URL(url, ORIGIN)) });
+				for (const lang of LANGS) await data.load(lang);
+				await data.loadSeasons();
+				let found = 0;
+				for (const url of urls) {
+					const [route, sql] = [await routeOver(url), await sqlGet(url)];
+					expect(route, url).toEqual(sql);
+					compared++;
+					if (route.status !== 200) continue;
+					if (JSON.parse(route.body).total) found++;
+					expect(JSON.stringify(data.match(url.slice(url.indexOf('?') + 1))), url).toBe(route.body);
+				}
+				expect(found).toBeGreaterThan(urls.size / 3);
+			}, 600_000);
+		});
 
 		// Search matches translated titles too, which the SQL never did: the
 		// expected body is the D1 route's wherever no translated title of the

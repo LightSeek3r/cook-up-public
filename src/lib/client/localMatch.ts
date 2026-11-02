@@ -34,6 +34,11 @@ export interface LocalMatch {
 	want(lang: string): void;
 	/** Whether `match` can answer queries in `lang` now. */
 	ready(lang: string): boolean;
+	/**
+	 * Seasonal ranking is on: fetch seasons.json now (or as soon as the rest
+	 * is in) rather than at the first seasonal query, which goes to the server.
+	 */
+	wantSeasons(): void;
 	/** The /api/match body for this query string, or null to ask the server. */
 	match(search: string): LocalMatchBody | null;
 }
@@ -43,6 +48,7 @@ export function createLocalMatch(deps: LocalMatchDeps): LocalMatch {
 	let opening = false;
 	let failed = false;
 	let idleQueued = false;
+	let seasonsWanted = false;
 	/** The page's language at the latest call, which the data loads once it is in. */
 	let lang = '';
 
@@ -57,6 +63,11 @@ export function createLocalMatch(deps: LocalMatchDeps): LocalMatch {
 		data?.load(lang).catch(() => {});
 	}
 
+	function loadSeasons() {
+		// Like a failed language: seasonal queries stay with the server.
+		if (seasonsWanted) data?.loadSeasons().catch(() => {});
+	}
+
 	function start(priority: RequestPriority) {
 		if (failed || opening || data) return;
 		opening = true;
@@ -64,6 +75,7 @@ export function createLocalMatch(deps: LocalMatchDeps): LocalMatch {
 			(opened) => {
 				data = opened;
 				loadLang();
+				loadSeasons();
 			},
 			// Not retried: a network that failed this once would make every later
 			// tap pay for a second download attempt as well as the server request.
@@ -86,6 +98,10 @@ export function createLocalMatch(deps: LocalMatchDeps): LocalMatch {
 			else start('auto');
 		},
 		ready: (next) => !!data && data.ready(next),
+		wantSeasons() {
+			seasonsWanted = true;
+			loadSeasons();
+		},
 		match(search) {
 			if (!data) return null;
 			try {
@@ -124,6 +140,7 @@ const shared = browser ? createLocalMatch(browserDeps) : null;
 export const prefetchMatchData = (lang: string) => shared?.prefetch(lang);
 export const wantMatchData = (lang: string) => shared?.want(lang);
 export const localMatchReady = (lang: string) => shared?.ready(lang) ?? false;
+export const wantSeasonData = () => shared?.wantSeasons();
 export const localMatch = (search: string) => shared?.match(search) ?? null;
 
 /**

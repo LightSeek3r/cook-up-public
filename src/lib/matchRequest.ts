@@ -9,6 +9,10 @@ export interface MatchRequestInput {
 	noAllergen: readonly string[];
 	must: readonly string[];
 	slack: number;
+	/** `<zone>.<n|s>.<month>` or `world.<month>`, the month from the client's clock; '' or absent: no season. */
+	season?: string;
+	/** Only recipes with nothing out of season left to buy; ignored without `season`. */
+	seasonOnly?: boolean;
 }
 
 // The route treats these lists as sets: it dedupes them, and any permutation
@@ -34,6 +38,10 @@ export function matchRequest(input: MatchRequestInput, offset = 0): string {
 	// Only meaningful once `slack` lets a recipe skip part of the selection
 	// (see MatchParams.mustUse), matching the API route's own guard.
 	if (input.must.length && input.slack > 0) search.set('must', asSet(input.must));
+	if (input.season) {
+		search.set('season', input.season);
+		if (input.seasonOnly) search.set('seasonOnly', '1');
+	}
 	if (offset) search.set('offset', String(offset));
 	return search.toString();
 }

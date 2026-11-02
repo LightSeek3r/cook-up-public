@@ -1,4 +1,5 @@
 import { ALLERGENS, CUISINES, DIETS, MEAL_TYPES, type Lang } from '$lib/config';
+import { parseSeasonParam } from '$lib/data/match.js';
 import { parseIds, parseKeys } from '$lib/db';
 import { resolveLang } from '$lib/i18n';
 import { VERSION_PARAM } from '$lib/httpCache';
@@ -144,6 +145,13 @@ export interface MatchQuery {
 	/** Sorted subset of `have`; empty when the selection is too small to have
 	 *  slack, where pinning changes nothing (see slackFor). */
 	must: string[];
+	/** `<zone>.<n|s>.<month>` or `world.<month>` (parseSeasonParam), exactly
+	 *  as written in the URL; malformed values are dropped like an unknown
+	 *  filter. The month is part of the value: the server never reads its
+	 *  own clock, so a response stays a function of its URL. */
+	season?: string;
+	/** Only recipes with nothing out of season left to buy; needs `season`. */
+	seasonOnly?: true;
 	offset: number;
 }
 
@@ -156,6 +164,8 @@ export function parseMatchQuery(params: URLSearchParams): MatchQuery | null {
 		slackFor(have.length) > 0
 			? asSet(parseKeys(params.get('must'))).filter((key) => have.includes(key))
 			: [];
+	const seasonValue = params.get('season');
+	const season = parseSeasonParam(seasonValue) ? (seasonValue as string) : undefined;
 	return {
 		have,
 		lang: resolveLang(params.get('lang')),
@@ -165,6 +175,8 @@ export function parseMatchQuery(params: URLSearchParams): MatchQuery | null {
 		sort: oneOf(MATCH_SORTS, params.get('sort')),
 		noAllergen: parseAllergenKeys(params.get('noAllergen')),
 		must,
+		season,
+		seasonOnly: season && params.get('seasonOnly') === '1' ? true : undefined,
 		offset
 	};
 }
@@ -179,6 +191,8 @@ function matchSearch(query: MatchQuery): URLSearchParams {
 	if (query.sort) search.set('sort', query.sort);
 	if (query.noAllergen.length) search.set('noAllergen', query.noAllergen.join(','));
 	if (query.must.length) search.set('must', query.must.join(','));
+	if (query.season) search.set('season', query.season);
+	if (query.seasonOnly) search.set('seasonOnly', '1');
 	if (query.offset) search.set('offset', String(query.offset));
 	return search;
 }

@@ -6,7 +6,8 @@ import { DataUnavailableError } from '$lib/apiError';
  * deployed with the Worker as one version) on first use, then kept in module
  * scope for the isolate's lifetime. A cold isolate pays one subrequest per
  * file and no parsing beyond core.bin's header; each language's two small
- * files are fetched the first time a request asks for that language. The
+ * files are fetched the first time a request asks for that language, and
+ * seasons.json the first time a match ranks by season. The
  * per-recipe files and the sitemap list are read per request instead.
  *
  * Anything that goes wrong while loading (a missing file, a corrupt one,
@@ -26,7 +27,10 @@ interface Loaded {
 	/** loadCorpus reads these lazily, so a language added here is picked up. */
 	names: Record<string, string>;
 	titles: Record<string, string>;
+	/** loadCorpus's input; `seasons` is set on it once seasons.json is read. */
+	input: Parameters<typeof loadCorpus>[0];
 	langs: Map<string, Promise<void>>;
+	seasons: Map<'seasons', Promise<void>>;
 	mosaics: Map<string, Promise<string>>;
 }
 
@@ -79,11 +83,12 @@ async function loadBase(assets: Assets): Promise<Loaded> {
 	]);
 	const names: Record<string, string> = { en };
 	const titles: Record<string, string> = {};
-	const corpus = loadCorpus({ core, names, titles });
+	const input = { core, names, titles };
+	const corpus = loadCorpus(input);
 	// Parses and checks the file now, so a bad one fails here, as a 503, and
 	// not halfway through some later request as a 500.
 	corpus.name(0, 'en');
-	return { corpus, names, titles, langs: new Map(), mosaics: new Map() };
+	return { corpus, names, titles, input, langs: new Map(), seasons: new Map(), mosaics: new Map() };
 }
 
 async function base(platform: App.Platform | undefined): Promise<{ assets: Assets; data: Loaded }> {
@@ -91,8 +96,16 @@ async function base(platform: App.Platform | undefined): Promise<{ assets: Asset
 	return { assets, data: await once(loaded, assets, () => loadBase(assets)) };
 }
 
-/** The corpus, with `lang`'s titles and ingredient names loaded and checked. */
-export async function corpusFor(platform: App.Platform | undefined, lang: string): Promise<Corpus> {
+/**
+ * The corpus, with `lang`'s titles and ingredient names loaded and checked,
+ * and with `seasons` also seasons.json (only requests that rank by season
+ * pay for it).
+ */
+export async function corpusFor(
+	platform: App.Platform | undefined,
+	lang: string,
+	{ seasons = false }: { seasons?: boolean } = {}
+): Promise<Corpus> {
 	const { assets, data } = await base(platform);
 	await once(data.langs, lang, async () => {
 		const [names, titles] = await Promise.all([
@@ -104,6 +117,22 @@ export async function corpusFor(platform: App.Platform | undefined, lang: string
 		data.corpus.name(0, lang);
 		data.corpus.title(0, lang);
 	});
+	if (seasons) {
+		await once(data.seasons, 'seasons', async () => {
+			const response = (await assets.fetch(`${BASE}seasons.json`)) as unknown as Response;
+			// Data built before seasons.json existed: matching ignores the season
+			// (corpus.seasons() stays null) rather than failing every such request.
+			if (response.status === 404) return;
+			if (!response.ok) throw new DataUnavailableError(`data/seasons.json: HTTP ${response.status}`);
+			data.input.seasons = await response.text();
+			try {
+				data.corpus.seasons();
+			} catch (error) {
+				data.input.seasons = undefined;
+				throw error;
+			}
+		});
+	}
 	return data.corpus;
 }
 

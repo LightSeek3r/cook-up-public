@@ -5,7 +5,7 @@ import { parseMatchQuery } from '$lib/apiParams';
  * The /api/match artefacts in the browser: core.bin, English names (every
  * language's fallback) and each language's names and titles, fetched from
  * the static assets and checked against the data version this build was made
- * with. Loaded through a dynamic import, so the decoder and the match code
+ * with, plus seasons.json once a query ranks by season. Loaded through a dynamic import, so the decoder and the match code
  * stay out of the home page's first-load JavaScript.
  */
 
@@ -13,6 +13,7 @@ export type MatchBody = ReturnType<typeof matchResponse>;
 type Corpus = ReturnType<typeof loadCorpus>;
 type NamesFile = Parameters<typeof loadCorpus>[0]['names'][string];
 type TitlesFile = NonNullable<Parameters<typeof loadCorpus>[0]['titles']>[string];
+type SeasonsFile = Exclude<NonNullable<Parameters<typeof loadCorpus>[0]['seasons']>, string>;
 export type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
 
 /**
@@ -31,9 +32,16 @@ export interface MatchData {
 	load(lang: string): Promise<void>;
 	ready(lang: string): boolean;
 	/**
+	 * Loads seasons.json once. Queries with a `season` are left to the server
+	 * until it is in, and for good if it fails; `match` starts it on the first
+	 * such query, so calling this ahead is only a head start.
+	 */
+	loadSeasons(): Promise<void>;
+	/**
 	 * The /api/match body for a query string as the page sends it, or null when
-	 * this cannot answer it: the query's language is not loaded, or the route
-	 * would answer 400. Throws if the match itself fails.
+	 * this cannot answer it: the query's language (or, with a season,
+	 * seasons.json) is not loaded, or the route would answer 400. Throws if the
+	 * match itself fails.
 	 */
 	match(search: string): MatchBody | null;
 }
@@ -72,7 +80,8 @@ export async function openMatchData({ version, lang, fetch, priority }: OpenOpti
 	// loadCorpus reads these records lazily, so a language added later is picked up.
 	const names: Record<string, NamesFile> = { en };
 	const titles: Record<string, TitlesFile> = {};
-	const corpus: Corpus = loadCorpus({ core, names, titles });
+	const input: Parameters<typeof loadCorpus>[0] = { core, names, titles };
+	const corpus: Corpus = loadCorpus(input);
 	corpus.name(0, 'en');
 
 	const langs = new Map<string, Promise<void>>();
@@ -103,13 +112,29 @@ export async function openMatchData({ version, lang, fetch, priority }: OpenOpti
 	// Only that language's matches go to the server if it fails (see load).
 	await load(lang).catch(() => {});
 
+	let seasons: Promise<void> | null = null;
+	let seasonsIn = false;
+	function loadSeasons(): Promise<void> {
+		seasons ??= (async () => {
+			input.seasons = await json<SeasonsFile>('seasons.json');
+			corpus.seasons();
+			seasonsIn = true;
+		})();
+		return seasons;
+	}
+
 	return {
 		version,
 		load,
 		ready: (lang) => loaded.has(lang),
+		loadSeasons,
 		match(search) {
 			const query = parseMatchQuery(new URLSearchParams(search));
 			if (!query || !loaded.has(query.lang)) return null;
+			if (query.season !== undefined && !seasonsIn) {
+				loadSeasons().catch(() => {});
+				return null;
+			}
 			return matchResponse(corpus, query);
 		}
 	};
