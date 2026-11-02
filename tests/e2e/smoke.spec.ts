@@ -238,7 +238,13 @@ test.describe('seasons', () => {
 			await shelf(page).getByRole('button', { name: /Tomato/ }).click();
 			await expect(page).toHaveURL(/[?&]have=tomato\b/);
 			await expect(tile(page, 'Tomato')).toHaveAttribute('aria-pressed', 'true');
-			await expect(tile(page, 'Tomato').getByRole('img', { name: /In season/ })).toBeVisible();
+			// The shelf's own Tomato button is pressed too, so pick the board tile by its badge.
+			await expect(
+				page
+					.locator('button[aria-pressed]')
+					.filter({ hasText: 'Tomato' })
+					.filter({ has: page.getByRole('img', { name: /In season/ }) })
+			).toBeVisible();
 		});
 
 		test.describe('seasonal ranking', () => {
@@ -267,6 +273,8 @@ test.describe('seasons', () => {
 
 				// A stored preference: it survives a reload.
 				await page.reload();
+				// The stored preference is no URL filter, so the panel comes back closed.
+				await page.getByText('Quick filters').click();
 				await expect(page.getByRole('radiogroup', { name: 'Seasonal ranking' }).getByRole('radio', { name: 'My climate' })).toBeChecked();
 			});
 		});
