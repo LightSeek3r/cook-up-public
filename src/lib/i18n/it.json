@@ -146,7 +146,7 @@
   "error.genericBody": "Si è verificato un errore imprevisto. Riprova.",
   "error.backHome": "Torna a Cook Up",
   "search.recipeHits": "Ricette che corrispondono alla tua ricerca",
-  "results.exactHeading": "Puoi cucinare queste",
+  "results.exactHeading": "Usano tutto ciò che hai scelto",
   "results.almostHeading": "Quasi",
   "results.almostHint": "Queste usano quasi tutto ciò che hai scelto.",
   "card.uses": "Usa",

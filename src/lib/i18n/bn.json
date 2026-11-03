@@ -146,7 +146,7 @@
   "error.genericBody": "একটি অপ্রত্যাশিত ত্রুটি ঘটেছে। আবার চেষ্টা করুন।",
   "error.backHome": "Cook Up-এ ফিরে যান",
   "search.recipeHits": "আপনার খোঁজের সাথে মেলে এমন রেসিপি",
-  "results.exactHeading": "আপনি এগুলো রান্না করতে পারেন",
+  "results.exactHeading": "এগুলোতে আপনার বেছে নেওয়া সবই লাগে",
   "results.almostHeading": "প্রায় হয়ে গেছে",
   "results.almostHint": "এগুলোতে আপনার বেছে নেওয়া প্রায় সবই লাগে।",
   "card.uses": "ব্যবহার হয়",

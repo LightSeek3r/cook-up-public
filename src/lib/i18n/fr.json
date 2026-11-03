@@ -146,7 +146,7 @@
   "error.genericBody": "Une erreur inattendue s'est produite. Veuillez réessayer.",
   "error.backHome": "Retour à Cook Up",
   "search.recipeHits": "Recettes correspondant à votre recherche",
-  "results.exactHeading": "Vous pouvez cuisiner ceci",
+  "results.exactHeading": "Avec tout ce que vous avez choisi",
   "results.almostHeading": "Presque",
   "results.almostHint": "Celles-ci utilisent presque tout ce que vous avez choisi.",
   "card.uses": "Utilise",

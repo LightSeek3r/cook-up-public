@@ -146,7 +146,7 @@
   "error.genericBody": "एक अप्रत्याशित त्रुटि हुई। कृपया पुनः प्रयास करें।",
   "error.backHome": "Cook Up पर वापस जाएं",
   "search.recipeHits": "आपकी खोज से मेल खाती रेसिपी",
-  "results.exactHeading": "आप ये बना सकते हैं",
+  "results.exactHeading": "इनमें आपकी चुनी हुई सारी सामग्री लगती है",
   "results.almostHeading": "लगभग तैयार",
   "results.almostHint": "ये आपकी चुनी हुई अधिकांश सामग्री का उपयोग करती हैं।",
   "card.uses": "उपयोग करता है",

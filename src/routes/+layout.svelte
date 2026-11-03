@@ -253,7 +253,9 @@
 		{#if !isHome}<p class="tagline">{t('app.tagline')}</p>{/if}
 	</header>
 
-	<main id="main">
+	<!-- tabindex -1 so the skip link moves focus here, not just the scroll
+	     position. -->
+	<main id="main" tabindex="-1">
 		{@render children?.()}
 	</main>
 
@@ -318,7 +320,10 @@
 		align-items: center;
 		gap: var(--space-2);
 		min-height: var(--tap);
-		min-width: 0;
+		/* The wordmark never shrinks below its text: a shrinking box with a
+		   nowrap title let the text run under the nav icons. Where the row cannot
+		   fit it, the 399px query below drops the text instead. */
+		flex: none;
 		color: var(--primary);
 		text-decoration: none;
 	}
@@ -338,6 +343,10 @@
 		white-space: nowrap;
 	}
 
+	/* A landing point for the skip link, not a control: no ring around the page. */
+	main:focus {
+		outline: none;
+	}
 	/* Off-screen until focused, then pinned over the header. */
 	.skip {
 		position: fixed;
@@ -507,8 +516,8 @@
 			display: none;
 		}
 	}
-	/* Small phones: the brand gives up a little so the row still fits. */
-	@media (max-width: 380px) {
+	/* Narrow phones: the brand gives up a little so the row still fits. */
+	@media (max-width: 430px) {
 		.brand {
 			gap: 0.3rem;
 		}
@@ -520,8 +529,26 @@
 			height: 1.6rem;
 		}
 		.lang {
-			min-width: 4rem;
+			min-width: 3.75rem;
 			padding: 0 0.4rem;
+		}
+	}
+	/* Below 400px the five controls leave no room for the words (measured: the
+	   row needs 404px with them): the bowl alone is the brand, and the text
+	   stays for screen readers like the nav labels. */
+	@media (max-width: 399px) {
+		.brand .title {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+		}
+	}
+	/* 320px: even the bowl and five 44px controls overrun the row by a few px. */
+	@media (max-width: 340px) {
+		.nav-link {
+			width: 2.5rem;
 		}
 	}
 	@media (forced-colors: active) {
@@ -535,6 +562,13 @@
 		color: var(--muted);
 		margin: var(--space-3) 0 var(--space-2);
 		font-size: 0.95rem;
+	}
+	/* Two lines of marketing on every inner page push the content down for no
+	   task: the home page's h1 already says it. */
+	@media (max-width: 600px) {
+		.tagline {
+			display: none;
+		}
 	}
 	/* The credits under a steel rule: a 1px shade with its light edge below,
 	   the same bevel as the chrome. */

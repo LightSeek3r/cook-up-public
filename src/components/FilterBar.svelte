@@ -148,7 +148,7 @@
 		</select>
 	</label>
 
-	<label class="field" class:on={meal}>
+	<label class="field dup" class:on={meal}>
 		<span class="field-label">{t('filter.meal')}</span>
 		<select value={meal} onchange={pick('meal')}>
 			<option value="">{t('filter.all')}</option>
@@ -158,7 +158,7 @@
 		</select>
 	</label>
 
-	<label class="field" class:on={diet}>
+	<label class="field dup" class:on={diet}>
 		<span class="field-label">{t('filter.diet')}</span>
 		<select value={diet} onchange={pick('diet')}>
 			<option value="">{t('filter.all')}</option>
@@ -342,6 +342,12 @@
 	.narrow-fields .allergens {
 		grid-column: 1 / -1;
 	}
+	/* Meal and diet are chip rows right below in the same panel, and the chips
+	   carry every value: the selects would be the same choice twice. Cuisine
+	   keeps its select because the chips list only the eight biggest. */
+	.narrow-fields .dup {
+		display: none;
+	}
 	/* Same reasoning as the tray on the home page: the fade-to-transparent tail
 	   only works because what shows through is blurred. Solid --bg instead. */
 	@media (prefers-reduced-transparency: reduce) {
@@ -380,7 +386,7 @@
 	.field-label,
 	.row-label {
 		font-family: var(--font-body);
-		font-size: 0.7rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		line-height: 1.1;
 		letter-spacing: 0.1em;
@@ -514,6 +520,17 @@
 	.panel input {
 		all: revert;
 		accent-color: var(--primary);
+	}
+	/* A wrong tick here lets an allergen through, so on touch the whole row is
+	   the target. */
+	@media (pointer: coarse) {
+		.panel label {
+			min-height: var(--tap);
+		}
+		.panel input {
+			width: 1.25rem;
+			height: 1.25rem;
+		}
 	}
 
 	.quick-wrap {
@@ -840,6 +857,14 @@
 		.wide-fields .allergens {
 			grid-row: auto;
 			grid-column: auto;
+		}
+	}
+
+	/* Not on 300px of screen: the pinned search plus the bottom tray would leave
+	   a slit to read in (landscape phones, an open keyboard, 400% zoom). */
+	@media (max-height: 31rem) {
+		.filters {
+			position: static;
 		}
 	}
 

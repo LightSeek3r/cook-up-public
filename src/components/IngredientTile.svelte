@@ -83,9 +83,12 @@
 		grid-column: span 2;
 		min-height: 6.75rem;
 	}
-	.tile:hover {
-		border-color: var(--cat-ink, var(--line-strong));
-		transform: translateY(-1px);
+	/* Hover-capable pointers only: on touch the lift stays after a tap. */
+	@media (hover: hover) {
+		.tile:hover {
+			border-color: var(--cat-ink, var(--line-strong));
+			transform: translateY(-1px);
+		}
 	}
 	.tile:active {
 		transform: translateY(1px) scale(0.97);
@@ -127,8 +130,10 @@
 		height: 3.5rem;
 		padding: 0.5rem;
 	}
-	.tile:hover .art {
-		transform: scale(1.08);
+	@media (hover: hover) {
+		.tile:hover .art {
+			transform: scale(1.08);
+		}
 	}
 
 	.name {

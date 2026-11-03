@@ -146,7 +146,7 @@
   "error.genericBody": "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.",
   "error.backHome": "Về lại Cook Up",
   "search.recipeHits": "Món ăn khớp với tìm kiếm",
-  "results.exactHeading": "Bạn có thể nấu những món này",
+  "results.exactHeading": "Dùng hết nguyên liệu bạn đã chọn",
   "results.almostHeading": "Gần được rồi",
   "results.almostHint": "Những món này dùng phần lớn nguyên liệu bạn đã chọn.",
   "card.uses": "Dùng",

@@ -408,9 +408,11 @@
 			transform var(--dur) var(--ease-out),
 			box-shadow var(--dur) ease;
 	}
-	.entry:hover {
-		transform: translateY(-2px);
-		box-shadow: var(--shadow-2);
+	@media (hover: hover) {
+		.entry:hover {
+			transform: translateY(-2px);
+			box-shadow: var(--shadow-2);
+		}
 	}
 	.entry:hover .name {
 		color: var(--primary);

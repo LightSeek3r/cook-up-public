@@ -146,7 +146,7 @@
   "error.genericBody": "予期しないエラーが発生しました。もう一度お試しください。",
   "error.backHome": "Cook Upに戻る",
   "search.recipeHits": "検索に一致するレシピ",
-  "results.exactHeading": "これは作れます",
+  "results.exactHeading": "選んだ食材をすべて使います",
   "results.almostHeading": "あと少し",
   "results.almostHint": "選んだ食材のほとんどを使います。",
   "card.uses": "使う食材",

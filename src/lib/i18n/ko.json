@@ -146,7 +146,7 @@
   "error.genericBody": "예기치 않은 오류가 발생했습니다. 다시 시도해 주세요.",
   "error.backHome": "Cook Up으로 돌아가기",
   "search.recipeHits": "검색과 일치하는 레시피",
-  "results.exactHeading": "지금 만들 수 있어요",
+  "results.exactHeading": "선택한 재료를 모두 사용합니다",
   "results.almostHeading": "거의 다 됐어요",
   "results.almostHint": "선택한 재료를 대부분 사용합니다.",
   "card.uses": "사용 재료",

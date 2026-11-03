@@ -146,7 +146,7 @@
   "error.genericBody": "An unexpected error occurred. Please try again.",
   "error.backHome": "Back to Cook Up",
   "search.recipeHits": "Recipes matching your search",
-  "results.exactHeading": "You can cook these",
+  "results.exactHeading": "Uses everything you picked",
   "results.almostHeading": "Almost there",
   "results.almostHint": "These use most of what you picked.",
   "card.uses": "Uses",

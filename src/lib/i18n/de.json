@@ -146,7 +146,7 @@
   "error.genericBody": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es erneut.",
   "error.backHome": "Zurück zu Cook Up",
   "search.recipeHits": "Rezepte, die zu deiner Suche passen",
-  "results.exactHeading": "Das kannst du kochen",
+  "results.exactHeading": "Mit allem, was du ausgewählt hast",
   "results.almostHeading": "Fast geschafft",
   "results.almostHint": "Diese verwenden fast alles, was du ausgewählt hast.",
   "card.uses": "Verwendet",

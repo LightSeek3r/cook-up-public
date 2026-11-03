@@ -146,7 +146,7 @@
   "error.genericBody": "Произошла непредвиденная ошибка. Попробуйте снова.",
   "error.backHome": "Назад в Cook Up",
   "search.recipeHits": "Рецепты по вашему запросу",
-  "results.exactHeading": "Вы можете приготовить эти",
+  "results.exactHeading": "Используют всё, что вы выбрали",
   "results.almostHeading": "Почти готово",
   "results.almostHint": "В этих рецептах используется почти всё, что вы выбрали.",
   "card.uses": "Использует",

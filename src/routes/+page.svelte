@@ -258,6 +258,21 @@
 		return () => root.style.removeProperty('--tray-room');
 	});
 
+	// The stacked tray's "See recipes" has done its job once the results heading
+	// is on screen; it then steps aside (CSS) instead of covering the cards it
+	// pointed at. The bottom margin is the bar's own height: a heading hidden
+	// behind it does not count as seen.
+	let resultsInView = $state(false);
+	$effect(() => {
+		const heading = document.getElementById('results-heading');
+		if (!heading) return;
+		const observer = new IntersectionObserver(([entry]) => (resultsInView = entry.isIntersecting), {
+			rootMargin: '0px 0px -120px 0px'
+		});
+		observer.observe(heading);
+		return () => observer.disconnect();
+	});
+
 	/**
 	 * Stacked layout: the plain jump to #results. Two panes: the results are
 	 * already on screen beside the mosaic, so bring their pane back to its first
@@ -614,6 +629,7 @@
 			{#if selected.length}
 				<div
 					class="tray"
+					class:in-results={resultsInView}
 					role="region"
 					aria-label={t('mosaic.selected')}
 					bind:offsetHeight={trayHeight}
@@ -909,7 +925,6 @@
 	}
 	.load-more-count {
 		font-variant-numeric: tabular-nums;
-		opacity: 0.75;
 	}
 
 	.skeleton {
@@ -1119,11 +1134,15 @@
 	.cta:active {
 		transform: translateY(1px);
 	}
+	/* The CTA's own two colours swapped: a translucent mix of them measured
+	   3.97:1 in the dark theme, the swap is the CTA's ratio (above 6:1 there). */
 	.badge {
-		background: color-mix(in srgb, var(--on-primary) 25%, transparent);
+		background: var(--on-primary);
+		color: var(--primary);
 		border-radius: var(--radius-pill);
 		padding: 0 0.45rem;
 		font-size: 0.85rem;
+		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -1135,6 +1154,8 @@
 			inset-inline: 0;
 			inset-block-end: 0;
 			padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
+			padding-left: max(var(--space-3), env(safe-area-inset-left));
+			padding-right: max(var(--space-3), env(safe-area-inset-right));
 			border-inline: 0;
 			border-block-end: 0;
 			border-start-start-radius: var(--radius-lg);
@@ -1182,6 +1203,27 @@
 		}
 		.chip-wrap {
 			max-inline-size: none;
+		}
+		/* With the results on screen the bar is a status line, not a form: the
+		   jump button steps aside and the chips take its row's place beside
+		   the count, so the bar drops from two rows to one. */
+		.tray.in-results .cta {
+			display: none;
+		}
+		.tray.in-results .tray-head {
+			flex: none;
+		}
+		.tray.in-results .chips {
+			order: 0;
+			flex: 1 1 0;
+		}
+	}
+	/* A landscape phone or an open keyboard leaves ~300px: the bar keeps the
+	   count, Clear all and the jump, and the chips (still removable on the
+	   board) wait until there is room. */
+	@media (max-width: 63.99rem) and (max-height: 31rem) {
+		.chips {
+			display: none;
 		}
 	}
 	/* The blur is what makes a 94%-opaque bar legible over the mosaic scrolling

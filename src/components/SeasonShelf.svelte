@@ -24,6 +24,10 @@
 	const LIMIT = 24;
 	const uid = $props.id();
 
+	// Phones only (CSS): the climate settings sit behind a button so the shelf
+	// is one row of food, not a form, above the board.
+	let tuning = $state(false);
+
 	onMount(() => {
 		seasonPrefs.hydrate();
 		seasonData.want();
@@ -53,17 +57,29 @@
 	<section class="shelf" aria-labelledby="{uid}-title">
 		<div class="head">
 			<div class="title-block">
-				<p class="eyebrow">{monthName(month, lang)}</p>
 				<h2 id="{uid}-title">
 					<svg class="leaf" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
 						<path d="M13.7 2.3c.6 6.7-2.3 11.1-7.7 11.3-1.1 0-2-.3-2.7-.8C2.9 7.9 6.6 3.1 13.7 2.3Z" />
 						<path class="rib" d="M3.1 13.5C5 10 7.6 7.4 11 5.4" />
 					</svg>
 					{t('seasonal.now')}
+					<span class="month">{monthName(month, lang)}</span>
 				</h2>
 				<p class="hint">{t('seasonal.nowHint')}</p>
 			</div>
-			<div class="controls">
+			<button
+				type="button"
+				class="tune"
+				aria-expanded={tuning}
+				aria-controls="{uid}-controls"
+				onclick={() => (tuning = !tuning)}
+			>
+				{t('seasonal.pickerTitle')}
+				<svg class="chev" viewBox="0 0 10 6" aria-hidden="true" focusable="false">
+					<path d="m1 1 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+				</svg>
+			</button>
+			<div class="controls" id="{uid}-controls" class:open={tuning}>
 				<ScopeSwitch {t} />
 				<SeasonChip {lang} {t} />
 			</div>
@@ -134,23 +150,19 @@
 		gap: 0.15rem;
 		min-width: 0;
 	}
-	.eyebrow {
-		margin: 0;
-		color: var(--primary);
-		font-size: 0.72rem;
-		font-weight: 700;
-		letter-spacing: 0.12em;
-		text-transform: uppercase;
-	}
-	.eyebrow:is(:lang(ar), :lang(pnb), :lang(hi), :lang(bn), :lang(zh), :lang(ja), :lang(ko)) {
-		letter-spacing: 0;
-	}
 	h2 {
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 0.45rem;
+		gap: 0.1rem 0.45rem;
 		margin: 0;
 		font-size: 1.35rem;
+	}
+	.month {
+		color: var(--muted);
+		font-family: var(--font-body);
+		font-size: 0.9rem;
+		font-weight: 600;
 	}
 	.leaf {
 		flex: none;
@@ -175,6 +187,15 @@
 		align-items: center;
 		gap: var(--space-2);
 		min-width: 0;
+	}
+	.tune {
+		display: none;
+	}
+	.chev {
+		width: 0.6rem;
+		height: 0.4rem;
+		color: var(--muted);
+		transition: transform var(--dur) var(--ease-out);
 	}
 
 	/* One scrolling row on every width, snapping item by item. The padding
@@ -225,9 +246,11 @@
 			border-color var(--dur-fast) ease,
 			background var(--dur-fast) ease;
 	}
-	.item:hover {
-		border-color: var(--cat-ink, var(--line-strong));
-		transform: translateY(-2px);
+	@media (hover: hover) {
+		.item:hover {
+			border-color: var(--cat-ink, var(--line-strong));
+			transform: translateY(-2px);
+		}
 	}
 	.item:active {
 		transform: translateY(1px) scale(0.97);
@@ -333,8 +356,68 @@
 	}
 	@media (max-width: 600px) {
 		.shelf {
+			gap: var(--space-2);
 			padding: var(--space-3) var(--space-3) 0;
 			margin-inline: calc(-1 * var(--space-1));
+			margin-block-end: var(--space-3);
+		}
+		/* On a phone the board is the task: the shelf is a one-line teaser. The
+		   hint and the "typical peaks" note repeat what the heading and the
+		   calendar page already say, and where the climate was detected from is a
+		   detail for the picker, not for the first screen. */
+		.hint,
+		.typical,
+		.controls :global(.source) {
+			display: none;
+		}
+		.head {
+			flex-wrap: nowrap;
+			align-items: center;
+			gap: var(--space-2);
+		}
+		.tune {
+			display: inline-flex;
+			flex: none;
+			align-items: center;
+			gap: 0.4rem;
+			min-height: var(--tap);
+			padding: 0 0.75rem;
+			border: 1px solid var(--line-strong);
+			border-radius: var(--radius-pill);
+			background: var(--sheen);
+			color: var(--ink);
+			font-size: 0.82rem;
+			font-weight: 600;
+			box-shadow:
+				inset 0 1px 0 var(--hi),
+				0 1px 1px var(--lo-2);
+		}
+		.tune[aria-expanded='true'] .chev {
+			transform: rotate(180deg);
+		}
+		.controls:not(.open) {
+			display: none;
+		}
+		.controls.open {
+			flex-basis: 100%;
+		}
+		.head:has(.controls.open) {
+			flex-wrap: wrap;
+		}
+		.foot {
+			justify-content: flex-end;
+		}
+		.item {
+			min-height: 6.4rem;
+			padding: 0.5rem 0.3rem 0.45rem;
+		}
+		.art {
+			width: 2.5rem;
+			height: 2.5rem;
+			padding: 0.35rem;
+		}
+		.rail {
+			padding-block-end: var(--space-2);
 		}
 		.rail,
 		.foot {

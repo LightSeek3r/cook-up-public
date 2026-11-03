@@ -181,6 +181,10 @@
 <style>
 	.seasonal {
 		display: grid;
+		/* minmax(0, …), not the implicit auto track: the month strip's own
+		   min-content (12 tabs, 700px+) would otherwise size the whole column and
+		   scroll the page sideways instead of the strip. */
+		grid-template-columns: minmax(0, 1fr);
 		gap: var(--space-4);
 		margin-block: var(--space-3) var(--space-5);
 	}
@@ -417,9 +421,11 @@
 			transform var(--dur) var(--ease-out),
 			border-color var(--dur-fast) ease;
 	}
-	.tile:hover {
-		border-color: var(--cat-ink, var(--line-strong));
-		transform: translateY(-2px);
+	@media (hover: hover) {
+		.tile:hover {
+			border-color: var(--cat-ink, var(--line-strong));
+			transform: translateY(-2px);
+		}
 	}
 	.tile:active {
 		transform: translateY(1px) scale(0.97);
@@ -455,7 +461,7 @@
 	}
 	.peak {
 		color: var(--cat-ink, var(--muted));
-		font-size: 0.72rem;
+		font-size: 0.75rem;
 		font-weight: 600;
 		text-align: center;
 	}

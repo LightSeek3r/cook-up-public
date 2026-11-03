@@ -166,10 +166,12 @@
 			box-shadow var(--dur) ease,
 			border-color var(--dur-fast) ease;
 	}
-	.result:hover {
-		transform: translateY(-1px);
-		box-shadow: var(--shadow-2);
-		border-color: var(--line-strong);
+	@media (hover: hover) {
+		.result:hover {
+			transform: translateY(-1px);
+			box-shadow: var(--shadow-2);
+			border-color: var(--line-strong);
+		}
 	}
 	.result:active {
 		transform: scale(0.99);
