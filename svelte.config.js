@@ -35,9 +35,9 @@ export default {
 				//     page that has a photo, and leaks the visitor's IP and referrer
 				//     to them.
 				//
-				// Chosen: hotlink. This is a content site, not an installable app, and
-				// Wikimedia is a stable non-commercial host that already serves the
-				// underlying recipe text. Narrowed to that exact host — NOT a wildcard —
+				// Chosen: hotlink. Photographs are optional in the UI (the installed app
+				// shows none offline), and Wikimedia is a stable non-commercial host
+				// that already serves the underlying recipe text. Narrowed to that exact host — NOT a wildcard —
 				// so nothing else can load images. `referrerpolicy="no-referrer"` on the
 				// <img> keeps the visitor's page out of Wikimedia's logs.
 				'img-src': ['self', 'data:', 'https://upload.wikimedia.org'],

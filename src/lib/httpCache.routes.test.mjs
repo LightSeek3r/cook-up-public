@@ -72,6 +72,23 @@ describe('Cache-Control on every public GET branch', () => {
 		expect((await get(route, path)).headers.get('cache-control')).toBe(PUBLIC_STATIC);
 	});
 
+	it('the manifest is installable: id, split any/maskable icons, shortcuts to real routes', async () => {
+		const response = await get(manifest, '/manifest.webmanifest');
+		expect(response.headers.get('content-type')).toBe('application/manifest+json');
+		const body = await response.json();
+		expect(body).toMatchObject({
+			id: '/',
+			start_url: '/',
+			display: 'standalone'
+		});
+		// Chrome wants a 192 and a 512 `any` icon plus a maskable one; a combined
+		// `any maskable` purpose is what Lighthouse flags.
+		const purposes = body.icons.map((icon) => `${icon.sizes}:${icon.purpose}`);
+		expect(purposes).toEqual(expect.arrayContaining(['192x192:any', '512x512:any', '512x512:maskable']));
+		expect(purposes.some((purpose) => purpose.includes('any maskable'))).toBe(false);
+		expect(body.shortcuts.map((shortcut) => shortcut.url)).toEqual(['/favorites', '/seasonal']);
+	});
+
 	it('robots.txt keeps crawlers out of /api/ and /admin', async () => {
 		const body = await (await get(robots, '/robots.txt')).text();
 		expect(body).toMatch(/^Disallow: \/api\/$/m);
