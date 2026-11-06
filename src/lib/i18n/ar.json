@@ -303,5 +303,10 @@
   "seasonal.category.forage": "فطر ومكسرات",
   "seasonal.category.animal": "مأكولات بحرية وصيد بري",
   "seasonal.month.aria": "الأشهر",
-  "seasonal.addToFridge": "إضافة {name} إلى مكوّناتك"
+  "seasonal.addToFridge": "إضافة {name} إلى مكوّناتك",
+  "install.title": "تثبيت Cook Up",
+  "install.body": "افتحه كتطبيق من شاشتك الرئيسية.",
+  "install.ios": "اضغط على «مشاركة» ثم «إضافة إلى الشاشة الرئيسية».",
+  "install.action": "تثبيت",
+  "install.dismiss": "ليس الآن"
 }

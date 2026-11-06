@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Pilze & Nüsse",
   "seasonal.category.animal": "Meeresfrüchte & Wild",
   "seasonal.month.aria": "Monate",
-  "seasonal.addToFridge": "{name} zu deinen Zutaten hinzufügen"
+  "seasonal.addToFridge": "{name} zu deinen Zutaten hinzufügen",
+  "install.title": "Cook Up installieren",
+  "install.body": "Öffne sie wie eine App direkt vom Home-Bildschirm.",
+  "install.ios": "Tippe auf Teilen und dann auf „Zum Home-Bildschirm“.",
+  "install.action": "Installieren",
+  "install.dismiss": "Nicht jetzt"
 }

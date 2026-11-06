@@ -303,5 +303,10 @@
   "seasonal.category.forage": "মাশরুম ও বাদাম",
   "seasonal.category.animal": "সামুদ্রিক খাবার ও বুনো মাংস",
   "seasonal.month.aria": "মাস",
-  "seasonal.addToFridge": "আপনার উপকরণের তালিকায় {name} যুক্ত করুন"
+  "seasonal.addToFridge": "আপনার উপকরণের তালিকায় {name} যুক্ত করুন",
+  "install.title": "Cook Up ইনস্টল করুন",
+  "install.body": "হোম স্ক্রিন থেকে অ্যাপের মতো খুলুন।",
+  "install.ios": "“শেয়ার” চাপুন, তারপর “হোম স্ক্রিনে যুক্ত করুন” বেছে নিন।",
+  "install.action": "ইনস্টল করুন",
+  "install.dismiss": "এখন নয়"
 }

@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Champignons et fruits à coque",
   "seasonal.category.animal": "Produits de la mer et gibier",
   "seasonal.month.aria": "Mois",
-  "seasonal.addToFridge": "Ajouter {name} à vos ingrédients"
+  "seasonal.addToFridge": "Ajouter {name} à vos ingrédients",
+  "install.title": "Installer Cook Up",
+  "install.body": "Ouvrez-la comme une appli depuis votre écran d’accueil.",
+  "install.ios": "Touchez Partager, puis « Sur l’écran d’accueil ».",
+  "install.action": "Installer",
+  "install.dismiss": "Plus tard"
 }

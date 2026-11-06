@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Cogumelos e castanhas",
   "seasonal.category.animal": "Frutos do mar e caça",
   "seasonal.month.aria": "Meses",
-  "seasonal.addToFridge": "Adicionar {name} aos seus ingredientes"
+  "seasonal.addToFridge": "Adicionar {name} aos seus ingredientes",
+  "install.title": "Instalar o Cook Up",
+  "install.body": "Abra como um app direto da tela de início.",
+  "install.ios": "Toque em Compartilhar e depois em “Adicionar à Tela de Início”.",
+  "install.action": "Instalar",
+  "install.dismiss": "Agora não"
 }

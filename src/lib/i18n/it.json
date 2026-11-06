@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Funghi e frutta a guscio",
   "seasonal.category.animal": "Pesce, frutti di mare e selvaggina",
   "seasonal.month.aria": "Mesi",
-  "seasonal.addToFridge": "Aggiungi {name} ai tuoi ingredienti"
+  "seasonal.addToFridge": "Aggiungi {name} ai tuoi ingredienti",
+  "install.title": "Installa Cook Up",
+  "install.body": "Aprila come un’app dalla schermata Home.",
+  "install.ios": "Tocca Condividi, poi «Aggiungi alla schermata Home».",
+  "install.action": "Installa",
+  "install.dismiss": "Non ora"
 }

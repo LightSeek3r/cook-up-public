@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Mushrooms & nuts",
   "seasonal.category.animal": "Seafood & game",
   "seasonal.month.aria": "Months",
-  "seasonal.addToFridge": "Add {name} to your ingredients"
+  "seasonal.addToFridge": "Add {name} to your ingredients",
+  "install.title": "Install Cook Up",
+  "install.body": "Open it like an app from your home screen.",
+  "install.ios": "Tap Share, then “Add to Home Screen”.",
+  "install.action": "Install",
+  "install.dismiss": "Not now"
 }

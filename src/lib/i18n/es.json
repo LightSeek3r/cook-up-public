@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Setas y frutos secos",
   "seasonal.category.animal": "Pescado, marisco y caza",
   "seasonal.month.aria": "Meses",
-  "seasonal.addToFridge": "Añadir {name} a tus ingredientes"
+  "seasonal.addToFridge": "Añadir {name} a tus ingredientes",
+  "install.title": "Instalar Cook Up",
+  "install.body": "Ábrela como una app desde tu pantalla de inicio.",
+  "install.ios": "Toca Compartir y luego «Añadir a pantalla de inicio».",
+  "install.action": "Instalar",
+  "install.dismiss": "Ahora no"
 }

@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Грибы и орехи",
   "seasonal.category.animal": "Морепродукты и дичь",
   "seasonal.month.aria": "Месяцы",
-  "seasonal.addToFridge": "Добавить в ингредиенты: {name}"
+  "seasonal.addToFridge": "Добавить в ингредиенты: {name}",
+  "install.title": "Установить Cook Up",
+  "install.body": "Открывайте как приложение прямо с главного экрана.",
+  "install.ios": "Нажмите «Поделиться», затем «На экран “Домой”».",
+  "install.action": "Установить",
+  "install.dismiss": "Не сейчас"
 }

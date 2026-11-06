@@ -303,5 +303,10 @@
   "seasonal.category.forage": "버섯·견과",
   "seasonal.category.animal": "해산물·야생 고기",
   "seasonal.month.aria": "월별",
-  "seasonal.addToFridge": "내 재료에 {name} 추가"
+  "seasonal.addToFridge": "내 재료에 {name} 추가",
+  "install.title": "Cook Up 설치하기",
+  "install.body": "홈 화면에서 앱처럼 바로 열 수 있어요.",
+  "install.ios": "공유를 누른 다음 “홈 화면에 추가”를 선택하세요.",
+  "install.action": "설치",
+  "install.dismiss": "나중에"
 }

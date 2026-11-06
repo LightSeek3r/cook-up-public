@@ -39,6 +39,11 @@
 		     match THEMES and THEME_KEY. -->
 		<script src="/theme-init.js"></script>
 
+		<!-- Sends a page opened without ?lang= to the visitor's language (see the
+		     file). Ahead of the SvelteKit head so a redirect starts before anything
+		     else is fetched. -->
+		<script src="/lang-init.js"></script>
+
 		%sveltekit.head%
 
 		<!-- After the stylesheets on purpose (see static/font-init.js); same

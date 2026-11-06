@@ -303,5 +303,10 @@
   "seasonal.category.forage": "मशरूम और मेवे",
   "seasonal.category.animal": "समुद्री भोजन और शिकार का मांस",
   "seasonal.month.aria": "महीने",
-  "seasonal.addToFridge": "{name} को अपनी सामग्री में जोड़ें"
+  "seasonal.addToFridge": "{name} को अपनी सामग्री में जोड़ें",
+  "install.title": "Cook Up इंस्टॉल करें",
+  "install.body": "इसे होम स्क्रीन से ऐप की तरह खोलें।",
+  "install.ios": "शेयर करें पर टैप करें, फिर “होम स्क्रीन में जोड़ें” चुनें।",
+  "install.action": "इंस्टॉल करें",
+  "install.dismiss": "अभी नहीं"
 }

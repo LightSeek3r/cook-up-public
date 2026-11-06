@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Nấm và hạt",
   "seasonal.category.animal": "Hải sản và thịt rừng",
   "seasonal.month.aria": "Các tháng",
-  "seasonal.addToFridge": "Thêm {name} vào nguyên liệu của bạn"
+  "seasonal.addToFridge": "Thêm {name} vào nguyên liệu của bạn",
+  "install.title": "Cài đặt Cook Up",
+  "install.body": "Mở như một ứng dụng ngay từ màn hình chính.",
+  "install.ios": "Nhấn Chia sẻ, rồi chọn “Thêm vào Màn hình chính”.",
+  "install.action": "Cài đặt",
+  "install.dismiss": "Để sau"
 }

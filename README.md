@@ -103,6 +103,15 @@ contribute to the code.
 - **Filters** — cuisine, meal type, diet (vegan/vegetarian/pescatarian/gluten-free/
   dairy-free), sort by match quality / kcal / quickest-first / balance grade. Allergen
   exclusion by any of: gluten, dairy, nut, peanut, egg, soy, fish, shellfish, sesame.
+- **Installable PWA** — a web manifest and a service worker (`src/service-worker.ts`) make it
+  installable on Android, iOS and desktop. A banner appears 5 seconds after the first page
+  loads: an Install button on Chromium (Android, desktop), the Share → Add to Home Screen hint
+  on iOS Safari, never in the installed app; closing it keeps it away for 60 days. Offline, a
+  page already visited opens again and the matching works on the data already loaded; any
+  other page shows an offline notice. APIs, `/admin` and the manifest are never cached.
+- **Your language by default** — a page opened without `?lang=` goes to the language last
+  picked in the selector, else the first browser language the site supports
+  (`static/lang-init.js`, before first paint).
 - **16 languages** — en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it, bn, ru, pnb, jv, including
   full RTL support for Arabic and Western Punjabi (Shahmukhi script). Ingredient names and UI
   strings are bundled; recipe titles and instructions are pre-translated in every language and

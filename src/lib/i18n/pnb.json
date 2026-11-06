@@ -303,5 +303,10 @@
   "seasonal.category.forage": "کھمباں تے گریاں",
   "seasonal.category.animal": "سمندری خوراک تے شکار دا گوشت",
   "seasonal.month.aria": "مہینے",
-  "seasonal.addToFridge": "{name} اپݨے اجزاء وچ شامل کرو"
+  "seasonal.addToFridge": "{name} اپݨے اجزاء وچ شامل کرو",
+  "install.title": "Cook Up انسٹال کرو",
+  "install.body": "ایہنوں ہوم سکرین توں ایپ وانگ کھولو۔",
+  "install.ios": "شیئر تے ٹیپ کرو، فیر “ہوم سکرین وچ شامل کرو” چنو۔",
+  "install.action": "انسٹال کرو",
+  "install.dismiss": "ہݨ نئیں"
 }

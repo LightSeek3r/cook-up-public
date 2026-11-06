@@ -303,5 +303,10 @@
   "seasonal.category.forage": "Jamur lan kacang",
   "seasonal.category.animal": "Iwak segara lan daging buron",
   "seasonal.month.aria": "Sasi",
-  "seasonal.addToFridge": "Tambahake {name} menyang bahan-bahanmu"
+  "seasonal.addToFridge": "Tambahake {name} menyang bahan-bahanmu",
+  "install.title": "Instal Cook Up",
+  "install.body": "Bukak kaya aplikasi saka layar ngarep.",
+  "install.ios": "Tutul Bagikan, banjur pilih “Tambahake ing Layar Ngarep”.",
+  "install.action": "Instal",
+  "install.dismiss": "Mengko wae"
 }

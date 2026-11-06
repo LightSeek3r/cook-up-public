@@ -303,5 +303,10 @@
   "seasonal.category.forage": "きのこ・木の実",
   "seasonal.category.animal": "魚介・ジビエ",
   "seasonal.month.aria": "月別",
-  "seasonal.addToFridge": "{name}を食材に追加"
+  "seasonal.addToFridge": "{name}を食材に追加",
+  "install.title": "Cook Up をインストール",
+  "install.body": "ホーム画面からアプリのようにすぐ開けます。",
+  "install.ios": "「共有」をタップし、「ホーム画面に追加」を選びます。",
+  "install.action": "インストール",
+  "install.dismiss": "今はしない"
 }

@@ -303,5 +303,10 @@
   "seasonal.category.forage": "菌菇与坚果",
   "seasonal.category.animal": "海鲜与野味",
   "seasonal.month.aria": "月份",
-  "seasonal.addToFridge": "将{name}加入你的食材"
+  "seasonal.addToFridge": "将{name}加入你的食材",
+  "install.title": "安装 Cook Up",
+  "install.body": "从主屏幕像应用一样直接打开。",
+  "install.ios": "点按“分享”，然后选择“添加到主屏幕”。",
+  "install.action": "安装",
+  "install.dismiss": "暂不"
 }

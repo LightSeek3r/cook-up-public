@@ -7,9 +7,10 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
-	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
+	import { LANG_ENDONYMS, LANG_KEY, SUPPORTED_LANGS } from '$lib/config';
 	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
+	import InstallPrompt from '$components/InstallPrompt.svelte';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 	import { shouldTrack } from '$lib/analytics';
 
@@ -88,6 +89,11 @@
 
 	function switchLang(event: Event) {
 		const next = (event.currentTarget as HTMLSelectElement).value;
+		try {
+			localStorage.setItem(LANG_KEY, next);
+		} catch {
+			// Storage can be blocked; the choice then lasts as long as the URL carries it.
+		}
 		const url = new URL($page.url);
 		url.searchParams.set('lang', next);
 		goto(url, { keepFocus: true, noScroll: true });
@@ -279,6 +285,17 @@
 		</div>
 	</footer>
 </div>
+
+<!-- The admin dashboard is not an app to install; it shares this layout. -->
+{#if !$page.url.pathname.startsWith('/admin')}
+	<InstallPrompt
+		title={t('install.title')}
+		body={t('install.body')}
+		iosHint={t('install.ios')}
+		action={t('install.action')}
+		dismissLabel={t('install.dismiss')}
+	/>
+{/if}
 
 <style>
 	.bar {
