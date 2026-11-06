@@ -6,6 +6,8 @@ All notable changes to Cook Up are listed here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-06
+
 ### Added
 
 - **Seasonal ingredients.** Typical peak months for all 1,039 ingredients in nine climate zones
@@ -96,6 +98,7 @@ project started on 2026-08-18.
 - Print stylesheet: `.no-print` is scoped to `@media print` and prints with less ink.
 - The deploy's browser check retries during the edge rollout instead of failing on a stale edge.
 
+[0.2.0]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.2.0
 [0.1.2]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.2
 [0.1.1]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.1
 [0.1.0]: https://github.com/LightSeek3r/cook-up-public/releases/tag/v0.1.0
