@@ -7,9 +7,10 @@
 	import { onMount } from 'svelte';
 	import { page } from '$app/stores';
 	import { dirFor, resolveLang, t as translator } from '$lib/i18n';
-	import { LANG_ENDONYMS, SUPPORTED_LANGS } from '$lib/config';
+	import { LANG_ENDONYMS, LANG_KEY, SUPPORTED_LANGS } from '$lib/config';
 	import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
 	import ThemeToggle from '$components/ThemeToggle.svelte';
+	import InstallPrompt from '$components/InstallPrompt.svelte';
 	import { favoriteIds, hydrateFavorites } from '$lib/favorites.svelte';
 	import { shouldTrack } from '$lib/analytics';
 
@@ -18,6 +19,7 @@
 	const lang = $derived(resolveLang($page.url.searchParams.get('lang')));
 	const t = $derived(translator(lang));
 	const inGlossary = $derived($page.url.pathname.startsWith('/glossary'));
+	const inSeasonal = $derived($page.url.pathname.startsWith('/seasonal'));
 	const inFavorites = $derived($page.url.pathname.startsWith('/favorites'));
 	const isHome = $derived($page.route.id === '/');
 	// ISO 639-3 'pnb' has no two-letter code of its own; PA is Punjabi's.
@@ -87,6 +89,11 @@
 
 	function switchLang(event: Event) {
 		const next = (event.currentTarget as HTMLSelectElement).value;
+		try {
+			localStorage.setItem(LANG_KEY, next);
+		} catch {
+			// Storage can be blocked; the choice then lasts as long as the URL carries it.
+		}
 		const url = new URL($page.url);
 		url.searchParams.set('lang', next);
 		goto(url, { keepFocus: true, noScroll: true });
@@ -175,6 +182,19 @@
 						</svg>
 						<span class="nav-text">{t('nav.glossary')}</span>
 					</a>
+					<a class="nav-link" href="/seasonal?lang={lang}" aria-current={inSeasonal ? 'page' : undefined}>
+						<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+							<path
+								d="M16.6 3.2c.7 8-2.8 13.3-9.3 13.5-1.3 0-2.4-.4-3.2-1C3.5 9.2 8 3.4 16.6 3.2ZM4 16.6c2.3-4.2 5.4-7.3 9.4-9.6"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.7"
+								stroke-linejoin="round"
+								stroke-linecap="round"
+							/>
+						</svg>
+						<span class="nav-text">{t('nav.seasonal')}</span>
+					</a>
 					<a
 						class="nav-link"
 						href="/favorites?lang={lang}"
@@ -239,7 +259,9 @@
 		{#if !isHome}<p class="tagline">{t('app.tagline')}</p>{/if}
 	</header>
 
-	<main id="main">
+	<!-- tabindex -1 so the skip link moves focus here, not just the scroll
+	     position. -->
+	<main id="main" tabindex="-1">
 		{@render children?.()}
 	</main>
 
@@ -263,6 +285,17 @@
 		</div>
 	</footer>
 </div>
+
+<!-- The admin dashboard is not an app to install; it shares this layout. -->
+{#if !$page.url.pathname.startsWith('/admin')}
+	<InstallPrompt
+		title={t('install.title')}
+		body={t('install.body')}
+		iosHint={t('install.ios')}
+		action={t('install.action')}
+		dismissLabel={t('install.dismiss')}
+	/>
+{/if}
 
 <style>
 	.bar {
@@ -304,7 +337,10 @@
 		align-items: center;
 		gap: var(--space-2);
 		min-height: var(--tap);
-		min-width: 0;
+		/* The wordmark never shrinks below its text: a shrinking box with a
+		   nowrap title let the text run under the nav icons. Where the row cannot
+		   fit it, the 399px query below drops the text instead. */
+		flex: none;
 		color: var(--primary);
 		text-decoration: none;
 	}
@@ -324,6 +360,10 @@
 		white-space: nowrap;
 	}
 
+	/* A landing point for the skip link, not a control: no ring around the page. */
+	main:focus {
+		outline: none;
+	}
 	/* Off-screen until focused, then pinned over the header. */
 	.skip {
 		position: fixed;
@@ -493,8 +533,8 @@
 			display: none;
 		}
 	}
-	/* Small phones: the brand gives up a little so the row still fits. */
-	@media (max-width: 380px) {
+	/* Narrow phones: the brand gives up a little so the row still fits. */
+	@media (max-width: 430px) {
 		.brand {
 			gap: 0.3rem;
 		}
@@ -506,8 +546,26 @@
 			height: 1.6rem;
 		}
 		.lang {
-			min-width: 4rem;
+			min-width: 3.75rem;
 			padding: 0 0.4rem;
+		}
+	}
+	/* Below 400px the five controls leave no room for the words (measured: the
+	   row needs 404px with them): the bowl alone is the brand, and the text
+	   stays for screen readers like the nav labels. */
+	@media (max-width: 399px) {
+		.brand .title {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+		}
+	}
+	/* 320px: even the bowl and five 44px controls overrun the row by a few px. */
+	@media (max-width: 340px) {
+		.nav-link {
+			width: 2.5rem;
 		}
 	}
 	@media (forced-colors: active) {
@@ -521,6 +579,13 @@
 		color: var(--muted);
 		margin: var(--space-3) 0 var(--space-2);
 		font-size: 0.95rem;
+	}
+	/* Two lines of marketing on every inner page push the content down for no
+	   task: the home page's h1 already says it. */
+	@media (max-width: 600px) {
+		.tagline {
+			display: none;
+		}
 	}
 	/* The credits under a steel rule: a 1px shade with its light edge below,
 	   the same bevel as the chrome. */

@@ -161,6 +161,8 @@ describe('a raw URL and its canonical URL get the same response', () => {
 		'/api/match?sort=time&have=leek,garlic,onion,egg&must=egg,tofu,leek&lang=en&offset=0',
 		'/api/match?have=garlic,egg,onion&must=garlic&noAllergen=gluten,gluten,dairy&diet=keto&lang=fr&offset=050',
 		'/api/match?have=egg&cuisine=mars&lang=xx',
+		'/api/match?seasonOnly=1&season=med.s.4&have=onion,egg&lang=fr',
+		'/api/match?have=onion,egg&lang=en&season=world.13&seasonOnly=1',
 		'/api/recipes?ids=91,13,10,13,abc&lang=fr&x=y',
 		'/sitemap.xml?_r=1'
 	])('%s', async (path) => {

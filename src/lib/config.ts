@@ -38,6 +38,9 @@ export const SUPPORTED_LANGS = [
 export type Lang = (typeof SUPPORTED_LANGS)[number];
 
 export const DEFAULT_LANG: Lang = 'en';
+
+/** localStorage key of the language chosen in the picker; read by static/lang-init.js (literal copy there). */
+export const LANG_KEY = 'cookup-lang';
 export const RTL_LANGS = new Set<Lang>(['ar', 'pnb']);
 
 /**

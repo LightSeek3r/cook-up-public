@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+		<meta name="color-scheme" content="light dark" />
+		<meta name="robots" content="noindex" />
+		<title>Offline · Cook Up</title>
+		<link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+		<style>
+			:root {
+				--bg: #ecedee;
+				--fg: #14171b;
+			}
+			@media (prefers-color-scheme: dark) {
+				:root {
+					--bg: #14171b;
+					--fg: #ecedee;
+				}
+			}
+			body {
+				margin: 0;
+				min-height: 100vh;
+				min-height: 100dvh;
+				display: grid;
+				place-items: center;
+				padding: 1.5rem;
+				box-sizing: border-box;
+				background: var(--bg);
+				color: var(--fg);
+				font-family: system-ui, sans-serif;
+				text-align: center;
+			}
+			main {
+				max-width: 24rem;
+			}
+			img {
+				width: 4rem;
+				height: 4rem;
+			}
+			h1 {
+				margin: 1rem 0 0.5rem;
+				font-size: 1.5rem;
+			}
+			p {
+				margin: 0 0 1.5rem;
+				line-height: 1.5;
+			}
+			a {
+				display: inline-block;
+				padding: 0.75rem 1.5rem;
+				border: 2px solid currentColor;
+				border-radius: 0.5rem;
+				color: inherit;
+				font-weight: 600;
+				text-decoration: none;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<img src="/icon-192.png" alt="" />
+			<h1>You are offline</h1>
+			<p>This page has not been opened on this device yet. Reconnect, or go back to a recipe you already viewed.</p>
+			<a href="/">Try again</a>
+		</main>
+	</body>
+</html>

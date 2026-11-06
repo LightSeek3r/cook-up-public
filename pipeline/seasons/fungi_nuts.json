@@ -1,0 +1,6 @@
+{
+	"acorn": {"z":{"trop":"none","sav":"none","high":"none","arid":"none","med":"10-12","subtrop":"10-11","oce":"9-10","cont":"9-10","bor":"none"},"p":["cont:n","med:n"],"st":3,"note":"Acorns drop through autumn; gathered nuts are dried and kept over winter for flour and Korean acorn jelly."},
+	"cep": {"z":{"trop":"none","sav":"none","high":"6-9","arid":"none","med":"9-11","subtrop":"none","oce":"8-10","cont":"8-10","bor":"8-9"},"p":["cont:n","med:n","high:n"],"st":0,"note":"Wild porcini flush after late-summer rain and peak in early autumn; in Yunnan and the Mexican highlands they come with the rainy season."},
+	"chestnut": {"z":{"trop":"none","sav":"none","high":"none","arid":"none","med":"10-11","subtrop":"9-11","oce":"10-11","cont":"9-10","bor":"none"},"p":["cont:n","subtrop:n","med:n"],"st":2,"note":"Nuts fall from late September; cured chestnuts keep cool for a couple of months, carrying them through the winter roasting season."},
+	"truffle": {"z":{"trop":"none","sav":"none","high":"none","arid":"2-4","med":"11-2","subtrop":"none","oce":"11-2","cont":"none","bor":"none"},"p":["med:n","oce:n","med:s"],"st":0,"note":"Prized winter truffles: Alba white from October, Périgord black from December to February; in the Gulf and North Africa desert truffles follow the late-winter rains."}
+}

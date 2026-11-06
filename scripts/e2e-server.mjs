@@ -21,13 +21,17 @@
 import { spawn, spawnSync } from 'node:child_process';
 import { cpSync, existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
-import { buildArtefacts, fixtureDb } from '../pipeline/lib/artefacts.mjs';
+import { buildArtefacts, fixtureDb, seasonSource } from '../pipeline/lib/artefacts.mjs';
 import { readLock, writeTree } from './lib/datapack.mjs';
 
 const PERSIST = '.wrangler/e2e-state';
 const BUILD = '.svelte-kit/cloudflare';
 const ASSETS = '.wrangler/e2e-assets';
 const SEED = 'tests/e2e/fixtures/seed.sql';
+// Season sources for the seed's ten keys (pipeline/seasons format): tomato
+// and onion are seasonal, so the shelf, the badges and seasonal ranking have
+// something to show; every other key is all year.
+const SEASONS = 'tests/e2e/fixtures/seasons';
 const DB = 'cook-up-db';
 const port = process.argv[2] ?? '8799';
 const WRANGLER = 'node_modules/wrangler/bin/wrangler.js';
@@ -54,7 +58,9 @@ wrangler(['d1', 'migrations', 'apply', DB, '--local', '--persist-to', PERSIST]);
 rmSync(ASSETS, { recursive: true, force: true });
 const buildData = path.resolve(BUILD, 'data');
 cpSync(BUILD, ASSETS, { recursive: true, filter: (src) => path.resolve(src) !== buildData });
-const seed = buildArtefacts(fixtureDb(readFileSync(SEED, 'utf8')));
+const seasons = await seasonSource(SEASONS);
+if (!seasons) throw new Error(`no season sources in ${SEASONS}`);
+const seed = buildArtefacts(fixtureDb(readFileSync(SEED, 'utf8')), { seasons: seasons.compile });
 writeTree(path.join(ASSETS, 'data'), stamped(seed.files, seed.version, readLock().version));
 
 /**

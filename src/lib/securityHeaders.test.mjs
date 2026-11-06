@@ -37,7 +37,8 @@ describe('_headers', () => {
 			// A type Cloudflare compresses; application/octet-stream goes out raw.
 			{ path: '/data/core.bin', headers: { ...IMMUTABLE, 'content-type': 'application/x-protobuf' } },
 			{ path: '/data/names/*', headers: IMMUTABLE },
-			{ path: '/data/titles/*', headers: IMMUTABLE }
+			{ path: '/data/titles/*', headers: IMMUTABLE },
+			{ path: '/data/seasons.json', headers: IMMUTABLE }
 		]);
 	});
 

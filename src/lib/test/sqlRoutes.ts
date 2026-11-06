@@ -7,6 +7,7 @@
 import { error, json } from '@sveltejs/kit';
 import { requireDb } from '$lib/db';
 import { slackFor } from '$lib/match';
+import { parseSeasonParam } from '$lib/data/match.js';
 import { MIN_FTS_LENGTH } from '$lib/search';
 import { matchRecipes, resolveIngredientIds } from './sql/match';
 import { ftsPhrase, getRecipesByIds, searchRecipeTitles } from './sql/search';
@@ -40,6 +41,7 @@ const match: Handler = async ({ url, platform }) => {
 		slack > 0 && query.must.length
 			? (await resolveIngredientIds(db, query.must)).filter((id) => have.includes(id))
 			: [];
+	const season = parseSeasonParam(query.season);
 	const data = await matchRecipes(db, {
 		have,
 		lang: query.lang,
@@ -50,6 +52,7 @@ const match: Handler = async ({ url, platform }) => {
 		sort: query.sort,
 		slack,
 		mustUse,
+		season: season && { ...season, only: query.seasonOnly === true },
 		offset: query.offset
 	});
 	return json({ ...data, haveCount: have.length }, { headers });
@@ -121,6 +124,7 @@ const sitemap: Handler = async ({ url, platform }) => {
 		`${url.origin}/`,
 		`${url.origin}/glossary`,
 		...getTermIds().map((id) => `${url.origin}/glossary/${id}`),
+		...Array.from({ length: 12 }, (_, i) => `${url.origin}/seasonal/${i + 1}`),
 		...(results ?? []).map((row) => `${url.origin}/recipe/${row.id}`)
 	];
 

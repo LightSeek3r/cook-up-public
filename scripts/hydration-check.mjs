@@ -41,11 +41,14 @@ export async function hydrationCheck(base, opts = {}) {
 		const res = await ingredients.catch(() => null);
 		if (!res) errors.push('/api/ingredients was never requested: the app did not hydrate');
 		else if (res.status() !== 200) errors.push(`/api/ingredients answered ${res.status()}`);
-		const tiles = await page
-			.locator('button[aria-pressed]')
+		// The tile class, not any pressed button: the filter chips are aria-pressed
+		// buttons too, and come first in the DOM, inside a closed <details> that
+		// current Chromium reports as hidden.
+		const tile = page.locator('button.tile[aria-pressed]');
+		const tiles = await tile
 			.first()
 			.waitFor({ timeout: 10_000 })
-			.then(() => page.locator('button[aria-pressed]').count())
+			.then(() => tile.count())
 			.catch(() => 0);
 		if (tiles === 0) errors.push('no interactive mosaic tiles rendered');
 		log(`hydration: ${tiles} tiles, ${errors.length} problem(s)`);

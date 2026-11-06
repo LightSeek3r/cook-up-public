@@ -28,3 +28,5 @@
   Cache-Control: public, max-age=31536000, immutable
 /data/titles/*
   Cache-Control: public, max-age=31536000, immutable
+/data/seasons.json
+  Cache-Control: public, max-age=31536000, immutable

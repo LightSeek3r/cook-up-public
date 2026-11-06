@@ -11,6 +11,8 @@ import {
 import { apiUrl, VERSION_PARAM } from './httpCache';
 import { matchRequest, type MatchRequestInput } from './matchRequest';
 import { slackFor } from './match';
+import { parseSeasonParam, seasonParam } from './data/match.js';
+import { WORLD_VIEW, viewIndex } from './data/seasons.js';
 
 const ORIGIN = 'https://cook.test';
 const params = (query: string) => new URLSearchParams(query);
@@ -63,6 +65,34 @@ describe('parseMatchQuery', () => {
 		const query = parseMatchQuery(params('have=egg&cuisine=mars&meal=brunch&diet=keto&sort=random'));
 		expect(query).toMatchObject({ cuisine: undefined, meal: undefined, diet: undefined, sort: undefined });
 	});
+
+	it.each(['med.n.4', 'med.s.12', 'trop.s.1', 'bor.n.10', 'world.7'])('accepts season=%s', (season) => {
+		expect(parseMatchQuery(params(`have=egg&season=${season}&seasonOnly=1`))).toMatchObject({ season, seasonOnly: true });
+		expect(parseMatchQuery(params(`have=egg&season=${season}`))).toMatchObject({ season, seasonOnly: undefined });
+	});
+
+	it.each(['', 'med', 'med.n', 'med.x.4', 'mars.n.4', 'world.0', 'world.13', 'world.04', 'world.4.1', 'WORLD.4', 'med.N.4', 'world.n.4', ' world.4'])(
+		'drops season=%s like an unknown filter value, and seasonOnly with it',
+		(season) => {
+			const query = parseMatchQuery(params(`have=egg&season=${encodeURIComponent(season)}&seasonOnly=1`));
+			expect(query).not.toBeNull();
+			expect(query).toMatchObject({ season: undefined, seasonOnly: undefined });
+		}
+	);
+
+	it('reads seasonOnly only as 1, and only with a season', () => {
+		expect(parseMatchQuery(params('have=egg&seasonOnly=1'))?.seasonOnly).toBeUndefined();
+		expect(parseMatchQuery(params('have=egg&season=world.3&seasonOnly=true'))?.seasonOnly).toBeUndefined();
+	});
+
+	it('season values map to the views of seasons.js and back', () => {
+		expect(parseSeasonParam('med.n.4')).toEqual({ view: viewIndex('med', 'n'), month: 4 });
+		expect(parseSeasonParam('bor.s.12')).toEqual({ view: viewIndex('bor', 's'), month: 12 });
+		expect(parseSeasonParam('world.1')).toEqual({ view: WORLD_VIEW, month: 1 });
+		for (let view = 0; view <= WORLD_VIEW; view++) {
+			for (const month of [1, 6, 12]) expect(parseSeasonParam(seasonParam(view, month))).toEqual({ view, month });
+		}
+	});
 });
 
 describe('parseRecipesQuery', () => {
@@ -106,7 +136,9 @@ describe('canonicalUrl: what the page fetches is already canonical', () => {
 				noAllergen: ['gluten', 'dairy'],
 				must: ['tomato', 'egg']
 			})
-		]
+		],
+		['a season', input({ season: 'cont.n.11' })],
+		['a season, only in season, sorted', input({ season: 'world.6', seasonOnly: true, sort: 'time', must: ['egg'] })]
 	])('/api/match, %s', (_, request) => {
 		for (const offset of [0, 50, 100]) {
 			const url = `${ORIGIN}${apiUrl('/api/match', matchRequest(request, offset))}`;
@@ -150,6 +182,16 @@ describe('canonicalUrl: everything else maps onto that one URL', () => {
 		expect(canonical('/api/recipes?lang=en&ids=488,3,17,3')).toBe(
 			`${ORIGIN}/api/recipes?ids=3%2C17%2C488&lang=en&${v}`
 		);
+	});
+
+	it('puts season and seasonOnly after must, and drops them when malformed or alone', () => {
+		expect(canonical('/api/match?seasonOnly=1&offset=50&season=med.s.4&have=egg&lang=fr')).toBe(
+			`${ORIGIN}/api/match?have=egg&lang=fr&season=med.s.4&seasonOnly=1&offset=50&${v}`
+		);
+		expect(canonical('/api/match?have=egg&lang=fr&season=med.s.13&seasonOnly=1')).toBe(
+			`${ORIGIN}/api/match?have=egg&lang=fr&${v}`
+		);
+		expect(canonical('/api/match?have=egg&lang=fr&seasonOnly=1')).toBe(`${ORIGIN}/api/match?have=egg&lang=fr&${v}`);
 	});
 
 	it('writes the language the route will use', () => {

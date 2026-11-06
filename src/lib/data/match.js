@@ -5,6 +5,7 @@
 
 import { compareBinary } from './text.js';
 import { floatOrNull, intOrNull, vocabOrNull } from './core.js';
+import { ALL_YEAR, VIEW_COUNT, WORLD_VIEW, ZONES, viewIndex } from './seasons.js';
 
 // Mirror $lib/config (MATCH_PAGE_SIZE, MISSING_NAMES_SEP), which this module
 // cannot import: the pipeline and the parity tools load it in plain Node,
@@ -18,6 +19,42 @@ export function slackFor(haveCount) {
 }
 
 /**
+ * A season to rank by: the climate view (seasons.js viewIndex, or
+ * WORLD_VIEW) and the month (1-12), which always comes from the client's
+ * clock, never the server's, so a response stays a function of its URL.
+ * @typedef {object} SeasonSelection
+ * @property {number} view
+ * @property {number} month
+ * @property {boolean} [only] drop recipes that still need an out-of-season ingredient
+ */
+
+const SEASON_PARAM = /^(?:([a-z]+)\.([ns])|world)\.([1-9]|1[0-2])$/;
+
+/**
+ * The `season` URL value, `<zone>.<n|s>.<month>` or `world.<month>`
+ * (`med.s.4`, `world.12`), as a view and month; null when malformed.
+ * @param {string | null | undefined} value
+ * @returns {{ view: number, month: number } | null}
+ */
+export function parseSeasonParam(value) {
+	const m = value ? SEASON_PARAM.exec(value) : null;
+	if (!m) return null;
+	const view = m[1] === undefined ? WORLD_VIEW : viewIndex(m[1], /** @type {'n' | 's'} */ (m[2]));
+	return view < 0 ? null : { view, month: Number(m[3]) };
+}
+
+/**
+ * parseSeasonParam's inverse.
+ * @param {number} view
+ * @param {number} month
+ */
+export function seasonParam(view, month) {
+	if (view === WORLD_VIEW) return `world.${month}`;
+	const z = view % ZONES.length;
+	return `${ZONES[z]}.${view < ZONES.length ? 'n' : 's'}.${month}`;
+}
+
+/**
  * @typedef {object} MatchQuery
  * @property {number[]} have ingredient ids
  * @property {string} lang
@@ -28,6 +65,7 @@ export function slackFor(haveCount) {
  * @property {'kcal' | 'grade' | 'time'} [sort]
  * @property {number} [slack]
  * @property {number[]} [mustUse]
+ * @property {SeasonSelection | null} [season] rank recipes needing out-of-season ingredients lower
  * @property {number} [limit]
  * @property {number} [offset]
  */
@@ -165,7 +203,7 @@ export function matchCore(corpus, p) {
 	}
 
 	/** @type {number[]} */
-	const cand = [];
+	let cand = [];
 	for (let i = 0; i < touchedCount; i++) {
 		const r = touched[i];
 		if (matched[r] < floor) continue;
@@ -177,6 +215,41 @@ export function matchCore(corpus, p) {
 		cand.push(r);
 	}
 	const missing = (/** @type {number} */ r) => c.nonStaple[r] - satisfied[r];
+	const byTime = p.sort !== 'kcal' && p.sort !== 'grade' && p.sort !== 'time';
+
+	// Per candidate, the ingredients still to buy (the ones `missing` counts)
+	// that the season's view has a calendar for and that are out of season in
+	// its month, capped at 3. Only the default order ranks by it; `only` drops
+	// every recipe that has one. Without seasons.json there is no season.
+	const season = p.season ?? null;
+	const seasons = season ? corpus.seasons() : null;
+	/** @type {Uint8Array | null} */
+	let oos = null;
+	if (season && seasons && (season.only || byTime)) {
+		const { view, month } = season;
+		if (!Number.isInteger(view) || view < 0 || view >= VIEW_COUNT || !Number.isInteger(month) || month < 1 || month > 12) {
+			throw new Error(`season must be a view 0..${VIEW_COUNT - 1} and a month 1..12, got ${view} and ${month}`);
+		}
+		const { masks } = seasons;
+		const bit = 1 << (month - 1);
+		const { recipeIngStart, recipeIng } = c;
+		oos = new Uint8Array(R);
+		/** @type {number[]} */
+		const kept = [];
+		for (const r of cand) {
+			let n = 0;
+			for (let j = recipeIngStart[r], end = recipeIngStart[r + 1], g = 0; j < end && n < 3; j++) {
+				g += recipeIng[j];
+				if (isStaple[g] || inSat[g]) continue;
+				const mask = masks[g * VIEW_COUNT + view];
+				if (mask !== ALL_YEAR && !(mask & bit)) n++;
+			}
+			if (season.only && n > 0) continue;
+			oos[r] = n;
+			kept.push(r);
+		}
+		cand = kept;
+	}
 
 	// match.ts's ORDER BY as one number per candidate, sorted natively: the
 	// per-recipe parts are ranks precomputed by the generator (they already
@@ -185,6 +258,7 @@ export function matchCore(corpus, p) {
 	// most significant first; the generator checks the largest key stays
 	// below 2^53. With slack, more selections used comes first.
 	//   default: missing, required_non_staple, timeRank (total_minutes, id)
+	//            with a season: missing, out-of-season (0-3), required_non_staple, timeRank
 	//   kcal:    kcalDense, missing, id
 	//   grade:   grade (NULL last), missing, id
 	//   time:    timeDense, missing, id
@@ -198,6 +272,7 @@ export function matchCore(corpus, p) {
 		if (p.sort === 'kcal') key = ((lead * R + c.kcalDense[r]) * MISS + missing(r)) * R + r;
 		else if (p.sort === 'grade') key = ((lead * 256 + (c.grade[r] || 255)) * MISS + missing(r)) * R + r;
 		else if (p.sort === 'time') key = ((lead * R + c.timeDense[r]) * MISS + missing(r)) * R + r;
+		else if (oos) key = (((lead * MISS + missing(r)) * 4 + oos[r]) * MISS + c.nonStaple[r]) * R + c.timeRank[r];
 		else key = ((lead * MISS + missing(r)) * MISS + c.nonStaple[r]) * R + c.timeRank[r];
 		keys[i] = key;
 	}
@@ -206,7 +281,6 @@ export function matchCore(corpus, p) {
 	const start = Math.max(0, offset);
 	const end = limit < 0 ? keys.length : Math.min(keys.length, start + limit);
 	if (start >= end) return { results: [], total: 0 };
-	const byTime = !p.sort || (p.sort !== 'kcal' && p.sort !== 'grade' && p.sort !== 'time');
 	/** @type {number[]} */
 	const page = [];
 	for (let i = start; i < end; i++) {
@@ -288,6 +362,8 @@ export function matchCore(corpus, p) {
  * @property {'kcal' | 'grade' | 'time'} [sort]
  * @property {string[]} noAllergen
  * @property {string[]} must
+ * @property {string} [season] `<zone>.<n|s>.<month>` or `world.<month>` (parseSeasonParam)
+ * @property {boolean} [seasonOnly]
  * @property {number} offset
  */
 
@@ -314,6 +390,8 @@ export function matchResponse(corpus, query) {
 	const mustUse =
 		slack > 0 && query.must.length ? resolveKeys(corpus, query.must).filter((id) => have.includes(id)) : [];
 
+	const season = parseSeasonParam(query.season);
+
 	const data = matchCore(corpus, {
 		have,
 		lang: query.lang,
@@ -327,6 +405,7 @@ export function matchResponse(corpus, query) {
 		// widen the match floor arbitrarily.
 		slack,
 		mustUse,
+		season: season && { ...season, only: query.seasonOnly === true },
 		offset: query.offset
 	});
 

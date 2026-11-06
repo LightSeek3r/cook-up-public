@@ -643,11 +643,20 @@ html[data-fonts='swap'] body {
 	/* No reserved room at the bottom: the home page adds the fixed selection
 	   tray's real height itself, only while a tray is showing. */
 	padding: var(--space-3) var(--space-3) var(--space-4);
+	/* viewport-fit=cover lets the page run under a notch or the home bar: keep
+	   the content clear of the cut-outs (landscape, standalone). Physical sides
+	   on purpose, the insets are physical too. */
+	padding-top: max(var(--space-3), env(safe-area-inset-top));
+	padding-left: max(var(--space-3), env(safe-area-inset-left));
+	padding-right: max(var(--space-3), env(safe-area-inset-right));
 }
 
 @media (min-width: 48rem) {
 	.page {
 		padding: var(--space-4) var(--space-5) var(--space-5);
+		padding-top: max(var(--space-4), env(safe-area-inset-top));
+		padding-left: max(var(--space-5), env(safe-area-inset-left));
+		padding-right: max(var(--space-5), env(safe-area-inset-right));
 	}
 }
 

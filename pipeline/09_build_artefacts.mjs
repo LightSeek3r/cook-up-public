@@ -9,7 +9,9 @@
  *     [--store=pipeline/data/recipe-i18n]
  *
  * --sql builds from plain INSERTs applied after every migration (a test
- * fixture such as tests/e2e/fixtures/seed.sql) instead of the snapshot.
+ * fixture such as tests/e2e/fixtures/seed.sql) instead of the snapshot, with
+ * every ingredient in season all year; the snapshot build compiles
+ * pipeline/seasons (artefacts.mjs seasonSource).
  * Writes the files into --out (replacing it) and prints sizes; refuses when a
  * budget is exceeded. --save-db also writes the database the artefacts were
  * built from, for the parity tests (DATA_PARITY_DB, see src/lib/data). Publishing
@@ -20,7 +22,7 @@ import { existsSync, readFileSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { gzipSync } from 'node:zlib';
-import { buildArtefacts, checkBudgets, fixtureDb, snapshotDb } from './lib/artefacts.mjs';
+import { buildArtefacts, checkBudgets, fixtureDb, seasonSource, SEASONS_DIR, snapshotDb } from './lib/artefacts.mjs';
 import { readManifest } from './lib/i18n_backup.mjs';
 import { storeDigest, STORE_DIR } from './lib/recipe_i18n_store.mjs';
 import { sha256, writeTree } from '../scripts/lib/datapack.mjs';
@@ -74,6 +76,8 @@ async function main() {
 	let db;
 	/** @type {Record<string, unknown>} */
 	let source;
+	/** @type {((keys: string[]) => string[]) | undefined} */
+	let seasons;
 	if (sqlFile) {
 		const sql = readFileSync(sqlFile);
 		db = fixtureDb(sql.toString('utf8'));
@@ -83,19 +87,23 @@ async function main() {
 		const snap = await snapshotDb({ storeDir });
 		db = snap.db;
 		const backupManifest = readManifest();
+		const compiled = await seasonSource();
+		seasons = compiled?.compile;
 		source = {
 			pipeline_out: Object.fromEntries(INPUT_FILES.map((f) => [f, sha256(readFileSync(path.join('pipeline/out', f)))])),
 			i18n_backup: { exported_at: backupManifest?.exported_at ?? null, manifest_sha256: sha256(readFileSync('pipeline/data/i18n-backup/manifest.json')) },
-			recipe_i18n_store: storeDigest(storeDir)
+			recipe_i18n_store: storeDigest(storeDir),
+			seasons: compiled ? Object.fromEntries(compiled.files.map((f) => [f, sha256(readFileSync(path.join(SEASONS_DIR, f)))])) : null
 		};
 		const s = snap.seed;
 		console.log(
 			`09_build_artefacts: snapshot ${s.rows.keptRecipes.length} recipes, ${s.rows.ingredients.length} ingredients; ` +
-				`${s.i18n.notKept} translation store rows left out (recipes with no kept ingredient)`
+				`${s.i18n.notKept} translation store rows left out (recipes with no kept ingredient); ` +
+				(compiled ? `seasons from ${compiled.files.length} files in ${SEASONS_DIR}` : `no season sources or compiler yet: every ingredient all year`)
 		);
 	}
 	const started = performance.now();
-	const { version, files, manifest } = buildArtefacts(db, { source });
+	const { version, files, manifest } = buildArtefacts(db, { source, seasons });
 	const problems = checkBudgets(files);
 	console.log(`09_build_artefacts: data version ${version}, ${files.size} files in ${((performance.now() - started) / 1000).toFixed(1)} s`);
 	for (const line of sizeReport(files)) console.log(`  ${line}`);

@@ -5,19 +5,24 @@ import type { MatchData } from './matchData';
 const BODY = { results: [], total: 0, haveCount: 0 };
 
 /** A MatchData that answers every query with BODY in any loaded language. */
-function fakeData(): MatchData & { loads: string[] } {
+function fakeData(): MatchData & { loads: string[]; seasonLoads: number } {
 	const loads: string[] = [];
 	const loaded = new Set<string>();
-	return {
+	const data = {
 		version: 'v1',
 		loads,
-		async load(lang) {
+		seasonLoads: 0,
+		async load(lang: string) {
 			loads.push(lang);
 			loaded.add(lang);
 		},
-		ready: (lang) => loaded.has(lang),
-		match: (search) => (loaded.has(new URLSearchParams(search).get('lang') ?? '') ? BODY : null)
+		ready: (lang: string) => loaded.has(lang),
+		async loadSeasons() {
+			data.seasonLoads++;
+		},
+		match: (search: string) => (loaded.has(new URLSearchParams(search).get('lang') ?? '') ? BODY : null)
 	};
+	return data;
 }
 
 function setup({ constrained = false } = {}) {
@@ -120,6 +125,25 @@ describe('createLocalMatch', () => {
 		expect(calls).toBe(1);
 		expect(local.ready('en')).toBe(false);
 		expect(deps.warn).toHaveBeenCalledWith(expect.stringContaining('corrupt'));
+	});
+
+	it('fetches seasons.json only once seasonal ranking is wanted, during the download or after it', async () => {
+		const { local, resolve } = setup();
+		local.want('en');
+		const data = fakeData();
+		resolve(data);
+		await tick();
+		expect(data.seasonLoads).toBe(0);
+		local.wantSeasons();
+		expect(data.seasonLoads).toBe(1);
+
+		const early = setup();
+		early.local.wantSeasons();
+		early.local.want('en');
+		const later = fakeData();
+		early.resolve(later);
+		await tick();
+		expect(later.seasonLoads).toBe(1);
 	});
 
 	it('is off outside the browser', () => {

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import IngredientIcon from './IngredientIcon.svelte';
+	import SeasonBadge from './SeasonBadge.svelte';
 	import type { IngredientTile as Tile } from '$lib/types';
 
 	interface Props {
@@ -34,6 +35,7 @@
 >
 	<span class="art">
 		<IngredientIcon canonicalKey={tile.canonical_key} category={tile.category} />
+		<SeasonBadge id={tile.id} />
 	</span>
 	<span class="name">{tile.name}</span>
 
@@ -81,9 +83,12 @@
 		grid-column: span 2;
 		min-height: 6.75rem;
 	}
-	.tile:hover {
-		border-color: var(--cat-ink, var(--line-strong));
-		transform: translateY(-1px);
+	/* Hover-capable pointers only: on touch the lift stays after a tap. */
+	@media (hover: hover) {
+		.tile:hover {
+			border-color: var(--cat-ink, var(--line-strong));
+			transform: translateY(-1px);
+		}
 	}
 	.tile:active {
 		transform: translateY(1px) scale(0.97);
@@ -105,6 +110,7 @@
 	/* Colour emoji cannot follow currentColor, so they sit on a --surface
 	   medallion that keeps them legible on every tile fill, selected included. */
 	.art {
+		position: relative;
 		display: grid;
 		place-items: center;
 		width: 2.75rem;
@@ -124,8 +130,10 @@
 		height: 3.5rem;
 		padding: 0.5rem;
 	}
-	.tile:hover .art {
-		transform: scale(1.08);
+	@media (hover: hover) {
+		.tile:hover .art {
+			transform: scale(1.08);
+		}
 	}
 
 	.name {

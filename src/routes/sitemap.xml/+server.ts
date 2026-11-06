@@ -21,6 +21,7 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 		`${url.origin}/`,
 		`${url.origin}/glossary`,
 		...getTermIds().map((id) => `${url.origin}/glossary/${id}`),
+		...Array.from({ length: 12 }, (_, i) => `${url.origin}/seasonal/${i + 1}`),
 		...ids.map((id) => `${url.origin}/recipe/${id}`)
 	];
 

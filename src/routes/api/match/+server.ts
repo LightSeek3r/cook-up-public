@@ -20,6 +20,6 @@ export const GET: RequestHandler = async ({ url, platform }) => {
 	// The home page computes this same body in the browser once it has the
 	// artefacts (src/lib/client/localMatch.ts); matchResponse is shared so the
 	// two cannot drift.
-	const corpus = await corpusFor(platform, query.lang);
+	const corpus = await corpusFor(platform, query.lang, { seasons: query.season !== undefined });
 	return json(matchResponse(corpus, query), { headers });
 };

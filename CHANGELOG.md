@@ -6,6 +6,31 @@ All notable changes to Cook Up are listed here. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- **Seasonal ingredients.** Typical peak months for all 1,039 ingredients in nine climate zones
+  plus a worldwide view, the climate worked out on the device from its time zone, an "In season
+  now" shelf, season badges on tiles and recipe ingredients, an optional seasonal ranking and
+  "only in-season recipes" filter, and `/seasonal` month pages (2 November).
+- **Installable PWA.** A web manifest with split `any` and `maskable` icons and shortcuts, and a
+  service worker: pages already visited open offline, other pages show an offline notice, and the
+  APIs, `/admin` and the manifest are never cached (5 November).
+- **Install banner.** Five seconds after the first page loads, an Install button on Chromium
+  (Android, desktop) and the Share → Add to Home Screen hint on iOS Safari; never in the installed
+  app, and a closed banner stays away for 60 days (6 November).
+- **Default language.** A page opened without `?lang=` goes to the language last picked in the
+  selector, else the first browser language the site supports (6 November).
+
+### Changed
+
+- Ingredient names are complete in all 16 languages and were read against the English by a second
+  reviewer, with French, Bengali and the other languages corrected along the way (2 November).
+- Phone layout: header, `/seasonal` overflow, first screen and result labels (3 November).
+
+### Removed
+
+- The scheduled monitoring workflow and its D1 usage script (30 October).
+
 ## [0.1.2] - 2026-10-23
 
 ### Security

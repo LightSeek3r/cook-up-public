@@ -9,9 +9,15 @@
 	import RecipeHits from '$components/RecipeHits.svelte';
 	import SeoHead from '$components/SeoHead.svelte';
 	import LoadError from '$components/LoadError.svelte';
+	import SeasonShelf from '$components/SeasonShelf.svelte';
+	import SeasonBadge from '$components/SeasonBadge.svelte';
 	import { resolveLang, t as translator } from '$lib/i18n';
 	import { MIN_FTS_LENGTH } from '$lib/search';
 	import { titleQueryReady } from '$lib/data/search.js';
+	import { seasonParam } from '$lib/data/match.js';
+	import { viewOf } from '$lib/seasonal';
+	import { seasonData } from '$lib/seasonal/data.svelte';
+	import { seasonPrefs } from '$lib/seasonal/prefs.svelte';
 	import { ALLERGENS } from '$lib/config';
 	import { slackFor } from '$lib/match';
 	import { matchRequest } from '$lib/matchRequest';
@@ -20,7 +26,8 @@
 		localMatch,
 		localMatchReady,
 		prefetchMatchData,
-		wantMatchData
+		wantMatchData,
+		wantSeasonData
 	} from '$lib/client/localMatch';
 	import { MAX_HAVE } from '$lib/apiParams';
 	import { cachedJson } from '$lib/responseCache';
@@ -39,6 +46,8 @@
 	}
 
 	let tiles = $state<IngredientTile[]>([]);
+	/** The unfiltered mosaic, kept while a search narrows `tiles`: what the season shelf offers. */
+	let allTiles = $state<IngredientTile[]>([]);
 	let results = $state<MatchResult[]>([]);
 	// Comes back with the results rather than being read off the URL: the server
 	// dedupes `have`, so its count is the authoritative denominator for
@@ -128,6 +137,24 @@
 	);
 
 	const selectedTiles = $derived(tiles.filter((tile) => selected.includes(tile.canonical_key)));
+
+	// Declared before every effect that reads them, so the first match already
+	// carries the season: the climate, the ranking choice and the month are the
+	// reader's, read once mounted (the server renders the defaults: off).
+	$effect(() =>
+		untrack(() => {
+			seasonPrefs.hydrate();
+			seasonData.want();
+		})
+	);
+	/** `season=` for /api/match, '' while ranking is off; the month only ever comes from the browser's clock. */
+	const season = $derived(
+		seasonPrefs.enabled && seasonData.month ? seasonParam(viewOf(seasonPrefs.view), seasonData.month) : ''
+	);
+	// Lets the browser answer seasonal queries itself once seasons.json is in.
+	$effect(() => {
+		if (season) wantSeasonData();
+	});
 
 	// The API returns both groups in one ranked list (full matches first, by
 	// construction — see `matchRecipes`), so splitting is a partition here rather
@@ -229,6 +256,21 @@
 		const root = document.documentElement;
 		root.style.setProperty('--tray-room', `${selected.length ? trayHeight : 0}px`);
 		return () => root.style.removeProperty('--tray-room');
+	});
+
+	// The stacked tray's "See recipes" has done its job once the results heading
+	// is on screen; it then steps aside (CSS) instead of covering the cards it
+	// pointed at. The bottom margin is the bar's own height: a heading hidden
+	// behind it does not count as seen.
+	let resultsInView = $state(false);
+	$effect(() => {
+		const heading = document.getElementById('results-heading');
+		if (!heading) return;
+		const observer = new IntersectionObserver(([entry]) => (resultsInView = entry.isIntersecting), {
+			rootMargin: '0px 0px -120px 0px'
+		});
+		observer.observe(heading);
+		return () => observer.disconnect();
 	});
 
 	/**
@@ -370,6 +412,7 @@
 			.then((data) => {
 				if (stale) return;
 				const found = data.results ?? [];
+				if (!fromServer) allTiles = found;
 				tiles = fromServer ? found : filterTiles(found, value);
 				tilesLoaded = true;
 			})
@@ -388,7 +431,19 @@
 	});
 
 	function matchInput() {
-		return { selected, lang, cuisine, meal, diet, sort, noAllergen, must, slack };
+		return {
+			selected,
+			lang,
+			cuisine,
+			meal,
+			diet,
+			sort,
+			noAllergen,
+			must,
+			slack,
+			season,
+			seasonOnly: seasonPrefs.onlyInSeason
+		};
 	}
 
 	// Keyed on a string so the effect below re-runs only when the request would
@@ -547,7 +602,15 @@
 				onRetry={() => tilesAttempt++}
 			/>
 		{:else}
-			<Mosaic {tiles} {selected} {t} onToggle={toggle} loading={!tilesLoaded} />
+			{#if !debouncedQuery.trim()}
+				<SeasonShelf tiles={allTiles} {selected} {lang} {t} onToggle={toggle} />
+			{/if}
+			<!-- Remounted when the tiles first land, so the board that replaces the
+			     skeleton is a new box: a shelf appearing above it in the same frame
+			     then moves nothing that was on screen. -->
+			{#key tilesLoaded}
+				<Mosaic {tiles} {selected} {t} onToggle={toggle} loading={!tilesLoaded} />
+			{/key}
 		{/if}
 	</div>
 
@@ -566,6 +629,7 @@
 			{#if selected.length}
 				<div
 					class="tray"
+					class:in-results={resultsInView}
 					role="region"
 					aria-label={t('mosaic.selected')}
 					bind:offsetHeight={trayHeight}
@@ -598,6 +662,7 @@
 											category={tile.category}
 											size={24}
 										/>
+										<SeasonBadge id={tile.id} />
 									</span>
 									<span class="chip-name">{tile.name}</span>
 									<svg class="x" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
@@ -860,7 +925,6 @@
 	}
 	.load-more-count {
 		font-variant-numeric: tabular-nums;
-		opacity: 0.75;
 	}
 
 	.skeleton {
@@ -973,6 +1037,8 @@
 		transform: scale(0.96);
 	}
 	.chip-art {
+		position: relative;
+		--season-size: 0.9rem;
 		width: 1.75rem;
 		height: 1.75rem;
 		padding: 0.2rem;
@@ -1068,11 +1134,15 @@
 	.cta:active {
 		transform: translateY(1px);
 	}
+	/* The CTA's own two colours swapped: a translucent mix of them measured
+	   3.97:1 in the dark theme, the swap is the CTA's ratio (above 6:1 there). */
 	.badge {
-		background: color-mix(in srgb, var(--on-primary) 25%, transparent);
+		background: var(--on-primary);
+		color: var(--primary);
 		border-radius: var(--radius-pill);
 		padding: 0 0.45rem;
 		font-size: 0.85rem;
+		font-weight: 700;
 		font-variant-numeric: tabular-nums;
 	}
 
@@ -1084,6 +1154,8 @@
 			inset-inline: 0;
 			inset-block-end: 0;
 			padding: var(--space-2) var(--space-3) max(var(--space-2), env(safe-area-inset-bottom));
+			padding-left: max(var(--space-3), env(safe-area-inset-left));
+			padding-right: max(var(--space-3), env(safe-area-inset-right));
 			border-inline: 0;
 			border-block-end: 0;
 			border-start-start-radius: var(--radius-lg);
@@ -1131,6 +1203,27 @@
 		}
 		.chip-wrap {
 			max-inline-size: none;
+		}
+		/* With the results on screen the bar is a status line, not a form: the
+		   jump button steps aside and the chips take its row's place beside
+		   the count, so the bar drops from two rows to one. */
+		.tray.in-results .cta {
+			display: none;
+		}
+		.tray.in-results .tray-head {
+			flex: none;
+		}
+		.tray.in-results .chips {
+			order: 0;
+			flex: 1 1 0;
+		}
+	}
+	/* A landscape phone or an open keyboard leaves ~300px: the bar keeps the
+	   count, Clear all and the jump, and the chips (still removable on the
+	   board) wait until there is room. */
+	@media (max-width: 63.99rem) and (max-height: 31rem) {
+		.chips {
+			display: none;
 		}
 	}
 	/* The blur is what makes a 94%-opaque bar legible over the mosaic scrolling

@@ -3,6 +3,7 @@ import { resolveLang, dirFor, t, registerMessages } from './index';
 import { BUNDLES as BY_LANG, messagesFor } from './messages.server';
 import { SUPPORTED_LANGS, DEFAULT_LANG } from '$lib/config';
 import { CATEGORY_IDS } from '$lib/glossary/types';
+import { PICKER_ZONES, SEASON_GROUPS } from '$lib/seasonal/ui';
 
 const BUNDLES: Record<string, Record<string, string>> = BY_LANG;
 const en = BY_LANG.en;
@@ -44,7 +45,15 @@ describe('i18n bundle key parity', () => {
 		['mosaic.mustUse', '{name}'],
 		['glossary.count', '{n}'],
 		['mosaic.limit', '{n}'],
-		['filter.active', '{n}']
+		['filter.active', '{n}'],
+		['seasonal.monthTitle', '{month}'],
+		['seasonal.metaDescription', '{month}'],
+		['seasonal.peak', '{range}'],
+		['seasonal.chip', '{zone}'],
+		['seasonal.detected', '{tz}'],
+		['seasonal.share', '{n}'],
+		['seasonal.share', '{m}'],
+		['seasonal.addToFridge', '{name}']
 	];
 
 	for (const [key, placeholder] of PLACEHOLDER_KEYS) {
@@ -58,6 +67,16 @@ describe('i18n bundle key parity', () => {
 	it.each(Object.keys(BUNDLES))('%s has a glossary.cat.<id> label for every category', (lang) => {
 		const missing = CATEGORY_IDS.filter((id) => !BUNDLES[lang][`glossary.cat.${id}`]);
 		expect(missing).toEqual([]);
+	});
+
+	// The season picker, chips and pages look these up by zone, scope and group id.
+	it.each(Object.keys(BUNDLES))('%s names every climate zone, scope and season group', (lang) => {
+		const keys = [
+			...PICKER_ZONES.flatMap((zone) => [`seasonal.zone.${zone}.name`, `seasonal.zone.${zone}.desc`]),
+			...['off', 'local', 'world'].map((scope) => `seasonal.scope.${scope}`),
+			...['all', ...SEASON_GROUPS].map((group) => `seasonal.category.${group}`)
+		];
+		expect(keys.filter((key) => !BUNDLES[lang][key])).toEqual([]);
 	});
 
 	it('SUPPORTED_LANGS and the bundle set agree exactly', () => {

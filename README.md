@@ -103,6 +103,15 @@ contribute to the code.
 - **Filters** — cuisine, meal type, diet (vegan/vegetarian/pescatarian/gluten-free/
   dairy-free), sort by match quality / kcal / quickest-first / balance grade. Allergen
   exclusion by any of: gluten, dairy, nut, peanut, egg, soy, fish, shellfish, sesame.
+- **Installable PWA** — a web manifest and a service worker (`src/service-worker.ts`) make it
+  installable on Android, iOS and desktop. A banner appears 5 seconds after the first page
+  loads: an Install button on Chromium (Android, desktop), the Share → Add to Home Screen hint
+  on iOS Safari, never in the installed app; closing it keeps it away for 60 days. Offline, a
+  page already visited opens again and the matching works on the data already loaded; any
+  other page shows an offline notice. APIs, `/admin` and the manifest are never cached.
+- **Your language by default** — a page opened without `?lang=` goes to the language last
+  picked in the selector, else the first browser language the site supports
+  (`static/lang-init.js`, before first paint).
 - **16 languages** — en, es, fr, de, ar, hi, zh, ja, ko, vi, pt, it, bn, ru, pnb, jv, including
   full RTL support for Arabic and Western Punjabi (Shahmukhi script). Ingredient names and UI
   strings are bundled; recipe titles and instructions are pre-translated in every language and
@@ -220,6 +229,12 @@ Ingredients are addressed by `canonical_key` (`onion`, `extra_virgin_olive_oil`:
   ingredients are selected (below that there are no "almost there" results, so every
   selected ingredient is already required), and only keys that are also in `have` count.
 - `cuisine`, `meal`, `diet` — single-value filters; allowed values are in `src/lib/config.ts`.
+- `season` — `<zone>.<n|s>.<month>` (`med.s.4`: Mediterranean climate, southern hemisphere,
+  April) or `world.<month>`; zones are listed in `src/lib/data/seasons.js`. The month is the
+  client's, so a response stays a function of its URL. In the default order, recipes whose
+  still-missing ingredients are out of season (up to 3 counted) rank after those with fewer,
+  just behind `missing`; other sorts are unchanged. Malformed values are ignored.
+- `seasonOnly=1` — with `season`, only recipes with no out-of-season ingredient left to buy.
 - `lang` — any supported language code (`en`, `pnb`, …); anything else falls back to `en`.
 
 Response: `{ results, total, haveCount }`. `total` is the full match count (for paging);
@@ -395,6 +410,7 @@ through the statements `06_seed_d1.mjs` writes into an in-memory SQLite with the
 | `names/<lang>.json` | ingredient display names, and which are the language's own | 5-7 KB |
 | `mosaic/<lang>.json` | the `/api/ingredients` mosaic, as the API returns it | 17-20 KB |
 | `r/<id>.json` | one recipe page, every language (3,478 files) | median 7 KB, max 44 KB |
+| `seasons.json` | a 12-month mask per ingredient for each of 19 climate views (9 zones x 2 hemispheres + world), compiled from `pipeline/seasons` (`src/lib/data/seasons.js`); every ingredient all year until those sources exist | budget 16 KB |
 | `sitemap.json`, `manifest.json` | every recipe id; data version, counts and sha256 of every file | |
 
 `src/lib/data/` reads them in the Worker and in the browser alike (plain JS, no `$lib`
@@ -414,7 +430,8 @@ with the SQL extended by the translated titles (`src/lib/test/titleSearch.mjs`).
 come from `core.bin` and `manifest.json`'s `counts`). `src/lib/server/data.ts` fetches
 `core.bin` and English from
 `env.ASSETS` on an isolate's first data request, each other language's two small files on its
-first use, and keeps them for the isolate's lifetime; a recipe page also fetches its own
+first use, `seasons.json` on the first `/api/match` with `season=` (a data set without it
+matches as if no season was asked), and keeps them for the isolate's lifetime; a recipe page also fetches its own
 `r/<id>.json` (alongside the corpus on a cold isolate), the sitemap `sitemap.json`, on every
 uncached request. A missing, corrupt or mixed-version file is `503 {"error":"unavailable"}` on
 the APIs and the "try again" error page on pages (logged by `handleError`, retried on the next
@@ -645,29 +662,13 @@ credentials in your shell: `wrangler login`, or `CLOUDFLARE_API_TOKEN` and
 and **Account · D1 · Edit**; D1 Edit rather than Read because `migrations list` first runs
 `CREATE TABLE IF NOT EXISTS d1_migrations`). It never applies migrations.
 
-Optional GitHub setup for monitoring (below), as **repository** secrets: `CF_ANALYTICS_TOKEN` (a
-separate token with only **Account · Account Analytics · Read**) and `CLOUDFLARE_ACCOUNT_ID`
-(secret or repository variable). Optional repository variable `COOKUP_URL` if the site moves to
-another host.
-
 ### Monitoring
 
 - **Workers Logs** (`[observability]` in `wrangler.toml`): every request's invocation log plus
   `console` output, in the dashboard under Workers → cook-up → Logs. Free plan: 200,000 events
   a day, 3 days retention, nothing written to D1. `npx wrangler tail` streams live.
-- **`.github/workflows/monitor.yml`**, read-only and scheduled:
-  - *d1-usage*, hourly: today's account-wide D1 rows read/written (UTC day, the window the Free
-    caps of 5M reads / 100k writes count) from the GraphQL Analytics API, with a linear
-    projection to midnight. At 70% of either cap it opens or comments on an issue
-    `D1 quota alert YYYY-MM-DD`; at 90% the run also fails, which emails you. Without
-    `CF_ANALYTICS_TOKEN` it is skipped with a notice, not failed. Locally:
-    `CF_ANALYTICS_TOKEN=… CLOUDFLARE_ACCOUNT_ID=… node scripts/d1-usage.mjs`.
-  - *uptime*, every 30 min: `/`, `/glossary` and `/api/ingredients` answer 200 and their whole
-    chunk graph loads. Failures open or comment on an issue `Site check failing YYYY-MM-DD`. It
-    needs no secret and runs no JavaScript, so it never records page views; `/api/ingredients`
-    reads D1 only on an edge-cache miss.
-  - GitHub can delay scheduled runs, and disables schedules after 60 days without repository
-    activity; failure emails go to whoever last edited the schedule.
+- No scheduled checks. After a deploy, `npm run verify:deploy -- <url>` checks pages, API and the
+  chunk graph on demand.
 
 ## Data sources & attribution
 

@@ -121,4 +121,27 @@ describe('openMatchData', () => {
 	it('a missing core.bin fails the whole set', async () => {
 		await expect(openMatchData({ version, lang: 'en', fetch: server(files, { missing: ['core.bin'] }).fetch })).rejects.toThrow(/core\.bin: HTTP 404/);
 	});
+
+	it('fetches seasons.json only at the first seasonal query, which the server answers, then matches seasonal queries like the route', async () => {
+		const { fetch, requests } = server(files);
+		const data = await openMatchData({ version, lang: 'en', fetch });
+		expect(data.match(search('en'))).not.toBeNull();
+		expect(requests.map((r) => r.path)).not.toContain('seasons.json');
+		const seasonal = search('en', '&season=med.n.4&seasonOnly=1');
+		expect(data.match(seasonal)).toBeNull();
+		expect(data.match(seasonal)).toBeNull();
+		await data.loadSeasons();
+		expect(requests.filter((r) => r.path === 'seasons.json')).toHaveLength(1);
+		expect(JSON.stringify(data.match(seasonal))).toBe(await routeBody(seasonal));
+	});
+
+	it('a missing or stale seasons.json leaves seasonal queries to the server; the others match', async () => {
+		const stale = restamped(files, version, OTHER);
+		for (const opts of [{ missing: ['seasons.json'] }, { stale: new Map([['seasons.json', stale.get('seasons.json')]]), staleOnReload: true }]) {
+			const data = await openMatchData({ version, lang: 'en', fetch: server(files, opts).fetch });
+			await expect(data.loadSeasons()).rejects.toThrow();
+			expect(data.match(search('en', '&season=world.1'))).toBeNull();
+			expect(JSON.stringify(data.match(search('en')))).toBe(await routeBody(search('en')));
+		}
+	});
 });

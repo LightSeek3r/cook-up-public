@@ -5,7 +5,16 @@
 
 export { decodeCore, CORE_FORMAT, NULL_INT } from './core.js';
 export { loadCorpus } from './corpus.js';
-export { matchCore, matchResponse, resolveKeys, slackFor, MATCH_PAGE_SIZE, MISSING_NAMES_SEP } from './match.js';
+export {
+	matchCore,
+	matchResponse,
+	parseSeasonParam,
+	resolveKeys,
+	seasonParam,
+	slackFor,
+	MATCH_PAGE_SIZE,
+	MISSING_NAMES_SEP
+} from './match.js';
 export {
 	buildMosaic,
 	normaliseQuery,
@@ -19,4 +28,17 @@ export {
 	RECIPE_HIT_LIMIT
 } from './search.js';
 export { nameForKey, recipePage } from './recipe.js';
+export {
+	ALL_YEAR,
+	VIEW_COUNT,
+	WORLD_VIEW,
+	ZONES,
+	inSeasonMask,
+	isSeasonalMask,
+	maskOf,
+	parseRange,
+	parseSeasons,
+	rotateMask,
+	viewIndex
+} from './seasons.js';
 export { compareBinary, foldText, ftsFold, likeFold, trigramMatch } from './text.js';
